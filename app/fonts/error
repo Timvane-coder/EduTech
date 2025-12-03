@@ -1,0 +1,2463 @@
+import {EnhancedStatisticalWorkbook,
+    StatisticalDistributions,
+    DistributionRegistry} from './statisticalWorkbook.js';
+
+
+// ============================================================================
+// ENHANCED STATISTICAL ANALYSIS INTEGRATION
+// ============================================================================
+
+export class EnhancedSpreadsheetWorkbook {
+    constructor(options = {}) {
+        this.width = options.width || 1600;
+        this.height = options.height || 2000;
+        this.theme = options.theme || 'professional';
+
+        // Spreadsheet data
+        this.data = [];
+        this.headers = [];
+        this.formulas = {};
+        this.calculations = {};
+        this.history = [];
+
+        // Chart management
+        this.charts = [];
+        this.chartRenderer = new ChartCanvasRenderer();
+
+        // Anatomical diagram management
+        this.anatomicalDiagrams = [];
+        this.diagramRenderer = new AnatomicalDiagramRenderer(null);
+
+        // Cross-section diagram management
+        this.crossSectionDiagrams = [];
+        this.crossSectionRenderer = new CrossSectionDiagramRenderer(null);
+
+        // Stereochemistry diagram management
+        this.stereochemistryDiagrams = [];
+        this.stereochemistryRenderer = new StereochemistryDiagramRenderer(null);
+
+        // Graphing Calculator management
+        this.graphingCalculator = null;
+
+        // Geometric shapes management
+        this.geometricShapes = [];
+        this.geometricRenderer = new GeometricShapeRenderer(null);
+
+        // **NEW: Statistical Analysis Integration**
+        this.statisticalWorkbook = null;
+        this.statisticalAnalyses = {};
+        this.distributionFits = {};
+        this.statisticalReports = [];
+
+        // Update unified diagram tracking
+        this.allDiagrams = {
+            anatomical: this.anatomicalDiagrams,
+            crossSection: this.crossSectionDiagrams,
+            stereochemistry: this.stereochemistryDiagrams,
+            geometric: this.geometricShapes
+        };
+
+        // Visual settings
+        this.cellWidth = 150;
+        this.cellHeight = 30;
+        this.headerHeight = 35;
+        this.fontSize = 11;
+        this.headerFontSize = 12;
+
+        // Metadata
+        this.sheetName = options.sheetName || 'Sheet1';
+        this.createdDate = new Date();
+        this.lastModified = new Date();
+        this.author = options.author || 'User';
+
+        this.setThemeColors();
+    }
+
+    // ==================== STATISTICAL WORKBOOK INITIALIZATION ====================
+
+    /**
+     * Initialize EnhancedStatisticalWorkbook instance
+     */
+    initializeStatisticalWorkbook(options = {}) {
+        if (!this.statisticalWorkbook) {
+            this.statisticalWorkbook = new EnhancedStatisticalWorkbook({
+                ...options,
+                progressCallback: (progress) => {
+                    console.log(`📊 Statistical Analysis: ${progress.stage} - ${progress.progress}%`);
+                }
+            });
+        }
+        return this.statisticalWorkbook;
+    }
+
+    /**
+     * Get statistical workbook instance
+     */
+    getStatisticalWorkbook() {
+        if (!this.statisticalWorkbook) {
+            this.initializeStatisticalWorkbook();
+        }
+        return this.statisticalWorkbook;
+    }
+
+    // ==================== DATA EXTRACTION FOR STATISTICAL ANALYSIS ====================
+
+    /**
+     * Extract column data as numeric array
+     */
+    extractColumnData(columnRef, options = {}) {
+        const {
+            startRow = 0,
+            endRow = this.data.length - 1,
+            skipNonNumeric = true,
+            skipEmpty = true,
+            skipNaN = true
+        } = options;
+
+        const colIndex = typeof columnRef === 'number' 
+            ? columnRef 
+            : this.letterToColumn(columnRef);
+
+        if (colIndex < 0 || colIndex >= this.headers.length) {
+            throw new Error(`Invalid column reference: ${columnRef}`);
+        }
+
+        let values = [];
+        
+        for (let row = startRow; row <= Math.min(endRow, this.data.length - 1); row++) {
+            const value = this.data[row][colIndex];
+            
+            if (skipEmpty && (value === null || value === undefined || value === '')) {
+                continue;
+            }
+
+            const numValue = parseFloat(value);
+            
+            if (skipNaN && isNaN(numValue)) {
+                if (!skipNonNumeric) {
+                    throw new Error(`Non-numeric value at row ${row + 1}: ${value}`);
+                }
+                continue;
+            }
+
+            values.push(numValue);
+        }
+
+        return values;
+    }
+
+    /**
+     * Extract range data as numeric array
+     */
+    extractRangeData(rangeRef, options = {}) {
+        const values = this.getRangeValues(rangeRef);
+        
+        const {
+            skipNonNumeric = true,
+            skipEmpty = true,
+            skipNaN = true
+        } = options;
+
+        return values
+            .filter(val => {
+                if (skipEmpty && (val === null || val === undefined || val === '')) {
+                    return false;
+                }
+                return true;
+            })
+            .map(val => parseFloat(val))
+            .filter(val => {
+                if (skipNaN && isNaN(val)) {
+                    if (!skipNonNumeric) {
+                        throw new Error(`Non-numeric value encountered: ${val}`);
+                    }
+                    return false;
+                }
+                return true;
+            });
+    }
+
+    /**
+     * Extract multiple columns as separate arrays
+     */
+    extractMultipleColumns(columnRefs, options = {}) {
+        const datasets = {};
+        
+        columnRefs.forEach(ref => {
+            const colName = typeof ref === 'string' ? ref : this.columnToLetter(ref);
+            datasets[colName] = this.extractColumnData(ref, options);
+        });
+
+        return datasets;
+    }
+
+    // ==================== EXPLORATORY DATA ANALYSIS (EDA) ====================
+
+    /**
+     * Perform exploratory data analysis on column
+     */
+    performEDA(columnRef, options = {}) {
+        console.log('\n📊 EXPLORATORY DATA ANALYSIS');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        console.log(`\nAnalyzing Column: ${colName}`);
+        console.log(`Sample Size: ${data.length}`);
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.variableName = colName;
+        stats.unitName = options.unitName || 'units';
+
+        // Calculate basic statistics
+        stats.calculateStatistics();
+
+        // Data validation
+        const validation = stats.validateData();
+
+        console.log(`\nData Quality: ${validation.dataQuality.rating} (${validation.dataQuality.score}/100)`);
+        
+        if (validation.issues.length > 0) {
+            console.log('\n⚠️  Issues:');
+            validation.issues.forEach(issue => console.log(`  • ${issue}`));
+        }
+
+        if (validation.warnings.length > 0) {
+            console.log('\n⚡ Warnings:');
+            validation.warnings.forEach(warning => console.log(`  • ${warning}`));
+        }
+
+        // Summary statistics
+        console.log('\n📈 SUMMARY STATISTICS:');
+        console.log(`  Mean: ${stats.statistics.mean.toFixed(4)}`);
+        console.log(`  Median: ${stats.statistics.median.toFixed(4)}`);
+        console.log(`  Std Dev: ${stats.statistics.standardDeviation.toFixed(4)}`);
+        console.log(`  Min: ${stats.statistics.min.toFixed(4)}`);
+        console.log(`  Max: ${stats.statistics.max.toFixed(4)}`);
+        console.log(`  Range: ${stats.statistics.range.toFixed(4)}`);
+        console.log(`  Skewness: ${stats.statistics.skewness.toFixed(4)}`);
+        console.log(`  Kurtosis: ${stats.statistics.kurtosis.toFixed(4)}`);
+
+        // Robust statistics
+        stats.calculateRobustStatistics();
+        
+        console.log('\n🛡️  ROBUST STATISTICS:');
+        console.log(`  MAD: ${stats.robustStatistics.mad.value.toFixed(4)}`);
+        console.log(`  Scaled MAD: ${stats.robustStatistics.mad.scaledMAD.toFixed(4)}`);
+        console.log(`  Trimmed Mean (10%): ${stats.robustStatistics.trimmedMean.value.toFixed(4)}`);
+
+        // Outlier detection
+        const outliers = stats.robustStatistics.outlierDetection;
+        console.log('\n🔍 OUTLIER DETECTION:');
+        console.log(`  Method: ${outliers.method}`);
+        console.log(`  Outliers: ${outliers.outlierCount} (${outliers.outlierPercentage})`);
+        console.log(`  Recommendation: ${outliers.recommendation}`);
+
+        // Store analysis
+        this.statisticalAnalyses[colName] = {
+            type: 'EDA',
+            timestamp: new Date(),
+            statistics: stats.statistics,
+            robustStatistics: stats.robustStatistics,
+            validation: validation
+        };
+
+        this.addToHistory(`Performed EDA on column ${colName}`);
+
+        return {
+            columnName: colName,
+            sampleSize: data.length,
+            statistics: stats.statistics,
+            robustStatistics: stats.robustStatistics,
+            validation: validation,
+            report: stats.generateEDAReport()
+        };
+    }
+
+    // ==================== DISTRIBUTION IDENTIFICATION ====================
+
+    /**
+     * Identify best-fit distribution for column data
+     */
+    identifyDistribution(columnRef, options = {}) {
+        console.log('\n📊 DISTRIBUTION IDENTIFICATION');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const {
+            candidateDistributions = ['normal', 't', 'exponential', 'gamma', 'lognormal', 'uniform'],
+            confidenceLevel = 0.95
+        } = options;
+
+        console.log(`\nAnalyzing Column: ${colName}`);
+        console.log(`Testing ${candidateDistributions.length} distributions...`);
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.variableName = colName;
+
+        // Perform comparison
+        stats.compareDistributions(candidateDistributions);
+
+        const bestFit = stats.comparisonResults.bestFit;
+        const bestDist = DistributionRegistry.getDistribution(bestFit);
+
+        console.log(`\n✓ Best Fit: ${bestDist.name}`);
+        console.log(`  Parameters: ${JSON.stringify(stats.comparisonResults.distributions[bestFit].parameters)}`);
+        console.log(`  Log-Likelihood: ${stats.comparisonResults.distributions[bestFit].logLikelihood.toFixed(4)}`);
+        console.log(`  AIC: ${stats.comparisonResults.distributions[bestFit].aic.toFixed(4)}`);
+        console.log(`  BIC: ${stats.comparisonResults.distributions[bestFit].bic.toFixed(4)}`);
+
+        // Store distribution fit
+        this.distributionFits[colName] = {
+            bestFit: bestFit,
+            timestamp: new Date(),
+            distributions: stats.comparisonResults.distributions,
+            data: data
+        };
+
+        this.addToHistory(`Identified ${bestDist.name} as best fit for ${colName}`);
+
+        return {
+            columnName: colName,
+            bestFit: bestFit,
+            distributionName: bestDist.name,
+            parameters: stats.comparisonResults.distributions[bestFit].parameters,
+            goodnessOfFit: stats.comparisonResults.distributions[bestFit].ksTest,
+            comparison: stats.comparisonResults
+        };
+    }
+
+    // ==================== DISTRIBUTION ANALYSIS ====================
+
+    /**
+     * Perform comprehensive distribution analysis
+     */
+    analyzeDistribution(columnRef, distributionType, options = {}) {
+        console.log('\n📊 DISTRIBUTION ANALYSIS');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Distribution: ${distributionType}`);
+        console.log(`Sample Size: ${data.length}`);
+
+        const stats = this.getStatisticalWorkbook();
+
+        const config = {
+            samples: data,
+            sampleName: colName,
+            variableName: colName,
+            unitName: options.unitName || 'units',
+            distribution: distributionType,
+            distributionParams: options.distributionParams || null,
+            targetValue: options.targetValue || null,
+            targetAnalysisType: options.targetAnalysisType || null,
+            hypothesisTest: options.hypothesisTest || null,
+            compareDistributions: options.compareDistributions || null,
+            regression: options.regression || null,
+            scenarioDescription: options.scenarioDescription || ''
+        };
+
+        // Run comprehensive analysis
+        const workbook = stats.analyzeDistribution(config);
+
+        console.log('\n✓ Analysis Complete');
+        console.log(`  Distribution: ${stats.distributionAnalysis.distribution}`);
+        console.log(`  Parameters: ${JSON.stringify(stats.distributionAnalysis.parameters)}`);
+        console.log(`  Log-Likelihood: ${stats.distributionAnalysis.logLikelihood.toFixed(4)}`);
+        console.log(`  AIC: ${stats.distributionAnalysis.aic.toFixed(4)}`);
+        console.log(`  BIC: ${stats.distributionAnalysis.bic.toFixed(4)}`);
+
+        // Store analysis
+        this.statisticalAnalyses[`${colName}_${distributionType}`] = {
+            type: 'Distribution Analysis',
+            timestamp: new Date(),
+            distribution: distributionType,
+            statistics: stats.statistics,
+            distributionAnalysis: stats.distributionAnalysis,
+            goodnessOfFit: stats.goodnessOfFit,
+            confidenceIntervals: stats.confidenceIntervals,
+            workbook: workbook
+        };
+
+        this.addToHistory(`Analyzed ${colName} with ${distributionType} distribution`);
+
+        return {
+            columnName: colName,
+            distribution: distributionType,
+            statistics: stats.statistics,
+            distributionAnalysis: stats.distributionAnalysis,
+            goodnessOfFit: stats.goodnessOfFit,
+            confidenceIntervals: stats.confidenceIntervals,
+            parameterCI: stats.parameterConfidenceIntervals,
+            targetAnalysis: stats.targetAnalysis,
+            hypothesisTests: stats.hypothesisTests,
+            workbook: workbook
+        };
+    }
+
+    // ==================== FORMAL DISTRIBUTIONAL ASSUMPTION CHECKS ====================
+
+    /**
+     * Perform formal tests for distribution assumptions
+     */
+    checkDistributionAssumptions(columnRef, distributionType, options = {}) {
+        console.log('\n🔍 DISTRIBUTION ASSUMPTION CHECKS');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.selectedDistribution = distributionType;
+
+        // Fit distribution
+        stats.fitDistribution();
+
+        // Perform goodness of fit tests
+        stats.performGoodnessOfFitTests();
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Distribution: ${distributionType}`);
+
+        console.log('\n📊 GOODNESS OF FIT TESTS:');
+        
+        // Kolmogorov-Smirnov
+        const ks = stats.goodnessOfFit.kolmogorovSmirnov;
+        console.log(`\n  Kolmogorov-Smirnov Test:`);
+        console.log(`    Statistic: ${ks.testStatistic.toFixed(6)}`);
+        console.log(`    p-value: ${ks.pValue.toFixed(6)}`);
+        console.log(`    Reject (α=0.05): ${ks.reject['0.05'] ? 'YES' : 'NO'}`);
+
+        // Anderson-Darling
+        const ad = stats.goodnessOfFit.andersonDarling;
+        console.log(`\n  Anderson-Darling Test:`);
+        console.log(`    Statistic: ${ad.testStatistic.toFixed(6)}`);
+        console.log(`    Reject (α=0.05): ${ad.reject['0.05'] ? 'YES' : 'NO'}`);
+
+        // Chi-Square
+        const chi = stats.goodnessOfFit.chisquareTest;
+        console.log(`\n  Chi-Square Test:`);
+        console.log(`    Statistic: ${chi.testStatistic.toFixed(6)}`);
+        console.log(`    df: ${chi.degreesOfFreedom}`);
+        console.log(`    p-value: ${chi.pValue.toFixed(6)}`);
+        console.log(`    Reject (α=0.05): ${chi.reject['0.05'] ? 'YES' : 'NO'}`);
+
+        // Shapiro-Wilk (if normal)
+        if (distributionType === 'normal' && stats.goodnessOfFit.shapiroWilk) {
+            const sw = stats.goodnessOfFit.shapiroWilk;
+            if (sw.testStatistic !== null) {
+                console.log(`\n  Shapiro-Wilk Test:`);
+                console.log(`    Statistic: ${sw.testStatistic.toFixed(6)}`);
+                console.log(`    p-value: ${sw.pValue.toFixed(6)}`);
+                console.log(`    Reject (α=0.05): ${sw.reject['0.05'] ? 'YES' : 'NO'}`);
+            }
+        }
+
+        // Store results
+        this.statisticalAnalyses[`${colName}_assumptions_${distributionType}`] = {
+            type: 'Assumption Checks',
+            timestamp: new Date(),
+            distribution: distributionType,
+            goodnessOfFit: stats.goodnessOfFit
+        };
+
+        this.addToHistory(`Checked ${distributionType} assumptions for ${colName}`);
+
+        return {
+            columnName: colName,
+            distribution: distributionType,
+            goodnessOfFit: stats.goodnessOfFit,
+            overallFit: this.assessOverallFit(stats.goodnessOfFit)
+        };
+    }
+
+    /**
+     * Assess overall fit from multiple tests
+     */
+    assessOverallFit(goodnessOfFit) {
+        const tests = [
+            goodnessOfFit.kolmogorovSmirnov,
+            goodnessOfFit.andersonDarling,
+            goodnessOfFit.chisquareTest
+        ];
+
+        const rejections = tests.filter(test => test && test.reject && test.reject['0.05']).length;
+        const totalTests = tests.filter(test => test && test.testStatistic !== null).length;
+
+        if (rejections === 0) {
+            return {
+                assessment: 'EXCELLENT',
+                description: 'All tests support the distribution fit',
+                recommendation: 'Distribution is appropriate for the data'
+            };
+        } else if (rejections <= totalTests / 2) {
+            return {
+                assessment: 'GOOD',
+                description: 'Most tests support the distribution fit',
+                recommendation: 'Distribution is reasonable for the data'
+            };
+        } else {
+            return {
+                assessment: 'POOR',
+                description: 'Multiple tests reject the distribution fit',
+                recommendation: 'Consider alternative distributions'
+            };
+        }
+    }
+
+// ==================== GENERATE VISUALIZATIONS ====================
+
+    /**
+     * Generate statistical visualizations for column
+     */
+    generateStatisticalVisualizations(columnRef, distributionType, options = {}) {
+        console.log('\n📊 GENERATING STATISTICAL VISUALIZATIONS');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.variableName = colName;
+        stats.selectedDistribution = distributionType;
+
+        // Fit distribution
+        stats.fitDistribution();
+
+        // Generate all visualizations
+        const visualizations = stats.generateAllVisualizations();
+
+        console.log(`\nGenerated ${Object.keys(visualizations).length} visualizations for ${colName}`);
+
+        Object.keys(visualizations).forEach(vizType => {
+            console.log(`  ✓ ${vizType}`);
+        });
+
+        // Store visualizations
+        this.statisticalAnalyses[`${colName}_viz_${distributionType}`] = {
+            type: 'Visualizations',
+            timestamp: new Date(),
+            distribution: distributionType,
+            visualizations: visualizations
+        };
+
+        this.addToHistory(`Generated visualizations for ${colName}`);
+
+        return {
+            columnName: colName,
+            distribution: distributionType,
+            visualizations: visualizations,
+            vizCount: Object.keys(visualizations).length
+        };
+    }
+
+    /**
+     * Save statistical visualizations to files
+     */
+    async saveStatisticalVisualizations(columnRef, distributionType, outputDir, options = {}) {
+        const vizResult = this.generateStatisticalVisualizations(columnRef, distributionType, options);
+        
+        const stats = this.getStatisticalWorkbook();
+        const savedFiles = await stats.saveAllVisualizations(outputDir);
+
+        console.log(`\n✓ Saved ${savedFiles.length} visualization files to ${outputDir}`);
+
+        return {
+            ...vizResult,
+            savedFiles: savedFiles,
+            outputDirectory: outputDir
+        };
+    }
+
+    // ==================== PARAMETER ESTIMATION ====================
+
+    /**
+     * Estimate distribution parameters
+     */
+    estimateParameters(columnRef, distributionType, options = {}) {
+        console.log('\n📊 PARAMETER ESTIMATION');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.selectedDistribution = distributionType;
+
+        // Fit distribution
+        stats.fitDistribution();
+
+        // Calculate parameter confidence intervals
+        stats.calculateParameterConfidenceIntervals();
+
+        const dist = DistributionRegistry.getDistribution(distributionType);
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Distribution: ${dist.name}`);
+
+        console.log('\n📈 ESTIMATED PARAMETERS:');
+        dist.params.forEach((param, idx) => {
+            console.log(`  ${param}: ${stats.distributionParams[idx].toFixed(6)}`);
+        });
+
+        console.log('\n🎯 PARAMETER CONFIDENCE INTERVALS (95%):');
+        const paramCI = stats.parameterConfidenceIntervals[0.95];
+        if (paramCI && paramCI.parameters) {
+            Object.entries(paramCI.parameters).forEach(([param, ci]) => {
+                console.log(`  ${param}:`);
+                console.log(`    Estimate: ${ci.estimate.toFixed(6)}`);
+                console.log(`    95% CI: [${ci.lowerBound.toFixed(6)}, ${ci.upperBound.toFixed(6)}]`);
+                console.log(`    SE: ${ci.standardError.toFixed(6)}`);
+            });
+        }
+
+        // Store results
+        this.statisticalAnalyses[`${colName}_params_${distributionType}`] = {
+            type: 'Parameter Estimation',
+            timestamp: new Date(),
+            distribution: distributionType,
+            parameters: stats.distributionParams,
+            confidenceIntervals: stats.parameterConfidenceIntervals
+        };
+
+        this.addToHistory(`Estimated parameters for ${colName} (${distributionType})`);
+
+        return {
+            columnName: colName,
+            distribution: distributionType,
+            parameters: stats.distributionParams,
+            parameterNames: dist.params,
+            confidenceIntervals: stats.parameterConfidenceIntervals,
+            distributionAnalysis: stats.distributionAnalysis
+        };
+    }
+
+    // ==================== POINT ESTIMATES ====================
+
+    /**
+     * Calculate point estimates for distribution properties
+     */
+    calculatePointEstimates(columnRef, distributionType, options = {}) {
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.selectedDistribution = distributionType;
+
+        stats.fitDistribution();
+
+        const dist = DistributionRegistry.getDistribution(distributionType);
+
+        return {
+            columnName: colName,
+            distribution: dist.name,
+            sampleSize: data.length,
+            sampleMean: stats.statistics.mean,
+            sampleMedian: stats.statistics.median,
+            sampleStdDev: stats.statistics.standardDeviation,
+            sampleVariance: stats.statistics.variance,
+            sampleSkewness: stats.statistics.skewness,
+            sampleKurtosis: stats.statistics.kurtosis,
+            distributionParameters: stats.distributionParams,
+            theoreticalMoments: stats.distributionAnalysis.theoreticalMoments
+        };
+    }
+
+    // ==================== STANDARD ERROR CALCULATION ====================
+
+    /**
+     * Calculate standard errors for estimates
+     */
+    calculateStandardErrors(columnRef, distributionType, options = {}) {
+        const paramResult = this.estimateParameters(columnRef, distributionType, options);
+
+        const standardErrors = {};
+        const paramCI = paramResult.confidenceIntervals[0.95];
+
+        if (paramCI && paramCI.parameters) {
+            Object.entries(paramCI.parameters).forEach(([param, ci]) => {
+                standardErrors[param] = {
+                    estimate: ci.estimate,
+                    standardError: ci.standardError,
+                    relativeSE: (ci.standardError / ci.estimate * 100).toFixed(2) + '%'
+                };
+            });
+        }
+
+        return {
+            columnName: paramResult.columnName,
+            distribution: paramResult.distribution,
+            standardErrors: standardErrors
+        };
+    }
+
+    // ==================== CONFIDENCE INTERVALS ====================
+
+    /**
+     * Calculate various confidence intervals
+     */
+    calculateConfidenceIntervals(columnRef, distributionType, options = {}) {
+        console.log('\n📊 CONFIDENCE INTERVALS');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const {
+            levels = [0.90, 0.95, 0.99]
+        } = options;
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.selectedDistribution = distributionType;
+
+        stats.fitDistribution();
+        stats.calculateDistributionConfidenceIntervals();
+        stats.calculateParameterConfidenceIntervals();
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Distribution: ${distributionType}`);
+
+        console.log('\n📈 DISTRIBUTION CONFIDENCE INTERVALS:');
+        levels.forEach(level => {
+            const ci = stats.confidenceIntervals[level];
+            if (ci) {
+                console.log(`\n  ${(level * 100)}% CI:`);
+                console.log(`    Lower: ${ci.lowerBound.toFixed(6)}`);
+                console.log(`    Upper: ${ci.upperBound.toFixed(6)}`);
+                console.log(`    Width: ${ci.width.toFixed(6)}`);
+            }
+        });
+
+        console.log('\n📈 PARAMETER CONFIDENCE INTERVALS:');
+        levels.forEach(level => {
+            const paramCI = stats.parameterConfidenceIntervals[level];
+            if (paramCI && paramCI.parameters) {
+                console.log(`\n  ${(level * 100)}% CI:`);
+                Object.entries(paramCI.parameters).forEach(([param, ci]) => {
+                    console.log(`    ${param}: [${ci.lowerBound.toFixed(6)}, ${ci.upperBound.toFixed(6)}]`);
+                });
+            }
+        });
+
+        return {
+            columnName: colName,
+            distribution: distributionType,
+            distributionCI: stats.confidenceIntervals,
+            parameterCI: stats.parameterConfidenceIntervals
+        };
+    }
+
+    // ==================== HYPOTHESIS TESTING ====================
+
+    /**
+     * Perform hypothesis test on column data
+     */
+    performHypothesisTest(columnRef, testConfig, options = {}) {
+        console.log('\n📊 HYPOTHESIS TEST');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+
+        // Perform test
+        stats.performHypothesisTest(testConfig);
+
+        const testType = testConfig.type;
+        const testResult = stats.hypothesisTests[testType];
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Test: ${testResult.testType}`);
+        console.log(`\nNull Hypothesis: ${testResult.nullHypothesis}`);
+        console.log(`Alternative: ${testResult.alternative}`);
+        console.log(`\nTest Statistic: ${testResult.testStatistic.toFixed(6)}`);
+        console.log(`p-value: ${testResult.pValue.toFixed(6)}`);
+        console.log(`\nDecision: ${testResult.conclusion}`);
+
+        // Store results
+        this.statisticalAnalyses[`${colName}_test_${testType}`] = {
+            type: 'Hypothesis Test',
+            timestamp: new Date(),
+            testType: testType,
+            result: testResult
+        };
+
+        this.addToHistory(`Performed ${testType} test on ${colName}`);
+
+        return {
+            columnName: colName,
+            testType: testType,
+            result: testResult
+        };
+    }
+
+    // ==================== CORRELATION MATRIX ====================
+
+    /**
+     * Calculate correlation matrix for multiple columns
+     */
+    calculateCorrelationMatrix(columnRefs, options = {}) {
+        console.log('\n📊 CORRELATION MATRIX');
+
+console.log('='.repeat(70));
+
+        const datasets = this.extractMultipleColumns(columnRefs, options);
+        const colNames = Object.keys(datasets);
+        const n = colNames.length;
+
+        console.log(`\nAnalyzing ${n} columns:`);
+        colNames.forEach(name => console.log(`  • ${name}`));
+
+        // Calculate correlation matrix
+        const correlationMatrix = [];
+        const pValueMatrix = [];
+
+        for (let i = 0; i < n; i++) {
+            correlationMatrix[i] = [];
+            pValueMatrix[i] = [];
+
+            for (let j = 0; j < n; j++) {
+                if (i === j) {
+                    correlationMatrix[i][j] = 1.0;
+                    pValueMatrix[i][j] = 0.0;
+                } else {
+                    const corr = this.pearsonCorrelation(
+                        datasets[colNames[i]],
+                        datasets[colNames[j]]
+                    );
+                    correlationMatrix[i][j] = corr.r;
+                    pValueMatrix[i][j] = corr.pValue;
+                }
+            }
+        }
+
+        console.log('\n📈 CORRELATION MATRIX:');
+        console.log('\n     ', colNames.map(n => n.substring(0, 8).padEnd(8)).join(' '));
+        correlationMatrix.forEach((row, i) => {
+            console.log(
+                colNames[i].substring(0, 4).padEnd(5),
+                row.map(r => r.toFixed(4).padStart(8)).join(' ')
+            );
+        });
+
+        console.log('\n📊 p-VALUE MATRIX:');
+        console.log('\n     ', colNames.map(n => n.substring(0, 8).padEnd(8)).join(' '));
+        pValueMatrix.forEach((row, i) => {
+            console.log(
+                colNames[i].substring(0, 4).padEnd(5),
+                row.map(p => p.toFixed(4).padStart(8)).join(' ')
+            );
+        });
+
+        // Identify significant correlations
+        const significantCorrelations = [];
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                if (pValueMatrix[i][j] < 0.05) {
+                    significantCorrelations.push({
+                        var1: colNames[i],
+                        var2: colNames[j],
+                        correlation: correlationMatrix[i][j],
+                        pValue: pValueMatrix[i][j],
+                        strength: this.interpretCorrelation(correlationMatrix[i][j])
+                    });
+                }
+            }
+        }
+
+        console.log('\n🔍 SIGNIFICANT CORRELATIONS (p < 0.05):');
+        if (significantCorrelations.length > 0) {
+            significantCorrelations.forEach(corr => {
+                console.log(
+                    `  ${corr.var1} ↔ ${corr.var2}: r = ${corr.correlation.toFixed(4)} ` +
+                    `(${corr.strength}, p = ${corr.pValue.toFixed(4)})`
+                );
+            });
+        } else {
+            console.log('  No significant correlations found');
+        }
+
+        // Store results
+        this.statisticalAnalyses['correlation_matrix'] = {
+            type: 'Correlation Matrix',
+            timestamp: new Date(),
+            columns: colNames,
+            correlationMatrix: correlationMatrix,
+            pValueMatrix: pValueMatrix,
+            significantCorrelations: significantCorrelations
+        };
+
+        this.addToHistory(`Calculated correlation matrix for ${n} columns`);
+
+        return {
+            columns: colNames,
+            correlationMatrix: correlationMatrix,
+            pValueMatrix: pValueMatrix,
+            significantCorrelations: significantCorrelations
+        };
+    }
+
+    /**
+     * Calculate Pearson correlation between two arrays
+     */
+    pearsonCorrelation(x, y) {
+        if (x.length !== y.length) {
+            throw new Error('Arrays must have equal length');
+        }
+
+        const n = x.length;
+        const meanX = x.reduce((a, b) => a + b, 0) / n;
+        const meanY = y.reduce((a, b) => a + b, 0) / n;
+
+        let numerator = 0;
+        let denomX = 0;
+        let denomY = 0;
+
+        for (let i = 0; i < n; i++) {
+            const dx = x[i] - meanX;
+            const dy = y[i] - meanY;
+            numerator += dx * dy;
+            denomX += dx * dx;
+            denomY += dy * dy;
+        }
+
+        if (denomX === 0 || denomY === 0) {
+            return { r: 0, pValue: 1 };
+        }
+
+        const r = numerator / Math.sqrt(denomX * denomY);
+
+        // Calculate t-statistic and p-value
+        const t = r * Math.sqrt((n - 2) / (1 - r * r));
+        const stats = this.getStatisticalWorkbook();
+        const pValue = 2 * (1 - StatisticalDistributions.tCDF(Math.abs(t), n - 2));
+
+        return { r, t, pValue, n };
+    }
+
+    /**
+     * Interpret correlation strength
+     */
+    interpretCorrelation(r) {
+        const absR = Math.abs(r);
+        if (absR < 0.3) return 'Weak';
+        if (absR < 0.7) return 'Moderate';
+        return 'Strong';
+    }
+
+    // ==================== STATISTICAL REPORTS ====================
+
+    /**
+     * Generate comprehensive statistical report for column
+     */
+    generateStatisticalReport(columnRef, options = {}) {
+        console.log('\n📊 GENERATING STATISTICAL REPORT');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const {
+            distributionType = 'normal',
+            includeVisualizations = true,
+            outputFormat = 'both' // 'both', 'png', 'excel'
+        } = options;
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Distribution: ${distributionType}`);
+        console.log(`Format: ${outputFormat}`);
+
+        const stats = this.getStatisticalWorkbook();
+
+        const config = {
+            samples: data,
+            sampleName: colName,
+            variableName: colName,
+            unitName: options.unitName || 'units',
+            distribution: distributionType,
+            distributionParams: options.distributionParams || null,
+            targetValue: options.targetValue || null,
+            targetAnalysisType: options.targetAnalysisType || null,
+            hypothesisTest: options.hypothesisTest || null,
+            compareDistributions: options.compareDistributions || null,
+            scenarioDescription: options.scenarioDescription || ''
+        };
+
+        // Run comprehensive analysis
+        stats.analyzeDistribution(config);
+
+        // Generate visualizations if requested
+        if (includeVisualizations) {
+            stats.generateAllVisualizations();
+        }
+
+        console.log('\n✓ Report Generated');
+        console.log(`  Pages: ${stats.currentWorkbook.length}`);
+        console.log(`  Visualizations: ${includeVisualizations ? Object.keys(stats.visualizations || {}).length : 0}`);
+
+        // Store report
+        const report = {
+            timestamp: new Date(),
+            columnName: colName,
+            distribution: distributionType,
+            statistics: stats.statistics,
+            distributionAnalysis: stats.distributionAnalysis,
+            goodnessOfFit: stats.goodnessOfFit,
+            confidenceIntervals: stats.confidenceIntervals,
+            parameterCI: stats.parameterConfidenceIntervals,
+            workbook: stats.currentWorkbook,
+            visualizations: includeVisualizations ? stats.visualizations : null
+        };
+
+        this.statisticalReports.push(report);
+        this.addToHistory(`Generated statistical report for ${colName}`);
+
+        return report;
+    }
+
+    /**
+     * Export statistical report to file
+     */
+    async exportStatisticalReport(columnRef, filename, options = {}) {
+        const report = this.generateStatisticalReport(columnRef, options);
+        const stats = this.getStatisticalWorkbook();
+
+        const {
+            outputFormat = 'both',
+            includeVisualizations = true
+        } = options;
+
+        const results = {};
+
+        if (outputFormat === 'png' || outputFormat === 'both') {
+            const pngFilename = `${filename}.png`;
+            
+            if (includeVisualizations) {
+                // Export with visualizations
+                await stats.generateXLSXWithImages(pngFilename);
+            } else {
+                // Export spreadsheet only
+                stats.exportToPNG(pngFilename);
+            }
+
+            results.png = pngFilename;
+            console.log(`✓ PNG report saved: ${pngFilename}`);
+        }
+
+        if (outputFormat === 'excel' || outputFormat === 'both') {
+            const excelFilename = `${filename}.xlsx`;
+            await stats.generateXLSXWithImages(excelFilename);
+            results.excel = excelFilename;
+            console.log(`✓ Excel report saved: ${excelFilename}`);
+        }
+
+        return {
+            report: report,
+            files: results
+        };
+    }
+
+    // ==================== REGRESSION ANALYSIS ====================
+
+    /**
+     * Perform regression analysis
+     */
+    performRegression(config, options = {}) {
+        console.log('\n📊 REGRESSION ANALYSIS');
+        console.log('='.repeat(70));
+
+        const {
+            predictorColumns,
+            responseColumn,
+            type = 'linear'
+        } = config;
+
+        // Extract data
+        const X = predictorColumns.map(col => this.extractColumnData(col, options));
+        const y = this.extractColumnData(responseColumn, options);
+
+        // Transpose X for proper format
+        const n = X[0].length;
+        const k = X.length;
+        const X_matrix = [];
+        for (let i = 0; i < n; i++) {
+            X_matrix[i] = [];
+            for (let j = 0; j < k; j++) {
+                X_matrix[i][j] = X[j][i];
+            }
+        }
+
+        const stats = this.getStatisticalWorkbook();
+        
+        const regressionConfig = {
+            type: type,
+            predictors: X_matrix,
+            response: y,
+            ...config
+        };
+
+        stats.performRegression(regressionConfig);
+
+        const result = stats.regressionResults[type];
+
+        console.log(`\nRegression Type: ${result.type}`);
+        console.log(`\nModel Fit:`);
+        console.log(`  R²: ${result.modelFit.rSquared.toFixed(6)}`);
+        console.log(`  Adjusted R²: ${result.modelFit.adjustedRSquared.toFixed(6)}`);
+        console.log(`  RMSE: ${result.modelFit.RMSE.toFixed(6)}`);
+
+        console.log(`\nCoefficients:`);
+        result.coefficients.forEach(coef => {
+            console.log(`  ${coef.name}: ${coef.value.toFixed(6)} (p = ${coef.pValue.toFixed(6)})`);
+        });
+
+        // Store results
+        this.statisticalAnalyses[`regression_${type}`] = {
+            type: 'Regression Analysis',
+            timestamp: new Date(),
+            regressionType: type,
+            result: result
+        };
+
+        this.addToHistory(`Performed ${type} regression`);
+
+        return result;
+    }
+
+    // ==================== BAYESIAN INFERENCE ====================
+
+    /**
+     * Perform Bayesian inference
+     */
+    performBayesianInference(columnRef, priorConfig, options = {}) {
+        console.log('\n📊 BAYESIAN INFERENCE');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.loadFromArray(data);
+        stats.sampleName = colName;
+        stats.selectedDistribution = options.distributionType || 'normal';
+
+        stats.fitDistribution();
+        stats.performBayesianInference(priorConfig);
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Prior: ${priorConfig.priorDistribution}`);
+        console.log(`Posterior: ${stats.bayesianAnalysis.posterior.distribution}`);
+
+        console.log('\n📈 POSTERIOR STATISTICS:');
+        const posterior = stats.bayesianAnalysis.posterior;
+        if (posterior.parameters) {
+            console.log(`  Mean: ${posterior.posteriorMean || 'N/A'}`);
+            console.log(`  Mode: ${posterior.posteriorMode || 'N/A'}`);
+        }
+
+        console.log('\n📊 CREDIBLE INTERVALS:');
+        Object.entries(stats.bayesianAnalysis.credibleIntervals).forEach(([level, ci]) => {
+            console.log(`  ${(parseFloat(level) * 100)}%: [${ci.lower.toFixed(6)}, ${ci.upper.toFixed(6)}]`);
+        });
+
+        // Store results
+        this.statisticalAnalyses[`${colName}_bayesian`] = {
+            type: 'Bayesian Inference',
+            timestamp: new Date(),
+            prior: priorConfig,
+            posterior: stats.bayesianAnalysis
+        };
+
+        this.addToHistory(`Performed Bayesian inference on ${colName}`);
+
+        return stats.bayesianAnalysis;
+    }
+
+    // ==================== POWER ANALYSIS ====================
+
+    /**
+     * Perform power analysis
+     */
+    performPowerAnalysis(config, options = {}) {
+        console.log('\n📊 POWER ANALYSIS');
+        console.log('='.repeat(70));
+
+        const stats = this.getStatisticalWorkbook();
+        stats.calculatePowerAnalysis(config);
+
+        const powerResult = stats.powerAnalysis;
+
+        console.log(`\nEffect Size: ${config.effectSize}`);
+        console.log(`Alpha: ${config.alpha}`);
+        console.log(`Desired Power: ${config.desiredPower}`);
+
+        console.log(`\n📈 RESULTS:`);
+        console.log(`  Required Sample Size: ${powerResult.requiredSampleSize.toFixed(0)}`);
+        console.log(`  Current Power: ${(powerResult.currentPower.power * 100).toFixed(2)}%`);
+        console.log(`  Minimum Detectable Effect: ${powerResult.minimumDetectableEffect.toFixed(6)}`);
+
+        console.log(`\n💡 RECOMMENDATION:`);
+        console.log(`  ${powerResult.recommendation}`);
+
+        // Store results
+        this.statisticalAnalyses['power_analysis'] = {
+            type: 'Power Analysis',
+            timestamp: new Date(),
+            config: config,
+            result: powerResult
+        };
+
+        this.addToHistory('Performed power analysis');
+
+        return powerResult;
+    }
+
+    // ==================== META-ANALYSIS ====================
+
+    /**
+     * Perform meta-analysis on multiple studies
+     */
+    performMetaAnalysis(studies, options = {}) {
+        console.log('\n📊 META-ANALYSIS');
+        console.log('='.repeat(70));
+
+        const stats = this.getStatisticalWorkbook();
+        stats.performMetaAnalysis(studies);
+
+        const metaResult = stats.metaAnalysis;
+
+        console.log(`\nNumber of Studies: ${studies.length}`);
+
+        console.log(`\n📈 FIXED EFFECT MODEL:`);
+        console.log(`  Pooled Effect: ${metaResult.fixedEffect.pooledEffect.toFixed(6)}`);
+        console.log(`  95% CI: [${metaResult.fixedEffect.confidenceInterval.lower.toFixed(6)}, ${metaResult.fixedEffect.confidenceInterval.upper.toFixed(6)}]`);
+        console.log(`  p-value: ${metaResult.fixedEffect.pValue.toFixed(6)}`);
+
+        console.log(`\n📈 RANDOM EFFECTS MODEL:`);
+        console.log(`  Pooled Effect: ${metaResult.randomEffects.pooledEffect.toFixed(6)}`);
+        console.log(`  95% CI: [${metaResult.randomEffects.confidenceInterval.lower.toFixed(6)}, ${metaResult.randomEffects.confidenceInterval.upper.toFixed(6)}]`);
+        console.log(`  Tau²: ${metaResult.randomEffects.tauSquared.toFixed(6)}`);
+
+        console.log(`\n📊 HETEROGENEITY:`);
+        console.log(`  Q: ${metaResult.heterogeneity.Q.toFixed(4)}`);
+        console.log(`  I²: ${metaResult.heterogeneity.I2}`);
+        console.log(`  Interpretation: ${metaResult.heterogeneity.interpretation}`);
+
+        // Store results
+        this.statisticalAnalyses['meta_analysis'] = {
+            type: 'Meta-Analysis',
+            timestamp: new Date(),
+            studies: studies,
+            result: metaResult
+        };
+
+        this.addToHistory(`Performed meta-analysis on ${studies.length} studies`);
+
+        return metaResult;
+    }
+
+    // ==================== TIME SERIES ANALYSIS ====================
+
+    /**
+     * Perform time series analysis
+     */
+    performTimeSeriesAnalysis(columnRef, config = {}, options = {}) {
+        console.log('\n📊 TIME SERIES ANALYSIS');
+        console.log('='.repeat(70));
+
+        const data = this.extractColumnData(columnRef, options);
+        const colName = this.headers[typeof columnRef === 'number' ? columnRef : this.letterToColumn(columnRef)];
+
+        const stats = this.getStatisticalWorkbook();
+        stats.performTimeSeriesAnalysis(data, config);
+
+        const tsResult = stats.timeSeriesAnalysis;
+
+        console.log(`\nColumn: ${colName}`);
+        console.log(`Observations: ${tsResult.descriptive.observations}`);
+
+        console.log(`\n📈 TREND ANALYSIS:`);
+        console.log(`  ${tsResult.trend.linearTrend.interpretation}`);
+        console.log(`  Mann-Kendall: ${tsResult.trend.mannKendall.interpretation}`);
+
+        if (tsResult.seasonality) {
+            console.log(`\n📊 SEASONALITY:`);
+            console.log(`  Period: ${tsResult.seasonality.period}`);
+            console.log(`  ${tsResult.seasonality.interpretation}`);
+        }
+
+        console.log(`\n🔍 STATIONARITY:`);
+        console.log(`  ${tsResult.stationarity.recommendation}`);
+
+        if (tsResult.arima) {
+            console.log(`\n📈 ARIMA MODEL:`);
+            console.log(`  Order: (${tsResult.arima.order.p}, ${tsResult.arima.order.d}, ${tsResult.arima.order.q})`);
+            console.log(`  AIC: ${tsResult.arima.diagnostics.AIC.toFixed(4)}`);
+            console.log(`  BIC: ${tsResult.arima.diagnostics.BIC.toFixed(4)}`);
+        }
+
+        // Store results
+        this.statisticalAnalyses[`${colName}_timeseries`] = {
+            type: 'Time Series Analysis',
+            timestamp: new Date(),
+            result: tsResult
+        };
+
+        this.addToHistory(`Performed time series analysis on ${colName}`);
+
+        return tsResult;
+    }
+
+    // ==================== ANOVA ====================
+
+    /**
+     * Perform ANOVA on grouped data
+     */
+    performANOVA(groupColumns, options = {}) {
+        console.log('\n📊 ANALYSIS OF VARIANCE (ANOVA)');
+        console.log('='.repeat(70));
+
+        const groups = groupColumns.map(col => this.extractColumnData(col, options));
+        const groupNames = groupColumns.map(col => 
+            this.headers[typeof col === 'number' ? col : this.letterToColumn(col)]
+        );
+
+        const stats = this.getStatisticalWorkbook();
+        const anovaResult = stats.performANOVA(groups);
+
+        console.log(`\nGroups: ${groupNames.join(', ')}`);
+        console.log(`Number of Groups: ${anovaResult.groups}`);
+        console.log(`Total Sample Size: ${anovaResult.totalSampleSize}`);
+
+        console.log(`\n📈 ANOVA TABLE:`);
+        console.log(`  Source          SS          df      MS          F         p-value`);
+        console.log(`  Between    ${anovaResult.sumOfSquares.between.toFixed(4).padStart(10)}  ${anovaResult.degreesOfFreedom.between.toString().padStart(3)}  ${anovaResult.meanSquares.between.toFixed(4).padStart(10)}  ${anovaResult.fStatistic.toFixed(4).padStart(8)}  ${anovaResult.pValue.toFixed(6)}`);
+        console.log(`  Within     ${anovaResult.sumOfSquares.within.toFixed(4).padStart(10)}  ${anovaResult.degreesOfFreedom.within.toString().padStart(3)}  ${anovaResult.meanSquares.within.toFixed(4).padStart(10)}`);
+        console.log(`  Total      ${anovaResult.sumOfSquares.total.toFixed(4).padStart(10)}  ${anovaResult.degreesOfFreedom.total.toString().padStart(3)}`);
+
+        console.log(`\n💡 CONCLUSION:`);
+        console.log(`  ${anovaResult.conclusion}`);
+
+        // Store results
+        this.statisticalAnalyses['anova'] = {
+            type: 'ANOVA',
+            timestamp: new Date(),
+            groups: groupNames,
+            result: anovaResult
+        };
+
+        this.addToHistory(`Performed ANOVA on ${groupNames.length} groups`);
+
+        return anovaResult;
+    }
+
+    // ==================== STATISTICAL WORKBOOK GENERATION ====================
+
+/**
+     * Generate complete statistical workbook
+     */
+    async generateStatisticalWorkbook(columnRef, distributionType, filename, options = {}) {
+        console.log('\n📊 GENERATING STATISTICAL WORKBOOK');
+        console.log('='.repeat(70));
+
+        const report = this.generateStatisticalReport(columnRef, {
+            ...options,
+            distributionType: distributionType,
+            includeVisualizations: true
+        });
+
+        const stats = this.getStatisticalWorkbook();
+
+        // Export to Excel with images
+        const excelFilename = `${filename}.xlsx`;
+        await stats.generateXLSXWithImages(excelFilename);
+
+        console.log(`\n✓ Statistical Workbook Generated`);
+        console.log(`  File: ${excelFilename}`);
+        console.log(`  Sheets: Multiple`);
+        console.log(`  Visualizations: ${Object.keys(stats.visualizations || {}).length}`);
+
+        return {
+            filename: excelFilename,
+            report: report,
+            visualizations: stats.visualizations
+        };
+    }
+
+    // ==================== SUMMARY AND STATUS METHODS ====================
+
+    /**
+     * Get statistical analysis summary
+     */
+    getStatisticalAnalysisSummary() {
+        return {
+            totalAnalyses: Object.keys(this.statisticalAnalyses).length,
+            distributionFits: Object.keys(this.distributionFits).length,
+            reports: this.statisticalReports.length,
+            analyses: Object.entries(this.statisticalAnalyses).map(([key, analysis]) => ({
+                key,
+                type: analysis.type,
+                timestamp: analysis.timestamp
+            }))
+        };
+    }
+
+    /**
+     * Display statistical analysis summary
+     */
+    displayStatisticalSummary() {
+        const summary = this.getStatisticalAnalysisSummary();
+
+        console.log('\n📊 STATISTICAL ANALYSIS SUMMARY');
+        console.log('='.repeat(70));
+        console.log(`\nTotal Analyses: ${summary.totalAnalyses}`);
+        console.log(`Distribution Fits: ${summary.distributionFits}`);
+        console.log(`Reports Generated: ${summary.reports}`);
+
+        if (summary.analyses.length > 0) {
+            console.log('\n📈 Recent Analyses:');
+            summary.analyses.slice(-10).forEach(analysis => {
+                console.log(`  ${analysis.type}: ${analysis.key} (${analysis.timestamp.toLocaleString()})`);
+            });
+        }
+
+        console.log('\n='.repeat(70));
+    }
+
+    /**
+     * Export all statistical analyses
+     */
+    async exportAllStatisticalAnalyses(outputDir) {
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        console.log('\n📊 EXPORTING ALL STATISTICAL ANALYSES');
+        console.log('='.repeat(70));
+
+        const exports = [];
+
+        // Export each report
+        for (let i = 0; i < this.statisticalReports.length; i++) {
+            const report = this.statisticalReports[i];
+            const filename = `${outputDir}/statistical_report_${i + 1}_${report.columnName}`;
+
+            try {
+                const stats = new EnhancedStatisticalWorkbook();
+                stats.currentWorkbook = report.workbook;
+                stats.visualizations = report.visualizations;
+
+                await stats.generateXLSXWithImages(`${filename}.xlsx`);
+                exports.push({
+                    success: true,
+                    filename: `${filename}.xlsx`,
+                    report: report.columnName
+                });
+
+                console.log(`✓ Exported: ${report.columnName}`);
+            } catch (error) {
+                console.error(`✗ Failed: ${report.columnName} - ${error.message}`);
+                exports.push({
+                    success: false,
+                    error: error.message,
+                    report: report.columnName
+                });
+            }
+        }
+
+        console.log(`\n✓ Export Complete: ${exports.filter(e => e.success).length}/${exports.length} successful`);
+
+        return {
+            outputDirectory: outputDir,
+            exports: exports,
+            successCount: exports.filter(e => e.success).length,
+            totalCount: exports.length
+        };
+    }
+
+    // ==================== INTEGRATION WITH EXISTING METHODS ====================
+
+    /**
+     * Updated getCompleteWorkbookStatus to include statistical analyses
+     */
+    getCompleteWorkbookStatus() {
+        const calc = this.graphingCalculator;
+
+        return {
+            metadata: {
+                name: this.sheetName,
+                created: this.createdDate,
+                lastModified: this.lastModified,
+                author: this.author
+            },
+            spreadsheet: {
+                rows: this.data.length,
+                columns: this.headers.length,
+                formulas: Object.keys(this.formulas).length,
+                calculations: Object.keys(this.calculations).length
+            },
+            visualizations: {
+                charts: this.charts.length,
+                anatomicalDiagrams: this.anatomicalDiagrams.length,
+                crossSectionDiagrams: this.crossSectionDiagrams.length,
+                stereochemistryDiagrams: this.stereochemistryDiagrams.length,
+                geometricShapes: this.geometricShapes.length
+            },
+            statisticalAnalysis: {
+                analyses: Object.keys(this.statisticalAnalyses).length,
+                distributionFits: Object.keys(this.distributionFits).length,
+                reports: this.statisticalReports.length
+            },
+            graphingCalculator: calc ? {
+                equations: calc.equationCounter,
+                shapes: calc.getTotalItemCount(),
+                vectors: calc.vectorCounter,
+                matrices: calc.matrixCounter || 0,
+                total: calc.getTotalItemCount()
+            } : {
+                total: 0
+            },
+            history: {
+                spreadsheetActions: this.history.length,
+                totalActions: this.history.length
+            }
+        };
+    }
+
+    /**
+     * Updated displayCompleteWorkbookStatus to include statistical analyses
+     */
+    displayCompleteWorkbookStatus() {
+        const status = this.getCompleteWorkbookStatus();
+
+        console.log("\n" + "=".repeat(70));
+        console.log("📊 COMPLETE WORKBOOK STATUS");
+        console.log("=".repeat(70));
+
+        console.log("\n📋 METADATA:");
+        console.log(`  Name: ${status.metadata.name}`);
+        console.log(`  Author: ${status.metadata.author}`);
+        console.log(`  Created: ${status.metadata.created.toLocaleString()}`);
+        console.log(`  Last Modified: ${status.metadata.lastModified.toLocaleString()}`);
+
+        console.log("\n📊 SPREADSHEET:");
+        console.log(`  Rows: ${status.spreadsheet.rows}`);
+        console.log(`  Columns: ${status.spreadsheet.columns}`);
+        console.log(`  Formulas: ${status.spreadsheet.formulas}`);
+        console.log(`  Calculations: ${status.spreadsheet.calculations}`);
+
+        console.log("\n📈 VISUALIZATIONS:");
+        console.log(`  Charts: ${status.visualizations.charts}`);
+        console.log(`  Anatomical Diagrams: ${status.visualizations.anatomicalDiagrams}`);
+        console.log(`  Cross-Section Diagrams: ${status.visualizations.crossSectionDiagrams}`);
+        console.log(`  Stereochemistry Diagrams: ${status.visualizations.stereochemistryDiagrams}`);
+        console.log(`  Geometric Shapes: ${status.visualizations.geometricShapes}`);
+
+        console.log("\n📊 STATISTICAL ANALYSIS:");
+        console.log(`  Total Analyses: ${status.statisticalAnalysis.analyses}`);
+        console.log(`  Distribution Fits: ${status.statisticalAnalysis.distributionFits}`);
+        console.log(`  Reports Generated: ${status.statisticalAnalysis.reports}`);
+
+        console.log("\n🧮 GRAPHING CALCULATOR:");
+        console.log(`  Total Items: ${status.graphingCalculator.total}`);
+
+        console.log("\n📜 HISTORY:");
+        console.log(`  Total Actions: ${status.history.totalActions}`);
+
+        console.log("\n=".repeat(70));
+    }
+
+    // [Previous spreadsheet methods remain unchanged...]
+    // loadData, columnToLetter, letterToColumn, parseCellReference, etc.
+}
+
+// ============================================================================
+// EXPORT
+// ============================================================================
+
+export { 
+    SpreadsheetFormulaRegistry,
+    GraphingCalculator, 
+    GraphingCalculatorGame,
+    Theme, 
+    ExcelChartsRegistry, 
+    ChartCanvasRenderer, 
+    AnatomicalDiagramsRegistry, 
+    AnatomicalShapes,
+    AnatomicalDiagramRenderer,
+    StereochemistryDiagramsRegistry,
+    StereochemistryDiagramRenderer,
+    CrossSectionDiagramsRegistry,
+    CrossSectionDiagramRenderer,
+    CrossSectionShapes,
+    GeometricShapesRegistry,
+    GeometricShapeRenderer,
+    AtomProperties,
+    MolecularGeometry,
+    EnhancedStatisticalWorkbook,
+    StatisticalDistributions,
+    DistributionRegistry
+};
+
+export default EnhancedSpreadsheet
+
+I created an example usage of the enhanced statistical workbook class in enhanced spreadsheet workbook class code above 
+
+// ============================================================================
+// COMPREHENSIVE STATISTICAL ANALYSIS TESTING EXAMPLE
+// ============================================================================
+
+import EnhancedSpreadsheetWorkbook from './excel.js';
+import fs from 'fs';
+
+async function runStatisticalAnalysisTests() {
+    console.log('\n' + '='.repeat(80));
+    console.log('📊 ENHANCED SPREADSHEET WORKBOOK - STATISTICAL ANALYSIS TESTS');
+    console.log('='.repeat(80));
+
+    // ============================================================================
+    // TEST 1: LOAD SAMPLE DATA
+    // ============================================================================
+    console.log('\n📂 TEST 1: Loading Sample Data');
+    console.log('-'.repeat(80));
+
+    const workbook = new EnhancedSpreadsheetWorkbook({
+        sheetName: 'Statistical Analysis Demo',
+        author: 'Data Scientist'
+    });
+
+    // Create sample dataset with multiple columns
+    const sampleData = [
+        ['Student_ID', 'Math_Score', 'Science_Score', 'Study_Hours', 'Attendance_%', 'Final_Grade'],
+        [1, 85, 88, 15, 95, 87],
+        [2, 72, 75, 10, 88, 74],
+        [3, 95, 92, 20, 98, 94],
+        [4, 68, 70, 8, 85, 70],
+        [5, 88, 85, 16, 92, 86],
+        [6, 91, 89, 18, 96, 90],
+        [7, 75, 78, 12, 90, 77],
+        [8, 82, 80, 14, 91, 81],
+        [9, 79, 82, 13, 89, 80],
+        [10, 94, 95, 19, 97, 95],
+        [11, 70, 72, 9, 86, 71],
+        [12, 87, 86, 15, 93, 86],
+        [13, 76, 79, 11, 88, 78],
+        [14, 92, 91, 17, 95, 91],
+        [15, 84, 83, 14, 92, 84],
+        [16, 77, 80, 12, 90, 79],
+        [17, 89, 87, 16, 94, 88],
+        [18, 73, 76, 10, 87, 75],
+        [19, 96, 94, 20, 99, 95],
+        [20, 81, 84, 13, 91, 83],
+        [21, 86, 85, 15, 93, 86],
+        [22, 74, 77, 11, 89, 76],
+        [23, 90, 88, 17, 95, 89],
+        [24, 78, 81, 12, 90, 80],
+        [25, 93, 92, 18, 97, 93],
+        [26, 71, 73, 9, 86, 72],
+        [27, 83, 82, 14, 92, 83],
+        [28, 97, 96, 21, 100, 97],  // High performer
+        [29, 65, 68, 7, 82, 67],     // Low performer
+        [30, 88, 86, 16, 94, 87],
+        [31, 45, 50, 5, 70, 48],     // Outlier - very low
+        [32, 80, 83, 13, 91, 82],
+        [33, 85, 84, 15, 93, 85],
+        [34, 99, 98, 22, 100, 99],   // Outlier - very high
+        [35, 76, 79, 11, 89, 78]
+    ];
+
+    workbook.loadData(sampleData);
+    console.log(`✓ Loaded ${workbook.data.length} rows × ${workbook.headers.length} columns`);
+    console.log(`✓ Headers: ${workbook.headers.join(', ')}`);
+
+    // ============================================================================
+    // TEST 2: EXPLORATORY DATA ANALYSIS (EDA)
+    // ============================================================================
+    console.log('\n\n📊 TEST 2: Exploratory Data Analysis (EDA)');
+    console.log('-'.repeat(80));
+
+    try {
+        // Perform EDA on Math Scores
+        const edaResult = workbook.performEDA('Math_Score', {
+            unitName: 'points'
+        });
+
+        console.log('\n📈 EDA Results Summary:');
+        console.log(`  Column: ${edaResult.columnName}`);
+        console.log(`  Sample Size: ${edaResult.sampleSize}`);
+        console.log(`  Data Quality: ${edaResult.validation.dataQuality.rating}`);
+        console.log(`  Mean: ${edaResult.statistics.mean.toFixed(2)}`);
+        console.log(`  Median: ${edaResult.statistics.median.toFixed(2)}`);
+        console.log(`  Std Dev: ${edaResult.statistics.standardDeviation.toFixed(2)}`);
+        console.log(`  Range: [${edaResult.statistics.min.toFixed(2)}, ${edaResult.statistics.max.toFixed(2)}]`);
+        console.log(`  Skewness: ${edaResult.statistics.skewness.toFixed(4)}`);
+        console.log(`  Kurtosis: ${edaResult.statistics.kurtosis.toFixed(4)}`);
+
+        console.log('\n✅ TEST 2 PASSED: EDA completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 2 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 3: OUTLIER DETECTION
+    // ============================================================================
+    console.log('\n\n🔍 TEST 3: Outlier Detection');
+    console.log('-'.repeat(80));
+
+    try {
+        // Perform EDA which includes outlier detection
+        const outlierResult = workbook.performEDA('Math_Score', {
+            unitName: 'points'
+        });
+
+        const outliers = outlierResult.robustStatistics.outlierDetection;
+
+        console.log('\n🔍 Outlier Detection Results:');
+        console.log(`  Method: ${outliers.method}`);
+        console.log(`  Lower Fence: ${outliers.lowerFence.toFixed(2)}`);
+        console.log(`  Upper Fence: ${outliers.upperFence.toFixed(2)}`);
+        console.log(`  Outliers Found: ${outliers.outlierCount}`);
+        console.log(`  Percentage: ${outliers.outlierPercentage}`);
+
+        if (outliers.outliers.length > 0) {
+            console.log(`\n  Outlier Values: ${outliers.outliers.map(v => v.toFixed(2)).join(', ')}`);
+        }
+
+        console.log(`\n  Recommendation: ${outliers.recommendation}`);
+
+        console.log('\n📊 Robust Statistics:');
+        console.log(`  Median: ${outlierResult.robustStatistics.median.toFixed(2)}`);
+        console.log(`  MAD: ${outlierResult.robustStatistics.mad.value.toFixed(2)}`);
+        console.log(`  Scaled MAD: ${outlierResult.robustStatistics.mad.scaledMAD.toFixed(2)}`);
+        console.log(`  Trimmed Mean (10%): ${outlierResult.robustStatistics.trimmedMean.value.toFixed(2)}`);
+
+        console.log('\n✅ TEST 3 PASSED: Outlier detection completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 3 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 4: CORRELATION MATRIX
+    // ============================================================================
+    console.log('\n\n📊 TEST 4: Correlation Matrix Analysis');
+    console.log('-'.repeat(80));
+
+    try {
+        // Calculate correlation matrix for multiple columns
+        const correlationResult = workbook.calculateCorrelationMatrix([
+            'Math_Score',
+            'Science_Score',
+            'Study_Hours',
+            'Attendance_%',
+            'Final_Grade'
+        ]);
+
+        console.log('\n📈 Correlation Analysis Complete');
+        console.log(`  Variables: ${correlationResult.columns.length}`);
+        console.log(`  Significant Correlations: ${correlationResult.significantCorrelations.length}`);
+
+        if (correlationResult.significantCorrelations.length > 0) {
+            console.log('\n🔗 Significant Correlations (p < 0.05):');
+            correlationResult.significantCorrelations.forEach(corr => {
+                console.log(`  ${corr.var1} ↔ ${corr.var2}:`);
+                console.log(`    r = ${corr.correlation.toFixed(4)}`);
+                console.log(`    p = ${corr.pValue.toFixed(6)}`);
+                console.log(`    Strength: ${corr.strength}`);
+                console.log('');
+            });
+        }
+
+        console.log('\n✅ TEST 4 PASSED: Correlation matrix calculated successfully');
+    } catch (error) {
+        console.error('❌ TEST 4 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 5: DISTRIBUTION IDENTIFICATION
+    // ============================================================================
+    console.log('\n\n📊 TEST 5: Distribution Identification');
+    console.log('-'.repeat(80));
+
+    try {
+        // Identify best-fit distribution for Math Scores
+        const distributionResult = workbook.identifyDistribution('Math_Score', {
+            candidateDistributions: ['normal', 't', 'gamma', 'lognormal', 'exponential'],
+            unitName: 'points'
+        });
+
+        console.log('\n🎯 Best Fit Distribution:');
+        console.log(`  Distribution: ${distributionResult.distributionName}`);
+        console.log(`  Parameters: ${JSON.stringify(distributionResult.parameters)}`);
+        console.log(`  AIC: ${distributionResult.comparison.distributions[distributionResult.bestFit].aic.toFixed(4)}`);
+        console.log(`  BIC: ${distributionResult.comparison.distributions[distributionResult.bestFit].bic.toFixed(4)}`);
+
+        console.log('\n📊 Goodness of Fit:');
+        const gof = distributionResult.goodnessOfFit;
+        console.log(`  K-S Statistic: ${gof.testStatistic.toFixed(6)}`);
+        console.log(`  K-S p-value: ${gof.pValue.toFixed(6)}`);
+
+        console.log('\n📋 Comparison Summary:');
+        Object.entries(distributionResult.comparison.distributions)
+            .sort((a, b) => a[1].aic - b[1].aic)
+            .forEach(([distName, distInfo]) => {
+                console.log(`  ${distName.padEnd(15)} AIC: ${distInfo.aic.toFixed(2).padStart(10)}  BIC: ${distInfo.bic.toFixed(2).padStart(10)}`);
+            });
+
+        console.log('\n✅ TEST 5 PASSED: Distribution identification completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 5 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 6: COMPREHENSIVE DISTRIBUTION ANALYSIS
+    // ============================================================================
+    console.log('\n\n📊 TEST 6: Comprehensive Distribution Analysis');
+    console.log('-'.repeat(80));
+
+    try {
+        // Perform full distribution analysis
+        const analysisResult = workbook.analyzeDistribution('Math_Score', 'normal', {
+            unitName: 'points',
+            targetValue: 85,
+            targetAnalysisType: 'value',
+            hypothesisTest: {
+                type: 'oneSample',
+                nullValue: 80,
+                alternative: 'two-sided',
+                alpha: 0.05
+            },
+            scenarioDescription: 'Student Math Performance Analysis'
+        });
+
+        console.log('\n📈 Distribution Analysis Complete');
+        console.log(`  Distribution: ${analysisResult.distribution}`);
+        console.log(`  Sample Size: ${analysisResult.statistics.n}`);
+
+        console.log('\n📊 Fitted Parameters:');
+        Object.entries(analysisResult.distributionAnalysis.parameters).forEach(([param, value]) => {
+            console.log(`  ${param}: ${value.toFixed(4)}`);
+        });
+
+        console.log('\n🎯 Goodness of Fit Tests:');
+        console.log(`  Kolmogorov-Smirnov: p = ${analysisResult.goodnessOfFit.kolmogorovSmirnov.pValue.toFixed(6)}`);
+        console.log(`  Anderson-Darling: Reject = ${analysisResult.goodnessOfFit.andersonDarling.reject['0.05']}`);
+        if (analysisResult.goodnessOfFit.shapiroWilk && analysisResult.goodnessOfFit.shapiroWilk.pValue) {
+            console.log(`  Shapiro-Wilk: p = ${analysisResult.goodnessOfFit.shapiroWilk.pValue.toFixed(6)}`);
+        }
+
+        console.log('\n📊 Confidence Intervals:');
+        Object.entries(analysisResult.confidenceIntervals).forEach(([level, ci]) => {
+            console.log(`  ${(parseFloat(level) * 100)}%: [${ci.lowerBound.toFixed(2)}, ${ci.upperBound.toFixed(2)}]`);
+        });
+
+        if (analysisResult.hypothesisTests && analysisResult.hypothesisTests.oneSample) {
+            const test = analysisResult.hypothesisTests.oneSample;
+            console.log('\n🔬 Hypothesis Test:');
+            console.log(`  Null Hypothesis: ${test.nullHypothesis}`);
+            console.log(`  Test Statistic: ${test.testStatistic.toFixed(4)}`);
+            console.log(`  p-value: ${test.pValue.toFixed(6)}`);
+            console.log(`  Conclusion: ${test.conclusion}`);
+        }
+
+        if (analysisResult.targetAnalysis && Object.keys(analysisResult.targetAnalysis).length > 0) {
+            console.log('\n🎯 Target Analysis (Score = 85):');
+            console.log(`  Z-Score: ${analysisResult.targetAnalysis.zScore?.toFixed(4) || 'N/A'}`);
+            console.log(`  P(X ≤ 85): ${analysisResult.targetAnalysis.probabilities?.lessThan?.toFixed(4) || 'N/A'}`);
+            console.log(`  P(X > 85): ${analysisResult.targetAnalysis.probabilities?.greaterThan?.toFixed(4) || 'N/A'}`);
+        }
+
+        console.log('\n✅ TEST 6 PASSED: Comprehensive distribution analysis completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 6 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 7: FORMAL DISTRIBUTION ASSUMPTION CHECKS
+    // ============================================================================
+    console.log('\n\n🔍 TEST 7: Formal Distribution Assumption Checks');
+    console.log('-'.repeat(80));
+
+    try {
+        const assumptionResult = workbook.checkDistributionAssumptions('Math_Score', 'normal', {
+            unitName: 'points'
+        });
+
+        console.log('\n📊 Distribution Assumption Tests:');
+        console.log(`  Distribution: ${assumptionResult.distribution}`);
+        console.log(`  Column: ${assumptionResult.columnName}`);
+
+        console.log('\n🔬 Test Results:');
+        const gof = assumptionResult.goodnessOfFit;
+
+        console.log('\n  Kolmogorov-Smirnov Test:');
+        console.log(`    Statistic: ${gof.kolmogorovSmirnov.testStatistic.toFixed(6)}`);
+        console.log(`    p-value: ${gof.kolmogorovSmirnov.pValue.toFixed(6)}`);
+        console.log(`    Reject at α=0.05: ${gof.kolmogorovSmirnov.reject['0.05'] ? 'YES' : 'NO'}`);
+
+        console.log('\n  Anderson-Darling Test:');
+        console.log(`    Statistic: ${gof.andersonDarling.testStatistic.toFixed(6)}`);
+        console.log(`    Reject at α=0.05: ${gof.andersonDarling.reject['0.05'] ? 'YES' : 'NO'}`);
+
+        console.log('\n  Chi-Square Test:');
+        console.log(`    Statistic: ${gof.chisquareTest.testStatistic.toFixed(6)}`);
+        console.log(`    df: ${gof.chisquareTest.degreesOfFreedom}`);
+        console.log(`    p-value: ${gof.chisquareTest.pValue.toFixed(6)}`);
+        console.log(`    Reject at α=0.05: ${gof.chisquareTest.reject['0.05'] ? 'YES' : 'NO'}`);
+
+        if (gof.shapiroWilk && gof.shapiroWilk.testStatistic !== null) {
+            console.log('\n  Shapiro-Wilk Test:');
+            console.log(`    Statistic: ${gof.shapiroWilk.testStatistic.toFixed(6)}`);
+            console.log(`    p-value: ${gof.shapiroWilk.pValue.toFixed(6)}`);
+            console.log(`    Reject at α=0.05: ${gof.shapiroWilk.reject['0.05'] ? 'YES' : 'NO'}`);
+        }
+
+        console.log('\n📊 Overall Assessment:');
+        console.log(`  Fit Quality: ${assumptionResult.overallFit.assessment}`);
+        console.log(`  Description: ${assumptionResult.overallFit.description}`);
+        console.log(`  Recommendation: ${assumptionResult.overallFit.recommendation}`);
+
+        console.log('\n✅ TEST 7 PASSED: Distribution assumption checks completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 7 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 8: PARAMETER ESTIMATION WITH CONFIDENCE INTERVALS
+    // ============================================================================
+    console.log('\n\n📊 TEST 8: Parameter Estimation with Confidence Intervals');
+    console.log('-'.repeat(80));
+
+    try {
+        const paramResult = workbook.estimateParameters('Math_Score', 'normal', {
+            unitName: 'points'
+        });
+
+        console.log('\n📈 Parameter Estimation Results:');
+        console.log(`  Distribution: ${paramResult.distribution}`);
+        console.log(`  Column: ${paramResult.columnName}`);
+
+        console.log('\n🎯 Estimated Parameters:');
+        paramResult.parameterNames.forEach((name, idx) => {
+            console.log(`  ${name}: ${paramResult.parameters[idx].toFixed(6)}`);
+        });
+
+        console.log('\n📊 Parameter Confidence Intervals (95%):');
+        const paramCI = paramResult.confidenceIntervals[0.95];
+        if (paramCI && paramCI.parameters) {
+            Object.entries(paramCI.parameters).forEach(([param, ci]) => {
+                console.log(`\n  ${param}:`);
+                console.log(`    Estimate: ${ci.estimate.toFixed(6)}`);
+                console.log(`    95% CI: [${ci.lowerBound.toFixed(6)}, ${ci.upperBound.toFixed(6)}]`);
+                console.log(`    Standard Error: ${ci.standardError.toFixed(6)}`);
+                console.log(`    Interpretation: ${ci.interpretation}`);
+            });
+        }
+
+        console.log('\n✅ TEST 8 PASSED: Parameter estimation completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 8 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 9: REGRESSION ANALYSIS
+    // ============================================================================
+    console.log('\n\n📊 TEST 9: Regression Analysis');
+    console.log('-'.repeat(80));
+
+    try {
+        const regressionResult = workbook.performRegression({
+            type: 'multiple',
+            predictorColumns: ['Math_Score', 'Science_Score', 'Study_Hours'],
+            responseColumn: 'Final_Grade'
+        });
+
+        console.log('\n📈 Multiple Regression Results:');
+        console.log(`  Model: ${regressionResult.type}`);
+
+        console.log('\n📊 Model Fit:');
+        console.log(`  R²: ${regressionResult.modelFit.rSquared.toFixed(6)}`);
+        console.log(`  Adjusted R²: ${regressionResult.modelFit.adjustedRSquared.toFixed(6)}`);
+        console.log(`  RMSE: ${regressionResult.modelFit.RMSE.toFixed(6)}`);
+        console.log(`  F-Statistic: ${regressionResult.modelFit.fStatistic.toFixed(4)}`);
+        console.log(`  p-value: ${regressionResult.modelFit.fPValue.toFixed(6)}`);
+
+        console.log('\n🎯 Coefficients:');
+        regressionResult.coefficients.forEach(coef => {
+            console.log(`  ${coef.name.padEnd(15)}: ${coef.value.toFixed(6).padStart(10)}  (p = ${coef.pValue.toFixed(6)})`);
+        });
+
+        console.log('\n✅ TEST 9 PASSED: Regression analysis completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 9 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 10: ANOVA
+    // ============================================================================
+    console.log('\n\n📊 TEST 10: ANOVA Analysis');
+    console.log('-'.repeat(80));
+
+    try {
+        // Group students into performance levels
+        // Create synthetic groups for demonstration
+        const group1 = [68, 70, 72, 65, 71, 74, 73, 75, 70, 69]; // Low performers
+        const group2 = [82, 85, 84, 83, 86, 87, 85, 84, 88, 83]; // Medium performers
+        const group3 = [92, 95, 94, 93, 96, 95, 97, 94, 99, 92]; // High performers
+
+        // Temporarily add these as columns
+        workbook.data.forEach((row, idx) => {
+            if (idx < group1.length) row.push(group1[idx]);
+            else if (idx < group1.length + group2.length) row.push(group2[idx - group1.length]);
+            else if (idx < group1.length + group2.length + group3.length) row.push(group3[idx - group1.length - group2.length]);
+            else row.push(85);
+        });
+        workbook.headers.push('Performance_Group');
+
+        const anovaResult = workbook.performANOVA([
+            workbook.headers.indexOf('Performance_Group')
+        ]);
+
+        console.log('\n📈 ANOVA Results:');
+        console.log(`  Groups: ${anovaResult.groups}`);
+        console.log(`  Total Sample Size: ${anovaResult.totalSampleSize}`);
+
+        console.log('\n📊 ANOVA Table:');
+        console.log(`  F-Statistic: ${anovaResult.fStatistic.toFixed(4)}`);
+        console.log(`  p-value: ${anovaResult.pValue.toFixed(6)}`);
+        console.log(`  Reject H₀: ${anovaResult.reject}`);
+
+        console.log('\n💡 Conclusion:');
+        console.log(`  ${anovaResult.conclusion}`);
+
+        console.log('\n✅ TEST 10 PASSED: ANOVA completed successfully');
+    } catch (error) {
+        console.error('❌ TEST 10 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 11: GENERATE STATISTICAL REPORT
+    // ============================================================================
+    console.log('\n\n📊 TEST 11: Generate Statistical Report');
+    console.log('-'.repeat(80));
+
+    try {
+        const report = workbook.generateStatisticalReport('Math_Score', {
+            distributionType: 'normal',
+            unitName: 'points',
+            includeVisualizations: true,
+            targetValue: 85,
+            hypothesisTest: {
+                type: 'oneSample',
+                nullValue: 80,
+                alternative: 'two-sided',
+                alpha: 0.05
+            }
+        });
+
+        console.log('\n📈 Statistical Report Generated:');
+        console.log(`  Column: ${report.columnName}`);
+        console.log(`  Distribution: ${report.distribution}`);
+        console.log(`  Timestamp: ${report.timestamp.toLocaleString()}`);
+        console.log(`  Workbook Pages: ${report.workbook.length}`);
+        console.log(`  Visualizations: ${report.visualizations ? Object.keys(report.visualizations).length : 0}`);
+
+        console.log('\n✅ TEST 11 PASSED: Statistical report generated successfully');
+    } catch (error) {
+        console.error('❌ TEST 11 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 12: EXPORT STATISTICAL REPORT
+    // ============================================================================
+    console.log('\n\n📊 TEST 12: Export Statistical Report');
+    console.log('-'.repeat(80));
+
+    try {
+        const exportResult = await workbook.exportStatisticalReport(
+            'Math_Score',
+            'statistical_report_math_scores',
+            {
+                distributionType: 'normal',
+                unitName: 'points',
+                includeVisualizations: true,
+                outputFormat: 'excel'
+            }
+        );
+
+        console.log('\n📁 Report Exported:');
+        console.log(`  Excel File: ${exportResult.files.excel}`);
+        console.log(`  Report Generated: ${exportResult.report.timestamp.toLocaleString()}`);
+
+        console.log('\n✅ TEST 12 PASSED: Statistical report exported successfully');
+    } catch (error) {
+        console.error('❌ TEST 12 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 13: GENERATE VISUALIZATIONS
+    // ============================================================================
+    console.log('\n\n📊 TEST 13: Generate Statistical Visualizations');
+    console.log('-'.repeat(80));
+
+    try {
+        const vizResult = workbook.generateStatisticalVisualizations('Math_Score', 'normal', {
+            unitName: 'points'
+        });
+
+        console.log('\n📈 Visualizations Generated:');
+        console.log(`  Column: ${vizResult.columnName}`);
+        console.log(`  Distribution: ${vizResult.distribution}`);
+        console.log(`  Total Visualizations: ${vizResult.vizCount}`);
+
+        console.log('\n📊 Available Visualizations:');
+        Object.keys(vizResult.visualizations).forEach(vizType => {
+            console.log(`  ✓ ${vizType}`);
+        });
+
+        console.log('\n✅ TEST 13 PASSED: Visualizations generated successfully');
+    } catch (error) {
+        console.error('❌ TEST 13 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // TEST 14: WORKBOOK STATUS
+    // ============================================================================
+    console.log('\n\n📊 TEST 14: Complete Workbook Status');
+    console.log('-'.repeat(80));
+
+    try {
+        workbook.displayCompleteWorkbookStatus();
+        workbook.displayStatisticalSummary();
+
+        const status = workbook.getCompleteWorkbookStatus();
+        console.log('\n📊 Status Summary:');
+        console.log(`  Spreadsheet Rows: ${status.spreadsheet.rows}`);
+        console.log(`  Spreadsheet Columns: ${status.spreadsheet.columns}`);
+        console.log(`  Statistical Analyses: ${status.statisticalAnalysis.analyses}`);
+        console.log(`  Distribution Fits: ${status.statisticalAnalysis.distributionFits}`);
+        console.log(`  Reports Generated: ${status.statisticalAnalysis.reports}`);
+
+        console.log('\n✅ TEST 14 PASSED: Workbook status retrieved successfully');
+    } catch (error) {
+        console.error('❌ TEST 14 FAILED:', error.message);
+    }
+
+    // ============================================================================
+    // FINAL SUMMARY
+    // ============================================================================
+    console.log('\n\n' + '='.repeat(80));
+    console.log('📊 TEST SUITE COMPLETE');
+    console.log('='.repeat(80));
+
+    const summary = workbook.getStatisticalAnalysisSummary();
+    console.log('\n📈 Final Statistics:');
+    console.log(`  Total Analyses Performed: ${summary.totalAnalyses}`);
+    console.log(`  Distribution Fits: ${summary.distributionFits}`);
+    console.log(`  Reports Generated: ${summary.reports}`);
+
+    console.log('\n✅ All tests completed successfully!');
+    console.log('\n📁 Generated Files:');
+    console.log('  • statistical_report_math_scores.xlsx');
+
+    console.log('\n' + '='.repeat(80));
+}
+
+// Run the tests
+runStatisticalAnalysisTests().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
+
+After running example usage I got below error 
+
+================
+📊 ENHANCED SPREADSHEET WORKBOOK - STATISTICAL ANALYSIS TESTS   ================================================================================
+
+📂 TEST 1: Loading Sample Data                                  --------------------------------------------------------------------------------
+✓ Loaded 35 rows × 6 columns
+✓ Headers: Student_ID, Math_Score, Science_Score, Study_Hours, Attendance_%, Final_Grade
+
+                                                                📊 TEST 2: Exploratory Data Analysis (EDA)
+--------------------------------------------------------------------------------
+
+📊 EXPLORATORY DATA ANALYSIS
+======================================================================                                                          ❌ TEST 2 FAILED: Invalid column reference: Math_Score
+
+
+🔍 TEST 3: Outlier Detection                                    --------------------------------------------------------------------------------
+
+📊 EXPLORATORY DATA ANALYSIS                                    ======================================================================
+❌ TEST 3 FAILED: Invalid column reference: Math_Score          
+
+📊 TEST 4: Correlation Matrix Analysis
+--------------------------------------------------------------------------------
+
+📊 CORRELATION MATRIX
+======================================================================
+❌ TEST 4 FAILED: Invalid column reference: Math_Score
+                                                                
+📊 TEST 5: Distribution Identification                          --------------------------------------------------------------------------------
+
+📊 DISTRIBUTION IDENTIFICATION
+======================================================================
+❌ TEST 5 FAILED: Invalid column reference: Math_Score
+
+
+📊 TEST 6: Comprehensive Distribution Analysis                  --------------------------------------------------------------------------------
+
+📊 DISTRIBUTION ANALYSIS
+======================================================================
+❌ TEST 6 FAILED: Invalid column reference: Math_Score
+
+
+🔍 TEST 7: Formal Distribution Assumption Checks
+--------------------------------------------------------------------------------
+
+But below is the working examples of how to load sample, custom and paste data 
+
+if (choice === '1') {
+            data = [
+                ['Agent Name', 'Target Sales', 'Actual Sales', 'Achievement %', 'Commission Rate', 'Commission Earned', 'Status'],
+                ['John M.', 50000, 55000, '', 0.05, '', ''],
+                ['Sarah K.', 60000, 48000, '', 0.05, '', ''],
+                ['Daniel P.', 40000, 42500, '', 0.04, '', ''],
+                ['Grace L.', 70000, 80000, '', 0.06, '', ''],
+                ['Alice N.', 55000, 50000, '', 0.05, '', ''],
+                ['Mike T.', 65000, 72000, '', 0.05, '', ''],
+                ['Emma R.', 45000, 46500, '', 0.04, '', '']
+            ];
+            console.log('\n✓ Sample sales data loaded');
+        } else if (choice === '2') {
+            data = await this.loadCustomData();
+        } else if (choice === '3') {
+            data = await this.loadPastedData();
+        } else {
+            console.log('Invalid choice. Loading sample data...');
+            data = [
+                ['Agent Name', 'Target Sales', 'Actual Sales', 'Achievement %', 'Commission Rate', 'Commission Earned', 'Status'],
+                ['John M.', 50000, 55000, '', 0.05, '', ''],
+                ['Sarah K.', 60000, 48000, '', 0.05, '', '']
+            ];
+        }
+
+        this.workbook.loadData(data);
+
+        console.log(`\n✓ Data loaded successfully!`);
+        console.log(`  Rows: ${this.workbook.data.length}`);
+        console.log(`  Columns: ${this.workbook.headers.length}`);
+        this.displayDataPreview();
+
+        await this.question('\nPress Enter to see available formulas...');
+    }
+
+    // Load custom data helper
+    async loadCustomData() {
+        console.log('\nData Entry Format Guide:');
+        console.log('- First row: Column headers (comma-separated)');
+        console.log('- Following rows: Data values (comma-separated)');
+        console.log('- Example: Name,Sales,Target');
+        console.log('          John,5000,4500\n');
+
+        const headers = (await this.question('Enter column headers (comma-separated): ')).split(',').map(h => h.trim());
+        const data = [headers];
+
+        const numRows = parseInt(await this.question('How many data rows? ')) || 3;
+
+        for (let i = 0; i < numRows; i++) {
+            const row = (await this.question(`Row ${i + 1} data: `)).split(',').map(v => {
+                const trimmed = v.trim();
+                return isNaN(trimmed) ? trimmed : parseFloat(trimmed);
+            });
+            data.push(row);
+        }
+
+        return data;
+    }
+
+    // Load pasted data
+    async loadPastedData() {
+        console.log('\nPaste your data below (one row per line, comma-separated).');
+        console.log('Type "END" on a new line when finished:\n');
+
+        const data = [];
+        while (true) {
+            const line = await this.question('');
+            if (line.toUpperCase() === 'END') break;
+
+            const row = line.split(',').map(v => {
+                const trimmed = v.trim();
+                return isNaN(trimmed) ? trimmed : parseFloat(trimmed);
+            });
+            data.push(row);
+        }
+
+        return data;
+    }
+
+    // Display data preview
+displayDataPreview() {
+    console.log('\n' + '='.repeat(80));
+    console.log('DATA PREVIEW');
+    console.log('='.repeat(80));
+
+    // Show actual data (first 5 rows)
+    console.log('\nSpreadsheet Data (first 5 rows):\n');
+    const preview = [this.workbook.headers, ...this.workbook.data.slice(0, 5)];
+
+    // Display with cell references
+    preview.forEach((row, rowIndex) => {
+        const rowNum = rowIndex === 0 ? '1' : String(rowIndex + 1);
+        const rowLabel = `Row ${rowNum}:`.padEnd(8);
+        console.log(rowLabel + row.map(cell => String(cell).padEnd(15)).join(' | '));
+    });
+
+    if (this.workbook.data.length > 5) {
+        console.log(`... (${this.workbook.data.length - 5} more rows)`);
+    }
+
+    // Show available ranges
+    console.log('\n' + '-'.repeat(80));
+    console.log('AVAILABLE CELL RANGES');
+    console.log('-'.repeat(80));
+
+    // Row ranges
+    console.log('\n📊 Row Ranges (examples):');
+    const numRows = this.workbook.data.length;
+    const numCols = this.workbook.headers.length;
+    const lastCol = this.workbook.columnToLetter(numCols - 1);
+
+    console.log(`  • Full data range:        A1:${lastCol}${numRows + 1}`);
+    console.log(`  • Headers only:           A1:${lastCol}1`);
+    console.log(`  • All data (no headers):  A2:${lastCol}${numRows + 1}`);
+    console.log(`  • First row data:         A2:${lastCol}2`);
+    console.log(`  • Last row data:          A${numRows + 1}:${lastCol}${numRows + 1}`);
+    console.log(`  • First 3 rows:           A2:${lastCol}4`);
+
+    // Column ranges (Named columns)
+    console.log('\n📋 Named Column Ranges:');
+    this.workbook.headers.forEach((header, index) => {
+        const colLetter = this.workbook.columnToLetter(index);
+        const headerRange = `${colLetter}1`;
+        const dataRange = `${colLetter}2:${colLetter}${numRows + 1}`;
+        const fullRange = `${colLetter}1:${colLetter}${numRows + 1}`;
+
+        console.log(`  • ${String(header).padEnd(20)} ${headerRange.padEnd(10)} (header)  |  ${dataRange.padEnd(15)} (data only)  |  ${fullRange} (with header)`);
+    });
+
+    // Individual cell examples
+    console.log('\n🔢 Individual Cell Examples:');
+    console.log(`  • Top-left data cell:     A2`);
+    console.log(`  • Top-right data cell:    ${lastCol}2`);
+    console.log(`  • Bottom-left data cell:  A${numRows + 1}`);
+    console.log(`  • Bottom-right data cell: ${lastCol}${numRows + 1}`);
+
+    // Block ranges if formulas applied
+    if (Object.keys(this.workbook.formulas).length > 0) {
+        console.log('\n✨ Formula Block Ranges:');
+
+        // Group formulas by column
+        const formulasByColumn = {};
+        Object.keys(this.workbook.formulas).forEach(cellRef => {
+            const match = cellRef.match(/^([A-Z]+)(\d+)$/);
+            if (match) {
+                const col = match[1];
+                const row = parseInt(match[2]);
+                if (!formulasByColumn[col]) {
+                    formulasByColumn[col] = [];
+                }
+                formulasByColumn[col].push(row);
+            }
+        });
+
+        // Find contiguous ranges
+        Object.entries(formulasByColumn).forEach(([col, rows]) => {
+            rows.sort((a, b) => a - b);
+
+            // Find contiguous ranges
+            let rangeStart = rows[0];
+            let rangeEnd = rows[0];
+            const ranges = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                if (rows[i] === rangeEnd + 1) {
+                    rangeEnd = rows[i];
+                } else {
+                    ranges.push(rangeStart === rangeEnd ? `${col}${rangeStart}` : `${col}${rangeStart}:${col}${rangeEnd}`);
+                    rangeStart = rows[i];
+                    rangeEnd = rows[i];
+                }
+            }
+            ranges.push(rangeStart === rangeEnd ? `${col}${rangeStart}` : `${col}${rangeStart}:${col}${rangeEnd}`);
+
+            const colIndex = this.workbook.letterToColumn(col);
+            const headerName = this.workbook.headers[colIndex] || `Column ${col}`;
+
+            ranges.forEach(range => {
+                const cellCount = range.includes(':') ?
+                    (parseInt(range.split(':')[1].match(/\d+/)[0]) - parseInt(range.split(':')[0].match(/\d+/)[0]) + 1) : 1;
+                console.log(`  • ${String(headerName).padEnd(20)} ${range.padEnd(15)} (${cellCount} formula${cellCount > 1 ? 's' : ''})`);
+            });
+        });
+    }
+
+    console.log('\n' + '='.repeat(80) + '\n');
+}
+
+// Helper: Get quick reference guide
+getQuickReferenceGuide() {
+    const numRows = this.workbook.data.length;
+    const numCols = this.workbook.headers.length;
+    const lastCol = this.workbook.columnToLetter(numCols - 1);
+
+    return {
+        dimensions: {
+            rows: numRows,
+            columns: numCols,
+            lastColumn: lastCol,
+            lastRow: numRows + 1
+        },
+        commonRanges: {
+            allData: `A2:${lastCol}${numRows + 1}`,
+            allWithHeaders: `A1:${lastCol}${numRows + 1}`,
+            headers: `A1:${lastCol}1`,
+            firstColumn: `A2:A${numRows + 1}`,
+            lastColumn: `${lastCol}2:${lastCol}${numRows + 1}`
+        },
+        namedColumns: this.workbook.headers.map((header, index) => {
+            const colLetter = this.workbook.columnToLetter(index);
+            return {
+                name: header,
+                column: colLetter,
+                headerCell: `${colLetter}1`,
+                dataRange: `${colLetter}2:${colLetter}${numRows + 1}`,
+                fullRange: `${colLetter}1:${colLetter}${numRows + 1}`
+            };
+        }),
+        formulaCells: Object.keys(this.workbook.formulas)
+    };
+}
+
+I don't know what might be wrong with my Example usage for enhanced statistical workbook class
