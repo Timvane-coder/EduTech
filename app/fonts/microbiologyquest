@@ -1,0 +1,3747 @@
+Here's the comprehensive integrated code for Microbiology related problem generators, solver functions, and updated document generation:
+// ============== BACTERIA - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedBacteria() {
+    const relatedProblems = [];
+
+    // Problem 1: Bacterial Cell Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Bacterial Cell Structure and Components',
+        problem: 'Describe the key structural components of a typical bacterial cell and their functions',
+        parameters: {
+            specificItems: ['Escherichia coli', 'Staphylococcus aureus'],
+            gramStain: 'gram-negative',
+            limit: 2
+        },
+        type: 'bacteria',
+        context: { difficulty: 'beginner', topic: 'Bacteria', focus: 'structure' },
+        subparts: [
+            'Bacterial Cell Components:',
+            '',
+            '1. CELL WALL:',
+            '   - Peptidoglycan (murein) layer',
+            '   - Provides shape and protection',
+            '   - Gram-positive: Thick (20-80 nm)',
+            '   - Gram-negative: Thin (2-7 nm) + outer membrane',
+            '',
+            '2. CELL MEMBRANE:',
+            '   - Phospholipid bilayer',
+            '   - Controls entry/exit of materials',
+            '   - Site of respiration (no mitochondria)',
+            '',
+            '3. NUCLEOID:',
+            '   - Circular DNA chromosome',
+            '   - Not membrane-bound',
+            '   - Contains genetic information',
+            '',
+            '4. RIBOSOMES:',
+            '   - 70S (smaller than eukaryotic 80S)',
+            '   - Protein synthesis',
+            '   - Target for antibiotics',
+            '',
+            '5. PLASMIDS (optional):',
+            '   - Small circular DNA',
+            '   - Carry extra genes (antibiotic resistance)',
+            '',
+            '6. FLAGELLA (optional):',
+            '   - Protein filament for movement',
+            '   - Powered by proton motive force',
+            '',
+            '7. PILI (optional):',
+            '   - Hair-like projections',
+            '   - Attachment and DNA transfer',
+            '',
+            '8. CAPSULE (optional):',
+            '   - Polysaccharide layer outside cell wall',
+            '   - Protection from phagocytosis',
+            '   - Virulence factor'
+        ],
+        helper: 'Think: Wall (shape), Membrane (control), Nucleoid (genes), Ribosomes (proteins)',
+        solution: 'Bacterial cells have cell wall, membrane, nucleoid DNA, ribosomes, and optional structures (flagella, pili, capsule)',
+        realWorldContext: 'Understanding bacterial structure helps design antibiotics that target specific components'
+    });
+
+    // Problem 2: Gram Staining
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Gram Staining Technique',
+        problem: 'Explain the Gram staining procedure and why bacteria stain differently',
+        parameters: {
+            gramStain: 'gram-positive',
+            type: 'staining',
+            limit: 3
+        },
+        type: 'bacteria',
+        context: { difficulty: 'intermediate', topic: 'Bacteria', focus: 'Gram stain' },
+        subparts: [
+            'GRAM STAINING PROCEDURE:',
+            '',
+            'Step 1: PRIMARY STAIN (Crystal Violet)',
+            '  - Apply crystal violet to smear',
+            '  - All bacteria stain purple',
+            '  - Wait 1 minute, rinse',
+            '',
+            'Step 2: MORDANT (Iodine)',
+            '  - Apply iodine solution',
+            '  - Forms crystal violet-iodine complex',
+            '  - Trapped in peptidoglycan',
+            '  - Wait 1 minute, rinse',
+            '',
+            'Step 3: DECOLORIZATION (Alcohol/Acetone)',
+            '  - Apply alcohol or acetone',
+            '  - CRITICAL STEP (timing matters)',
+            '  - Gram-positive: Thick wall retains purple',
+            '  - Gram-negative: Thin wall loses purple',
+            '',
+            'Step 4: COUNTERSTAIN (Safranin)',
+            '  - Apply safranin (pink/red)',
+            '  - Stains decolorized bacteria',
+            '  - Gram-positive: Stay purple (don\'t need counterstain)',
+            '  - Gram-negative: Turn pink/red',
+            '',
+            'RESULTS:',
+            '  Gram-positive: PURPLE (thick peptidoglycan retains stain)',
+            '  Gram-negative: PINK/RED (thin peptidoglycan loses stain)',
+            '',
+            'WHY DIFFERENT STAINING:',
+            '  Gram-positive:',
+            '  - Thick peptidoglycan (20-80 nm)',
+            '  - Crystal violet-iodine complex trapped',
+            '  - Alcohol dehydrates wall, closes pores',
+            '  - Stain retained',
+            '',
+            '  Gram-negative:',
+            '  - Thin peptidoglycan (2-7 nm)',
+            '  - Outer membrane present',
+            '  - Alcohol dissolves outer membrane',
+            '  - Stain washed out',
+            '',
+            'Clinical Importance:',
+            '  - Rapid identification',
+            '  - Guides antibiotic choice',
+            '  - Gram-positive vs Gram-negative have different susceptibilities'
+        ],
+        helper: 'Purple = crystal violet, Iodine = mordant, Alcohol = decolorize, Safranin = counterstain',
+        solution: 'Gram stain: Crystal violet → Iodine → Alcohol → Safranin; Thick wall (Gram+) retains purple, thin wall (Gram-) turns pink',
+        realWorldContext: 'Gram staining is the most important staining technique in clinical microbiology'
+    });
+
+    // Problem 3: Bacterial Shapes and Arrangements
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Bacterial Morphology',
+        problem: 'Identify and describe the different bacterial shapes and arrangements',
+        parameters: {
+            shape: 'cocci',
+            type: 'morphology',
+            limit: 5
+        },
+        type: 'bacteria',
+        context: { difficulty: 'beginner', topic: 'Bacteria', focus: 'shapes' },
+        subparts: [
+            'BACTERIAL SHAPES:',
+            '',
+            '1. COCCI (Spherical):',
+            '   Arrangements:',
+            '   - Diplococci: Pairs (Streptococcus pneumoniae)',
+            '   - Streptococci: Chains (Streptococcus pyogenes)',
+            '   - Staphylococci: Clusters/grape-like (Staphylococcus aureus)',
+            '   - Tetrads: Groups of 4 (Micrococcus)',
+            '   - Sarcinae: Cubes of 8 (Sarcina)',
+            '',
+            '2. BACILLI (Rod-shaped):',
+            '   Arrangements:',
+            '   - Single: Most common (E. coli, Salmonella)',
+            '   - Diplobacilli: Pairs',
+            '   - Streptobacilli: Chains (Bacillus anthracis)',
+            '   - Coccobacilli: Short/plump rods (Haemophilus)',
+            '',
+            '3. SPIRILLA (Spiral/Curved):',
+            '   Types:',
+            '   - Vibrio: Comma-shaped (Vibrio cholerae)',
+            '   - Spirillum: Rigid spiral (Spirillum volutans)',
+            '   - Spirochete: Flexible spiral (Treponema pallidum, Borrelia)',
+            '',
+            'OTHER SHAPES:',
+            '   - Pleomorphic: Variable shape (Mycoplasma)',
+            '   - Filamentous: Long threads (Actinomyces)',
+            '   - Square: Rare (Haloquadratum)',
+            '   - Star-shaped: Rare (Stella)',
+            '',
+            'Why Shape Matters:',
+            '  - Identification and classification',
+            '  - Affects surface area to volume ratio',
+            '  - Influences motility',
+            '  - Reflects habitat adaptation',
+            '',
+            'Shape Determination:',
+            '  - Cytoskeleton proteins (MreB, FtsZ)',
+            '  - Cell wall synthesis pattern',
+            '  - Environmental factors'
+        ],
+        helper: 'Cocci = spheres (in groups), Bacilli = rods (single/chains), Spirilla = spirals',
+        solution: 'Bacterial shapes: Cocci (spherical, in pairs/chains/clusters), Bacilli (rod-shaped), Spirilla (spiral/curved)',
+        realWorldContext: 'Shape is the first characteristic used to identify bacteria under microscope'
+    });
+
+    // Problem 4: Bacterial Growth Requirements
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Bacterial Oxygen Requirements',
+        problem: 'Compare different types of bacteria based on their oxygen requirements',
+        parameters: {
+            oxygenRequirement: 'aerobe',
+            metabolism: 'aerobic',
+            limit: 5
+        },
+        type: 'bacteria',
+        context: { difficulty: 'intermediate', topic: 'Bacteria', focus: 'oxygen needs' },
+        subparts: [
+            'BACTERIAL OXYGEN REQUIREMENTS:',
+            '',
+            '1. OBLIGATE AEROBES:',
+            '   - REQUIRE oxygen for growth',
+            '   - Cannot survive without O₂',
+            '   - Use aerobic respiration only',
+            '   - Produce catalase/superoxide dismutase',
+            '   Examples:',
+            '   - Mycobacterium tuberculosis (TB)',
+            '   - Pseudomonas aeruginosa',
+            '   - Bacillus subtilis',
+            '',
+            '2. OBLIGATE ANAEROBES:',
+            '   - CANNOT tolerate oxygen',
+            '   - Oxygen is TOXIC to them',
+            '   - Lack detoxifying enzymes',
+            '   - Use fermentation or anaerobic respiration',
+            '   Examples:',
+            '   - Clostridium tetani (tetanus)',
+            '   - Clostridium botulinum (botulism)',
+            '   - Bacteroides (gut bacteria)',
+            '   Why toxic: O₂ forms reactive species (superoxide, peroxide)',
+            '',
+            '3. FACULTATIVE ANAEROBES:',
+            '   - Grow WITH or WITHOUT oxygen',
+            '   - Prefer oxygen (more ATP)',
+            '   - Can switch to fermentation if no O₂',
+            '   - Most versatile!',
+            '   Examples:',
+            '   - E. coli',
+            '   - Staphylococcus aureus',
+            '   - Salmonella',
+            '   Advantage: Metabolic flexibility',
+            '',
+            '4. AEROTOLERANT ANAEROBES:',
+            '   - Don\'t USE oxygen',
+            '   - But can TOLERATE it',
+            '   - Always use fermentation',
+            '   - Have some detoxifying enzymes',
+            '   Examples:',
+            '   - Streptococcus',
+            '   - Lactobacillus',
+            '',
+            '5. MICROAEROPHILES:',
+            '   - Require LOW oxygen (2-10%)',
+            '   - High O₂ is toxic',
+            '   - Low O₂ needed for respiration',
+            '   Examples:',
+            '   - Helicobacter pylori (ulcers)',
+            '   - Campylobacter jejuni',
+            '',
+            'LABORATORY TESTING:',
+            '   Thioglycollate tube (oxygen gradient):',
+            '   - Obligate aerobes: Top only',
+            '   - Obligate anaerobes: Bottom only',
+            '   - Facultative: Throughout (mostly top)',
+            '   - Microaerophiles: Middle band',
+            '   - Aerotolerant: Throughout (even distribution)'
+        ],
+        helper: 'Obligate aerobe (needs O₂), Obligate anaerobe (O₂ toxic), Facultative (flexible)',
+        solution: 'Bacteria classified by O₂ needs: Obligate aerobes (require), Obligate anaerobes (toxic), Facultative (flexible), Microaerophiles (low O₂)',
+        realWorldContext: 'Oxygen requirements determine culture conditions and infection sites in body'
+    });
+
+    // Problem 5: Bacterial Pathogenesis
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Bacterial Virulence Factors',
+        problem: 'Explain how pathogenic bacteria use virulence factors to cause disease',
+        parameters: {
+            pathogenic: true,
+            disease: 'infection',
+            resistance: 'MRSA',
+            limit: 4
+        },
+        type: 'bacteria',
+        context: { difficulty: 'advanced', topic: 'Bacteria', focus: 'pathogenesis' },
+        subparts: [
+            'BACTERIAL VIRULENCE FACTORS:',
+            '',
+            '1. ADHESINS (Attachment):',
+            '   - Structures that bind to host cells',
+            '   - Pili/fimbriae, adhesive proteins',
+            '   - Prevent removal by physical defenses',
+            '   Example: E. coli pili bind bladder cells (UTI)',
+            '',
+            '2. CAPSULES (Protection):',
+            '   - Polysaccharide coat outside cell wall',
+            '   - Antiphagocytic (prevents engulfment)',
+            '   - Slippery surface',
+            '   Example: Streptococcus pneumoniae capsule',
+            '',
+            '3. INVASINS (Tissue Penetration):',
+            '   - Enzymes that break down host tissues',
+            '   Types:',
+            '   - Hyaluronidase: Breaks connective tissue',
+            '   - Collagenase: Breaks collagen',
+            '   - Coagulase: Clots plasma (hides bacteria)',
+            '   - Kinases: Dissolve clots (spread bacteria)',
+            '   Example: Streptococcus hyaluronidase spreads infection',
+            '',
+            '4. TOXINS (Damage):',
+            '   ',
+            '   A. EXOTOXINS (Secreted proteins):',
+            '      - Gram-positive mainly',
+            '      - Highly toxic (ng-μg lethal)',
+            '      - Heat-labile (destroyed by cooking)',
+            '      - Antigenic (vaccines possible)',
+            '      ',
+            '      Types:',
+            '      - Cytotoxins: Kill cells',
+            '        Example: Diphtheria toxin',
+            '      - Neurotoxins: Affect nerves',
+            '        Example: Tetanus toxin, Botulinum toxin',
+            '      - Enterotoxins: Affect intestines',
+            '        Example: Cholera toxin',
+            '      ',
+            '   B. ENDOTOXIN (LPS from Gram-negative):',
+            '      - Part of outer membrane',
+            '      - Released when bacteria die/divide',
+            '      - Lipid A is toxic part',
+            '      - Heat-stable',
+            '      - Weakly antigenic',
+            '      - Causes fever, shock',
+            '      Example: E. coli, Salmonella LPS',
+            '',
+            '5. IMMUNE EVASION:',
+            '   - Antigenic variation (change surface proteins)',
+            '   - IgA protease (destroys antibodies)',
+            '   - Intracellular survival',
+            '   Example: M protein (Streptococcus pyogenes)',
+            '',
+            '6. BIOFILM FORMATION:',
+            '   - Protective community on surfaces',
+            '   - Up to 1000× more antibiotic resistant',
+            '   - Difficult to eradicate',
+            '   Example: Pseudomonas in lungs (CF patients)',
+            '',
+            'PATHOGENESIS STAGES:',
+            '  1. Entry (through portal)',
+            '  2. Adhesion (stick to tissues)',
+            '  3. Colonization (multiply)',
+            '  4. Invasion (penetrate tissues)',
+            '  5. Damage (toxins, inflammation)',
+            '  6. Exit (transmission to new host)'
+        ],
+        helper: 'Virulence factors: Adhesins (stick), Capsule (hide), Toxins (damage), Invasins (spread)',
+        solution: 'Pathogenic bacteria use virulence factors: adhesins (attachment), capsules (protection), toxins (damage), invasins (spread), immune evasion',
+        realWorldContext: 'Understanding virulence helps develop vaccines and treatments targeting specific factors'
+    });
+
+    return relatedProblems;
+}
+
+// ============== VIRUSES - RELATED PROBLEMS GENERATOR ==============
+
+// ============== COMPLETE VIRUSES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedViruses() {
+    const relatedProblems = [];
+
+    // Problem 1: Viral Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Viral Structure and Components',
+        problem: 'Describe the basic structure of viruses and explain why they are considered acellular',
+        parameters: {
+            specificItems: ['Influenza Virus', 'Bacteriophage T4'],
+            enveloped: true,
+            limit: 2
+        },
+        type: 'viruses',
+        context: { difficulty: 'beginner', topic: 'Viruses', focus: 'structure' },
+        subparts: [
+            'VIRAL STRUCTURE:',
+            '',
+            'Basic Components (ALL viruses):',
+            '  1. NUCLEIC ACID (Genome):',
+            '     - DNA OR RNA (never both)',
+            '     - Single-stranded or double-stranded',
+            '     - Linear or circular',
+            '     - Contains genes for replication',
+            '',
+            '  2. CAPSID (Protein Coat):',
+            '     - Made of protein subunits (capsomeres)',
+            '     - Protects nucleic acid',
+            '     - Determines virus shape',
+            '     Shapes:',
+            '     - Icosahedral: 20-sided (poliovirus)',
+            '     - Helical: Spiral (tobacco mosaic virus)',
+            '     - Complex: Neither (bacteriophages)',
+            '',
+            'Additional Components (SOME viruses):',
+            '  3. ENVELOPE (Lipid membrane):',
+            '     - Derived from host cell membrane',
+            '     - Contains viral glycoproteins (spikes)',
+            '     - More fragile (sensitive to disinfectants)',
+            '     Examples: Influenza, HIV, coronaviruses',
+            '',
+            '  4. ENZYMES (Some viruses):',
+            '     - Reverse transcriptase (retroviruses)',
+            '     - Polymerases',
+            '     - Neuraminidase (influenza)',
+            '',
+            'WHY ACELLULAR:',
+            '  - No cell membrane',
+            '  - No cytoplasm',
+            '  - No ribosomes',
+            '  - No organelles',
+            '  - Cannot produce ATP',
+            '  - Cannot synthesize proteins independently',
+            '  - Not considered "alive" by most definitions',
+            '',
+            'Obligate Intracellular Parasites:',
+            '  - MUST infect host cell to replicate',
+            '  - Use host machinery (ribosomes, ATP, enzymes)',
+            '  - Cannot reproduce outside cells',
+            '',
+            'Size:',
+            '  - 20-300 nm (nanometers)',
+            '  - Much smaller than bacteria',
+            '  - Only visible with electron microscope'
+        ],
+        helper: 'All viruses have nucleic acid + capsid; some have envelope; all need host cells',
+        solution: 'Viruses are acellular: have nucleic acid (DNA or RNA) + protein capsid, some have envelope; lack cell structures, need host to replicate',
+        realWorldContext: 'Viruses cause diseases from common cold to AIDS; antibiotics don\'t work because viruses aren\'t cellular'
+    });
+
+    // Problem 2: Viral Replication Cycles
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Lytic vs Lysogenic Cycles',
+        problem: 'Compare and contrast the lytic and lysogenic cycles of viral replication',
+        parameters: {
+            specificItems: ['Bacteriophage', 'lytic cycle', 'lysogenic cycle'],
+            type: 'replication',
+            limit: 2
+        },
+        type: 'viruses',
+        context: { difficulty: 'intermediate', topic: 'Viruses', focus: 'replication' },
+        subparts: [
+            'VIRAL REPLICATION CYCLES:',
+            '',
+            'LYTIC CYCLE (Productive Infection):',
+            '  Result: Host cell DESTROYED',
+            '',
+            '  Steps:',
+            '  1. ATTACHMENT: Virus binds to host receptor',
+            '  2. PENETRATION: Viral nucleic acid enters',
+            '  3. BIOSYNTHESIS: Viral genes expressed, components made',
+            '  4. MATURATION: New virions assembled',
+            '  5. RELEASE: Host cell LYSES, viruses released',
+            '',
+            '  Timing: Minutes to hours',
+            '  Examples: Bacteriophage T4, poliovirus',
+            '',
+            'LYSOGENIC CYCLE (Latent Infection):',
+            '  Result: Host cell SURVIVES',
+            '',
+            '  Steps:',
+            '  1-2. Attachment and Penetration (same)',
+            '  3. INTEGRATION: Viral DNA → prophage in chromosome',
+            '  4. REPLICATION: Prophage copied with host DNA',
+            '  5. INDUCTION: Stress triggers → lytic cycle',
+            '',
+            '  Timing: Can be indefinite',
+            '  Examples: Lambda phage, HIV, herpes',
+            '',
+            'Key Differences:',
+            '  Lytic: Immediate destruction, rapid spread',
+            '  Lysogenic: Delayed, silent spread, chronic infection'
+        ],
+        helper: 'Lytic = destroy host immediately; Lysogenic = hide in chromosome, destroy later',
+        solution: 'Lytic cycle: virus replicates and lyses host cell; Lysogenic cycle: viral DNA integrates into chromosome, replicates with host',
+        realWorldContext: 'Herpes virus uses lysogenic cycle - hides in neurons, reactivates causing recurrent outbreaks'
+    });
+
+    // Problem 3: Viral Classification
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Baltimore Classification System',
+        problem: 'Explain how viruses are classified based on their nucleic acid type and replication strategy',
+        parameters: {
+            nucleicAcid: 'RNA',
+            type: 'classification',
+            limit: 5
+        },
+        type: 'viruses',
+        context: { difficulty: 'intermediate', topic: 'Viruses', focus: 'classification' },
+        subparts: [
+            'BALTIMORE CLASSIFICATION:',
+            '',
+            'CLASS I: dsDNA',
+            '  - Examples: Herpesviruses, Adenoviruses, Poxviruses',
+            '',
+            'CLASS II: ssDNA',
+            '  - Examples: Parvoviruses',
+            '',
+            'CLASS III: dsRNA',
+            '  - Examples: Reoviruses (rotavirus)',
+            '',
+            'CLASS IV: +ssRNA (Positive-sense)',
+            '  - RNA acts as mRNA directly',
+            '  - Examples: Poliovirus, Coronaviruses, Hepatitis C',
+            '',
+            'CLASS V: -ssRNA (Negative-sense)',
+            '  - Must convert to +RNA first',
+            '  - Examples: Influenza, Measles, Rabies, Ebola',
+            '',
+            'CLASS VI: Retroviruses (ssRNA-RT)',
+            '  - Reverse transcription: RNA → DNA',
+            '  - Examples: HIV, HTLV',
+            '',
+            'CLASS VII: dsDNA-RT',
+            '  - Uses RNA intermediate',
+            '  - Examples: Hepatitis B',
+            '',
+            'Clinical Importance:',
+            '  - Guides antiviral treatment',
+            '  - Different classes need different approaches'
+        ],
+        helper: 'Baltimore: DNA vs RNA, +/- sense, with/without reverse transcriptase',
+        solution: 'Baltimore system classifies by nucleic acid: dsDNA, ssDNA, dsRNA, +ssRNA, -ssRNA, Retroviruses, dsDNA-RT',
+        realWorldContext: 'Classification guides treatment - HIV (retrovirus) needs reverse transcriptase inhibitors'
+    });
+
+    // Problem 4: Viral Prevention
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Viral Disease Prevention',
+        problem: 'Explain methods to prevent viral infections, focusing on vaccines',
+        parameters: {
+            disease: 'COVID-19',
+            treatment: 'vaccine',
+            transmission: 'respiratory',
+            limit: 3
+        },
+        type: 'viruses',
+        context: { difficulty: 'intermediate', topic: 'Viruses', focus: 'prevention' },
+        subparts: [
+            'VIRAL PREVENTION METHODS:',
+            '',
+            'A. VACCINES (Most Effective):',
+            '   Types:',
+            '   1. Live Attenuated:',
+            '      - Weakened virus',
+            '      - Strong immunity',
+            '      - Examples: MMR, varicella',
+            '',
+            '   2. Inactivated:',
+            '      - Killed virus',
+            '      - Safer, weaker immunity',
+            '      - Examples: Polio (IPV), flu shot',
+            '',
+            '   3. Subunit/Protein:',
+            '      - Viral protein fragments',
+            '      - Very safe',
+            '      - Examples: Hepatitis B, HPV',
+            '',
+            '   4. mRNA:',
+            '      - Genetic instructions for viral protein',
+            '      - New technology',
+            '      - Examples: COVID-19 (Pfizer, Moderna)',
+            '',
+            '   5. Viral Vector:',
+            '      - Uses different virus to deliver genes',
+            '      - Examples: COVID-19 (J&J), Ebola',
+            '',
+            'B. HYGIENE:',
+            '  - Handwashing',
+            '  - Masks (respiratory viruses)',
+            '  - Safe food handling',
+            '  - Disinfection',
+            '',
+            'C. AVOIDING EXPOSURE:',
+            '  - Social distancing',
+            '  - Avoiding sick individuals',
+            '  - Safe sex practices',
+            '  - Mosquito protection (vector-borne)',
+            '',
+            'D. ANTIVIRAL PROPHYLAXIS:',
+            '  - Pre-exposure: PrEP for HIV',
+            '  - Post-exposure: Rabies vaccine after bite'
+        ],
+        helper: 'Prevention: Vaccines (best), hygiene, avoiding exposure, antivirals',
+        solution: 'Viral prevention: vaccines (live, inactivated, subunit, mRNA, vector), hygiene, avoiding exposure, antiviral prophylaxis',
+        realWorldContext: 'Vaccines have eliminated smallpox and nearly eliminated polio globally'
+    });
+
+    // Problem 5: Antiviral Treatments
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Antiviral Drug Mechanisms',
+        problem: 'Explain how antiviral drugs work and why they are difficult to develop',
+        parameters: {
+            treatment: 'antiviral',
+            disease: 'HIV',
+            resistance: 'mutation',
+            limit: 4
+        },
+        type: 'viruses',
+        context: { difficulty: 'advanced', topic: 'Viruses', focus: 'treatment' },
+        subparts: [
+            'ANTIVIRAL DRUG TARGETS:',
+            '',
+            '1. VIRAL ENTRY INHIBITORS:',
+            '   - Block attachment or fusion',
+            '   - Example: Maraviroc (HIV - CCR5 blocker)',
+            '',
+            '2. UNCOATING INHIBITORS:',
+            '   - Prevent capsid removal',
+            '   - Example: Amantadine (influenza A)',
+            '',
+            '3. NUCLEOSIDE ANALOGS:',
+            '   - Mimic nucleotides',
+            '   - Incorporated into viral DNA/RNA',
+            '   - Terminate chain or cause errors',
+            '   Examples:',
+            '   - Acyclovir (herpes)',
+            '   - AZT (HIV)',
+            '   - Remdesivir (COVID-19)',
+            '',
+            '4. NON-NUCLEOSIDE INHIBITORS:',
+            '   - Block viral polymerase directly',
+            '   - Example: Efavirenz (HIV)',
+            '',
+            '5. PROTEASE INHIBITORS:',
+            '   - Block viral protein processing',
+            '   - Examples:',
+            '   - Ritonavir (HIV)',
+            '   - Paxlovid (COVID-19)',
+            '',
+            '6. INTEGRASE INHIBITORS:',
+            '   - Prevent viral DNA integration',
+            '   - Example: Raltegravir (HIV)',
+            '',
+            '7. NEURAMINIDASE INHIBITORS:',
+            '   - Block viral release',
+            '   - Example: Oseltamivir/Tamiflu (influenza)',
+            '',
+            'WHY ANTIVIRALS ARE DIFFICULT:',
+            '',
+            '1. INTRACELLULAR PARASITES:',
+            '   - Virus uses host machinery',
+            '   - Hard to target virus without harming host',
+            '',
+            '2. RAPID MUTATION:',
+            '   - RNA viruses especially',
+            '   - Develop drug resistance quickly',
+            '   - Need combination therapy (HIV cocktail)',
+            '',
+            '3. LIMITED TARGETS:',
+            '   - Viruses have few proteins',
+            '   - Fewer drug targets than bacteria',
+            '',
+            '4. HOST CELL TOXICITY:',
+            '   - Many antivirals affect host cells too',
+            '   - Narrow therapeutic window',
+            '',
+            'HIV TREATMENT (Example):',
+            '  - HAART (Highly Active Antiretroviral Therapy)',
+            '  - Combination of 3+ drugs',
+            '  - Targets multiple steps',
+            '  - Reduces resistance',
+            '  - Has transformed HIV from death sentence to chronic disease'
+        ],
+        helper: 'Antivirals target viral proteins; difficult because viruses use host machinery and mutate rapidly',
+        solution: 'Antivirals block viral entry, replication, or release; difficult to develop due to host cell dependence, rapid mutation, limited targets',
+        realWorldContext: 'HIV requires lifelong combination therapy to prevent resistance; COVID antivirals reduce severe disease'
+    });
+
+    return relatedProblems;
+}
+
+// ============== FUNGI - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedFungi() {
+    const relatedProblems = [];
+
+    // Problem 1: Fungal Structure and Types
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Fungal Structure: Yeasts vs Molds',
+        problem: 'Compare the structural differences between yeasts and molds, explaining their growth patterns',
+        parameters: {
+            specificItems: ['Saccharomyces cerevisiae', 'Aspergillus fumigatus'],
+            type: 'yeast',
+            limit: 2
+        },
+        type: 'fungi',
+        context: { difficulty: 'beginner', topic: 'Fungi', focus: 'structure' },
+        subparts: [
+            'FUNGAL STRUCTURE:',
+            '',
+            'YEASTS (Unicellular):',
+            '  Structure:',
+            '  - Single-celled fungi',
+            '  - Oval or spherical',
+            '  - 5-10 μm diameter',
+            '  - Cell wall: Chitin + glucans',
+            '',
+            '  Reproduction:',
+            '  - BUDDING (asexual):',
+            '    • Parent cell forms small bud',
+            '    • Bud grows and separates',
+            '    • Rapid reproduction',
+            '  - Sexual: Form ascospores',
+            '',
+            '  Growth:',
+            '  - Smooth, creamy colonies',
+            '  - Grow quickly',
+            '  - Easy to culture',
+            '',
+            '  Examples:',
+            '  - Saccharomyces cerevisiae (baker\'s yeast)',
+            '  - Candida albicans (pathogen)',
+            '  - Cryptococcus neoformans',
+            '',
+            'MOLDS (Multicellular):',
+            '  Structure:',
+            '  - Composed of HYPHAE',
+            '  - Hyphae = thread-like filaments (3-10 μm wide)',
+            '  - MYCELIUM = network of hyphae',
+            '',
+            '  Types of Hyphae:',
+            '  - Septate: Have cross-walls (most fungi)',
+            '  - Coenocytic: No cross-walls (Zygomycetes)',
+            '',
+            '  Reproduction:',
+            '  - Asexual spores:',
+            '    • Conidia (external)',
+            '    • Sporangiospores (in sac)',
+            '  - Sexual spores (varies by group)',
+            '',
+            '  Growth:',
+            '  - Fuzzy, colored colonies',
+            '  - Aerial hyphae extend',
+            '  - Can spread extensively',
+            '',
+            '  Examples:',
+            '  - Aspergillus (green/black mold)',
+            '  - Penicillium (blue-green mold)',
+            '  - Rhizopus (black bread mold)',
+            '',
+            'DIMORPHIC FUNGI:',
+            '  - Can exist as BOTH yeast and mold',
+            '  - Temperature-dependent:',
+            '    • 37°C (body temp): Yeast form',
+            '    • 25°C (room temp): Mold form',
+            '  - Often pathogenic',
+            '  Examples:',
+            '  - Histoplasma capsulatum',
+            '  - Blastomyces dermatitidis',
+            '  - Candida albicans',
+            '',
+            'Comparison Summary:',
+            '  Yeasts: Single cells, budding, smooth colonies',
+            '  Molds: Filamentous, spores, fuzzy colonies',
+            '  Dimorphic: Switch based on environment'
+        ],
+        helper: 'Yeasts = single cells (budding); Molds = filaments (hyphae/mycelium); Dimorphic = both',
+        solution: 'Yeasts are unicellular (budding); Molds are multicellular (hyphae forming mycelium); Dimorphic fungi switch between forms',
+        realWorldContext: 'Baker\'s yeast is unicellular (makes bread rise); Penicillium mold produces penicillin antibiotic'
+    });
+
+    // Problem 2: Fungal Reproduction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Fungal Reproduction Methods',
+        problem: 'Describe the different methods of fungal reproduction, both sexual and asexual',
+        parameters: {
+            reproduction: 'asexual',
+            type: 'filamentous',
+            limit: 3
+        },
+        type: 'fungi',
+        context: { difficulty: 'intermediate', topic: 'Fungi', focus: 'reproduction' },
+        subparts: [
+            'FUNGAL REPRODUCTION:',
+            '',
+            'ASEXUAL REPRODUCTION (Common):',
+            '',
+            '1. BUDDING (Yeasts):',
+            '   - Parent cell forms outgrowth',
+            '   - Bud receives nucleus copy',
+            '   - Separates when mature',
+            '   - Rapid, efficient',
+            '   Example: Saccharomyces cerevisiae',
+            '',
+            '2. FRAGMENTATION:',
+            '   - Hyphae break into pieces',
+            '   - Each fragment grows into new mycelium',
+            '   - Common in lab cultures',
+            '',
+            '3. ASEXUAL SPORES:',
+            '   Types:',
+            '',
+            '   A. CONIDIA (External):',
+            '      - Form on specialized hyphae (conidiophores)',
+            '      - Not enclosed',
+            '      - Wind-dispersed',
+            '      - Example: Penicillium (brush-like)',
+            '',
+            '   B. SPORANGIOSPORES (Internal):',
+            '      - Form inside sac (sporangium)',
+            '      - Released when sac bursts',
+            '      - Example: Rhizopus (black bread mold)',
+            '',
+            '   C. ARTHROSPORES:',
+            '      - Hyphae fragment into spores',
+            '      - Each cell becomes spore',
+            '',
+            '   D. CHLAMYDOSPORES:',
+            '      - Thick-walled resting spores',
+            '      - Survive harsh conditions',
+            '',
+            'SEXUAL REPRODUCTION (Less Common):',
+            '',
+            'Process:',
+            '  1. PLASMOGAMY:',
+            '     - Fusion of cytoplasm',
+            '     - Two haploid cells join',
+            '     - Dikaryotic stage (n + n)',
+            '',
+            '  2. KARYOGAMY:',
+            '     - Fusion of nuclei',
+            '     - Forms diploid (2n)',
+            '',
+            '  3. MEIOSIS:',
+            '     - Diploid → Haploid',
+            '     - Produces sexual spores',
+            '',
+            'Sexual Spore Types:',
+            '',
+            '  - ASCOSPORES:',
+            '    • Formed in sac (ascus)',
+            '    • Phylum Ascomycota',
+            '    • Example: Saccharomyces, Penicillium',
+            '',
+            '  - BASIDIOSPORES:',
+            '    • Formed on club (basidium)',
+            '    • Phylum Basidiomycota',
+            '    • Example: Mushrooms, puffballs',
+            '',
+            '  - ZYGOSPORES:',
+            '    • Thick-walled resistant spores',
+            '    • Phylum Zygomycota',
+            '    • Example: Rhizopus',
+            '',
+            'Why Both Methods?',
+            '  Asexual:',
+            '  - Fast, efficient',
+            '  - Colonize favorable environment',
+            '  - Genetically identical',
+            '',
+            '  Sexual:',
+            '  - Genetic variation',
+            '  - Adaptation to changes',
+            '  - Produces resistant spores'
+        ],
+        helper: 'Asexual (fast): budding, spores; Sexual (variation): ascospores, basidiospores, zygospores',
+        solution: 'Asexual: budding, fragmentation, conidia, sporangiospores; Sexual: plasmogamy + karyogamy + meiosis → ascospores/basidiospores/zygospores',
+        realWorldContext: 'Mushrooms are sexual reproductive structures (basidiocarps) releasing millions of basidiospores'
+    });
+
+    // Problem 3: Fungal Classification
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Major Fungal Phyla',
+        problem: 'Describe the characteristics of the main fungal phyla and provide examples of each',
+        parameters: {
+            classification: 'Ascomycota',
+            type: 'classification',
+            limit: 4
+        },
+        type: 'fungi',
+        context: { difficulty: 'intermediate', topic: 'Fungi', focus: 'classification' },
+        subparts: [
+            'MAJOR FUNGAL PHYLA:',
+            '',
+            '1. ASCOMYCOTA (Sac Fungi):',
+            '   Characteristics:',
+            '   - Sexual spores in ascus (sac)',
+            '   - Usually 8 ascospores per ascus',
+            '   - Septate hyphae',
+            '   - Largest phylum',
+            '',
+            '   Examples:',
+            '   - Saccharomyces cerevisiae (yeast)',
+            '   - Penicillium (antibiotic production)',
+            '   - Aspergillus (food spoilage, disease)',
+            '   - Morchella (morel mushrooms)',
+            '   - Neurospora (research model)',
+            '',
+            '   Importance:',
+            '   - Food production (bread, beer, cheese)',
+            '   - Antibiotics (penicillin)',
+            '   - Some cause plant diseases',
+            '',
+            '2. BASIDIOMYCOTA (Club Fungi):',
+            '   Characteristics:',
+            '   - Sexual spores on basidium (club)',
+            '   - Usually 4 basidiospores per basidium',
+            '   - Septate hyphae',
+            '   - Produces basidiocarp (mushroom)',
+            '',
+            '   Examples:',
+            '   - Agaricus (common mushroom)',
+            '   - Puffballs',
+            '   - Shelf fungi',
+            '   - Rusts and smuts (plant pathogens)',
+            '   - Cryptococcus neoformans (pathogen)',
+            '',
+            '   Importance:',
+            '   - Edible mushrooms',
+            '   - Decomposers (wood decay)',
+            '   - Plant diseases',
+            '',
+            '3. ZYGOMYCOTA (Conjugated Fungi):',
+            '   Characteristics:',
+            '   - Zygospores (thick-walled)',
+            '   - Coenocytic hyphae (no septa)',
+            '   - Black spore sacs',
+            '',
+            '   Examples:',
+            '   - Rhizopus stolonifer (black bread mold)',
+            '   - Mucor',
+            '',
+            '   Importance:',
+            '   - Food spoilage',
+            '   - Some fermentation',
+            '   - Decomposers',
+            '',
+            '4. CHYTRIDIOMYCOTA (Chytrids):',
+            '   Characteristics:',
+            '   - Most primitive fungi',
+            '   - Flagellated spores (zoospores)',
+            '   - Aquatic or moist environments',
+            '',
+            '   Examples:',
+            '   - Batrachochytrium (amphibian pathogen)',
+            '',
+            '   Importance:',
+            '   - Decomposers in aquatic systems',
+            '   - Amphibian decline (chytridiomycosis)',
+            '',
+            '5. DEUTEROMYCOTA (Imperfect Fungi):',
+            '   - Not a true phylum',
+            '   - Classification category for fungi without known sexual stage',
+            '   - Most turn out to be Ascomycota',
+            '',
+            '   Examples:',
+            '   - Candida albicans',
+            '   - Some Aspergillus',
+            '   - Many dermatophytes',
+            '',
+            'Classification Summary:',
+            '  - Based on sexual reproductive structures',
+            '  - Ascomycota (ascospores in sac)',
+            '  - Basidiomycota (basidiospores on club)',
+            '  - Zygomycota (zygospores)',
+            '  - Chytridiomycota (flagellated spores)'
+        ],
+        helper: 'Asco = sac (8 spores), Basidio = club (4 spores), Zygo = conjugation, Chytrid = flagella',
+        solution: 'Major phyla: Ascomycota (ascus/sac), Basidiomycota (basidium/club), Zygomycota (zygospores), Chytridiomycota (flagellated)',
+        realWorldContext: 'Ascomycetes produce penicillin; Basidiomycetes include edible mushrooms; Chytrids are killing amphibians worldwide'
+    });
+
+    // Problem 4: Fungal Diseases (Mycoses)
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Fungal Infections in Humans',
+        problem: 'Explain the different types of fungal infections (mycoses) and their treatments',
+        parameters: {
+            pathogenicity: 'opportunistic pathogen',
+            disease: 'candidiasis',
+            treatment: 'antifungal',
+            limit: 4
+        },
+        type: 'fungi',
+        context: { difficulty: 'intermediate', topic: 'Fungi', focus: 'diseases' },
+        subparts: [
+            'TYPES OF FUNGAL INFECTIONS (MYCOSES):',
+            '',
+            '1. SUPERFICIAL MYCOSES:',
+            '   Location: Hair, skin surface (no tissue invasion)',
+            '   Examples:',
+            '   - Tinea versicolor (Malassezia)',
+            '   - Piedra (hair nodules)',
+            '   Severity: Cosmetic only, not invasive',
+            '',
+            '2. CUTANEOUS MYCOSES (Dermatophytoses):',
+            '   Location: Keratinized tissues (skin, hair, nails)',
+            '   Caused by: Dermatophytes (Trichophyton, Microsporum, Epidermophyton)',
+            '   Examples:',
+            '   - Athlete\'s foot (tinea pedis)',
+            '   - Ringworm (tinea corporis)',
+            '   - Jock itch (tinea cruris)',
+            '   - Nail fungus (onychomycosis)',
+            '   Transmission: Direct contact, fomites',
+            '   Treatment: Topical antifungals',
+            '',
+            '3. SUBCUTANEOUS MYCOSES:',
+            '   Location: Dermis, subcutaneous tissue',
+            '   Entry: Traumatic implantation (thorns, splinters)',
+            '   Examples:',
+            '   - Sporotrichosis ("rose gardener\'s disease")',
+            '   - Chromoblastomycosis',
+            '   Characteristics: Chronic, localized, nodular',
+            '   Treatment: Oral antifungals, sometimes surgery',
+            '',
+            '4. SYSTEMIC MYCOSES:',
+            '   Location: Internal organs',
+            '',
+            '   A. ENDEMIC (Geographic):',
+            '      - Healthy people can get infected',
+            '      - Specific regions',
+            '      Examples:',
+            '      - Histoplasmosis (Ohio/Mississippi valleys)',
+            '      - Coccidioidomycosis (Southwest US)',
+            '      - Blastomycosis (Great Lakes region)',
+            '      Entry: Inhalation of spores',
+            '',
+            '   B. OPPORTUNISTIC:',
+            '      - Immunocompromised patients mainly',
+            '      - Normal immune system usually prevents',
+            '      Examples:',
+            '      - Candidiasis (Candida albicans)',
+            '        • Oral thrush',
+            '        • Vaginal yeast infection',
+            '        • Systemic in AIDS patients',
+            '      - Aspergillosis (Aspergillus fumigatus)',
+            '        • Invasive in immunocompromised',
+            '      - Cryptococcosis (Cryptococcus neoformans)',
+            '        • Meningitis in AIDS patients',
+            '      - Pneumocystis pneumonia (AIDS-defining illness)',
+            '',
+            'RISK FACTORS:',
+            '  - Immunosuppression (AIDS, cancer, transplant)',
+            '  - Broad-spectrum antibiotics (kill bacteria, fungi overgrow)',
+            '  - Diabetes',
+            '  - Corticosteroid use',
+            '  - Indwelling catheters',
+            '',
+            'ANTIFUNGAL TREATMENTS:',
+            '',
+            '1. POLYENES:',
+            '   - Bind ergosterol in fungal membrane',
+            '   - Forms pores → cell death',
+            '   - Example: Amphotericin B (IV, severe infections)',
+            '   - Toxic but effective',
+            '',
+            '2. AZOLES:',
+            '   - Inhibit ergosterol synthesis',
+            '   - Less toxic than polyenes',
+            '   - Examples:',
+            '     • Fluconazole (systemic)',
+            '     • Clotrimazole (topical)',
+            '     • Voriconazole (aspergillosis)',
+            '',
+            '3. ECHINOCANDINS:',
+            '   - Inhibit cell wall synthesis (β-glucan)',
+            '   - No effect on human cells (no cell wall)',
+            '   - Example: Caspofungin',
+            '   - IV only, for severe infections',
+            '',
+            '4. ALLYLAMINES:',
+            '   - Inhibit ergosterol synthesis (different step)',
+            '   - Example: Terbinafine (nail fungus)',
+            '',
+            'Why Fungal Infections Hard to Treat:',
+            '  - Eukaryotic cells (like human)',
+            '  - Many drugs toxic to humans too',
+            '  - Slow-growing (treatment takes weeks/months)',
+            '  - Biofilms resistant to drugs',
+            '  - Immunocompromised patients difficult'
+        ],
+        helper: 'Mycoses: Superficial (surface), Cutaneous (skin/hair/nails), Subcutaneous (deeper), Systemic (organs)',
+        solution: 'Fungal infections: superficial, cutaneous (dermatophytes), subcutaneous, systemic (endemic/opportunistic); treated with azoles, polyenes, echinocandins',
+        realWorldContext: 'Candida infections increased with AIDS epidemic; antifungals target ergosterol (fungal membrane sterol)'
+    });
+
+    // Problem 5: Beneficial Fungi
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Beneficial Roles of Fungi',
+        problem: 'Describe the important beneficial roles that fungi play in nature and human society',
+        parameters: {
+            application: 'biotechnology',
+            type: 'beneficial',
+            limit: 5
+        },
+        type: 'fungi',
+        context: { difficulty: 'beginner', topic: 'Fungi', focus: 'applications' },
+        subparts: [
+            'BENEFICIAL ROLES OF FUNGI:',
+            '',
+            '1. DECOMPOSITION (Ecological):',
+            '   - Break down dead organic matter',
+            '   - Recycle nutrients (carbon, nitrogen)',
+            '   - Essential for ecosystem function',
+            '   - Decompose wood (cellulose, lignin)',
+            '   Examples: Shelf fungi, many molds',
+            '',
+            '2. FOOD PRODUCTION:',
+            '   A. Baking:',
+            '      - Saccharomyces cerevisiae',
+            '      - Ferments sugars → CO₂ (bread rises)',
+            '',
+            '   B. Brewing:',
+            '      - Saccharomyces cerevisiae',
+            '      - Ferments sugars → Ethanol + CO₂',
+            '      - Beer, wine, sake',
+            '',
+            '   C. Cheese:',
+            '      - Penicillium roqueforti (blue cheese)',
+            '      - Penicillium camemberti (brie, camembert)',
+            '      - Adds flavor, texture',
+            '',
+            '   D. Edible Mushrooms:',
+            '      - Agaricus bisporus (button mushroom)',
+            '      - Shiitake, oyster, portobello',
+            '      - High protein, low calories',
+            '',
+            '   E. Fermented Foods:',
+            '      - Tempeh (Indonesia)',
+            '      - Soy sauce (Aspergillus)',
+            '',
+            '3. ANTIBIOTIC PRODUCTION:',
+            '   - Penicillin (Penicillium chrysogenum)',
+            '   - First antibiotic discovered (1928)',
+            '   - Revolutionized medicine',
+            '   - Other fungal antibiotics: Cephalosporins',
+            '',
+            '4. BIOTECHNOLOGY:',
+            '   A. Enzyme Production:',
+            '      - Amylases (starch breakdown)',
+            '      - Cellulases (cellulose breakdown)',
+            '      - Proteases (protein breakdown)',
+            '      - Used in detergents, food processing',
+            '',
+            '   B. Organic Acid Production:',
+            '      - Citric acid (Aspergillus niger)',
+            '      - Used in food, beverages',
+            '',
+            '   C. Recombinant Proteins:',
+            '      - Yeast as expression system',
+            '      - Insulin production',
+            '      - Vaccines',
+            '',
+            '5. MYCORRHIZAE (Plant Symbiosis):',
+            '   Types:',
+            '   A. Ectomycorrhizae:',
+            '      - Sheath around roots',
+            '      - Trees (pine, oak)',
+            '',
+            '   B. Endomycorrhizae (Arbuscular):',
+            '      - Penetrate root cells',
+            '      - Most plants (90%)',
+            '',
+            '   Benefits:',
+            '   - Fungus: Gets sugars from plant',
+            '   - Plant: Gets water and minerals (especially phosphorus)',
+            '   - Increased surface area (1000×)',
+            '   - Essential for plant growth',
+            '',
+            '6. RESEARCH MODELS:',
+            '   - Saccharomyces cerevisiae (genetics)',
+            '   - Neurospora crassa (one gene-one enzyme)',
+            '   - Simple eukaryote model',
+            '',
+            '7. BIOREMEDIATION:',
+            '   - Degrade pollutants',
+            '   - Oil spills',
+            '   - Pesticides',
+            '   - Heavy metals (bioaccumulation)',
+            '',
+            '8. MEDICAL APPLICATIONS:',
+            '   - Statins (cholesterol drugs)',
+            '   - Immunosuppressants (cyclosporine)',
+            '   - Cancer drugs (taxol from fungal endophyte)',
+            '',
+            'Economic Impact:',
+            '  - Food industry: billions of dollars',
+            '  - Pharmaceutical industry: antibiotics, drugs',
+            '  - Agriculture: mycorrhizae enhance crop yields',
+            '  - Environmental: decomposition, bioremediation'
+        ],
+        helper: 'Fungi: decompose, make food (bread/beer/cheese), produce antibiotics, form mycorrhizae with plants',
+        solution: 'Beneficial fungi: decomposition, food production (baking/brewing/cheese), antibiotics, biotechnology, mycorrhizae, research models',
+        realWorldContext: 'Without fungi, dead matter would accumulate; without mycorrhizae, most plants couldn\'t survive'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PROTISTS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedProtists() {
+    const relatedProblems = [];
+
+    // Problem 1: Protist Diversity
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Protist Classification and Diversity',
+        problem: 'Describe the major groups of protists and their distinguishing characteristics',
+        parameters: {
+            type: 'protozoa',
+            classification: 'diversity',
+            limit: 4
+        },
+        type: 'protists',
+        context: { difficulty: 'beginner', topic: 'Protists', focus: 'diversity' },
+        subparts: [
+            'PROTIST GROUPS:',
+            '',
+            'Definition: Eukaryotic microorganisms',
+            '  - Not plants, animals, or fungi',
+            '  - Mostly unicellular (some multicellular)',
+            '  - Great diversity',
+            '',
+            '1. PROTOZOA (Animal-like):',
+            '   Characteristics:',
+            '   - Heterotrophic (consume organic matter)',
+            '   - Motile',
+            '   - No cell wall',
+            '',
+            '   Groups by Locomotion:',
+            '',
+            '   A. AMOEBOZOA:',
+            '      Movement: Pseudopodia ("false feet")',
+            '      - Cytoplasm flows into extensions',
+            '      - Used for movement and feeding',
+            '      Example: Amoeba proteus, Entamoeba histolytica',
+            '',
+            '   B. CILIATES:',
+            '      Movement: Cilia (short hair-like structures)',
+            '      - Thousands of cilia beat in coordinated waves',
+            '      - Fastest swimmers',
+            '      - Complex cells (macro/micronucleus)',
+            '      Example: Paramecium, Balantidium coli',
+            '',
+            '   C. FLAGELLATES:',
+            '      Movement: Flagella (long whip-like structures)',
+            '      - One or more flagella',
+            '      - Whip-like motion',
+            '      Example: Giardia lamblia, Trypanosoma, Trichomonas',
+            '',
+            '   D. APICOMPLEXANS:',
+            '      Movement: Non-motile (in most stages)',
+            '      - All parasitic',
+            '      - Apical complex for host cell invasion',
+            '      - Complex life cycles',
+            '      Example: Plasmodium (malaria), Toxoplasma',
+            '',
+            '2. ALGAE (Plant-like):',
+            '   Characteristics:',
+            '   - Autotrophic (photosynthetic)',
+            '   - Contain chloroplasts',
+            '   - Aquatic environments',
+            '   - Cell walls (cellulose)',
+            '',
+            '   Types:',
+            '   - Green algae (Chlorophyta)',
+            '   - Red algae (Rhodophyta)',
+            '   - Brown algae (Phaeophyta)',
+            '   - Diatoms (silica shells)',
+            '   - Dinoflagellates (two flagella)',
+            '   - Euglena (both plant and animal-like)',
+            '',
+            '3. SLIME MOLDS (Fungus-like):',
+            '   - Plasmodial: Multinucleate mass',
+            '   - Cellular: Individual amoebas aggregate',
+            '   - Feed on bacteria/organic matter',
+            '   - Form fruiting bodies (spores)',
+            '',
+            '4. WATER MOLDS (Oomycetes):',
+            '   - Not true fungi',
+            '   - Cellulose cell walls (not chitin)',
+            '   - Decomposers and plant pathogens',
+            '   - Example: Phytophthora (potato blight)',
+            '',
+            'General Features:',
+            '  - Eukaryotic cells',
+            '  - Membrane-bound organelles',
+            '  - Most aquatic',
+            '  - Diverse nutrition modes',
+            '  - Reproduce asexually and sexually'
+        ],
+        helper: 'Protists: Protozoa (animal-like, motile), Algae (plant-like, photosynthetic), Slime molds (fungus-like)',
+        solution: 'Protist groups: Protozoa (pseudopodia/cilia/flagella/apicomplexans), Algae (photosynthetic), Slime molds, Water molds',
+        realWorldContext: 'Protists are incredibly diverse; some cause disease (malaria), others produce oxygen (algae)'
+    });
+
+    // Problem 2: Protozoan Life Cycles
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Protozoan Life Stages',
+        problem: 'Explain the trophozoite and cyst stages of protozoan life cycles',
+        parameters: {
+            specificItems: ['Giardia lamblia', 'Entamoeba histolytica'],
+            type: 'life cycle',
+            limit: 2
+        },
+        type: 'protists',
+        context: { difficulty: 'intermediate', topic: 'Protists', focus: 'life cycles' },
+        subparts: [
+            'PROTOZOAN LIFE CYCLE STAGES:',
+            '',
+            '1. TROPHOZOITE (Active Stage):',
+            '   Characteristics:',
+            '   - Actively growing and feeding',
+            '   - Motile (moving)',
+            '   - Reproducing (binary fission)',
+            '   - Metabolically active',
+            '   - Fragile',
+            '',
+            '   Location:',
+            '   - Inside host',
+            '   - Favorable environments',
+            '',
+            '   Functions:',
+            '   - Pathogenic stage (causes disease)',
+            '   - Nutrient absorption',
+            '   - Tissue invasion (some species)',
+            '',
+            '   Example - Giardia trophozoite:',
+            '   - Pear-shaped',
+            '   - Two nuclei ("monkey face")',
+            '   - Four pairs of flagella',
+            '   - Ventral adhesive disk',
+            '   - Attaches to intestinal wall',
+            '',
+            '2. CYST (Dormant Stage):',
+            '   Characteristics:',
+            '   - Dormant/resting',
+            '   - Non-motile',
+            '   - Not feeding',
+            '   - Thick protective wall',
+            '   - Very resistant',
+            '',
+            '   Resistance to:',
+            '   - Desiccation (drying)',
+            '   - Temperature extremes',
+            '   - Chemicals (chlorine)',
+            '   - Stomach acid',
+            '   - Can survive months in environment',
+            '',
+            '   Location:',
+            '   - Outside host (environment)',
+            '   - Feces',
+            '   - Water, food',
+            '',
+            '   Functions:',
+            '   - Survival outside host',
+            '   - Transmission to new host',
+            '   - Infective stage',
+            '',
+            '   Example - Giardia cyst:',
+            '   - Oval shape',
+            '   - Thick wall',
+            '   - Contains 2-4 nuclei',
+            '   - Infective when ingested',
+            '',
+            'LIFE CYCLE PATTERN:',
+            '',
+            '  1. CYST INGESTED:',
+            '     - In contaminated water/food',
+            '     - Survives stomach acid',
+            '',
+            '  2. EXCYSTATION:',
+            '     - Cyst wall breaks down',
+            '     - In small intestine',
+            '     - Triggered by pH change, enzymes',
+            '     - Trophozoites released',
+            '',
+            '  3. TROPHOZOITE STAGE:',
+            '     - Multiplies (binary fission)',
+            '     - Feeds on nutrients',
+            '     - Causes disease symptoms',
+            '     - Attaches to intestinal wall',
+            '',
+            '  4. ENCYSTATION:',
+            '     - Environmental trigger',
+            '     - Forms protective cyst wall',
+            '     - In large intestine',
+            '',
+            '  5. CYST SHED:',
+            '     - Passed in feces',
+            '     - Contaminates environment',
+            '     - Infects new hosts',
+            '',
+            'CLINICAL SIGNIFICANCE:',
+            '',
+            'Giardiasis (Giardia lamblia):',
+            '  - Transmission: Fecal-oral (contaminated water)',
+            '  - Symptoms: Diarrhea, gas, cramps',
+            '  - Diagnosis: Stool sample (cysts or trophozoites)',
+            '  - Treatment: Metronidazole',
+            '  - Prevention: Water treatment, hygiene',
+            '',
+            'Amoebiasis (Entamoeba histolytica):',
+            '  - Transmission: Fecal-oral',
+            '  - Symptoms: Bloody diarrhea (dysentery)',
+            '  - Can invade liver (liver abscess)',
+            '  - Diagnosis: Stool sample',
+            '  - Treatment: Metronidazole',
+            '',
+            'Why Cyst Stage Important:',
+            '  - Allows survival outside host',
+            '  - Resistant to chlorine (water treatment)',
+            '  - Small outbreaks from contaminated water',
+            '  - Camping/hiking risk (stream water)'
+        ],
+        helper: 'Trophozoite = active/pathogenic; Cyst = dormant/infective/resistant',
+        solution: 'Trophozoite: active, motile, feeding stage (causes disease); Cyst: dormant, resistant, infective stage (transmission)',
+        realWorldContext: 'Giardia cysts in water cause "backpacker\'s diarrhea"; cysts survive water chlorination'
+    });
+
+    // Problem 3: Malaria Parasite
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Malaria Life Cycle',
+        problem: 'Describe the complex life cycle of Plasmodium and explain why malaria is difficult to control',
+        parameters: {
+            specificItems: ['Plasmodium'],
+            disease: 'malaria',
+            transmission: 'vector',
+            limit: 1
+        },
+        type: 'protists',
+        context: { difficulty: 'advanced', topic: 'Protists', focus: 'malaria' },
+        subparts: [
+            'MALARIA (Plasmodium):',
+            '',
+            'Causative Agent: Plasmodium (Apicomplexan)',
+            '  Species:',
+            '  - P. falciparum (most deadly)',
+            '  - P. vivax (most common)',
+            '  - P. ovale',
+            '  - P. malariae',
+            '  - P. knowlesi',
+            '',
+            'LIFE CYCLE (Two Hosts):',
+            '',
+            'A. IN MOSQUITO (Definitive Host - Sexual Reproduction):',
+            '',
+            '  1. GAMETOCYTES INGESTED:',
+            '     - Female Anopheles mosquito bites infected human',
+            '     - Takes blood containing gametocytes',
+            '',
+            '  2. GAMETE FORMATION:',
+            '     - In mosquito stomach',
+            '     - Male and female gametes form',
+            '',
+            '  3. FERTILIZATION:',
+            '     - Gametes fuse → Zygote (diploid)',
+            '     - Only diploid stage!',
+            '',
+            '  4. OOKINETE:',
+            '     - Motile zygote',
+            '     - Penetrates mosquito stomach wall',
+            '',
+            '  5. OOCYST:',
+            '     - On outside of stomach',
+            '     - Undergoes meiosis',
+            '     - Produces thousands of sporozoites',
+            '',
+            '  6. SPOROZOITES:',
+            '     - Released when oocyst ruptures',
+            '     - Migrate to salivary glands',
+            '     - Ready to infect humans',
+            '',
+            'B. IN HUMAN (Intermediate Host - Asexual Reproduction):',
+            '',
+            '  1. INFECTION:',
+            '     - Infected mosquito bites human',
+            '     - Injects sporozoites with saliva',
+            '',
+            '  2. LIVER STAGE (Exoerythrocytic):',
+            '     - Sporozoites travel to liver',
+            '     - Infect hepatocytes',
+            '     - Multiply asexually (schizogony)',
+            '     - Form thousands of merozoites',
+            '     - Takes 1-2 weeks',
+            '     - NO SYMPTOMS yet',
+            '     - Hypnozoites (dormant) in P. vivax/ovale → Relapses',
+            '',
+            '  3. BLOOD STAGE (Erythrocytic):',
+            '     - Merozoites released from liver',
+            '     - Invade RED BLOOD CELLS',
+            '     - Feed on hemoglobin',
+            '',
+            '     Stages in RBC:',
+            '     a. Ring stage (trophozoite)',
+            '     b. Schizont (dividing)',
+            '     c. Merozoites (8-32 formed)',
+            '',
+            '     - RBC ruptures',
+            '     - Merozoites released',
+            '     - Infect new RBCs',
+            '     - Cycle repeats every 48-72 hours',
+            '',
+            '  4. SYMPTOMS:',
+            '     - Occur when RBCs rupture',
+            '     - Periodic fever (every 48-72 hrs)',
+            '     - Chills, sweats',
+            '     - Headache, fatigue',
+            '     - Anemia (RBC destruction)',
+            '     - Splenomegaly',
+            '',
+            '  5. GAMETOCYTE FORMATION:',
+            '     - Some merozoites → gametocytes',
+            '     - Male and female',
+            '     - Circulate in blood',
+            '     - Taken up by mosquito',
+            '     - Cycle continues',
+            '',
+            'COMPLICATIONS (P. falciparum):',
+            '  - Cerebral malaria (brain damage)',
+            '  - Severe anemia',
+            '  - Respiratory distress',
+            '  - Kidney failure',
+            '  - Death (especially children)',
+            '',
+            'WHY DIFFICULT TO CONTROL:',
+            '',
+            '1. COMPLEX LIFE CYCLE:',
+            '   - Two hosts required',
+            '   - Multiple stages',
+            '   - Liver stage hidden (no symptoms)',
+            '',
+            '2. ANTIGENIC VARIATION:',
+            '   - Changes surface proteins',
+            '   - Evades immune response',
+            '   - No lasting immunity',
+            '',
+            '3. DRUG RESISTANCE:',
+            '   - Chloroquine resistance widespread',
+            '   - Artemisinin resistance emerging',
+            '',
+            '4. MOSQUITO CONTROL CHALLENGES:',
+            '   - Insecticide resistance',
+            '   - Breeding sites difficult to eliminate',
+            '   - Expensive',
+            '',
+            '5. NO EFFECTIVE VACCINE (yet):',
+            '   - RTS,S vaccine partially effective (30-50%)',
+            '   - Complex immune response needed',
+            '',
+            '6. HYPNOZOITES (P. vivax/ovale):',
+            '   - Dormant liver stages',
+            '   - Cause relapses months/years later',
+            '',
+            'CONTROL MEASURES:',
+            '  - Insecticide-treated bed nets',
+            '  - Indoor residual spraying',
+            '  - Antimalarial drugs (prophylaxis, treatment)',
+            '  - Mosquito control',
+            '  - Early diagnosis and treatment',
+            '  - RTS,S vaccine (limited effectiveness)',
+            '',
+            'GLOBAL IMPACT:',
+            '  - 200+ million cases annually',
+            '  - 400,000+ deaths (mostly children under 5)',
+            '  - Sub-Saharan Africa most affected',
+            '  - Major cause of poverty'
+        ],
+        helper: 'Malaria cycle: Mosquito (sexual) → Liver (multiply) → Blood (fever/symptoms) → Mosquito',
+        solution: 'Plasmodium: sporozoites (mosquito) → liver (multiply) → blood/RBCs (symptoms) → gametocytes (mosquito takes up); difficult due to complex cycle, drug resistance',
+        realWorldContext: 'Malaria kills a child every 2 minutes; mosquito nets reduce deaths by 20%'
+    });
+
+    // Problem 4: Algae and Primary Production
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Algae as Primary Producers',
+        problem: 'Explain the ecological importance of algae and their role in aquatic ecosystems',
+        parameters: {
+            type: 'algae',
+            habitat: 'aquatic',
+            application: 'ecology',
+            limit: 3
+        },
+        type: 'protists',
+        context: { difficulty: 'intermediate', topic: 'Protists', focus: 'ecology' },
+        subparts: [
+            'ALGAE: AQUATIC PRIMARY PRODUCERS',
+            '',
+            'Types of Algae:',
+            '',
+            '1. PHYTOPLANKTON (Microscopic):',
+            '   - Float in water column',
+            '   - Single-celled or colonial',
+            '',
+            '   Types:',
+            '   A. DIATOMS:',
+            '      - Silica shells (frustules)',
+            '      - Ornate, geometric patterns',
+            '      - Golden-brown color',
+            '      - Most abundant phytoplankton',
+            '',
+            '   B. DINOFLAGELLATES:',
+            '      - Two flagella',
+            '      - Cellulose plates',
+            '      - Some bioluminescent',
+            '      - Some produce toxins',
+            '',
+            '   C. GREEN ALGAE (unicellular):',
+            '      - Chlorophyll a and b',
+            '      - Examples: Chlamydomonas, Chlorella',
+            '',
+            '2. MACROALGAE (Seaweeds):',
+            '   - Multicellular',
+            '   - Attached to substrate',
+            '',
+            '   Types:',
+            '   - Green algae (shallow)',
+            '   - Brown algae (kelp forests)',
+            '   - Red algae (deep water)',
+            '',
+            'ECOLOGICAL ROLES:',
+            '',
+            '1. PRIMARY PRODUCTION:',
+            '   - Convert solar energy → organic compounds',
+            '   - Photosynthesis: CO₂ + H₂O → Glucose + O₂',
+            '   - Base of aquatic food webs',
+            '   - Support all aquatic life',
+            '',
+            '   Productivity:',
+            '   - Phytoplankton produce 50% of Earth\'s oxygen!',
+            '   - More than all terrestrial plants combined',
+            '   - Fix massive amounts of CO₂',
+            '',
+            '2. FOOD SOURCE:',
+            '   - Eaten by zooplankton',
+            '   - Zooplankton eaten by fish',
+            '   - Fish eaten by larger animals',
+            '   - Supports fisheries (human food)',
+            '',
+            '3. CARBON CYCLE:',
+            '   - Fix atmospheric CO₂',
+            '   - Biological carbon pump:',
+            '     • Phytoplankton absorb CO₂',
+            '     • Die and sink',
+            '     • Carbon buried in sediments',
+            '     • Removes CO₂ from atmosphere',
+            '   - Climate regulation',
+            '',
+            '4. OXYGEN PRODUCTION:',
+            '   - 50-80% of atmospheric O₂',
+            '   - Essential for aerobic life',
+            '   - Ancient algae created oxygen atmosphere',
+            '',
+            'ALGAL BLOOMS:',
+            '',
+            'Normal Blooms:',
+            '  - Seasonal increases',
+            '  - Spring/summer when nutrients available',
+            '  - Support increased productivity',
+            '',
+            'Harmful Algal Blooms (HABs):',
+            '  - Excessive growth',
+            '  - Often caused by nutrient pollution (eutrophication)',
+            '',
+            '  Types:',
+            '  1. RED TIDES:',
+            '     - Dinoflagellates (Karenia brevis)',
+            '     - Produce neurotoxins',
+            '     - Kill fish, marine mammals',
+            '     - Shellfish poisoning in humans',
+            '     - Water turns red/brown',
+            '',
+            '  2. GREEN BLOOMS:',
+            '     - Cyanobacteria (actually bacteria, not algae)',
+            '     - Produce toxins (microcystins)',
+            '     - Lake Erie, Florida problems',
+            '     - Dogs die from drinking',
+            '',
+            '  Effects:',
+            '  - Toxins kill animals',
+            '  - Block sunlight',
+            '  - Decomposition uses oxygen → Dead zones',
+            '  - Economic damage (tourism, fishing)',
+            '',
+            'HUMAN USES:',
+            '',
+            '1. FOOD:',
+            '   - Nori (sushi wraps)',
+            '   - Kelp, dulse',
+            '   - Spirulina (supplement)',
+            '',
+            '2. PRODUCTS:',
+            '   - Agar (microbiology media)',
+            '   - Carrageenan (food thickener)',
+            '   - Alginates (ice cream, toothpaste)',
+            '',
+            '3. BIOFUELS:',
+            '   - Algae produce oils',
+            '   - Can be converted to biodiesel',
+            '   - Research ongoing',
+            '',
+            '4. BIOREMEDIATION:',
+            '   - Absorb heavy metals',
+            '   - Wastewater treatment',
+            '',
+            '5. RESEARCH:',
+            '   - Chlamydomonas (model organism)',
+            '   - Photosynthesis research'
+        ],
+        helper: 'Algae: produce 50% of Earth\'s O₂, base of aquatic food webs, harmful blooms kill fish',
+        solution: 'Algae are primary producers: photosynthesize (50% of O₂), base of food webs, carbon cycle; harmful blooms produce toxins',
+        realWorldContext: 'Every other breath you take comes from marine algae; red tides cause shellfish poisoning'
+    });
+
+    // Problem 5: Parasitic Protists
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Protistan Parasites and Disease',
+        problem: 'Describe the major parasitic protists that cause human diseases and their transmission',
+        parameters: {
+            pathogenic: true,
+            disease: 'parasitic',
+            transmission: 'various',
+            limit: 5
+        },
+        type: 'protists',
+        context: { difficulty: 'intermediate', topic: 'Protists', focus: 'diseases' },
+        subparts: [
+            'MAJOR PARASITIC PROTISTS:',
+            '',
+            '1. PLASMODIUM (Malaria):',
+            '   Transmission: Mosquito (Anopheles)',
+            '   Location: Blood (RBCs)',
+            '   Symptoms: Periodic fever, chills, anemia',
+            '   Distribution: Tropical/subtropical',
+            '   Impact: 200M cases, 400K deaths/year',
+            '   Prevention: Bed nets, antimalarials',
+            '',
+            '2. GIARDIA LAMBLIA (Giardiasis):',
+            '   Transmission: Fecal-oral (contaminated water)',
+            '   Location: Small intestine',
+            '   Symptoms: Diarrhea, gas, bloating, malabsorption',
+            '   Common: "Traveler\'s diarrhea," "Beaver fever"',
+            '   Diagnosis: Stool sample (cysts)',
+            '   Treatment: Metronidazole',
+            '   Prevention: Water treatment, hygiene',
+            '',
+            '3. ENTAMOEBA HISTOLYTICA (Amoebiasis):',
+            '   Transmission: Fecal-oral',
+            '   Location: Large intestine (can invade liver)',
+            '   Symptoms: Bloody diarrhea (dysentery), liver abscess',
+            '   Distribution: Developing countries',
+            '   Diagnosis: Stool sample',
+            '   Treatment: Metronidazole',
+            '',
+            '4. TRYPANOSOMA (Sleeping Sickness, Chagas Disease):',
+            '',
+            '   A. T. brucei (African Sleeping Sickness):',
+            '      Transmission: Tsetse fly',
+            '      Location: Blood, then CNS',
+            '      Symptoms:',
+            '      - Early: Fever, headache, joint pain',
+            '      - Late: Neurological (confusion, sleep disturbances, coma)',
+            '      Distribution: Sub-Saharan Africa',
+            '      Fatal if untreated',
+            '',
+            '   B. T. cruzi (Chagas Disease):',
+            '      Transmission: Reduviid bug ("kissing bug")',
+            '      - Bug defecates while feeding',
+            '      - Parasite in feces enters bite wound',
+            '      Location: Blood, heart, intestines',
+            '      Symptoms:',
+            '      - Acute: Fever, swelling',
+            '      - Chronic: Heart damage, megacolon',
+            '      Distribution: Latin America',
+            '      Treatment: Limited options',
+            '',
+            '5. LEISHMANIA (Leishmaniasis):',
+            '   Transmission: Sandfly',
+            '   Types:',
+            '',
+            '   A. Cutaneous:',
+            '      - Skin sores/ulcers',
+            '      - Most common form',
+            '      - Disfiguring but not fatal',
+            '',
+            '   B. Visceral (Kala-azar):',
+            '      - Invades spleen, liver, bone marrow',
+            '      - Fever, weight loss, splenomegaly',
+            '      - Fatal if untreated',
+            '',
+            '   C. Mucocutaneous:',
+            '      - Destroys mucous membranes',
+            '      - Nose, mouth, throat',
+            '',
+            '   Distribution: Tropical/subtropical',
+            '   Treatment: Antimonial drugs, amphotericin B',
+            '',
+            '6. TRICHOMONAS VAGINALIS (Trichomoniasis):',
+            '   Transmission: Sexual contact',
+            '   Location: Urogenital tract',
+            '   Symptoms:',
+            '   - Women: Discharge, irritation, odor',
+            '   - Men: Often asymptomatic',
+            '   - Most common non-viral STI',
+            '   Diagnosis: Microscopy (motile trophozoites)',
+            '   Treatment: Metronidazole',
+            '   Note: No cyst stage (only trophozoites)',
+            '',
+            '7. TOXOPLASMA GONDII (Toxoplasmosis):',
+            '   Transmission:',
+            '   - Cat feces (oocysts)',
+            '   - Undercooked meat (tissue cysts)',
+            '   - Congenital (mother to fetus)',
+            '',
+            '   Life cycle:',
+            '   - Definitive host: Cats (sexual reproduction)',
+            '   - Intermediate hosts: All warm-blooded animals',
+            '',
+            '   Symptoms:',
+            '   - Healthy adults: Usually asymptomatic',
+            '   - Immunocompromised: Brain lesions',
+            '   - Congenital: Birth defects, blindness',
+            '',
+            '   Prevalence: 30-50% of humans infected!',
+            '   Prevention:',
+            '   - Pregnant women avoid cat litter',
+            '   - Cook meat thoroughly',
+            '',
+            '8. CRYPTOSPORIDIUM (Cryptosporidiosis):',
+            '   Transmission: Fecal-oral (water)',
+            '   Location: Small intestine',
+            '   Symptoms: Watery diarrhea (severe in AIDS)',
+            '   - Self-limited in healthy people',
+            '   - Can be fatal in immunocompromised',
+            '   Resistant to: Chlorine (water treatment)',
+            '   Prevention: Water filtration, hygiene',
+            '',
+            'COMMON THEMES:',
+            '',
+            'Transmission Routes:',
+            '  - Vector-borne: Mosquitoes, flies (malaria, trypanosomiasis)',
+            '  - Waterborne: Fecal-oral (Giardia, Cryptosporidium)',
+            '  - Foodborne: Contaminated food (Toxoplasma)',
+            '  - Sexual: Direct contact (Trichomonas)',
+            '',
+            'Risk Factors:',
+            '  - Poverty, poor sanitation',
+            '  - Contaminated water sources',
+            '  - Travel to endemic areas',
+            '  - Immunosuppression (AIDS)',
+            '  - Lack of vector control',
+            '',
+            'Diagnosis:',
+            '  - Microscopy (blood, stool, tissue)',
+            '  - Serology (antibodies)',
+            '  - PCR (molecular detection)',
+            '',
+            'Treatment Challenges:',
+            '  - Drug resistance developing',
+            '  - Limited drug options',
+            '  - Toxic side effects',
+            '  - Expensive (for poor countries)',
+            '  - Need for combination therapy',
+            '',
+            'Prevention Strategies:',
+            '  - Vector control (nets, insecticides)',
+            '  - Water sanitation',
+            '  - Food safety',
+            '  - Hygiene education',
+            '  - Travel precautions',
+            '  - Prophylactic drugs (malaria)',
+            '',
+            'NEGLECTED TROPICAL DISEASES:',
+            '  - Many protistan diseases underfunded',
+            '  - Affect poorest populations',
+            '  - WHO efforts to control',
+            '  - Need for new drugs, vaccines'
+        ],
+        helper: 'Major parasites: Plasmodium (malaria/mosquito), Giardia (diarrhea/water), Trypanosoma (sleeping sickness/fly), Toxoplasma (cats)',
+        solution: 'Parasitic protists: Plasmodium (malaria), Giardia (water), Entamoeba (dysentery), Trypanosoma (flies), Toxoplasma (cats); transmitted by vectors, water, food',
+        realWorldContext: 'Protistan parasites cause millions of deaths; malaria alone kills 400,000+ annually, mostly children'
+    });
+
+    return relatedProblems;
+}
+
+// ============== MICROBIAL GROWTH - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedMicrobialGrowth() {
+    const relatedProblems = [];
+
+    // Problem 1: Bacterial Growth Curve
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Bacterial Growth Curve Phases',
+        problem: 'Describe the four phases of the bacterial growth curve and what occurs in each phase',
+        parameters: {
+            growthPhase: 'exponential',
+            category: 'growth patterns',
+            limit: 1
+        },
+        type: 'microbial_growth',
+        context: { difficulty: 'beginner', topic: 'Microbial Growth', focus: 'growth curve' },
+        subparts: [
+            'BACTERIAL GROWTH CURVE:',
+            '',
+            'Measured by: Cell number vs Time (in closed system/batch culture)',
+            '',
+            '1. LAG PHASE:',
+            '   Characteristics:',
+            '   - No increase in cell number',
+            '   - Cells metabolically active',
+            '   - Adjusting to new environment',
+            '',
+            '   Activities:',
+            '   - Synthesize enzymes',
+            '   - Produce metabolites',
+            '   - Repair damage',
+            '   - Increase cell size',
+            '   - Synthesize DNA',
+            '',
+            '   Duration:',
+            '   - Varies (minutes to hours)',
+            '   - Depends on:',
+            '     • Previous growth conditions',
+            '     • Medium composition',
+            '     • Inoculum size',
+            '     • Species',
+            '',
+            '   Purpose: Preparation for rapid division',
+            '',
+            '2. LOG/EXPONENTIAL PHASE:',
+            '   Characteristics:',
+            '   - RAPID cell division',
+            '   - Constant growth rate',
+            '   - Cells divide at maximum rate',
+            '   - Population doubles at regular intervals',
+            '',
+            '   Generation time (doubling time):',
+            '   - Time for population to double',
+            '   - E. coli: ~20 minutes (optimal)',
+            '   - M. tuberculosis: ~15 hours',
+            '   - Varies by species',
+            '',
+            '   Exponential growth formula:',
+            '   - N = N₀ × 2ⁿ',
+            '   - N = final number',
+            '   - N₀ = initial number',
+            '   - n = number of generations',
+            '',
+            '   Conditions:',
+            '   - Nutrients abundant',
+            '   - Waste products minimal',
+            '   - Optimal temperature, pH',
+            '',
+            '   Importance:',
+            '   - Cells most uniform (research)',
+            '   - Most susceptible to antibiotics',
+            '   - Best for studying metabolism',
+            '',
+            '3. STATIONARY PHASE:',
+            '   Characteristics:',
+            '   - NO NET increase in cell number',
+            '   - Growth rate = Death rate',
+            '   - Total cell count constant',
+            '   - Population reaches maximum',
+            '',
+            '   Causes:',
+            '   - Nutrient depletion',
+            '   - Oxygen depletion',
+            '   - Toxic waste accumulation',
+            '   - pH changes',
+            '   - Space limitation',
+            '',
+            '   Cell changes:',
+            '   - Smaller cells',
+            '   - Produce secondary metabolites',
+            '   - Endospore formation (some species)',
+            '   - More resistant to stress',
+            '',
+            '   Secondary metabolites:',
+            '   - Antibiotics produced NOW',
+            '   - Pigments',
+            '   - Toxins',
+            '   - Not needed for growth',
+            '',
+            '4. DEATH/DECLINE PHASE:',
+            '   Characteristics:',
+            '   - Number of deaths > Number of new cells',
+            '   - Population decreases',
+            '   - Exponential death (like log phase in reverse)',
+            '',
+            '   Causes:',
+            '   - Nutrients exhausted',
+            '   - Toxic waste levels high',
+            '   - Autolysis (self-digestion)',
+            '',
+            '   Rate varies:',
+            '   - Species-dependent',
+            '   - Some die quickly',
+            '   - Some form survival structures',
+            '',
+            'PLOTTING THE CURVE:',
+            '  - X-axis: Time',
+            '  - Y-axis: Log₁₀ (cell number)',
+            '  - Logarithmic scale needed',
+            '  - Shows all phases clearly',
+            '',
+            'PRACTICAL APPLICATIONS:',
+            '',
+            'Industrial Fermentation:',
+            '  - Harvest cells in log phase (biomass)',
+            '  - Harvest products in stationary phase (antibiotics)',
+            '',
+            'Medical:',
+            '  - Antibiotics target log phase cells',
+            '  - Stationary phase cells more resistant',
+            '',
+            'Food Safety:',
+            '  - Prevent log phase in food (refrigeration)',
+            '  - Understand spoilage rates',
+            '',
+            'Continuous Culture:',
+            '  - Maintain cells in log phase indefinitely',
+            '  - Add nutrients, remove waste continuously',
+            '  - Chemostat, turbidostat'
+        ],
+        helper: 'Growth curve: Lag (adjust), Log (rapid division), Stationary (growth=death), Death (decline)',
+        solution: 'Bacterial growth phases: Lag (preparation), Log/Exponential (rapid division), Stationary (growth=death), Death (population declines)',
+        realWorldContext: 'Food poisoning bacteria grow exponentially when food left at room temperature; refrigeration slows to lag phase'
+    });
+
+    // Problem 2: Generation Time Calculation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Calculating Generation Time',
+        problem: 'Calculate generation time and predict bacterial population growth over time',
+        parameters: {
+            category: 'calculations',
+            growthPhase: 'exponential',
+            limit: 1
+        },
+        type: 'microbial_growth',
+        context: { difficulty: 'intermediate', topic: 'Microbial Growth', focus: 'calculations' },
+        subparts: [
+            'GENERATION TIME CALCULATIONS:',
+            '',
+            'DEFINITIONS:',
+            '',
+            'Generation Time (g):',
+            '  - Time required for population to DOUBLE',
+            '  - Also called "Doubling Time"',
+            '  - Species-specific',
+            '  - Condition-dependent',
+            '',
+            'Examples of Generation Times:',
+            '  - E. coli: 20 min (optimal)',
+            '  - Staphylococcus: 30 min',
+            '  - Mycobacterium tuberculosis: 15 hours',
+            '  - Treponema pallidum: 30 hours',
+            '',
+            'FORMULAS:',
+            '',
+            '1. EXPONENTIAL GROWTH:',
+            '   N = N₀ × 2ⁿ',
+            '   ',
+            '   Where:',
+            '   - N = Final number of cells',
+            '   - N₀ = Initial number of cells',
+            '   - n = Number of generations',
+            '',
+            '2. NUMBER OF GENERATIONS:',
+            '   n = log₁₀(N/N₀) / log₁₀(2)',
+            '   or',
+            '   n = log₁₀(N/N₀) / 0.301',
+            '   or',
+            '   n = 3.3 × log₁₀(N/N₀)',
+            '',
+            '3. GENERATION TIME:',
+            '   g = t / n',
+            '   ',
+            '   Where:',
+            '   - g = Generation time',
+            '   - t = Total time elapsed',
+            '   - n = Number of generations',
+            '',
+            'EXAMPLE PROBLEM 1:',
+            '',
+            'A bacterial culture starts with 1,000 cells.',
+            'After 3 hours, there are 256,000 cells.',
+            'Calculate the generation time.',
+            '',
+            'Solution:',
+            '  N₀ = 1,000',
+            '  N = 256,000',
+            '  t = 3 hours = 180 minutes',
+            '',
+            '  Step 1: Calculate number of generations',
+            '  n = 3.3 × log₁₀(N/N₀)',
+            '  n = 3.3 × log₁₀(256,000/1,000)',
+            '  n = 3.3 × log₁₀(256)',
+            '  n = 3.3 × 2.408',
+            '  n ≈ 8 generations',
+            '',
+            '  Step 2: Calculate generation time',
+            '  g = t / n',
+            '  g = 180 minutes / 8',
+            '  g = 22.5 minutes',
+            '',
+            '  Answer: Generation time = 22.5 minutes',
+            '',
+            'EXAMPLE PROBLEM 2:',
+            '',
+            'E. coli with generation time of 20 minutes',
+            'starts with 100 cells. How many cells after 2 hours?',
+            '',
+            'Solution:',
+            '  g = 20 minutes',
+            '  t = 2 hours = 120 minutes',
+            '  N₀ = 100 cells',
+            '',
+            '  Step 1: Calculate number of generations',
+            '  n = t / g',
+            '  n = 120 / 20',
+            '  n = 6 generations',
+            '',
+            '  Step 2: Calculate final number',
+            '  N = N₀ × 2ⁿ',
+            '  N = 100 × 2⁶',
+            '  N = 100 × 64',
+            '  N = 6,400 cells',
+            '',
+            '  Answer: 6,400 cells after 2 hours',
+            '',
+            'EXAMPLE PROBLEM 3:',
+            '',
+            'How long for 1 cell to become 1 million cells',
+            'if generation time is 30 minutes?',
+            '',
+            'Solution:',
+            '  N₀ = 1',
+            '  N = 1,000,000',
+            '  g = 30 minutes',
+            '',
+            '  Step 1: Calculate generations needed',
+            '  n = 3.3 × log₁₀(N/N₀)',
+            '  n = 3.3 × log₁₀(1,000,000/1)',
+            '  n = 3.3 × log₁₀(1,000,000)',
+            '  n = 3.3 × 6',
+            '  n ≈ 20 generations',
+            '',
+            '  Step 2: Calculate time',
+            '  t = n × g',
+            '  t = 20 × 30',
+            '  t = 600 minutes = 10 hours',
+            '',
+            '  Answer: 10 hours to reach 1 million cells',
+            '',
+            'KEY POINTS:',
+            '',
+            '- Exponential growth is FAST',
+            '  • 1 → 1 million in 20 generations',
+            '  • 2²⁰ = 1,048,576',
+            '',
+            '- Small generation time = rapid growth',
+            '  • E. coli (20 min): 1 → 16 million in 8 hours',
+            '  • M. tuberculosis (15 hr): 1 → 16 in 60 hours',
+            '',
+            '- Only applies to LOG PHASE',
+            '  • Lag phase: no growth',
+            '  • Stationary phase: net zero growth',
+            '',
+            'CLINICAL SIGNIFICANCE:',
+            '  - Untreated infections grow exponentially',
+            '  - Early antibiotic treatment crucial',
+            '  - Small delay = many more bacteria',
+            '',
+            'FOOD SAFETY:',
+            '  - Room temperature: rapid bacterial growth',
+            '  - "Danger zone" 5-60°C',
+            '  - Refrigeration dramatically slows growth'
+        ],
+        helper: 'Generation time: g = t/n; Generations: n = 3.3 × log(N/N₀); Final cells: N = N₀ × 2ⁿ',
+        solution: 'Calculate generations (n = 3.3 × log(N/N₀)), then generation time (g = t/n), or final cells (N = N₀ × 2ⁿ)',
+        realWorldContext: 'One E. coli cell can become 1 billion in 10 hours under optimal conditions'
+    });
+
+    // Problem 3: Physical Growth Requirements
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Temperature and pH Requirements',
+        problem: 'Explain how temperature and pH affect microbial growth and classify microorganisms based on these factors',
+        parameters: {
+            temperatureClass: 'mesophile',
+            category: 'physical requirements',
+            limit: 3
+        },
+        type: 'microbial_growth',
+        context: { difficulty: 'intermediate', topic: 'Microbial Growth', focus: 'physical factors' },
+        subparts: [
+            'PHYSICAL GROWTH REQUIREMENTS:',
+            '',
+            'A. TEMPERATURE:',
+            '',
+            'Temperature Cardinal Points:',
+            '  - Minimum: Lowest temp for growth',
+            '  - Optimum: Best growth rate',
+            '  - Maximum: Highest temp for growth',
+            '',
+            'CLASSIFICATION BY TEMPERATURE:',
+            '',
+            '1. PSYCHROPHILES ("Cold-loving"):',
+            '   Range: -5°C to 20°C',
+            '   Optimum: 15°C',
+            '   Habitat:',
+            '   - Arctic/Antarctic',
+            '   - Deep ocean',
+            '   - Refrigerators',
+            '   Examples:',
+            '   - Polaromonas',
+            '   - Some Pseudomonas',
+            '   Adaptations:',
+            '   - Unsaturated fatty acids (membrane fluidity)',
+            '   - Cold-active enzymes',
+            '   - Antifreeze proteins',
+            '',
+            '2. PSYCHROTROPHS ("Cold-tolerant"):',
+            '   Range: 0-30°C',
+            '   Optimum: 20-30°C',
+            '   - Grow slowly in refrigerators',
+            '   - Cause food spoilage',
+            '   Examples:',
+            '   - Listeria monocytogenes',
+            '   - Some Pseudomonas',
+            '   Food Safety: Important spoilage organisms',
+            '',
+            '3. MESOPHILES ("Middle-loving"):',
+            '   Range: 20-45°C',
+            '   Optimum: 37°C (body temperature)',
+            '   - MOST COMMON group',
+            '   - Includes most pathogens',
+            '   Examples:',
+            '   - E. coli',
+            '   - Staphylococcus aureus',
+            '   - Salmonella',
+            '   - Most intestinal bacteria',
+            '   Why 37°C: Human body temperature',
+            '',
+            '4. THERMOPHILES ("Heat-loving"):',
+            '   Range: 45-80°C',
+            '   Optimum: 55-65°C',
+            '   Habitat:',
+            '   - Hot springs',
+            '   - Compost heaps',
+            '   - Hot water heaters',
+            '   Examples:',
+            '   - Thermus aquaticus (Taq polymerase)',
+            '   - Geobacillus stearothermophilus',
+            '   Adaptations:',
+            '   - Saturated fatty acids (membrane stability)',
+            '   - Heat-stable enzymes',
+            '   Applications: Industrial enzymes',
+            '',
+            '5. HYPERTHERMOPHILES ("Extreme heat-loving"):',
+            '   Range: 65-110°C',
+            '   Optimum: 80-105°C',
+            '   - Mostly Archaea',
+            '   Habitat:',
+            '   - Deep-sea hydrothermal vents',
+            '   - Volcanic hot springs',
+            '   Examples:',
+            '   - Pyrolobus fumarii (113°C maximum!)',
+            '   - Methanopyrus',
+            '   Adaptations:',
+            '   - Specialized proteins',
+            '   - Unique membrane lipids',
+            '',
+            'TEMPERATURE EFFECTS:',
+            '  Below minimum:',
+            '  - Membranes too rigid',
+            '  - Enzymes inactive',
+            '  - Transport stops',
+            '',
+            '  Above maximum:',
+            '  - Proteins denature',
+            '  - Membranes too fluid',
+            '  - Death',
+            '',
+            'B. pH:',
+            '',
+            'pH Scale: 0-14',
+            '  - <7: Acidic',
+            '  - 7: Neutral',
+            '  - >7: Basic/Alkaline',
+            '',
+            'CLASSIFICATION BY pH:',
+            '',
+            '1. ACIDOPHILES:',
+            '   Range: pH 0-5',
+            '   Optimum: pH 2-3',
+            '   Examples:',
+            '   - Thiobacillus (sulfur bacteria)',
+            '   - Picrophilus (pH 0.7!)',
+            '   Habitat:',
+            '   - Acid mine drainage',
+            '   - Volcanic areas',
+            '   - Acidic hot springs',
+            '',
+            '2. NEUTROPHILES:',
+            '   Range: pH 5-9',
+            '   Optimum: pH 6.5-7.5',
+            '   - MOST bacteria',
+            '   - Includes all pathogens',
+            '   Examples:',
+            '   - E. coli',
+            '   - Staphylococcus',
+            '   - Most intestinal bacteria',
+            '',
+            '3. ALKALIPHILES:',
+            '   Range: pH 9-13',
+            '   Optimum: pH 10-11',
+            '   Examples:',
+            '   - Bacillus alcalophilus',
+            '   Habitat:',
+            '   - Soda lakes',
+            '   - Alkaline soils',
+            '   Applications:',
+            '   - Alkaline-stable enzymes (detergents)',
+            '',
+            'pH EFFECTS:',
+            '  - Affects enzyme activity',
+            '  - Alters cell membrane function',
+            '  - Changes nutrient availability',
+            '  - Most bacteria produce acids → Lower pH',
+            '  - Buffers needed in culture media',
+            '',
+            'FOOD PRESERVATION:',
+            '  Acidic foods (pH < 4.6):',
+            '  - Inhibit most pathogens',
+            '  - Clostridium botulinum won\'t grow',
+            '  - Pickles, yogurt, sauerkraut safe',
+            '',
+            'C. OSMOTIC PRESSURE:',
+            '',
+            '1. NON-HALOPHILES:',
+            '   - Cannot tolerate salt',
+            '   - Most bacteria',
+            '',
+            '2. HALOPHILES:',
+            '   - Require salt',
+            '   - Extreme: 15-30% NaCl',
+            '   - Examples: Halobacterium',
+            '',
+            '3. HALOTOLERANT:',
+            '   - Tolerate salt but don\'t require',
+            '   - Staphylococcus aureus (up to 15%)',
+            '',
+            'Food preservation:',
+            '  - Salt/sugar inhibit microbes',
+            '  - Creates hypertonic environment',
+            '  - Plasmolysis (water leaves cells)'
+        ],
+        helper: 'Temperature: Psychro (cold), Meso (medium/37°C/pathogens), Thermo (hot); pH: Acido (acid), Neutro (neutral/most), Alkali (basic)',
+        solution: 'Temperature classes: psychrophiles (cold), mesophiles (37°C, pathogens), thermophiles (hot); pH: acidophiles, neutrophiles (most), alkaliphiles',
+        realWorldContext: 'Refrigeration works because most pathogens are mesophiles; they don\'t grow well at 4°C'
+    });
+
+    // Problem 4: Measuring Microbial Growth
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Methods to Measure Microbial Growth',
+        problem: 'Describe different methods used to measure bacterial growth in the laboratory',
+        parameters: {
+            category: 'measurement techniques',
+            limit: 5
+        },
+        type: 'microbial_growth',
+        context: { difficulty: 'intermediate', topic: 'Microbial Growth', focus: 'measurement' },
+        subparts: [
+            'METHODS TO MEASURE MICROBIAL GROWTH:',
+            '',
+            '1. DIRECT CELL COUNTS:',
+            '',
+            '   A. PLATE COUNTS (Standard Plate Count/Colony Count):',
+            '      Principle:',
+            '      - Each viable cell forms one colony',
+            '      - Count colonies → Calculate cells/mL',
+            '',
+            '      Procedure:',
+            '      1. Serial dilutions (10-fold)',
+            '      2. Spread or pour plate',
+            '      3. Incubate 24-48 hours',
+            '      4. Count colonies (30-300 range)',
+            '      5. Calculate: CFU/mL = (colonies × dilution factor)',
+            '',
+            '      Units: CFU/mL (Colony Forming Units)',
+            '',
+            '      Advantages:',
+            '      - Counts VIABLE cells only',
+            '      - Gold standard',
+            '      - Widely used',
+            '',
+            '      Disadvantages:',
+            '      - Slow (24-48 hours)',
+            '      - Clumps counted as one colony',
+            '      - Not all bacteria culturable',
+            '',
+            '   B. DIRECT MICROSCOPIC COUNT:',
+            '      Principle:',
+            '      - Count cells under microscope',
+            '      - Use counting chamber (hemocytometer, Petroff-Hausser)',
+            '',
+            '      Advantages:',
+            '      - Fast (minutes)',
+            '      - Simple',
+            '      - No incubation needed',
+            '',
+            '      Disadvantages:',
+            '      - Counts DEAD and LIVE cells',
+            '      - Small cells hard to see',
+            '      - Requires high concentration (>10⁶ cells/mL)',
+            '      - Cannot distinguish species',
+            '',
+            '   C. FLOW CYTOMETRY:',
+            '      - Automated cell counting',
+            '      - Fluorescent dyes',
+            '      - Distinguish live/dead',
+            '      - Very fast, accurate',
+            '      - Expensive equipment',
+            '',
+            '2. INDIRECT MEASUREMENTS:',
+            '',
+            '   A. TURBIDITY (Optical Density):',
+            '      Principle:',
+            '      - Measures cloudiness',
+            '      - More cells = more turbidity',
+            '      - Use spectrophotometer',
+            '',
+            '      Procedure:',
+            '      - Measure absorbance at 600 nm (OD₆₀₀)',
+            '      - Higher OD = more cells',
+            '      - Typical range: 0.1-1.0',
+            '',
+            '      Advantages:',
+            '      - Fast, easy',
+            '      - Non-destructive',
+            '      - Real-time monitoring',
+            '      - Inexpensive',
+            '',
+            '      Disadvantages:',
+            '      - Counts dead and live cells',
+            '      - Not linear at high densities',
+            '      - Requires ≥10⁷ cells/mL',
+            '      - Must calibrate (OD vs cell count)',
+            '',
+            '      Standard curve:',
+            '      - Plot OD vs plate count',
+            '      - Use to convert OD → cells/mL',
+            '',
+            '   B. DRY WEIGHT:',
+            '      Procedure:',
+            '      - Filter culture',
+            '      - Dry filter',
+            '      - Weigh biomass',
+            '',
+            '      Advantages:',
+            '      - Direct measure of biomass',
+            '      - Useful for filamentous organisms',
+            '',
+            '      Disadvantages:',
+            '      - Destructive',
+            '      - Requires large volume',
+            '      - Time-consuming',
+            '',
+            '   C. METABOLIC ACTIVITY:',
+            '      Methods:',
+            '      - Acid production (pH drop)',
+            '      - Gas production (Durham tube)',
+            '      - Oxygen consumption',
+            '      - Substrate utilization',
+            '',
+            '      Advantages:',
+            '      - Measures ACTIVE cells',
+            '',
+            '      Disadvantages:',
+            '      - Indirect',
+            '      - Variable metabolic rates',
+            '',
+            '   D. PROTEIN/DNA QUANTIFICATION:',
+            '      - Measure total protein',
+            '      - Measure total DNA',
+            '      - Proportional to cell number',
+            '      - Used in research',
+            '',
+            '3. VIABLE BUT NON-CULTURABLE (VBNC) DETECTION:',
+            '   Problem: Some cells alive but won\'t grow on plates',
+            '   Solutions:',
+            '   - Live/dead staining + microscopy',
+            '   - Flow cytometry',
+            '   - Molecular methods (PCR)',
+            '',
+            'COMPARISON TABLE:',
+            '',
+            'Method          | Speed   | Live/Dead | Sensitivity',
+            '----------------|---------|-----------|------------',
+            'Plate count     | Slow    | Live only | High',
+            'Microscopy      | Fast    | Both      | Low',
+            'Turbidity       | Fast    | Both      | Medium',
+            'Flow cytometry  | Fast    | Both      | High',
+            'Metabolic       | Medium  | Live only | Medium',
+            '',
+            'CHOOSING A METHOD:',
+            '',
+            'Research:',
+            '  - Plate counts (viability)',
+            '  - Turbidity (monitoring)',
+            '',
+            'Clinical:',
+            '  - Plate counts (diagnosis)',
+            '  - Rapid tests (screening)',
+            '',
+            'Industrial:',
+            '  - Turbidity (fermentation)',
+            '  - Biomass (yield)',
+            '',
+            'Water Quality:',
+            '  - Membrane filtration + plate counts',
+            '  - Most Probable Number (MPN)',
+            '',
+            'Food Safety:',
+            '  - Plate counts',
+            '  - ELISA for specific pathogens',
+            '  - PCR for rapid detection'
+        ],
+        helper: 'Direct: Plate counts (viable), Microscopy (fast/both); Indirect: Turbidity/OD (fast/both), Dry weight (biomass)',
+        solution: 'Measurement methods: Plate counts (viable cells, slow), Microscopy (fast, live+dead), Turbidity/OD (fast, indirect), Dry weight (biomass)',
+        realWorldContext: 'Water quality tested by plate counts; clinical labs use plate counts for diagnosis; research uses turbidity for real-time monitoring'
+    });
+
+    // Problem 5: Bacterial Growth in Nature vs Lab
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Batch Culture vs Continuous Culture vs Natural Growth',
+        problem: 'Compare bacterial growth in laboratory batch culture versus continuous culture versus natural environments',
+        parameters: {
+            category: 'culture systems',
+            limit: 3
+        },
+        type: 'microbial_growth',
+        context: { difficulty: 'advanced', topic: 'Microbial Growth', focus: 'culture systems' },
+        subparts: [
+            'BACTERIAL GROWTH SYSTEMS:',
+            '',
+            '1. BATCH CULTURE (Closed System):',
+            '',
+            'Definition:',
+            '  - Fixed volume of medium',
+            '  - No nutrients added',
+            '  - No waste removed',
+            '  - Cells go through all growth phases',
+            '',
+            'Characteristics:',
+            '  - Follows standard growth curve',
+            '  - Lag → Log → Stationary → Death',
+            '  - Nutrients depleted over time',
+            '  - Waste accumulates',
+            '  - Environment constantly changing',
+            '',
+            'Examples:',
+            '  - Test tube culture',
+            '  - Flask culture',
+            '  - Most lab cultures',
+            '',
+            'Advantages:',
+            '  - Simple setup',
+            '  - Inexpensive',
+            '  - Good for teaching',
+            '  - Easy to control variables',
+            '',
+            'Disadvantages:',
+            '  - Changing conditions',
+            '  - Limited duration',
+            '  - Not representative of nature',
+            '  - Cells physiologically different in each phase',
+            '',
+            'Uses:',
+            '  - Research (basic studies)',
+            '  - Teaching labs',
+            '  - Producing biomass',
+            '  - Antibiotic production (stationary phase)',
+            '',
+            '2. CONTINUOUS CULTURE (Open System):',
+            '',
+            'Definition:',
+            '  - Fresh medium continuously added',
+            '  - Culture continuously removed',
+            '  - Maintains constant volume',
+            '  - Cells kept in steady state',
+            '',
+            'Types:',
+            '',
+            'A. CHEMOSTAT:',
+            '   - Growth rate controlled by NUTRIENT supply',
+            '   - Dilution rate sets growth rate',
+            '   - One nutrient limiting',
+            '   - Maintains log phase indefinitely',
+            '',
+            '   Components:',
+            '   - Culture vessel',
+            '   - Fresh medium reservoir',
+            '   - Pump (controls dilution rate)',
+            '   - Overflow (removes culture)',
+            '   - Air supply (aeration)',
+            '',
+            '   Dilution rate (D):',
+            '   - D = Flow rate / Culture volume',
+            '   - At steady state: D = μ (growth rate)',
+            '',
+            'B. TURBIDOSTAT:',
+            '   - Growth controlled by CELL DENSITY',
+            '   - Turbidity sensor',
+            '   - Adds medium when OD exceeds set point',
+            '   - Maintains constant cell density',
+            '',
+            'Advantages:',
+            '  - Steady state (constant conditions)',
+            '  - Unlimited duration',
+            '  - Cells physiologically uniform',
+            '  - Reproducible experiments',
+            '  - Study specific growth rates',
+            '',
+            'Disadvantages:',
+            '  - Complex setup',
+            '  - Expensive',
+            '  - Risk of contamination',
+            '  - Requires monitoring',
+            '',
+            'Uses:',
+            '  - Research (physiology, metabolism)',
+            '  - Evolution studies',
+            '  - Industrial fermentation',
+            '  - Producing enzymes, proteins',
+            '  - Wastewater treatment (activated sludge)',
+            '',
+            '3. NATURAL ENVIRONMENTS:',
+            '',
+            'Characteristics:',
+            '  - Multiple species (not pure culture)',
+            '  - Nutrient-limited (usually)',
+            '  - Fluctuating conditions',
+            '  - Spatial heterogeneity',
+            '  - Biofilms common',
+            '',
+            'Growth Patterns:',
+            '  - Rarely exponential',
+            '  - Usually slow, steady state',
+            '  - Generation times much longer than lab',
+            '  - E. coli in gut: hours (vs 20 min in lab)',
+            '',
+            'Nutrient Availability:',
+            '  - Often oligotrophic (nutrient-poor)',
+            '  - Feast and famine cycles',
+            '  - Competition for resources',
+            '',
+            'Cell Characteristics:',
+            '  - Smaller than lab cells',
+            '  - More resistant to stress',
+            '  - Different gene expression',
+            '  - Viable but non-culturable (VBNC) common',
+            '',
+            'Examples:',
+            '',
+            'A. SOIL:',
+            '   - Highly heterogeneous',
+            '   - Nutrients in patches',
+            '   - Microcolonies common',
+            '   - Slow growth',
+            '',
+            'B. AQUATIC:',
+            '   - Usually oligotrophic',
+            '   - Nutrients dilute',
+            '   - Biofilms on surfaces',
+            '   - Planktonic cells slow-growing',
+            '',
+            'C. HOST-ASSOCIATED:',
+            '   - Human gut: dense (10¹¹-10¹² cells/g)',
+            '   - Competition intense',
+            '   - Host factors (immune system)',
+            '   - Anaerobic',
+            '',
+            'D. BIOFILMS:',
+            '   - Attached communities',
+            '   - Encased in EPS (matrix)',
+            '   - Nutrient gradients',
+            '   - Slow growth in deep layers',
+            '   - Very different from planktonic cells',
+            '',
+            'Challenges Studying Natural Growth:',
+            '  - Cannot culture most bacteria (>99%)',
+            '  - Slow growth (days-weeks)',
+            '  - Complex interactions',
+            '  - Difficult to measure',
+            '',
+            'COMPARISON SUMMARY:',
+            '',
+            'Batch Culture:',
+            '  - Rapidly changing',
+            '  - All growth phases',
+            '  - Simple but artificial',
+            '',
+            'Continuous Culture:',
+            '  - Steady state',
+            '  - Log phase maintained',
+            '  - More realistic than batch',
+            '',
+            'Natural Environment:',
+            '  - Slow, steady',
+            '  - Nutrient-limited',
+            '  - Complex, realistic',
+            '',
+            'LAB vs NATURE Gap:',
+            '  Problem: Lab conditions don\'t reflect nature',
+            '  - Lab: Fast growth, single species, rich media',
+            '  - Nature: Slow growth, communities, limited nutrients',
+            '',
+            '  Consequences:',
+            '  - Antibiotic resistance different in vivo',
+            '  - Virulence factors may not express in lab',
+            '  - Many bacteria unculturable',
+            '',
+            '  Solutions:',
+            '  - Use more natural media',
+            '  - Co-culture with other species',
+            '  - Study in host models',
+            '  - Molecular methods (PCR, metagenomics)',
+            '',
+            'INDUSTRIAL APPLICATIONS:',
+            '',
+            'Batch Fermentation:',
+            '  - Antibiotics (harvest stationary phase)',
+            '  - Beer, wine (batch process)',
+            '  - Simple but less efficient',
+            '',
+            'Continuous Fermentation:',
+            '  - Yeast for baking',
+            '  - Ethanol production',
+            '  - Wastewater treatment',
+            '  - More efficient, consistent',
+            '',
+            'Fed-Batch:',
+            '  - Compromise between batch and continuous',
+            '  - Add nutrients periodically',
+            '  - Extends log phase',
+            '  - Common in industry'
+        ],
+        helper: 'Batch (closed, all phases); Continuous/Chemostat (open, steady log phase); Nature (slow, limited nutrients, biofilms)',
+        solution: 'Batch culture: closed system, all growth phases; Continuous culture: steady-state log phase; Nature: slow growth, nutrient-limited, biofilms',
+        realWorldContext: 'Industrial fermentation uses continuous culture for efficiency; most environmental bacteria grow slowly and form biofilms'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVER FUNCTIONS FOR MICROBIOLOGY ==============
+
+function solveBacteriaProblems() {
+    const problems = generateRelatedBacteria();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Bacteria Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMicrobiologyWorkbook({
+            theme: 'microbiological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleMicrobiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveVirusesProblems() {
+    const problems = generateRelatedViruses();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Viruses Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMicrobiologyWorkbook({
+            theme: 'microbiological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleMicrobiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveFungiProblems() {
+    const problems = generateRelatedFungi();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Fungi Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMicrobiologyWorkbook({
+            theme: 'microbiological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleMicrobiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveProtistsProblems() {
+    const problems = generateRelatedProtists();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Protists Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMicrobiologyWorkbook({
+            theme: 'microbiological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleMicrobiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveMicrobialGrowthProblems() {
+    const problems = generateRelatedMicrobialGrowth();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Microbial Growth Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMicrobiologyWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleMicrobiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== UPDATED COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveBiologyDocument() {
+    console.log('Generating Comprehensive Cell Biology and Microbiology Workbook...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Biology Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Cell Biology and Microbiology with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide: Cell Structure, Organelles, Membrane, Division, Transport, Metabolism, and Microbiology',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // SECTION A: CELL BIOLOGY (42 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION A: CELL BIOLOGY (Problems 1-42)',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 300, after: 200 }
+        })
+    );
+
+    // Part I: Cell Structure
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellStructureProblems = generateRelatedCellStructure();
+    cellStructureProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // [Continue with all Cell Biology parts II-VIII as before...]
+    // Part II: Cell Membrane (6 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const membraneProblems = generateRelatedCellMembrane();
+    membraneProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 6}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part III: Organelles (6 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const organellesProblems = generateRelatedOrganelles();
+    organellesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 12}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part IV: Cell Division (5 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellDivisionProblems = generateRelatedCellDivision();
+    cellDivisionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 18}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part V: Mitosis and Meiosis (5 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const mitosisProblems = generateRelatedMitosisMeiosis();
+    mitosisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 23}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VI: Cell Transport (5 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const transportProblems = generateRelatedCellTransport();
+    transportProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 28}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VII: Cellular Respiration (5 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const respirationProblems = generateRelatedCellularRespiration();
+    respirationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 33}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VIII: Photosynthesis (5 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const photosynthesisProblems = generateRelatedPhotosynthesis();
+    photosynthesisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 38}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // SECTION B: MICROBIOLOGY (27 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION B: MICROBIOLOGY (Problems 43-69)',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 300, after: 200 }
+        })
+    );
+
+    // Part IX: Bacteria
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Bacteria (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const bacteriaProblems = generateRelatedBacteria();
+    bacteriaProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 43}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part X: Viruses
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Viruses (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const virusesProblems = generateRelatedViruses();
+    virusesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 48}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XI: Fungi
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: Fungi (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const fungiProblems = generateRelatedFungi();
+    fungiProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 53}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XII: Protists
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: Protists (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const protistsProblems = generateRelatedProtists();
+    protistsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 58}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XIII: Microbial Growth
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Microbial Growth (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const microbialGrowthProblems = generateRelatedMicrobialGrowth();
+    microbialGrowthProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 63}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PROCESS ALL CELL BIOLOGY PROBLEMS (as before) ==============
+    // [Process Parts I-VIII exactly as in original code...]
+
+    console.log('\nProcessing Part I: Cell Structure...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION A: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellStructureSolved = solveCellStructureProblems();
+    cellStructureSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Structure Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // [Continue with Parts II-VIII - Cell Membrane, Organelles, Cell Division, Mitosis/Meiosis, Transport, Respiration, Photosynthesis...]
+    // (Same code as before for these sections)
+
+    // For brevity, I'll show just one more section and note that others follow the same pattern:
+
+    console.log('\nProcessing Part II: Cell Membrane...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const membraneSolved = solveCellMembraneProblems();
+    membraneSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Membrane Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 6}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // [Parts III-VIII follow same pattern - omitted for brevity]
+    // Process Organelles, Cell Division, Mitosis/Meiosis, Transport, Respiration, Photosynthesis...
+
+    // ============== PROCESS ALL MICROBIOLOGY PROBLEMS ==============
+
+    console.log('\nProcessing SECTION B: MICROBIOLOGY...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION B: MICROBIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    // Part IX: Bacteria
+    console.log('\nProcessing Part IX: Bacteria...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Bacteria',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const bacteriaSolved = solveBacteriaProblems();
+    bacteriaSolved.forEach((solved, index) => {
+        console.log(`  Adding Bacteria Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 43}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part X: Viruses
+    console.log('\nProcessing Part X: Viruses...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Viruses',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const virusesSolved = solveVirusesProblems();
+    virusesSolved.forEach((solved, index) => {
+        console.log(`  Adding Viruses Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 48}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part XI: Fungi
+    console.log('\nProcessing Part XI: Fungi...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: Fungi',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const fungiSolved = solveFungiProblems();
+    fungiSolved.forEach((solved, index) => {
+        console.log(`  Adding Fungi Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 53}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part XII: Protists
+    console.log('\nProcessing Part XII: Protists...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: Protists',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const protistsSolved = solveProtistsProblems();
+    protistsSolved.forEach((solved, index) => {
+        console.log(`  Adding Protists Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 58}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part XIII: Microbial Growth
+    console.log('\nProcessing Part XIII: Microbial Growth...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Microbial Growth',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const microbialGrowthSolved = solveMicrobialGrowthProblems();
+    microbialGrowthSolved.forEach((solved, index) => {
+        console.log(`  Adding Microbial Growth Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 63}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_biology_workbook_cell_and_micro.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE BIOLOGY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 69');
+        console.log('\n  SECTION A: CELL BIOLOGY (42 problems)');
+        console.log('    - Cell Structure: 5 problems');
+        console.log('    - Cell Membrane: 6 problems');
+        console.log('    - Cell Organelles: 6 problems');
+        console.log('    - Cell Division: 5 problems');
+        console.log('    - Mitosis and Meiosis: 5 problems');
+        console.log('    - Cell Transport: 5 problems');
+        console.log('    - Cellular Respiration: 5 problems');
+        console.log('    - Photosynthesis: 5 problems');
+        console.log('\n  SECTION B: MICROBIOLOGY (27 problems)');
+        console.log('    - Bacteria: 5 problems');
+        console.log('    - Viruses: 5 problems');
+        console.log('    - Fungi: 5 problems');
+        console.log('    - Protists: 5 problems');
+        console.log('    - Microbial Growth: 5 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('\n  SECTION A: CELL BIOLOGY');
+        console.log('    • Part I: Cell Structure and Types (Problems 1-5)');
+        console.log('    • Part II: Cell Membrane (Problems 6-11)');
+        console.log('    • Part III: Cell Organelles (Problems 12-17)');
+        console.log('    • Part IV: Cell Division (Problems 18-22)');
+        console.log('    • Part V: Mitosis and Meiosis (Problems 23-27)');
+        console.log('    • Part VI: Cell Transport (Problems 28-32)');
+        console.log('    • Part VII: Cellular Respiration (Problems 33-37)');
+        console.log('    • Part VIII: Photosynthesis (Problems 38-42)');
+        console.log('\n  SECTION B: MICROBIOLOGY');
+        console.log('    • Part IX: Bacteria (Problems 43-47)');
+        console.log('    • Part X: Viruses (Problems 48-52)');
+        console.log('    • Part XI: Fungi (Problems 53-57)');
+        console.log('    • Part XII: Protists (Problems 58-62)');
+        console.log('    • Part XIII: Microbial Growth (Problems 63-67)');
+        console.log('\n📄 EXPECTED PAGES: 250+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step explanation');
+        console.log('  • Detailed biological/microbiological content');
+        console.log('  • Key concepts and definitions');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common misconceptions addressed');
+        console.log('  • Pedagogical notes for teaching');
+        console.log('  • Comparisons and contrasts');
+        console.log('  • Examples from nature and medicine');
+        console.log('  • Clinical and practical significance');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveBiologyDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});        

@@ -1,0 +1,5014 @@
+Here's the complete code for the Genetics and Molecular Biology related problem generators, solver functions, and integrated comprehensive document generation:
+// ============== MENDELIAN GENETICS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedMendelianGenetics() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic Dominance
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Mendel\'s Law of Dominance',
+        problem: 'Explain Mendel\'s Law of Dominance using pea plant height as an example',
+        parameters: {
+            specificItems: ['Law of Dominance'],
+            type: 'law',
+            organism: 'pea plant',
+            limit: 1
+        },
+        type: 'mendelian_genetics',
+        context: { difficulty: 'beginner', topic: 'Mendelian Genetics', focus: 'dominance' },
+        subparts: [
+            'Law of Dominance:',
+            '  - When two different alleles present, one masks the other',
+            '  - Dominant allele expressed in heterozygote',
+            '  - Recessive allele hidden in heterozygote',
+            '',
+            'Pea Plant Height Example:',
+            '  - T (tall) is dominant',
+            '  - t (short) is recessive',
+            '',
+            'Genotypes and Phenotypes:',
+            '  - TT (homozygous dominant) → Tall',
+            '  - Tt (heterozygous) → Tall (T masks t)',
+            '  - tt (homozygous recessive) → Short',
+            '',
+            'Key Point: Tt looks identical to TT because T is dominant'
+        ],
+        helper: 'Dominant allele (capital) masks recessive (lowercase) in heterozygote',
+        solution: 'Dominant allele expressed when present; recessive only expressed when homozygous',
+        realWorldContext: 'Many human traits follow this pattern (widow\'s peak, dimples)'
+    });
+
+    // Problem 2: Law of Segregation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Law of Segregation',
+        problem: 'Describe Mendel\'s Law of Segregation and explain how alleles separate during gamete formation',
+        parameters: {
+            specificItems: ['Law of Segregation'],
+            type: 'law',
+            limit: 1
+        },
+        type: 'mendelian_genetics',
+        context: { difficulty: 'beginner', topic: 'Mendelian Genetics', focus: 'segregation' },
+        subparts: [
+            'Law of Segregation:',
+            '  - Allele pairs separate during gamete formation (meiosis)',
+            '  - Each gamete receives only ONE allele from each pair',
+            '  - Random which allele goes to which gamete',
+            '',
+            'Example with Aa parent:',
+            '  Parent genotype: Aa',
+            '  During meiosis: Alleles separate',
+            '  Gametes produced:',
+            '    - 50% carry A',
+            '    - 50% carry a',
+            '',
+            'Why Important:',
+            '  - Explains 3:1 ratio in F2 generation',
+            '  - Each parent contributes one allele',
+            '  - Offspring get new combination',
+            '',
+            'Aa × Aa cross:',
+            '  - Parent gametes: A, a (from each)',
+            '  - Offspring: 25% AA, 50% Aa, 25% aa',
+            '  - Phenotypic ratio: 3:1 (dominant:recessive)'
+        ],
+        helper: 'Each gamete gets one allele from each pair (like dealing cards)',
+        solution: 'Allele pairs separate during meiosis; each gamete receives one allele per gene',
+        realWorldContext: 'This ensures genetic variation in offspring'
+    });
+
+    // Problem 3: Independent Assortment
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Law of Independent Assortment',
+        problem: 'Explain Mendel\'s Law of Independent Assortment using a dihybrid cross example',
+        parameters: {
+            specificItems: ['Law of Independent Assortment'],
+            type: 'law',
+            limit: 1
+        },
+        type: 'mendelian_genetics',
+        context: { difficulty: 'intermediate', topic: 'Mendelian Genetics', focus: 'independent assortment' },
+        subparts: [
+            'Law of Independent Assortment:',
+            '  - Genes for different traits segregate independently',
+            '  - Inheritance of one trait doesn\'t affect another',
+            '  - Only true for genes on different chromosomes (not linked)',
+            '',
+            'Dihybrid Cross Example (TtYy × TtYy):',
+            '  - T/t = height (Tall/short)',
+            '  - Y/y = seed color (Yellow/green)',
+            '',
+            'Parent TtYy produces 4 gamete types:',
+            '  - TY (25%)',
+            '  - Ty (25%)',
+            '  - tY (25%)',
+            '  - ty (25%)',
+            '',
+            'F2 Phenotypic Ratio: 9:3:3:1',
+            '  - 9 Tall Yellow (T_Y_)',
+            '  - 3 Tall green (T_yy)',
+            '  - 3 short Yellow (ttY_)',
+            '  - 1 short green (ttyy)',
+            '',
+            'Why 9:3:3:1?',
+            '  - Height: 3:1 ratio (Tall:short)',
+            '  - Color: 3:1 ratio (Yellow:green)',
+            '  - Independent: 3:1 × 3:1 = 9:3:3:1',
+            '',
+            'Exception: Linked genes (same chromosome) don\'t assort independently'
+        ],
+        helper: 'Different traits sorted independently (height doesn\'t affect color)',
+        solution: 'Genes on different chromosomes assort independently; produces 9:3:3:1 ratio in dihybrid cross',
+        realWorldContext: 'Allows unlimited combinations of parental traits in offspring'
+    });
+
+    // Problem 4: Genotype vs Phenotype
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Genotype and Phenotype Distinction',
+        problem: 'Distinguish between genotype and phenotype, providing clear examples',
+        parameters: {
+            specificItems: ['genotype', 'phenotype'],
+            limit: 2
+        },
+        type: 'mendelian_genetics',
+        context: { difficulty: 'beginner', topic: 'Mendelian Genetics', focus: 'terminology' },
+        subparts: [
+            'GENOTYPE:',
+            '  Definition: Genetic makeup (alleles present)',
+            '  - Written with letters',
+            '  - Examples: AA, Aa, aa',
+            '  - Cannot see by looking',
+            '  - Determines potential',
+            '',
+            'PHENOTYPE:',
+            '  Definition: Physical appearance (traits expressed)',
+            '  - What you can observe',
+            '  - Examples: Tall, short, purple flowers',
+            '  - Result of genotype + environment',
+            '  - What you see',
+            '',
+            'Relationship:',
+            '  Genotype → Phenotype',
+            '  (Genetic code → Observable trait)',
+            '',
+            'Examples:',
+            '  Height in pea plants:',
+            '    Genotype TT → Phenotype Tall',
+            '    Genotype Tt → Phenotype Tall',
+            '    Genotype tt → Phenotype Short',
+            '',
+            '  Note: TT and Tt have different genotypes',
+            '        but SAME phenotype (both tall)',
+            '',
+            'Key Insight:',
+            '  - Cannot always determine genotype from phenotype',
+            '  - Dominant phenotype could be AA or Aa',
+            '  - Need test cross to determine'
+        ],
+        helper: 'Genotype = genes you have; Phenotype = traits you show',
+        solution: 'Genotype is genetic makeup (AA, Aa, aa); Phenotype is observable trait (tall, short)',
+        realWorldContext: 'Identical twins have same genotype but can have slightly different phenotypes'
+    });
+
+    // Problem 5: Test Cross
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Test Cross to Determine Unknown Genotype',
+        problem: 'Explain how a test cross is used to determine if a dominant phenotype is homozygous or heterozygous',
+        parameters: {
+            specificItems: ['Test Cross'],
+            type: 'cross',
+            limit: 1
+        },
+        type: 'mendelian_genetics',
+        context: { difficulty: 'intermediate', topic: 'Mendelian Genetics', focus: 'test cross' },
+        subparts: [
+            'TEST CROSS:',
+            '  Purpose: Determine unknown genotype',
+            '  Method: Cross with homozygous recessive (aa)',
+            '',
+            'Problem: Tall pea plant (T_)',
+            '  - Could be TT or Tt',
+            '  - Both look identical (tall)',
+            '  - How to determine which?',
+            '',
+            'Solution: Test Cross',
+            '  Cross unknown (T?) with short plant (tt)',
+            '',
+            'SCENARIO 1: Unknown is TT',
+            '  Cross: TT × tt',
+            '  Offspring: All Tt (100% tall)',
+            '  Conclusion: Unknown was TT',
+            '',
+            'SCENARIO 2: Unknown is Tt',
+            '  Cross: Tt × tt',
+            '  Offspring: 50% Tt (tall), 50% tt (short)',
+            '  Ratio: 1:1 (Tall:short)',
+            '  Conclusion: Unknown was Tt',
+            '',
+            'Why Use Homozygous Recessive?',
+            '  - Only contributes recessive allele (t)',
+            '  - Offspring phenotype reveals unknown\'s alleles',
+            '  - If any short offspring appear → unknown was Tt',
+            '  - If all tall → unknown was TT',
+            '',
+            'General Rule:',
+            '  A? × aa',
+            '  - All dominant phenotype → A? is AA',
+            '  - Some recessive phenotype → A? is Aa'
+        ],
+        helper: 'Cross with recessive (aa) to reveal hidden alleles',
+        solution: 'Test cross with homozygous recessive; offspring ratio reveals unknown genotype',
+        realWorldContext: 'Breeders use test crosses to identify pure-breeding individuals'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PUNNETT SQUARES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPunnettSquares() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic Monohybrid Square
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Monohybrid Punnett Square',
+        problem: 'Construct a Punnett square for Aa × Aa and determine genotypic and phenotypic ratios',
+        parameters: {
+            specificItems: ['monohybrid'],
+            type: 'monohybridCross',
+            genotype: 'Aa',
+            limit: 1
+        },
+        type: 'punnett_squares',
+        context: { difficulty: 'beginner', topic: 'Punnett Squares', focus: 'monohybrid' },
+        subparts: [
+            'Monohybrid Cross: Aa × Aa',
+            '',
+            'Step 1: Determine Gametes',
+            '  Parent 1 (Aa): Produces A and a',
+            '  Parent 2 (Aa): Produces A and a',
+            '',
+            'Step 2: Set Up Punnett Square (2×2)',
+            '       A    a',
+            '   ┌─────────┐',
+            ' A │ AA | Aa │',
+            '   ├─────────┤',
+            ' a │ Aa | aa │',
+            '   └─────────┘',
+            '',
+            'Step 3: Fill in Offspring',
+            '  Top-left: AA',
+            '  Top-right: Aa',
+            '  Bottom-left: Aa',
+            '  Bottom-right: aa',
+            '',
+            'Step 4: Count Genotypes',
+            '  1 AA : 2 Aa : 1 aa',
+            '  Genotypic ratio = 1:2:1',
+            '',
+            'Step 5: Determine Phenotypes (assuming complete dominance)',
+            '  AA → Dominant phenotype',
+            '  Aa → Dominant phenotype',
+            '  aa → Recessive phenotype',
+            '  3 Dominant : 1 Recessive',
+            '  Phenotypic ratio = 3:1',
+            '',
+            'Probabilities:',
+            '  AA: 25% (1/4)',
+            '  Aa: 50% (2/4)',
+            '  aa: 25% (1/4)',
+            '  Dominant phenotype: 75% (3/4)',
+            '  Recessive phenotype: 25% (1/4)'
+        ],
+        helper: 'List gametes, make 2×2 grid, combine alleles from row and column',
+        solution: 'Genotypic ratio 1:2:1 (AA:Aa:aa); Phenotypic ratio 3:1 (dominant:recessive)',
+        realWorldContext: 'Predicts probability of genetic diseases in children'
+    });
+
+    // Problem 2: Dihybrid Cross
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Dihybrid Punnett Square',
+        problem: 'Construct a dihybrid Punnett square for AaBb × AaBb and interpret the 9:3:3:1 ratio',
+        parameters: {
+            specificItems: ['dihybrid'],
+            type: 'dihybridCross',
+            genotype: 'AaBb',
+            limit: 1
+        },
+        type: 'punnett_squares',
+        context: { difficulty: 'intermediate', topic: 'Punnett Squares', focus: 'dihybrid' },
+        subparts: [
+            'Dihybrid Cross: AaBb × AaBb',
+            '  (Two traits: A/a and B/b)',
+            '',
+            'Step 1: Determine Gametes (use FOIL)',
+            '  Parent AaBb can produce:',
+            '  - AB (First: A and B)',
+            '  - Ab (Outer: A and b)',
+            '  - aB (Inner: a and B)',
+            '  - ab (Last: a and b)',
+            '  Each gamete type: 25% probability',
+            '',
+            'Step 2: Set Up Punnett Square (4×4)',
+            '  16 boxes total',
+            '  Each parent contributes one of 4 gamete types',
+            '',
+            'Step 3: Fill in all 16 combinations',
+            '  (Showing abbreviated - too large for full display)',
+            '',
+            'Step 4: Count Phenotypes',
+            '  Assuming complete dominance for both genes:',
+            '',
+            '  A_B_ (Dominant for both): 9/16',
+            '  A_bb (Dom A, rec b): 3/16',
+            '  aaB_ (rec a, Dom B): 3/16',
+            '  aabb (rec both): 1/16',
+            '',
+            'Phenotypic Ratio: 9:3:3:1',
+            '',
+            'Example (Height and Color):',
+            '  9 Tall Yellow',
+            '  3 Tall green',
+            '  3 short Yellow',
+            '  1 short green',
+            '',
+            'Why 9:3:3:1?',
+            '  Height ratio: 3 Tall : 1 short',
+            '  Color ratio: 3 Yellow : 1 green',
+            '  Combined: (3:1) × (3:1) = 9:3:3:1',
+            '',
+            'This ratio confirms:',
+            '  - Independent assortment',
+            '  - Two unlinked genes',
+            '  - Complete dominance for both'
+        ],
+        helper: 'Use FOIL to find 4 gamete types, then make 4×4 grid (16 boxes)',
+        solution: 'Dihybrid produces 9:3:3:1 phenotypic ratio when genes assort independently',
+        realWorldContext: 'Used to predict multiple traits simultaneously in breeding programs'
+    });
+
+    // Problem 3: Test Cross Square
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Test Cross Punnett Square',
+        problem: 'Use a Punnett square to show how a test cross (Aa × aa) reveals the unknown genotype',
+        parameters: {
+            specificItems: ['test cross'],
+            type: 'testCross',
+            limit: 1
+        },
+        type: 'punnett_squares',
+        context: { difficulty: 'intermediate', topic: 'Punnett Squares', focus: 'test cross' },
+        subparts: [
+            'Test Cross: A? × aa',
+            '  Goal: Determine if unknown is AA or Aa',
+            '',
+            'CASE 1: Unknown is AA',
+            '',
+            'Cross: AA × aa',
+            '',
+            'Gametes:',
+            '  AA parent: All A',
+            '  aa parent: All a',
+            '',
+            'Punnett Square:',
+            '       a    a',
+            '   ┌─────────┐',
+            ' A │ Aa | Aa │',
+            '   ├─────────┤',
+            ' A │ Aa | Aa │',
+            '   └─────────┘',
+            '',
+            'Result: 100% Aa (all dominant phenotype)',
+            'Conclusion: Unknown was AA',
+            '',
+            'CASE 2: Unknown is Aa',
+            '',
+            'Cross: Aa × aa',
+            '',
+            'Gametes:',
+            '  Aa parent: A and a',
+            '  aa parent: All a',
+            '',
+            'Punnett Square:',
+            '       a    a',
+            '   ┌─────────┐',
+            ' A │ Aa | Aa │',
+            '   ├─────────┤',
+            ' a │ aa | aa │',
+            '   └─────────┘',
+            '',
+            'Result: 50% Aa, 50% aa',
+            'Phenotypic ratio: 1:1 (dominant:recessive)',
+            'Conclusion: Unknown was Aa',
+            '',
+            'Interpretation:',
+            '  If any recessive offspring → Unknown was heterozygous',
+            '  If all dominant offspring → Unknown was homozygous dominant'
+        ],
+        helper: 'Cross with aa reveals hidden alleles through offspring ratios',
+        solution: 'All dominant offspring = homozygous; 1:1 ratio = heterozygous',
+        realWorldContext: 'Farmers test-cross prize animals to identify pure breeds'
+    });
+
+    // Problem 4: Incomplete Dominance Square
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Incomplete Dominance Punnett Square',
+        problem: 'Construct a Punnett square for incomplete dominance (RR × WW → RW) and explain the 1:2:1 ratio',
+        parameters: {
+            specificItems: ['incomplete dominance'],
+            type: 'incompleteDominance',
+            limit: 1
+        },
+        type: 'punnett_squares',
+        context: { difficulty: 'intermediate', topic: 'Punnett Squares', focus: 'incomplete dominance' },
+        subparts: [
+            'Incomplete Dominance Example: Snapdragon flowers',
+            '  RR = Red',
+            '  WW = White',
+            '  RW = Pink (intermediate, not red!)',
+            '',
+            'P Generation Cross: RR × WW',
+            '',
+            'Punnett Square:',
+            '       W    W',
+            '   ┌─────────┐',
+            ' R │ RW | RW │',
+            '   ├─────────┤',
+            ' R │ RW | RW │',
+            '   └─────────┘',
+            '',
+            'F1 Result: 100% RW (all pink)',
+            '',
+            'F2 Generation Cross: RW × RW',
+            '',
+            'Punnett Square:',
+            '       R    W',
+            '   ┌─────────┐',
+            ' R │ RR | RW │',
+            '   ├─────────┤',
+            ' W │ RW | WW │',
+            '   └─────────┘',
+            '',
+            'F2 Results:',
+            '  Genotypic Ratio: 1 RR : 2 RW : 1 WW',
+            '  Phenotypic Ratio: 1 Red : 2 Pink : 1 White',
+            '  Also 1:2:1!',
+            '',
+            'Key Difference from Complete Dominance:',
+            '  - Complete dominance: 3:1 phenotypic ratio',
+            '  - Incomplete dominance: 1:2:1 phenotypic ratio',
+            '  - Genotypic and phenotypic ratios are THE SAME',
+            '',
+            'Why?',
+            '  - All three genotypes have different phenotypes',
+            '  - Heterozygote is intermediate (blend)',
+            '  - No masking of alleles'
+        ],
+        helper: 'Incomplete dominance: heterozygote shows intermediate phenotype (blend)',
+        solution: 'Incomplete dominance gives 1:2:1 both genotypic and phenotypic ratios',
+        realWorldContext: 'Human hair texture shows incomplete dominance (straight, wavy, curly)'
+    });
+
+// Problem 5: Probability Calculations
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Genetic Probability Calculations',
+        problem: 'Calculate the probability of specific offspring genotypes using multiplication and addition rules',
+        parameters: {
+            specificItems: ['probability'],
+            type: 'calculation',
+            limit: 1
+        },
+        type: 'punnett_squares',
+        context: { difficulty: 'intermediate', topic: 'Punnett Squares', focus: 'probability' },
+        subparts: [
+            'Probability Rules in Genetics:',
+            '',
+            '1. MULTIPLICATION RULE (AND):',
+            '  - Probability of independent events both occurring',
+            '  - P(A AND B) = P(A) × P(B)',
+            '',
+            'Example: AaBb × AaBb',
+            '  What is probability of AaBb offspring?',
+            '',
+            '  For Aa:',
+            '    Aa × Aa → 50% Aa (from Punnett square)',
+            '  For Bb:',
+            '    Bb × Bb → 50% Bb',
+            '',
+            '  P(AaBb) = P(Aa) × P(Bb)',
+            '  P(AaBb) = 1/2 × 1/2 = 1/4 = 25%',
+            '',
+            '2. ADDITION RULE (OR):',
+            '  - Probability of either event occurring',
+            '  - P(A OR B) = P(A) + P(B)',
+            '',
+            'Example: Aa × Aa',
+            '  What is probability of heterozygous OR homozygous dominant?',
+            '',
+            '  P(AA) = 1/4',
+            '  P(Aa) = 1/2',
+            '  P(AA OR Aa) = 1/4 + 1/2 = 3/4 = 75%',
+            '',
+            'Complex Example:',
+            '  AaBbCc × AaBbCc',
+            '  Probability of AaBbCc offspring?',
+            '',
+            '  P(Aa) = 1/2',
+            '  P(Bb) = 1/2',
+            '  P(Cc) = 1/2',
+            '',
+            '  P(AaBbCc) = 1/2 × 1/2 × 1/2 = 1/8 = 12.5%',
+            '',
+            'Important Notes:',
+            '  - Each fertilization is independent',
+            '  - Previous offspring don\'t affect next',
+            '  - Ratios are probabilities, not guarantees',
+            '  - 3:1 ratio doesn\'t mean exactly 3 and 1 in small samples'
+        ],
+        helper: 'Multiply for "and" (both events); Add for "or" (either event)',
+        solution: 'Use multiplication for independent events; addition for alternative outcomes',
+        realWorldContext: 'Genetic counselors calculate disease risk probabilities for couples'
+    });
+
+    return relatedProblems;
+}
+
+// ============== DNA STRUCTURE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedDNAStructure() {
+    const relatedProblems = [];
+
+    // Problem 1: Double Helix Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'DNA Double Helix',
+        problem: 'Describe the structure of DNA including the double helix, backbone, and base pairing',
+        parameters: {
+            specificItems: ['double helix', 'nucleotide'],
+            base: 'A',
+            limit: 2
+        },
+        type: 'dna_structure',
+        context: { difficulty: 'beginner', topic: 'DNA Structure', focus: 'double helix' },
+        subparts: [
+            'DNA Structure - Double Helix:',
+            '',
+            'Overall Shape:',
+            '  - Twisted ladder (double helix)',
+            '  - Right-handed spiral',
+            '  - Two antiparallel strands',
+            '  - Width: ~2 nanometers',
+            '',
+            'Components:',
+            '',
+            '1. SUGAR-PHOSPHATE BACKBONE:',
+            '  - Outside of helix',
+            '  - Alternating sugar (deoxyribose) and phosphate',
+            '  - Phosphodiester bonds connect nucleotides',
+            '  - Provides structural support',
+            '  - Negatively charged (from phosphates)',
+            '',
+            '2. NITROGENOUS BASES:',
+            '  - Inside helix (protected)',
+            '  - Like rungs of ladder',
+            '  - Perpendicular to backbone',
+            '  - Form base pairs',
+            '',
+            'Antiparallel Strands:',
+            '  - One strand: 5\' → 3\'',
+            '  - Other strand: 3\' → 5\'',
+            '  - Run in opposite directions',
+            '  - Essential for replication',
+            '',
+            'Grooves:',
+            '  - Major groove (wide): protein binding site',
+            '  - Minor groove (narrow): less protein access',
+            '',
+            'Discoverers: Watson and Crick (1953)',
+            'Based on: Rosalind Franklin\'s X-ray crystallography'
+        ],
+        helper: 'Think of twisted ladder: sides = backbone, rungs = base pairs',
+        solution: 'DNA is double helix with sugar-phosphate backbone outside, bases inside forming pairs',
+        realWorldContext: 'DNA structure explains how genetic information is stored and replicated'
+    });
+
+    // Problem 2: Base Pairing Rules
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Complementary Base Pairing',
+        problem: 'Explain the base pairing rules and why A pairs with T and G pairs with C',
+        parameters: {
+            specificItems: ['base pairing'],
+            base: 'G',
+            type: 'purine',
+            limit: 1
+        },
+        type: 'dna_structure',
+        context: { difficulty: 'beginner', topic: 'DNA Structure', focus: 'base pairing' },
+        subparts: [
+            'Base Pairing Rules:',
+            '',
+            'Four Nitrogenous Bases:',
+            '  Purines (double ring, larger):',
+            '    - Adenine (A)',
+            '    - Guanine (G)',
+            '',
+            '  Pyrimidines (single ring, smaller):',
+            '    - Thymine (T)',
+            '    - Cytosine (C)',
+            '',
+            'Pairing Rules:',
+            '  A pairs with T (2 hydrogen bonds)',
+            '  G pairs with C (3 hydrogen bonds)',
+            '',
+            'Why These Specific Pairs?',
+            '',
+            '1. SIZE COMPLEMENTARITY:',
+            '  - Purine must pair with pyrimidine',
+            '  - Keeps uniform width of helix',
+            '  - Big + Small = Constant distance',
+            '',
+            '2. HYDROGEN BONDING:',
+            '  - A and T form 2 H-bonds',
+            '  - G and C form 3 H-bonds',
+            '  - Specific chemistry allows only these pairs',
+            '',
+            '3. CHARGAFF\'S RULE:',
+            '  - Amount of A = Amount of T',
+            '  - Amount of G = Amount of C',
+            '  - Confirms base pairing',
+            '',
+            'Significance:',
+            '  - Allows accurate replication',
+            '  - One strand templates the other',
+            '  - Sequence of one strand determines other',
+            '',
+            'Example:',
+            '  If one strand: 5\'-ATGC-3\'',
+            '  Other strand: 3\'-TACG-5\'',
+            '',
+            'Note: RNA uses Uracil (U) instead of Thymine (T)'
+        ],
+        helper: 'Remember: A-T (2 bonds, AT has 2 letters), G-C (3 bonds, GC has 3 letters)',
+        solution: 'A pairs with T (2 H-bonds), G pairs with C (3 H-bonds) due to size and bonding complementarity',
+        realWorldContext: 'Base pairing is the foundation of DNA replication and PCR technology'
+    });
+
+    // Problem 3: Nucleotide Structure
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Nucleotide Components',
+        problem: 'Identify and describe the three components of a DNA nucleotide',
+        parameters: {
+            specificItems: ['nucleotide'],
+            type: 'structure',
+            limit: 1
+        },
+        type: 'dna_structure',
+        context: { difficulty: 'intermediate', topic: 'DNA Structure', focus: 'nucleotide' },
+        subparts: [
+            'DNA Nucleotide Structure:',
+            '',
+            'Three Components:',
+            '',
+            '1. PHOSPHATE GROUP (PO₄³⁻):',
+            '  - Contains phosphorus',
+            '  - Negatively charged',
+            '  - Connects to 5\' carbon of sugar',
+            '  - Links nucleotides together',
+            '  - Forms backbone with sugar',
+            '',
+            '2. DEOXYRIBOSE SUGAR (5-carbon):',
+            '  - Pentagon-shaped',
+            '  - Carbons numbered 1\' to 5\' (prime notation)',
+            '  - "Deoxy" = missing oxygen at 2\' carbon',
+            '  - 1\' carbon: Attaches to base',
+            '  - 3\' carbon: OH group (next nucleotide connects)',
+            '  - 5\' carbon: Phosphate attached',
+            '',
+            '3. NITROGENOUS BASE:',
+            '  - Attached to 1\' carbon of sugar',
+            '  - Four types: A, T, G, C',
+            '  - Purines (A, G): Double ring',
+            '  - Pyrimidines (T, C): Single ring',
+            '  - Determines genetic information',
+            '',
+            'How Nucleotides Connect:',
+            '  - Phosphodiester bond',
+            '  - 3\' OH of one sugar → 5\' phosphate of next',
+            '  - Creates sugar-phosphate backbone',
+            '  - Direction: 5\' → 3\'',
+            '',
+            'DNA vs RNA Nucleotides:',
+            '  DNA:',
+            '    - Deoxyribose sugar (no O at 2\')',
+            '    - Thymine base',
+            '  RNA:',
+            '    - Ribose sugar (has O at 2\')',
+            '    - Uracil base (instead of Thymine)',
+            '',
+            'Mnemonic: Sugar-Phosphate-Base (SPB)'
+        ],
+        helper: 'Three parts: Phosphate (connector), Sugar (backbone), Base (information)',
+        solution: 'Nucleotide = Phosphate + Deoxyribose sugar + Nitrogenous base',
+        realWorldContext: 'ATP (cellular energy) is a modified nucleotide with three phosphates'
+    });
+
+    // Problem 4: DNA Packaging
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'DNA Packaging and Chromatin',
+        problem: 'Explain how 2 meters of DNA fits into a nucleus through hierarchical packaging',
+        parameters: {
+            specificItems: ['DNA packaging', 'histone', 'chromatin'],
+            type: 'structure',
+            limit: 3
+        },
+        type: 'dna_structure',
+        context: { difficulty: 'intermediate', topic: 'DNA Structure', focus: 'packaging' },
+        subparts: [
+            'DNA Packaging Problem:',
+            '  - Human DNA: ~2 meters long (6 feet)',
+            '  - Nucleus diameter: ~10 micrometers',
+            '  - Must fit without tangling',
+            '  - Must still be accessible for transcription',
+            '',
+            'Hierarchical Packaging Levels:',
+            '',
+            '1. DNA DOUBLE HELIX (2 nm):',
+            '  - Starting point',
+            '  - Naked DNA',
+            '',
+            '2. NUCLEOSOME (11 nm):',
+            '  - DNA wraps around histone octamer',
+            '  - 8 histone proteins (2 each of H2A, H2B, H3, H4)',
+            '  - 147 base pairs wrap 1.65 turns',
+            '  - "Beads on a string" appearance',
+            '  - Histones positively charged',
+            '  - DNA negatively charged',
+            '  - Electrostatic attraction',
+            '',
+            '3. CHROMATIN FIBER (30 nm):',
+            '  - Nucleosomes coil together',
+            '  - H1 histone helps',
+            '  - "Solenoid" structure',
+            '',
+            '4. LOOPED DOMAINS (300 nm):',
+            '  - Chromatin forms loops',
+            '  - Attached to protein scaffold',
+            '',
+            '5. CONDENSED CHROMATIN (700 nm):',
+            '  - Further coiling',
+            '',
+            '6. METAPHASE CHROMOSOME (1400 nm):',
+            '  - Most condensed form',
+            '  - Only during cell division',
+            '  - Visible under microscope',
+            '  - Sister chromatids joined at centromere',
+            '',
+            'Chromatin Types:',
+            '  Euchromatin:',
+            '    - Loosely packed',
+            '    - Transcriptionally active',
+            '    - Light staining',
+            '  Heterochromatin:',
+            '    - Tightly packed',
+            '    - Transcriptionally inactive',
+            '    - Dark staining',
+            '',
+            'Packaging Efficiency:',
+            '  - 10,000-fold compaction',
+            '  - Allows 2 meters → 10 μm'
+        ],
+        helper: 'DNA wraps around histones (nucleosomes), then coils progressively tighter',
+        solution: 'DNA packages through nucleosomes → chromatin fiber → loops → condensed chromatin → chromosome',
+        realWorldContext: 'Gene activation requires unpacking DNA from tight chromatin'
+    });
+
+    // Problem 5: DNA vs RNA
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'DNA vs RNA Comparison',
+        problem: 'Compare and contrast the structures of DNA and RNA',
+        parameters: {
+            specificItems: ['DNA', 'RNA'],
+            type: 'comparison',
+            limit: 2
+        },
+        type: 'dna_structure',
+        context: { difficulty: 'intermediate', topic: 'DNA Structure', focus: 'DNA vs RNA' },
+        subparts: [
+            'DNA vs RNA Structural Differences:',
+            '',
+            '1. SUGAR:',
+            '  DNA: Deoxyribose (no O at 2\' carbon)',
+            '  RNA: Ribose (has OH at 2\' carbon)',
+            '  Significance: RNA less stable due to 2\' OH',
+            '',
+            '2. BASES:',
+            '  DNA: Adenine, Thymine, Guanine, Cytosine (A, T, G, C)',
+            '  RNA: Adenine, Uracil, Guanine, Cytosine (A, U, G, C)',
+            '  Difference: RNA has Uracil instead of Thymine',
+            '  Base Pairing:',
+            '    DNA: A-T, G-C',
+            '    RNA: A-U, G-C',
+            '',
+            '3. STRUCTURE:',
+            '  DNA:',
+            '    - Double-stranded (helix)',
+            '    - Very long molecules',
+            '    - Stable structure',
+            '  RNA:',
+            '    - Usually single-stranded',
+            '    - Can fold on itself (hairpins)',
+            '    - Shorter molecules',
+            '    - Less stable',
+            '',
+            '4. FUNCTION:',
+            '  DNA:',
+            '    - Long-term storage of genetic info',
+            '    - Template for RNA',
+            '    - Stays in nucleus (eukaryotes)',
+            '  RNA:',
+            '    - Temporary messenger',
+            '    - Protein synthesis',
+            '    - Catalytic activity (ribozymes)',
+            '    - Can leave nucleus',
+            '',
+            '5. LOCATION:',
+            '  DNA: Nucleus, mitochondria, chloroplasts',
+            '  RNA: Nucleus, cytoplasm, ribosomes',
+            '',
+            '6. STABILITY:',
+            '  DNA: Very stable (2\' H, double-stranded)',
+            '  RNA: Less stable (2\' OH reactive)',
+            '',
+            'Why Different?',
+            '  - DNA: Permanent storage (stable)',
+            '  - RNA: Temporary messenger (disposable)',
+            '',
+            'Similarity:',
+            '  - Both nucleic acids',
+            '  - Both store genetic information',
+            '  - Both use base pairing'
+        ],
+        helper: 'DNA = Double, Deoxyribose, Thymine; RNA = (usually) Single, Ribose, Uracil',
+        solution: 'DNA: double-stranded, deoxyribose, thymine, stable; RNA: single-stranded, ribose, uracil, temporary',
+        realWorldContext: 'RNA viruses (like COVID-19) have RNA genomes instead of DNA'
+    });
+
+    return relatedProblems;
+}
+
+// ============== DNA REPLICATION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedDNAReplication() {
+    const relatedProblems = [];
+
+    // Problem 1: Semiconservative Replication
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Semiconservative Replication Model',
+        problem: 'Explain the semiconservative model of DNA replication and the Meselson-Stahl experiment',
+        parameters: {
+            specificItems: ['semiconservative'],
+            type: 'model',
+            limit: 1
+        },
+        type: 'dna_replication',
+        context: { difficulty: 'beginner', topic: 'DNA Replication', focus: 'semiconservative model' },
+        subparts: [
+            'Semiconservative Replication:',
+            '',
+            'Concept:',
+            '  - Each new DNA molecule contains:',
+            '    • One original (parent) strand',
+            '    • One newly synthesized strand',
+            '  - "Semi" = half',
+            '  - "Conservative" = keeping half',
+            '',
+            'Process:',
+            '  1. Parent DNA unzips',
+            '  2. Each strand serves as template',
+            '  3. New complementary strands synthesized',
+            '  4. Result: Two identical DNA molecules',
+            '  5. Each has one old, one new strand',
+            '',
+            'Meselson-Stahl Experiment (1958):',
+            '',
+            '  Goal: Prove which replication model is correct',
+            '',
+            '  Three Possible Models:',
+            '    1. Conservative: Both old strands together, both new together',
+            '    2. Semiconservative: One old, one new per molecule',
+            '    3. Dispersive: Old and new interspersed',
+            '',
+            '  Method:',
+            '    1. Grow E. coli in heavy nitrogen (¹⁵N)',
+            '       - All DNA becomes "heavy"',
+            '    2. Transfer to light nitrogen (¹⁴N) medium',
+            '    3. Allow one round of replication',
+            '    4. Centrifuge DNA to separate by density',
+            '',
+            '  Results After One Replication:',
+            '    - All DNA had intermediate density',
+            '    - Not heavy (rules out conservative)',
+            '    - Not light (rules out conservative)',
+            '    - Intermediate = one heavy strand, one light strand',
+            '    - Proves semiconservative model!',
+            '',
+            '  After Two Replications:',
+            '    - 50% intermediate density',
+            '    - 50% light density',
+            '    - Further confirms semiconservative',
+            '',
+            'Significance:',
+            '  - Explains accurate copying of genetic info',
+            '  - Each strand templates its complement',
+            '  - Allows for DNA repair using other strand'
+        ],
+        helper: 'Each new DNA keeps one old strand (template) and builds one new strand',
+        solution: 'Semiconservative: each new DNA has one parent strand + one new strand; proven by Meselson-Stahl',
+        realWorldContext: 'This mechanism ensures genetic information passes accurately to daughter cells'
+    });
+
+    // Problem 2: Key Replication Enzymes
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Enzymes of DNA Replication',
+        problem: 'Describe the roles of helicase, DNA polymerase, primase, and ligase in DNA replication',
+        parameters: {
+            specificItems: ['helicase', 'DNA polymerase', 'primase', 'ligase'],
+            type: 'enzyme',
+            limit: 4
+        },
+        type: 'dna_replication',
+        context: { difficulty: 'intermediate', topic: 'DNA Replication', focus: 'enzymes' },
+        subparts: [
+            'Key Enzymes in DNA Replication:',
+            '',
+            '1. HELICASE:',
+            '  Function: "Unzipper"',
+            '  - Unwinds DNA double helix',
+            '  - Breaks hydrogen bonds between base pairs',
+            '  - Creates replication fork (Y-shape)',
+            '  - Uses ATP energy',
+            '  Location: At replication fork',
+            '',
+            '2. SINGLE-STRAND BINDING PROTEINS (SSB):',
+            '  Function: "Stabilizer"',
+            '  - Bind to separated strands',
+            '  - Prevent re-pairing',
+            '  - Keep DNA single-stranded',
+            '',
+            '3. TOPOISOMERASE:',
+            '  Function: "Tension reliever"',
+            '  - Prevents overwinding ahead of fork',
+            '  - Cuts and rejoins DNA strands',
+            '  - Relieves supercoiling tension',
+            '',
+            '4. PRIMASE:',
+            '  Function: "Primer maker"',
+            '  - Synthesizes short RNA primers (~10 nucleotides)',
+            '  - Provides 3\' OH for DNA polymerase',
+            '  - DNA polymerase cannot start from scratch',
+            '  - Multiple primers on lagging strand',
+            '',
+            '5. DNA POLYMERASE III (main):',
+            '  Function: "Main builder"',
+            '  - Adds nucleotides to growing strand',
+            '  - Reads template 3\' → 5\'',
+            '  - Synthesizes new strand 5\' → 3\'',
+            '  - Has proofreading (3\' → 5\' exonuclease)',
+            '  - Very high accuracy (~1 error per 10 million)',
+            '  Speed: ~1000 nucleotides/second',
+            '',
+            '6. DNA POLYMERASE I:',
+            '  Function: "Primer replacer"',
+            '  - Removes RNA primers',
+            '  - Fills gaps with DNA',
+            '  - Has 5\' → 3\' exonuclease activity',
+            '',
+            '7. DNA LIGASE:',
+            '  Function: "Gluer"',
+            '  - Joins Okazaki fragments on lagging strand',
+            '  - Forms phosphodiester bonds',
+            '  - Seals nicks in sugar-phosphate backbone',
+            '  - Creates continuous strand',
+            '',
+            'Enzyme Order:',
+            '  Helicase → SSB → Primase → DNA Pol III → DNA Pol I → Ligase',
+            '',
+            'Memory Trick: "Helpful Students Prepare DNA Poly Ligaments"'
+        ],
+        helper: 'Helicase unzips, Primase starts, DNA Pol III builds, Ligase joins',
+        solution: 'Helicase unwinds; Primase makes primers; DNA Pol III synthesizes; Ligase joins fragments',
+        realWorldContext: 'Many antibiotics and cancer drugs target replication enzymes'
+    });
+
+    // Problem 3: Leading vs Lagging Strands
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Leading and Lagging Strand Synthesis',
+        problem: 'Compare leading and lagging strand synthesis, explaining why lagging strand is discontinuous',
+        parameters: {
+            specificItems: ['leading strand', 'lagging strand'],
+            phase: 'elongation',
+            stage: 'lagging',
+            limit: 2
+        },
+        type: 'dna_replication',
+        context: { difficulty: 'intermediate', topic: 'DNA Replication', focus: 'strand synthesis' },
+        subparts: [
+            'DNA Replication Fork:',
+            '  - Y-shaped structure',
+            '  - Helicase moves along DNA',
+            '  - Two strands exposed',
+            '  - Both strands replicated simultaneously',
+            '',
+            'Key Constraint:',
+            '  DNA polymerase only synthesizes 5\' → 3\'',
+            '  Cannot synthesize 3\' → 5\'',
+            '',
+            'LEADING STRAND:',
+            '',
+            '  Template orientation: 3\' → 5\'',
+            '  Synthesis direction: 5\' → 3\' (toward fork)',
+            '',
+            '  Process:',
+            '    1. One RNA primer at origin',
+            '    2. DNA polymerase adds nucleotides',
+            '    3. Follows helicase continuously',
+            '    4. Synthesized as one continuous piece',
+            '',
+            '  Characteristics:',
+            '    - Continuous synthesis',
+            '    - Same direction as fork movement',
+            '    - Only one primer needed',
+            '    - Faster/easier',
+            '',
+            'LAGGING STRAND:',
+            '',
+            '  Template orientation: 5\' → 3\'',
+            '  Synthesis direction: 5\' → 3\' (away from fork)',
+            '',
+            '  Problem:',
+            '    - DNA polymerase can\'t work backward',
+            '    - Can\'t follow helicase continuously',
+            '',
+            '  Solution: Discontinuous synthesis',
+            '',
+            '  Process:',
+            '    1. Multiple RNA primers made',
+            '    2. DNA synthesized in short segments',
+            '    3. Segments called Okazaki fragments',
+            '       - Prokaryotes: 1000-2000 nucleotides',
+            '       - Eukaryotes: 100-200 nucleotides',
+            '    4. DNA Pol III synthesizes each fragment',
+            '    5. DNA Pol I removes primers, fills gaps',
+            '    6. Ligase joins fragments',
+            '',
+            '  Characteristics:',
+            '    - Discontinuous synthesis',
+            '    - Opposite direction to fork movement',
+            '    - Many primers needed',
+            '    - More complex/slower',
+            '',
+            'COMPARISON:',
+            '',
+            '  Leading:',
+            '    - Continuous',
+            '    - One primer',
+            '    - Toward fork',
+            '    - Easier',
+            '',
+            '  Lagging:',
+            '    - Discontinuous (Okazaki fragments)',
+            '    - Many primers',
+            '    - Away from fork',
+            '    - More complex',
+            '',
+            'Why This Matters:',
+            '  - Explains why replication is complex',
+            '  - Shows importance of multiple enzymes',
+            '  - Demonstrates antiparallel strand challenge'
+        ],
+        helper: 'Leading = continuous toward fork; Lagging = fragments away from fork',
+        solution: 'Leading strand synthesized continuously; Lagging strand in Okazaki fragments due to 5\'→3\' constraint',
+        realWorldContext: 'Replication errors more common on lagging strand'
+    });
+
+// Problem 4: Replication Initiation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Initiation of DNA Replication',
+        problem: 'Describe how DNA replication initiates at origins of replication',
+        parameters: {
+            specificItems: ['origin of replication'],
+            phase: 'initiation',
+            limit: 1
+        },
+        type: 'dna_replication',
+        context: { difficulty: 'intermediate', topic: 'DNA Replication', focus: 'initiation' },
+        subparts: [
+            'Origin of Replication:',
+            '',
+            'Definition:',
+            '  - Specific DNA sequences where replication begins',
+            '  - Rich in A-T base pairs (easier to separate)',
+            '  - Recognized by initiator proteins',
+            '',
+            'Prokaryotes vs Eukaryotes:',
+            '',
+            '  PROKARYOTES:',
+            '    - Single origin of replication',
+            '    - Called oriC in E. coli',
+            '    - ~245 base pairs long',
+            '    - Circular chromosome',
+            '    - Bidirectional replication',
+            '    - Two replication forks move in opposite directions',
+            '    - Fast: ~1000 nucleotides/second',
+            '    - Complete in ~40 minutes',
+            '',
+            '  EUKARYOTES:',
+            '    - Multiple origins (hundreds to thousands)',
+            '    - Linear chromosomes',
+            '    - Why many origins?',
+            '      • Chromosomes much longer',
+            '      • Replication slower (~50 nt/sec)',
+            '      • Must finish in S phase (~8 hours)',
+            '    - Origins spaced 10,000-300,000 base pairs apart',
+            '    - All origins don\'t fire simultaneously',
+            '    - Replication timing regulated',
+            '',
+            'Initiation Process:',
+            '',
+            '  1. RECOGNITION:',
+            '     - Initiator proteins bind to origin',
+            '     - ORC (Origin Recognition Complex) in eukaryotes',
+            '     - DnaA protein in prokaryotes',
+            '',
+            '  2. UNWINDING:',
+            '     - Helicase loaded at origin',
+            '     - ATP hydrolysis provides energy',
+            '     - DNA strands separate',
+            '     - Forms "replication bubble"',
+            '',
+            '  3. PRIMER SYNTHESIS:',
+            '     - Primase synthesizes RNA primers',
+            '     - One on leading strand',
+            '     - Multiple on lagging strand',
+            '',
+            '  4. ELONGATION BEGINS:',
+            '     - DNA polymerase III binds',
+            '     - Synthesis proceeds bidirectionally',
+            '     - Two replication forks move apart',
+            '',
+            'Regulation:',
+            '  - Occurs once per cell cycle (S phase)',
+            '  - Licensing factors prevent re-replication',
+            '  - Checkpoints ensure accuracy',
+            '',
+            'Bidirectional Replication:',
+            '  - From each origin, two forks move outward',
+            '  - Doubles speed of replication',
+            '  - Forks eventually meet and merge'
+        ],
+        helper: 'Prokaryotes: 1 origin; Eukaryotes: many origins (faster completion)',
+        solution: 'Replication initiates at origins; prokaryotes have 1, eukaryotes have many; bidirectional fork movement',
+        realWorldContext: 'Cancer cells often have dysregulated replication initiation'
+    });
+
+    // Problem 5: Telomere Replication
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Telomere Problem and Telomerase',
+        problem: 'Explain the end-replication problem and how telomerase solves it',
+        parameters: {
+            specificItems: ['telomere', 'telomerase'],
+            type: 'special mechanism',
+            limit: 2
+        },
+        type: 'dna_replication',
+        context: { difficulty: 'advanced', topic: 'DNA Replication', focus: 'telomeres' },
+        subparts: [
+            'End-Replication Problem:',
+            '',
+            'The Problem:',
+            '  - DNA polymerase cannot fully replicate 5\' ends',
+            '  - Needs RNA primer to start',
+            '  - When primer removed from 5\' end:',
+            '    • Gap left behind',
+            '    • Cannot be filled (no 3\' OH upstream)',
+            '  - Result: Chromosome shortens each division',
+            '',
+            'Why This Matters:',
+            '  - Without solution, chromosomes shrink',
+            '  - Eventually lose important genes',
+            '  - Cell can no longer divide',
+            '',
+            'TELOMERES:',
+            '',
+            '  Structure:',
+            '    - Repetitive DNA sequences at chromosome ends',
+            '    - Humans: TTAGGG repeated 1000s of times',
+            '    - Like "plastic tips on shoelaces" (aglets)',
+            '    - Protect coding regions',
+            '',
+            '  Function:',
+            '    - Expendable sequences',
+            '    - Okay to lose these repeats',
+            '    - Protect genes from loss',
+            '    - Prevent chromosome fusion',
+            '',
+            '  Problem:',
+            '    - Shorten with each cell division',
+            '    - Eventually become too short',
+            '    - Cell stops dividing (senescence)',
+            '',
+            'TELOMERASE:',
+            '',
+            '  What It Is:',
+            '    - Special enzyme (reverse transcriptase)',
+            '    - Contains RNA template',
+            '    - Adds telomere repeats',
+            '',
+            '  How It Works:',
+            '    1. Binds to 3\' overhang of telomere',
+            '    2. Uses its RNA template (AAUCCC)',
+            '    3. Adds DNA repeats (TTAGGG)',
+            '    4. Extends 3\' end',
+            '    5. Regular DNA polymerase fills in other strand',
+            '    6. Net result: Telomere maintained',
+            '',
+            '  Activity:',
+            '    HIGH in:',
+            '      - Embryonic cells',
+            '      - Stem cells',
+            '      - Germ cells (sperm/egg)',
+            '      - ~90% of cancer cells',
+            '',
+            '    LOW/ABSENT in:',
+            '      - Most adult somatic cells',
+            '      - Leads to cellular aging',
+            '',
+            'Cellular Aging:',
+            '  - Telomeres shorten with each division',
+            '  - "Hayflick limit": ~50-70 divisions',
+            '  - Short telomeres trigger senescence',
+            '  - Cell stops dividing',
+            '',
+            'Cancer Connection:',
+            '  - Cancer cells reactivate telomerase',
+            '  - Allows unlimited divisions',
+            '  - Immortalization',
+            '  - Target for cancer therapy',
+            '',
+            'Significance:',
+            '  - Links cellular aging to molecular mechanism',
+            '  - Explains limited cell divisions',
+            '  - Cancer treatment target'
+        ],
+        helper: 'Telomeres = protective caps; Telomerase = enzyme that extends them',
+        solution: 'DNA polymerase can\'t fully replicate ends; telomerase adds repeats to maintain telomere length',
+        realWorldContext: 'Telomere length associated with aging; short telomeres linked to age-related diseases'
+    });
+
+    return relatedProblems;
+}
+
+// ============== TRANSCRIPTION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedTranscription() {
+    const relatedProblems = [];
+
+    // Problem 1: Transcription Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Transcription Process Overview',
+        problem: 'Describe the overall process of transcription and its role in gene expression',
+        parameters: {
+            specificItems: ['Transcription'],
+            phase: 'overview',
+            type: 'mRNA',
+            limit: 1
+        },
+        type: 'transcription',
+        context: { difficulty: 'beginner', topic: 'Transcription', focus: 'overview' },
+        subparts: [
+            'TRANSCRIPTION: DNA → RNA',
+            '',
+            'Definition:',
+            '  - Process of copying DNA to RNA',
+            '  - First step of gene expression',
+            '  - Occurs in nucleus (eukaryotes)',
+            '',
+            'Purpose:',
+            '  - Transfer genetic info from DNA to RNA',
+            '  - RNA can leave nucleus',
+            '  - Protein synthesis requires RNA',
+            '',
+            'Key Enzyme: RNA Polymerase',
+            '  - Synthesizes RNA',
+            '  - Reads DNA template 3\' → 5\'',
+            '  - Builds RNA 5\' → 3\'',
+            '  - Does NOT need primer (unlike DNA polymerase)',
+            '',
+            'Template vs Coding Strand:',
+            '  Template (antisense):',
+            '    - Read by RNA polymerase',
+            '    - Complementary to RNA',
+            '    - 3\' → 5\' direction',
+            '  Coding (sense):',
+            '    - Same sequence as RNA (except T→U)',
+            '    - 5\' → 3\' direction',
+            '    - Not used as template',
+            '',
+            'Base Pairing in Transcription:',
+            '  DNA → RNA',
+            '  A → U (RNA uses Uracil, not Thymine)',
+            '  T → A',
+            '  G → C',
+            '  C → G',
+            '',
+            'Product: RNA',
+            '  Types: mRNA, tRNA, rRNA',
+            '  - mRNA: codes for proteins',
+            '  - tRNA: transfers amino acids',
+            '  - rRNA: part of ribosomes',
+            '',
+            'Central Dogma:',
+            '  DNA → RNA → Protein',
+            '      (Transcription) (Translation)'
+        ],
+        helper: 'Transcription = DNA to RNA (like making a working copy)',
+        solution: 'Transcription uses DNA template to synthesize complementary RNA; DNA→RNA via RNA polymerase',
+        realWorldContext: 'Regulating transcription controls which proteins cells make'
+    });
+
+    // Problem 2: Three Stages
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Stages of Transcription',
+        problem: 'Describe the three stages of transcription: initiation, elongation, and termination',
+        parameters: {
+            specificItems: ['initiation', 'elongation', 'termination'],
+            phase: 'all',
+            limit: 3
+        },
+        type: 'transcription',
+        context: { difficulty: 'intermediate', topic: 'Transcription', focus: 'stages' },
+        subparts: [
+            'THREE STAGES OF TRANSCRIPTION:',
+            '',
+            '1. INITIATION:',
+            '',
+            '  Goal: Start transcription at correct location',
+            '',
+            '  Process:',
+            '    a) PROMOTER RECOGNITION:',
+            '       - Promoter: DNA sequence upstream of gene',
+            '       - Signals "start here"',
+            '       - Contains specific sequences',
+            '',
+            '    b) TRANSCRIPTION FACTOR BINDING (Eukaryotes):',
+            '       - Proteins that help RNA polymerase',
+            '       - Bind to promoter first',
+            '       - Recruit RNA polymerase',
+            '',
+            '    c) RNA POLYMERASE BINDING:',
+            '       - Binds to promoter region',
+            '       - Prokaryotes: Sigma factor helps',
+            '       - Eukaryotes: Transcription factors help',
+            '',
+            '    d) DNA UNWINDING:',
+            '       - RNA polymerase unwinds DNA',
+            '       - Creates transcription bubble',
+            '       - Exposes template strand',
+            '',
+            '  Key Sequences:',
+            '    Prokaryotes:',
+            '      - Pribnow box (TATAAT) at -10',
+            '      - -35 sequence (TTGACA)',
+            '    Eukaryotes:',
+            '      - TATA box (TATAAA) at ~-25',
+            '      - Other regulatory elements',
+            '',
+            '2. ELONGATION:',
+            '',
+            '  Goal: Synthesize RNA transcript',
+            '',
+            '  Process:',
+            '    a) RNA polymerase moves along DNA',
+            '    b) Reads template strand 3\' → 5\'',
+            '    c) Adds complementary RNA nucleotides 5\' → 3\'',
+            '    d) DNA unwinds ahead, rewinds behind',
+            '    e) Transcription bubble moves with enzyme',
+            '',
+            '  Speed: ~40 nucleotides/second (eukaryotes)',
+            '',
+            '  Base Pairing:',
+            '    Template A → RNA U',
+            '    Template T → RNA A',
+            '    Template G → RNA C',
+            '    Template C → RNA G',
+            '',
+            '  NO Proofreading (unlike DNA replication):',
+            '    - Errors less critical',
+            '    - RNA is temporary',
+            '    - Many RNA copies made',
+            '',
+            '3. TERMINATION:',
+            '',
+            '  Goal: Stop transcription and release RNA',
+            '',
+            '  Prokaryotes:'    Rho-independent:',
+            '      - RNA forms hairpin loop structure',
+            '      - Followed by U-rich region',
+            '      - Causes RNA polymerase to fall off',
+            '    Rho-dependent:',
+            '      - Rho protein binds to RNA',
+            '      - Catches up to RNA polymerase',
+            '      - Causes release',
+            '',
+            '  Eukaryotes:',
+            '    - RNA polymerase transcribes past gene',
+            '    - Cleavage at polyadenylation signal (AAUAAA)',
+            '    - Poly-A tail added after cleavage',
+            '    - RNA polymerase eventually released',
+            '',
+            '  Result:',
+            '    - RNA transcript released',
+            '    - RNA polymerase detaches',
+            '    - DNA strands rejoin',
+            '',
+            'Summary:',
+            '  Initiation: Start at promoter',
+            '  Elongation: Synthesize RNA',
+            '  Termination: Stop and release'
+        ],
+        helper: 'Initiation (start), Elongation (build), Termination (stop and release)',
+        solution: 'Transcription: Initiation at promoter → Elongation (RNA synthesis) → Termination at signal',
+        realWorldContext: 'Mutations in promoters can prevent gene expression'
+    });
+
+    // Problem 3: RNA Processing
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Eukaryotic RNA Processing',
+        problem: 'Explain the three types of RNA processing in eukaryotes: 5\' cap, 3\' poly-A tail, and splicing',
+        parameters: {
+            specificItems: ['RNA processing', '5\' cap', 'poly-A tail', 'splicing'],
+            type: 'eukaryotic',
+            limit: 4
+        },
+        type: 'transcription',
+        context: { difficulty: 'intermediate', topic: 'Transcription', focus: 'RNA processing' },
+        subparts: [
+            'EUKARYOTIC RNA PROCESSING:',
+            '',
+            'Why Needed:',
+            '  - Pre-mRNA has introns (non-coding)',
+            '  - Needs protection for export',
+            '  - Requires modifications for function',
+            '',
+            '1. 5\' CAP:',
+            '',
+            '  What: Modified guanine nucleotide',
+            '  Structure: 7-methylguanosine',
+            '',
+            '  When: During transcription (~25 nucleotides in)',
+            '',
+            '  How:',
+            '    - Added to 5\' end of pre-mRNA',
+            '    - Unusual 5\'-5\' triphosphate linkage',
+            '    - Methyl group added',
+            '',
+            '  Functions:',
+            '    • Protects mRNA from degradation',
+            '    • Ribosome recognition signal',
+            '    • Helps mRNA export from nucleus',
+            '    • Translation initiation signal',
+            '',
+            '2. 3\' POLY-A TAIL:',
+            '',
+            '  What: String of ~200 adenine nucleotides',
+            '',
+            '  When: After transcription',
+            '',
+            '  How:',
+            '    a) Pre-mRNA cleaved at polyadenylation signal',
+            '       - Signal sequence: AAUAAA',
+            '       - Cleavage 10-30 nucleotides downstream',
+            '    b) Poly-A polymerase adds ~200 A\'s',
+            '       - Does NOT use DNA template',
+            '       - Adds A\'s one by one',
+            '',
+            '  Functions:',
+            '    • Protects mRNA from degradation',
+            '    • Aids mRNA export from nucleus',
+            '    • Translation efficiency',
+            '    • mRNA stability (longer tail = longer lifespan)',
+            '',
+            '3. SPLICING:',
+            '',
+            '  What: Removal of introns, joining of exons',
+            '',
+            '  Introns: Non-coding sequences (intervening)',
+            '  Exons: Coding sequences (expressed)',
+            '',
+            '  When: After transcription, before export',
+            '',
+            '  How (Spliceosome):',
+            '    a) Spliceosome complex assembles',
+            '       - Made of snRNPs (small nuclear ribonucleoproteins)',
+            '       - "Snurps" = proteins + snRNA',
+            '    b) Recognizes splice sites',
+            '       - 5\' splice site: GU',
+            '       - 3\' splice site: AG',
+            '       - Branch point: A',
+            '    c) Intron looped out (lariat structure)',
+            '    d) Intron cut and removed',
+            '    e) Exons joined together',
+            '    f) Intron degraded',
+            '',
+            '  Result: Mature mRNA with only exons',
+            '',
+            '  ALTERNATIVE SPLICING:',
+            '    - Different exon combinations',
+            '    - One gene → Multiple proteins',
+            '    - Major source of protein diversity',
+            '    - Example: Human genome ~20,000 genes → >100,000 proteins',
+            '',
+            '    Types:',
+            '      • Exon skipping (most common)',
+            '      • Alternative 5\' or 3\' splice sites',
+            '      • Intron retention',
+            '      • Mutually exclusive exons',
+            '',
+            '    Importance:',
+            '      • Tissue-specific proteins',
+            '      • Developmental regulation',
+            '      • Response to signals',
+            '',
+            'PROKARYOTES vs EUKARYOTES:',
+            '',
+            '  Prokaryotes:',
+            '    - NO RNA processing',
+            '    - mRNA used immediately',
+            '    - No introns in most genes',
+            '    - Transcription and translation coupled',
+            '',
+            '  Eukaryotes:',
+            '    - Extensive RNA processing',
+            '    - mRNA must be processed before export',
+            '    - Introns common',
+            '    - Transcription and translation separated',
+            '',
+            'Summary:',
+            '  Pre-mRNA → (Cap + Tail + Splicing) → Mature mRNA',
+            '  Ready for export and translation'
+        ],
+        helper: '5\' cap (protection), Poly-A tail (stability), Splicing (remove introns)',
+        solution: 'Eukaryotic mRNA processed: 5\' cap + 3\' poly-A tail (protection), splicing removes introns',
+        realWorldContext: 'Splicing errors cause ~15% of genetic diseases'
+    });
+
+    // Problem 4: Prokaryotic vs Eukaryotic
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Transcription Differences',
+        problem: 'Compare transcription in prokaryotes and eukaryotes',
+        parameters: {
+            specificItems: ['prokaryotic', 'eukaryotic'],
+            type: 'comparison',
+            limit: 2
+        },
+        type: 'transcription',
+        context: { difficulty: 'intermediate', topic: 'Transcription', focus: 'comparison' },
+        subparts: [
+            'PROKARYOTIC vs EUKARYOTIC TRANSCRIPTION:',
+            '',
+            '1. LOCATION:',
+            '  Prokaryotes: Cytoplasm (no nucleus)',
+            '  Eukaryotes: Nucleus',
+            '',
+            '2. RNA POLYMERASE:',
+            '  Prokaryotes:',
+            '    - One RNA polymerase for all genes',
+            '    - Sigma factor helps find promoter',
+            '  Eukaryotes:',
+            '    - Three RNA polymerases',
+            '    - RNA Pol I: rRNA',
+            '    - RNA Pol II: mRNA (most genes)',
+            '    - RNA Pol III: tRNA, small RNAs',
+            '',
+            '3. PROMOTER RECOGNITION:',
+            '  Prokaryotes:',
+            '    - Sigma factor recognizes promoter',
+            '    - -10 box (Pribnow box): TATAAT',
+            '    - -35 box: TTGACA',
+            '    - Simple, direct binding',
+            '  Eukaryotes:',
+            '    - Transcription factors needed',
+            '    - TATA box: TATAAA (~-25)',
+            '    - Multiple regulatory elements',
+            '    - Complex, multi-step assembly',
+            '',
+            '4. RNA PROCESSING:',
+            '  Prokaryotes:',
+            '    - NO processing',
+            '    - mRNA used directly',
+            '    - No introns (mostly)',
+            '    - No 5\' cap or poly-A tail',
+            '  Eukaryotes:',
+            '    - Extensive processing',
+            '    - 5\' cap added',
+            '    - 3\' poly-A tail added',
+            '    - Splicing removes introns',
+            '    - Mature mRNA exported',
+            '',
+            '5. mRNA STRUCTURE:',
+            '  Prokaryotes:',
+            '    - Polycistronic (multiple genes on one mRNA)',
+            '    - Operons common',
+            '    - No modifications',
+            '  Eukaryotes:',
+            '    - Monocistronic (one gene per mRNA)',
+            '    - Modified 5\' and 3\' ends',
+            '    - Only exons present',
+            '',
+            '6. COUPLING:',
+            '  Prokaryotes:',
+            '    - Transcription and translation simultaneous',
+            '    - Ribosomes bind mRNA while still being transcribed',
+            '    - No separation',
+            '  Eukaryotes:',
+            '    - Transcription and translation separated',
+            '    - Transcription in nucleus',
+            '    - Translation in cytoplasm',
+            '    - mRNA must be exported',
+            '',
+            '7. REGULATION:',
+            '  Prokaryotes:',
+            '    - Mainly transcriptional (operons)',
+            '    - Rapid response to environment',
+            '    - Simple regulation',
+            '  Eukaryotes:',
+            '    - Multiple levels of regulation',
+            '    - Chromatin remodeling',
+            '    - Transcription factors',
+            '    - RNA processing',
+            '    - Complex regulation',
+            '',
+            '8. SPEED:',
+            '  Prokaryotes:',
+            '    - Faster (~40-80 nt/sec)',
+            '    - Immediate use',
+            '  Eukaryotes:',
+            '    - Slower (~20-40 nt/sec)',
+            '    - Processing time added',
+            '',
+            'Key Difference Summary:',
+            '  Prokaryotes: Simple, fast, coupled',
+            '  Eukaryotes: Complex, separated, processed'
+        ],
+        helper: 'Prokaryotes: simple, no processing; Eukaryotes: complex, processing required',
+        solution: 'Prokaryotes: no processing, coupled; Eukaryotes: extensive processing, separated compartments',
+        realWorldContext: 'Antibiotic rifampin blocks bacterial RNA polymerase but not human'
+    });
+
+    // Problem 5: Gene Regulation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Transcriptional Regulation',
+        problem: 'Explain how transcription is regulated through promoters, enhancers, and transcription factors',
+        parameters: {
+            specificItems: ['promoter', 'enhancer', 'transcription factor'],
+            regulationLevel: 'transcriptional',
+            limit: 3
+        },
+        type: 'transcription',
+        context: { difficulty: 'advanced', topic: 'Transcription', focus: 'regulation' },
+        subparts: [
+            'TRANSCRIPTIONAL REGULATION:',
+            '',
+            'Why Important:',
+            '  - Not all genes expressed all the time',
+            '  - Cells respond to environment',
+            '  - Cell differentiation requires selective expression',
+            '  - Efficient use of resources',
+            '',
+            '1. PROMOTER:',
+            '',
+            '  Definition:',
+            '    - DNA sequence where transcription starts',
+            '    - Located upstream of gene (5\' direction)',
+            '    - Required for transcription',
+            '',
+            '  Components:',
+            '    - Core promoter: Minimal sequence for transcription',
+            '    - TATA box (eukaryotes): ~-25 position',
+            '    - Transcription start site: +1 position',
+            '',
+            '  Function:',
+            '    - Binding site for RNA polymerase',
+            '    - Determines direction of transcription',
+            '    - Basal level of transcription',
+            '',
+            '2. TRANSCRIPTION FACTORS:',
+            '',
+            '  Definition:',
+            '    - Proteins that regulate transcription',
+            '    - Bind to DNA',
+            '    - Control gene expression',
+            '',
+            '  Types:',
+            '',
+            '    GENERAL Transcription Factors:',
+            '      - Required for ALL transcription',
+            '      - Bind to core promoter',
+            '      - Help position RNA polymerase',
+            '      - Example: TFIID binds TATA box',
+            '',
+            '    SPECIFIC Transcription Factors:',
+            '      - Regulate specific genes',
+            '      - Respond to signals',
+            '      - Two categories:',
+            '',
+            '        Activators:',
+            '          - Increase transcription',
+            '          - Bind to enhancers',
+            '          - Recruit RNA polymerase',
+            '          - Example: CREB, Myc',
+            '',
+            '        Repressors:',
+            '          - Decrease transcription',
+            '          - Bind to silencers',
+            '          - Block RNA polymerase',
+            '          - Example: p53 (in some contexts)',
+            '',
+            '  Structure:',
+            '    - DNA-binding domain: Recognizes specific DNA sequence',
+            '    - Activation domain: Interacts with other proteins',
+            '',
+            '  Common DNA-binding motifs:',
+            '    • Helix-turn-helix',
+            '    • Zinc finger',
+            '    • Leucine zipper',
+            '    • Helix-loop-helix',
+            '',
+            '3. ENHANCERS:',
+            '',
+            '  Definition:',
+            '    - DNA sequences that increase transcription',
+            '    - Binding sites for activator proteins',
+            '',
+            '  Characteristics:',
+            '    - Can be far from gene (thousands of base pairs)',
+            '    - Can be upstream OR downstream',
+            '    - Work regardless of orientation',
+            '    - Tissue-specific or condition-specific',
+            '',
+            '  Mechanism:',
+            '    a) Activator binds to enhancer',
+            '    b) DNA loops to bring enhancer near promoter',
+            '    c) Activator contacts mediator proteins',
+            '    d) Mediator recruits RNA polymerase',
+            '    e) Transcription increases',
+            '',
+            '  Multiple enhancers:',
+            '    - One gene can have many enhancers',
+            '    - Combinatorial control',
+            '    - Fine-tuned regulation',
+            '',
+            '4. SILENCERS:',
+            '',
+            '  - Opposite of enhancers',
+            '  - Decrease transcription',
+            '  - Bind repressor proteins',
+            '  - Can also be far from gene',
+            '',
+            'COMBINATORIAL CONTROL:',
+            '',
+            '  - Multiple transcription factors work together',
+            '  - Different combinations → different outcomes',
+            '  - Explains complex gene regulation',
+            '',
+            '  Example:',
+            '    - Factor A + Factor B → Gene ON',
+            '    - Factor A + Factor C → Gene OFF',
+            '    - Factor A alone → Low expression',
+            '',
+            'Other Regulatory Mechanisms:',
+            '  - Chromatin remodeling (DNA accessibility)',
+            '  - DNA methylation (gene silencing)',
+            '  - Histone modifications',
+            '  - Mediator complex',
+            '',
+            'Importance:',
+            '  - Cell differentiation',
+            '  - Response to hormones/signals',
+            '  - Development',
+            '  - Homeostasis'
+        ],
+        helper: 'Promoter (start site), Enhancers (boost), Transcription factors (regulators)',
+        solution: 'Promoters direct RNA polymerase; Enhancers increase transcription; Transcription factors bind and regulate',
+        realWorldContext: 'Cancer often involves mutated transcription factors causing uncontrolled gene expression'
+    });
+
+    return relatedProblems;
+}
+
+// ============== TRANSLATION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedTranslation() {
+    const relatedProblems = [];
+
+    // Problem 1: Genetic Code
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'The Genetic Code',
+        problem: 'Explain the genetic code, including codons, start codon, and stop codons',
+        parameters: {
+            specificItems: ['genetic code', 'codon'],
+            codon: 'AUG',
+            limit: 2
+        },
+        type: 'translation',
+        context: { difficulty: 'beginner', topic: 'Translation', focus: 'genetic code' },
+        subparts: [
+            'THE GENETIC CODE:',
+            '',
+            'Definition:',
+            '  - Rules for converting mRNA sequence to amino acid sequence',
+            '  - Dictionary that translates nucleotide language to amino acid language',
+            '',
+            'CODON:',
+            '  - Three-nucleotide sequence on mRNA',
+            '  - Codes for one amino acid',
+            '  - Read 5\' → 3\' direction',
+            '',
+            'START CODON: AUG',
+            '  - Codes for Methionine (Met)',
+            '  - Signals where translation begins',
+            '  - First amino acid in ALL proteins',
+            '',
+            'STOP CODONS:',
+            '  - UAA, UAG, UGA',
+            '  - Do NOT code for amino acids',
+            '  - Signal end of translation',
+            '',
+            'Properties:',
+            '  - Redundant (multiple codons per amino acid)',
+            '  - Universal (same in most organisms)',
+            '  - Unambiguous (one codon = one amino acid)'
+        ],
+        helper: 'Codon = 3 nucleotides = 1 amino acid; AUG = start; UAA/UAG/UGA = stop',
+        solution: 'Genetic code: 64 codons for 20 amino acids; AUG = start (Met); UAA/UAG/UGA = stop',
+        realWorldContext: 'Universal genetic code allows human proteins to be made in bacteria'
+    });
+
+    // Problem 2: Translation Process
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Steps of Translation',
+        problem: 'Describe the three stages of translation: initiation, elongation, and termination',
+        parameters: {
+            specificItems: ['initiation', 'elongation', 'termination'],
+            phase: 'all',
+            limit: 3
+        },
+        type: 'translation',
+        context: { difficulty: 'intermediate', topic: 'Translation', focus: 'stages' },
+        subparts: [
+            'THREE STAGES OF TRANSLATION:',
+            '',
+            '1. INITIATION:',
+            '  - Ribosome assembles at start codon (AUG)',
+            '  - Small subunit binds mRNA',
+            '  - Initiator tRNA (Met) binds',
+            '  - Large subunit joins',
+            '',
+            '2. ELONGATION (repeating cycle):',
+            '  a) tRNA enters A site',
+            '  b) Peptide bond forms',
+            '  c) Ribosome translocates',
+            '  - Continues until stop codon',
+            '',
+            '3. TERMINATION:',
+            '  - Stop codon reaches A site',
+            '  - Release factor binds',
+            '  - Polypeptide released',
+            '  - Ribosome disassembles',
+            '',
+            'Result: Completed protein'
+        ],
+        helper: 'Initiation (start), Elongation (build), Termination (release)',
+        solution: 'Initiation at AUG → Elongation adds amino acids → Termination at stop codon releases protein',
+        realWorldContext: 'Many antibiotics target bacterial ribosomes to stop translation'
+    });
+
+    // Problem 3: tRNA Function
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Transfer RNA (tRNA)',
+        problem: 'Explain how tRNA functions as an adapter molecule between mRNA and amino acids',
+        parameters: {
+            specificItems: ['tRNA', 'anticodon'],
+            type: 'RNA',
+            limit: 2
+        },
+        type: 'translation',
+        context: { difficulty: 'intermediate', topic: 'Translation', focus: 'tRNA' },
+        subparts: [
+            'tRNA STRUCTURE AND FUNCTION:',
+            '',
+            'Structure:',
+            '  - Cloverleaf shape (2D)',
+            '  - L-shape (3D)',
+            '  - Two key regions:',
+            '',
+            '1. ANTICODON (bottom):',
+            '  - Three nucleotides',
+            '  - Complementary to mRNA codon',
+            '  - Reads codon to identify amino acid needed',
+            '',
+            '2. AMINO ACID ATTACHMENT SITE (top):',
+            '  - 3\' end (CCA sequence)',
+            '  - Specific amino acid attaches here',
+            '',
+            'Function:',
+            '  - "Adapter" molecule',
+            '  - Brings correct amino acid to ribosome',
+            '  - Anticodon pairs with mRNA codon',
+            '  - Delivers amino acid for protein synthesis',
+            '',
+            'Charging:',
+            '  - Aminoacyl-tRNA synthetase attaches amino acid',
+            '  - One enzyme per amino acid',
+            '  - Ensures correct pairing'
+        ],
+        helper: 'tRNA = adapter: anticodon reads mRNA, amino acid end carries building block',
+        solution: 'tRNA has anticodon (matches codon) and amino acid attachment; brings correct amino acid to ribosome',
+        realWorldContext: 'Charging errors cause wrong amino acids in proteins, leading to disease'
+    });
+
+    // Problem 4: Ribosome Structure
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Ribosome Structure and Sites',
+        problem: 'Describe the structure of the ribosome and the function of its three binding sites',
+        parameters: {
+            specificItems: ['ribosome', 'A site', 'P site', 'E site'],
+            type: 'structure',
+            limit: 4
+        },
+        type: 'translation',
+        context: { difficulty: 'intermediate', topic: 'Translation', focus: 'ribosome' },
+        subparts: [
+            'RIBOSOME STRUCTURE:',
+            '',
+            'Composition:',
+            '  - Two subunits (large and small)',
+            '  - Made of rRNA + proteins',
+            '  - Prokaryotic: 70S (30S + 50S)',
+            '  - Eukaryotic: 80S (40S + 60S)',
+            '',
+            'THREE BINDING SITES:',
+            '',
+            '1. A SITE (Aminoacyl):',
+            '  - Accepts incoming tRNA',
+            '  - New amino acid arrives here',
+            '  - Codon-anticodon pairing checked',
+            '',
+            '2. P SITE (Peptidyl):',
+            '  - Holds tRNA with growing polypeptide chain',
+            '  - Peptide bond forms between P and A site amino acids',
+            '',
+            '3. E SITE (Exit):',
+            '  - Empty tRNA exits here',
+            '  - After delivering amino acid',
+            '',
+            'Movement:',
+            '  tRNA path: A → P → E → exits',
+            '  Ribosome moves along mRNA (5\' → 3\')',
+            '',
+            'Catalytic Activity:',
+            '  - Peptidyl transferase center (rRNA)',
+            '  - Ribosome is a ribozyme!',
+            '  - Forms peptide bonds'
+        ],
+        helper: 'A site = Arrival, P site = Peptide, E site = Exit',
+        solution: 'Ribosome has A site (incoming tRNA), P site (growing chain), E site (exit); moves A→P→E',
+        realWorldContext: 'Ribosome structure allows multiple ribosomes on one mRNA (polysome)'
+    });
+
+    // Problem 5: Post-translational Modifications
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Post-translational Processing',
+        problem: 'Explain the modifications that occur to proteins after translation',
+        parameters: {
+            specificItems: ['post-translational modification'],
+            type: 'processing',
+            limit: 1
+        },
+        type: 'translation',
+        context: { difficulty: 'advanced', topic: 'Translation', focus: 'modifications' },
+        subparts: [
+            'POST-TRANSLATIONAL MODIFICATIONS:',
+            '',
+            'Why Needed:',
+            '  - Raw polypeptide is not functional',
+            '  - Must fold and be modified',
+            '  - Determines final protein function',
+            '',
+            'TYPES OF MODIFICATIONS:',
+            '',
+            '1. FOLDING:',
+            '  - Polypeptide folds into 3D shape',
+            '  - Chaperone proteins assist',
+            '  - Correct folding essential for function',
+            '',
+            '2. CLEAVAGE:',
+            '  - Removing parts of protein',
+            '  - Signal sequences removed',
+            '  - Insulin: C-peptide removed',
+            '  - Activates some proteins',
+            '',
+            '3. CHEMICAL MODIFICATIONS:',
+            '  Phosphorylation:',
+            '    - Adding phosphate groups',
+            '    - Turns proteins on/off',
+            '    - Cell signaling',
+            '  Glycosylation:',
+            '    - Adding carbohydrate chains',
+            '    - Cell recognition',
+            '    - Protein stability',
+            '  Methylation/Acetylation:',
+            '    - Adding methyl/acetyl groups',
+            '    - Gene regulation (histones)',
+            '',
+            '4. DISULFIDE BOND FORMATION:',
+            '  - Cysteine residues form S-S bonds',
+            '  - Stabilizes protein structure',
+            '  - Common in secreted proteins',
+            '',
+            '5. TARGETING/LOCALIZATION:',
+            '  - Signal sequences direct proteins',
+            '  - To: nucleus, mitochondria, ER, etc.',
+            '  - Ensures proteins reach correct location',
+            '',
+            'Importance:',
+            '  - Increases protein diversity',
+            '  - Regulates protein activity',
+            '  - Essential for function'
+        ],
+        helper: 'Raw protein needs: folding, modifications, targeting to function properly',
+        solution: 'Post-translation: folding, cleavage, chemical modifications (phosphorylation, glycosylation), targeting',
+        realWorldContext: 'Misfolded proteins cause diseases like Alzheimer\'s and cystic fibrosis'
+    });
+
+    return relatedProblems;
+}
+
+// ============== MUTATIONS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedMutations() {
+    const relatedProblems = [];
+
+    // Problem 1: Types of Point Mutations
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Point Mutation Types',
+        problem: 'Distinguish between silent, missense, and nonsense mutations',
+        parameters: {
+            specificItems: ['point mutation', 'substitution'],
+            type: 'pointMutations',
+            effect: 'substitution',
+            limit: 3
+        },
+        type: 'mutations',
+        context: { difficulty: 'beginner', topic: 'Mutations', focus: 'point mutations' },
+        subparts: [
+            'POINT MUTATIONS (Substitutions):',
+            '  - Single nucleotide change',
+            '  - One base replaced by another',
+            '',
+            'THREE TYPES:',
+            '',
+            '1. SILENT MUTATION:',
+            '  - Nucleotide changes',
+            '  - Amino acid stays SAME',
+            '  - Due to codon redundancy',
+            '  Example:',
+            '    Original: GCU (Alanine)',
+            '    Mutated:  GCC (Alanine)',
+            '    Result: No change in protein',
+            '  - Usually no effect on organism',
+            '',
+            '2. MISSENSE MUTATION:',
+            '  - Nucleotide changes',
+            '  - DIFFERENT amino acid',
+            '  Example:',
+            '    Original: GAA (Glutamate)',
+            '    Mutated:  GUA (Valine)',
+            '    Result: Wrong amino acid in protein',
+            '  Effects vary:',
+            '    - Minor: Similar amino acid',
+            '    - Major: Very different amino acid',
+            '  Famous example: Sickle cell disease',
+            '    (Glu → Val in hemoglobin)',
+            '',
+            '3. NONSENSE MUTATION:',
+            '  - Nucleotide changes',
+            '  - Creates STOP codon',
+            '  Example:',
+            '    Original: UAC (Tyrosine)',
+            '    Mutated:  UAA (STOP)',
+            '    Result: Protein cut short (truncated)',
+            '  - Usually severe',
+            '  - Non-functional protein',
+            '',
+            'Severity:',
+            '  Silent < Missense < Nonsense',
+            '  (generally)'
+        ],
+        helper: 'Silent = same amino acid; Missense = different amino acid; Nonsense = stop codon',
+        solution: 'Silent (no amino acid change), Missense (different amino acid), Nonsense (premature stop)',
+        realWorldContext: 'Sickle cell is missense mutation; many cancers involve nonsense mutations'
+    });
+
+    // Problem 2: Frameshift Mutations
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Frameshift Mutations',
+        problem: 'Explain how insertions and deletions cause frameshift mutations and their severe effects',
+        parameters: {
+            specificItems: ['frameshift', 'insertion', 'deletion'],
+            type: 'frameshiftMutations',
+            limit: 2
+        },
+        type: 'mutations',
+        context: { difficulty: 'intermediate', topic: 'Mutations', focus: 'frameshift' },
+        subparts: [
+            'FRAMESHIFT MUTATIONS:',
+            '',
+            'Cause:',
+            '  - Insertion: Adding nucleotide(s)',
+            '  - Deletion: Removing nucleotide(s)',
+            '  - NOT multiples of 3',
+            '',
+            'Effect: Shifts Reading Frame',
+            '',
+            'Example:',
+            '  Original mRNA: AUG-CCU-GAA-UUU',
+            '    Translation: Met-Pro-Glu-Phe',
+            '',
+            '  After INSERTION of C after AUG:',
+            '    Mutated: AUG-CCC-UGA-AUU-U',
+            '    Translation: Met-Pro-STOP',
+            '    Result: Truncated protein',
+            '',
+            '  After DELETION of C in CCU:',
+            '    Mutated: AUG-CUG-AAU-UU',
+            '    Translation: Met-Leu-Asn...',
+            '    Result: Completely different protein',
+            '',
+            'Why So Severe:',
+            '  - ALL downstream codons changed',
+            '  - Usually creates stop codon soon',
+            '  - Non-functional protein',
+            '  - Often more severe than point mutations',
+            '',
+            'Exception:',
+            '  - If insertion/deletion is multiple of 3:',
+            '    • Adds/removes amino acids',
+            '    • Does NOT shift frame',
+            '    • Less severe',
+            '  Example: Cystic fibrosis',
+            '    - 3-nucleotide deletion',
+            '    - Removes one amino acid',
+            '    - Still harmful but not frameshift'
+        ],
+        helper: 'Frameshift = add or remove bases (not multiple of 3) → all downstream codons wrong',
+        solution: 'Insertion/deletion (not ×3) shifts reading frame; all downstream amino acids wrong; usually severe',
+        realWorldContext: 'Tay-Sachs disease caused by frameshift mutation in HEXA gene'
+    });
+
+    // Problem 3: Causes of Mutations
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Causes of Mutations',
+        problem: 'Distinguish between spontaneous and induced mutations, giving examples of each',
+        parameters: {
+            specificItems: ['spontaneous', 'induced', 'mutagen'],
+            type: 'causes',
+            limit: 3
+        },
+        type: 'mutations',
+        context: { difficulty: 'intermediate', topic: 'Mutations', focus: 'causes' },
+        subparts: [
+            'CAUSES OF MUTATIONS:',
+            '',
+            '1. SPONTANEOUS MUTATIONS:',
+            '  - Occur naturally',
+            '  - No external cause',
+            '',
+            '  Sources:',
+            '  a) DNA Replication Errors:',
+            '    - DNA polymerase mistakes',
+            '    - ~1 error per billion nucleotides',
+            '    - Proofreading reduces errors',
+            '',
+            '  b) Spontaneous DNA Changes:',
+            '    - Depurination (loss of purine base)',
+            '    - Deamination (C → U)',
+            '    - Oxidative damage',
+            '',
+            '  c) Transposons (Jumping Genes):',
+            '    - DNA segments that move',
+            '    - Insert into genes',
+            '    - Disrupt function',
+            '',
+            '  Rate: Low but inevitable',
+            '',
+            '2. INDUCED MUTATIONS:',
+            '  - Caused by external agents',
+            '  - Mutagens',
+            '',
+            '  Types of Mutagens:',
+            '',
+            '  a) RADIATION:',
+            '    Ionizing (X-rays, gamma rays):',
+            '      - Break DNA strands',
+            '      - Cause chromosomal damage',
+            '    UV radiation:',
+            '      - Forms thymine dimers',
+            '      - Skin cancer risk',
+            '',
+            '  b) CHEMICAL MUTAGENS:',
+            '    Base analogs:',
+            '      - Mimic DNA bases',
+            '      - Pair incorrectly',
+            '    Alkylating agents:',
+            '      - Add alkyl groups',
+            '      - Change base pairing',
+            '    Intercalating agents:',
+            '      - Insert between bases',
+            '      - Cause insertions/deletions',
+            '    Examples:',
+            '      • Benzene, formaldehyde',
+            '      • Tobacco smoke',
+            '      • Aflatoxin (from moldy food)',
+            '',
+            '  c) BIOLOGICAL AGENTS:',
+            '    - Some viruses insert DNA',
+            '    - Can disrupt genes',
+            '    - Example: HPV causes cervical cancer',
+            '',
+            'Prevention:',
+            '  - Avoid mutagens',
+            '  - Sunscreen (UV protection)',
+            '  - Don\'t smoke',
+            '  - DNA repair mechanisms'
+        ],
+        helper: 'Spontaneous = natural errors; Induced = caused by mutagens (radiation, chemicals, viruses)',
+        solution: 'Spontaneous (replication errors, spontaneous changes); Induced (radiation, chemicals, viruses)',
+        realWorldContext: 'UV exposure from sun causes mutations leading to skin cancer'
+    });
+
+    // Problem 4: Effects of Mutations
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Mutation Effects',
+        problem: 'Classify mutations as beneficial, neutral, or harmful, with examples',
+        parameters: {
+            specificItems: ['beneficial', 'neutral', 'harmful'],
+            effect: 'all',
+            limit: 3
+        },
+        type: 'mutations',
+        context: { difficulty: 'intermediate', topic: 'Mutations', focus: 'effects' },
+        subparts: [
+            'EFFECTS OF MUTATIONS:',
+            '',
+            '1. HARMFUL (Most common):',
+            '  - Reduce fitness/survival',
+            '  - Disrupt protein function',
+            '',
+            '  Examples:',
+            '    - Sickle cell disease',
+            '    - Cystic fibrosis',
+            '    - Tay-Sachs disease',
+            '    - Most cancers',
+            '',
+            '  Why most are harmful:',
+            '    - Proteins already optimized',
+            '    - Random changes usually break function',
+            '',
+            '2. NEUTRAL (Most common of those that survive):',
+            '  - No effect on fitness',
+            '  - Silent mutations',
+            '  - Mutations in non-coding DNA',
+            '  - Mutations in redundant genes',
+            '',
+            '  Importance:',
+            '    - Source of genetic variation',
+            '    - Basis for molecular clocks',
+            '    - Used in evolutionary studies',
+            '',
+            '3. BENEFICIAL (Rare):',
+            '  - Increase fitness/survival',
+            '  - Improve function',
+            '',
+            '  Examples:',
+            '    - Antibiotic resistance (bacteria)',
+            '    - Lactose tolerance (humans)',
+            '    - CCR5-Δ32 (HIV resistance)',
+            '    - Pesticide resistance (insects)',
+            '',
+            '  Context-dependent:',
+            '    - Sickle cell HETEROZYGOTE',
+            '      • One normal, one mutant allele',
+            '      • Malaria resistance',
+            '      • Beneficial in malaria regions',
+            '      • Harmful elsewhere',
+            '',
+            'Frequency:',
+            '  Harmful > Neutral >> Beneficial',
+            '',
+            'Evolution:',
+            '  - Natural selection removes harmful',
+            '  - Retains neutral and beneficial',
+            '  - Beneficial spread in population',
+            '  - Source of adaptation'
+        ],
+        helper: 'Most harmful; some neutral; rare beneficial (context-dependent)',
+        solution: 'Harmful (reduce function), Neutral (no effect), Beneficial (improve function, rare)',
+        realWorldContext: 'Antibiotic overuse selects for beneficial resistance mutations in bacteria'
+    });
+
+    // Problem 5: Chromosomal Mutations
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Large-Scale Chromosomal Mutations',
+        problem: 'Describe the four types of large-scale chromosomal mutations',
+        parameters: {
+            specificItems: ['deletion', 'duplication', 'inversion', 'translocation'],
+            type: 'chromosomal',
+            limit: 4
+        },
+        type: 'mutations',
+        context: { difficulty: 'advanced', topic: 'Mutations', focus: 'chromosomal' },
+        subparts: [
+            'CHROMOSOMAL MUTATIONS:',
+            '  - Large-scale changes',
+            '  - Affect chromosome structure',
+            '  - Visible under microscope',
+            '',
+            'FOUR TYPES:',
+            '',
+            '1. DELETION:',
+            '  - Segment of chromosome lost',
+            '  - Genes removed',
+            '',
+            '  Example: A B C D E F G',
+            '  After:   A B _ _ E F G',
+            '  (C and D deleted)',
+            '',
+            '  Effects:',
+            '    - Loss of genes',
+            '    - Usually harmful',
+            '  Example: Cri-du-chat syndrome',
+            '    - Part of chromosome 5 deleted',
+            '',
+            '2. DUPLICATION:',
+            '  - Segment copied',
+            '  - Extra copy of genes',
+            '',
+            '  Example: A B C D E F G',
+            '  After:   A B C D D E F G',
+            '  (D duplicated)',
+            '',
+            '  Effects:',
+            '    - Extra gene copies',
+            '    - Can be beneficial (evolution)',
+            '  Example: Gene families arose this way',
+            '',
+            '3. INVERSION:',
+            '  - Segment reversed',
+            '  - Flipped 180°',
+            '',
+            '  Example: A B C D E F G',
+            '  After:   A B E D C F G',
+            '  (C-D-E inverted)',
+            '',
+            '  Effects:',
+            '    - Genes still present',
+            '    - Order changed',
+            '    - Can affect gene expression',
+            '    - Problems in meiosis',
+            '',
+            '4. TRANSLOCATION:',
+            '  - Segment moved to different chromosome',
+            '  - Can be reciprocal (swap)',
+            '',
+            '  Example:',
+            '    Chromosome 1: A B C D E',
+            '    Chromosome 2: F G H I J',
+            '  After translocation:',
+            '    Chromosome 1: A B I J',
+            '    Chromosome 2: F G H C D E',
+            '',
+            '  Effects:',
+            '    - Changes gene linkage',
+            '    - Can activate oncogenes',
+            '  Example: Philadelphia chromosome',
+            '    - Causes chronic myeloid leukemia',
+            '    - Translocation between chr 9 and 22',
+            '',
+            'Detection:',
+            '  - Karyotype analysis',
+            '  - Banding patterns',
+            '',
+            'Importance:',
+            '  - Evolutionary change',
+            '  - Source of genetic disease',
+            '  - Cancer development'
+        ],
+        helper: 'Deletion (lost), Duplication (copied), Inversion (flipped), Translocation (moved)',
+        solution: 'Deletion (segment lost), Duplication (segment copied), Inversion (segment reversed), Translocation (moved to different chromosome)',
+        realWorldContext: 'Down syndrome is chromosomal mutation (extra chromosome 21)'
+    });
+
+    return relatedProblems;
+}
+
+// ============== GENE EXPRESSION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedGeneExpression() {
+    const relatedProblems = [];
+
+    // Problem 1: Central Dogma
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Central Dogma of Molecular Biology',
+        problem: 'Explain the central dogma: DNA → RNA → Protein',
+        parameters: {
+            specificItems: ['central dogma'],
+            category: 'overview',
+            limit: 1
+        },
+        type: 'gene_expression',
+        context: { difficulty: 'beginner', topic: 'Gene Expression', focus: 'central dogma' },
+        subparts: [
+            'CENTRAL DOGMA:',
+            '  DNA → RNA → Protein',
+            '',
+            'Flow of Genetic Information:',
+            '',
+            '1. DNA (Genome):',
+            '  - Permanent genetic information',
+            '  - In nucleus (eukaryotes)',
+            '  - Template for RNA',
+            '',
+            '2. TRANSCRIPTION (DNA → RNA):',
+            '  - DNA copied to mRNA',
+            '  - RNA polymerase enzyme',
+            '  - In nucleus',
+            '  - mRNA exits to cytoplasm',
+            '',
+            '3. TRANSLATION (RNA → Protein):',
+            '  - mRNA read by ribosome',
+            '  - Amino acids assembled',
+            '  - In cytoplasm',
+            '  - Produces protein',
+            '',
+            'Why RNA Intermediate?',
+            '  - Protects DNA (doesn\'t leave nucleus)',
+            '  - Amplification (many RNA from one DNA)',
+            '  - Regulation possible at multiple steps',
+            '  - Different proteins from one gene (splicing)',
+            '',
+            'Exceptions:',
+            '  - Reverse transcription (RNA → DNA)',
+            '    • Retroviruses (HIV)',
+            '    • Telomerase',
+            '  - RNA directly functional',
+            '    • rRNA, tRNA (no translation)',
+            '',
+            'Gene Expression = Transcription + Translation'
+        ],
+        helper: 'DNA stores info → RNA carries message → Protein does work',
+        solution: 'Central dogma: DNA transcribed to RNA, RNA translated to protein; DNA→RNA→Protein',
+        realWorldContext: 'All cells have same DNA but express different genes (liver vs brain)'
+    });
+
+    // Problem 2: Lac Operon
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Lac Operon Regulation',
+        problem: 'Explain how the lac operon regulates lactose metabolism in bacteria',
+        parameters: {
+            specificItems: ['lac operon'],
+            regulationLevel: 'transcriptional',
+            type: 'prokaryotic',
+            limit: 1
+        },
+        type: 'gene_expression',
+        context: { difficulty: 'intermediate', topic: 'Gene Expression', focus: 'lac operon' },
+        subparts: [
+            'LAC OPERON (Prokaryotic Gene Regulation):',
+            '',
+            'Function:',
+            '  - Regulates lactose metabolism genes',
+            '  - Turns genes ON when lactose present',
+            '  - Turns genes OFF when lactose absent',
+            '',
+            'Components:',
+            '  Structural genes:',
+            '    - lacZ: β-galactosidase (breaks down lactose)',
+            '    - lacY: Permease (transports lactose in)',
+            '    - lacA: Transacetylase',
+            '  Regulatory:',
+            '    - Promoter: RNA polymerase binding site',
+            '    - Operator: Repressor binding site',
+            '    - lacI gene: Codes for repressor protein',
+            '',
+            'TWO STATES:',
+            '',
+            '1. LACTOSE ABSENT (Default OFF):',
+            '  a) Repressor protein binds to operator',
+            '  b) Blocks RNA polymerase',
+            '  c) Genes NOT transcribed',
+            '  d) No enzymes made',
+            '  Result: System OFF (makes sense - no lactose to digest)',
+            '',
+            '2. LACTOSE PRESENT (Induced ON):',
+            '  a) Lactose (allolactose) binds to repressor',
+            '  b) Changes repressor shape',
+            '  c) Repressor falls off operator',
+            '  d) RNA polymerase can transcribe',
+            '  e) Enzymes made',
+            '  Result: System ON (makes sense - digest available lactose)',
+            '',
+            'Type: NEGATIVE REGULATION',
+            '  - Default is repressed',
+            '  - Inducer (lactose) removes repression',
+            '',
+            'Positive Regulation (CAP-cAMP):',
+            '  - Glucose absent → cAMP high',
+            '  - CAP-cAMP complex enhances transcription',
+            '  - Glucose present → cAMP low',
+            '  - Transcription reduced',
+            '  - Glucose preferred over lactose',
+            '',
+            'Efficiency:',
+            '  - Saves energy',
+            '  - Only make enzymes when needed',
+            '  - Fast response to environment'
+        ],
+        helper: 'No lactose = repressor blocks genes; Lactose present = repressor removed, genes ON',
+        solution: 'Lac operon: lactose absent (repressor blocks); lactose present (inducer removes repressor, genes ON)',
+        realWorldContext: 'Model system for understanding gene regulation; won Nobel Prize'
+    });
+
+    // Problem 3: Transcription Factors
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Eukaryotic Transcription Factors',
+        problem: 'Explain how transcription factors regulate gene expression in eukaryotes',
+        parameters: {
+            specificItems: ['transcription factor', 'enhancer'],
+            regulationLevel: 'transcriptional',
+            type: 'eukaryotic',
+            limit: 2
+        },
+        type: 'gene_expression',
+        context: { difficulty: 'intermediate', topic: 'Gene Expression', focus: 'transcription factors' },
+        subparts: [
+            'EUKARYOTIC TRANSCRIPTION FACTORS:',
+            '',
+            'Definition:',
+            '  - Proteins that regulate transcription',
+            '  - Bind to DNA',
+            '  - Control gene expression',
+            '',
+            'TWO MAIN TYPES:',
+            '',
+            '1. GENERAL TRANSCRIPTION FACTORS:',
+            '  - Required for ALL genes',
+            '  - Assemble at promoter',
+            '  - Help RNA polymerase II bind',
+            '',
+            '  Process:',
+            '    a) TFIID binds TATA box',
+            '    b) Other factors (TFIIA, TFIIB, etc.) join',
+            '    c) RNA polymerase II recruited',
+            '    d) Basal transcription begins',
+            '',
+            '2. SPECIFIC TRANSCRIPTION FACTORS:',
+            '  - Regulate specific genes',
+            '  - Respond to signals',
+            '',
+            '  Two categories:',
+            '',
+            '  ACTIVATORS:',
+            '    - Increase transcription',
+            '    - Bind to enhancers',
+            '    - Recruit RNA polymerase',
+            '    - Example: Hormone receptors',
+            '',
+            '  REPRESSORS:',
+            '    - Decrease transcription',
+            '    - Bind to silencers',
+            '    - Block RNA polymerase',
+            '    - Example: Tumor suppressors',
+            '',
+            'ENHANCERS:',
+            '  - DNA sequences that boost transcription',
+            '  - Can be far from gene (thousands of bp)',
+            '  - Work in any orientation',
+            '',
+            '  Mechanism:',
+            '    1. Activator binds to enhancer',
+            '    2. DNA loops to bring enhancer near promoter',
+            '    3. Activator contacts mediator proteins',
+            '    4. Mediator recruits RNA polymerase',
+            '    5. Transcription increases',
+            '',
+            'COMBINATORIAL CONTROL:',
+            '  - Multiple factors work together',
+            '  - Different combinations = different outcomes',
+            '',
+            '  Example:',
+            '    Factor A + Factor B = Gene ON',
+            '    Factor A + Factor C = Gene OFF',
+            '    Factor A alone = Low expression',
+            '',
+            '  Importance:',
+            '    - Fine-tuned control',
+            '    - Cell-type specific expression',
+            '    - Response to environment',
+            '',
+            'Signal Transduction:',
+            '  Hormone → Receptor → Transcription factor activated',
+            '  → Gene expression changes'
+        ],
+        helper: 'General TFs = basic machinery; Specific TFs = activators/repressors for control',
+        solution: 'General TFs assemble RNA polymerase; Specific TFs (activators/repressors) regulate specific genes via enhancers/silencers',
+        realWorldContext: 'Many cancers involve mutated transcription factors (p53, Myc)'
+    });
+
+    // Problem 4: Levels of Regulation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Multiple Levels of Gene Regulation',
+        problem: 'Describe the four main levels at which gene expression can be regulated',
+        parameters: {
+            specificItems: ['transcriptional', 'post-transcriptional', 'translational', 'post-translational'],
+            regulationLevel: 'all',
+            limit: 4
+        },
+        type: 'gene_expression',
+        context: { difficulty: 'advanced', topic: 'Gene Expression', focus: 'regulation levels' },
+        subparts: [
+            'LEVELS OF GENE REGULATION:',
+            '',
+            '1. TRANSCRIPTIONAL CONTROL (Primary):',
+            '  - Control of mRNA synthesis',
+            '  - Most important level',
+            '',
+            '  Mechanisms:',
+            '    Chromatin remodeling:',
+            '      - Tightly packed = inaccessible',
+            '      - Loosely packed = accessible',
+            '    Transcription factors:',
+            '      - Activators and repressors',
+            '    Epigenetic modifications:',
+            '      - DNA methylation (silences genes)',
+            '      - Histone modifications',
+            '',
+            '  Advantage: Energy efficient (prevents waste)',
+            '',
+            '2. POST-TRANSCRIPTIONAL CONTROL:',
+            '  - Control of mRNA processing and stability',
+            '',
+            '  Mechanisms:',
+            '    Alternative splicing:',
+            '      - Different exon combinations',
+            '      - One gene → multiple proteins',
+            '      - Example: 20,000 genes → 100,000+ proteins',
+            '    mRNA stability:',
+            '      - Short poly-A tail = quick degradation',
+            '      - Long poly-A tail = stable',
+            '    mRNA localization:',
+            '      - mRNA sent to specific cell regions',
+            '',
+            '  Example: Tropomyosin',
+            '    - Same gene, different splicing',
+            '    - Muscle vs non-muscle versions',
+            '',
+            '3. TRANSLATIONAL CONTROL:',
+            '  - Control of protein synthesis',
+            '',
+            '  Mechanisms:',
+            '    Regulatory proteins:',
+            '      - Block ribosome binding',
+            '      - Example: Iron regulation',
+            '    microRNAs (miRNAs):',
+            '      - Small RNAs that bind mRNA',
+            '      - Block translation or cause degradation',
+            '    Initiation factor regulation:',
+            '      - Control translation start',
+            '',
+            '  Example: Ferritin (iron storage)',
+            '    - Low iron: translation blocked',
+            '    - High iron: translation proceeds',
+            '',
+            '4. POST-TRANSLATIONAL CONTROL:',
+            '  - Control of protein activity',
+            '',
+            '  Mechanisms:',
+            '    Chemical modifications:',
+            '      • Phosphorylation (on/off switch)',
+            '      • Methylation, acetylation',
+            '      • Glycosylation',
+            '    Protein cleavage:',
+            '      - Insulin activation',
+            '    Protein degradation:',
+            '      - Ubiquitin tagging',
+            '      - Proteasome destruction',
+            '    Protein localization:',
+            '      - Sent to correct compartment',
+            '',
+            '  Example: Cyclin proteins',
+            '    - Regulate cell cycle',
+            '    - Phosphorylation activates',
+            '    - Ubiquitin tags for destruction',
+            '',
+            'WHY MULTIPLE LEVELS?',
+            '  - Fine-tuned control',
+            '  - Rapid response (post-translational fastest)',
+            '  - Energy efficiency (transcriptional saves most)',
+            '  - Flexibility',
+            '',
+            'Efficiency vs Speed:',
+            '  Transcriptional: Slow but efficient',
+            '  Post-translational: Fast but less efficient'
+        ],
+        helper: 'Four levels: DNA→RNA (transcriptional), RNA processing (post-transcriptional), RNA→Protein (translational), Protein modification (post-translational)',
+        solution: 'Regulation at: Transcriptional (mRNA synthesis), Post-transcriptional (splicing/stability), Translational (protein synthesis), Post-translational (modifications)',
+        realWorldContext: 'Insulin production involves all levels: gene transcription, splicing, translation, cleavage'
+    });
+
+    // Problem 5: Epigenetic Regulation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Epigenetic Gene Regulation',
+        problem: 'Explain how epigenetic modifications regulate gene expression without changing DNA sequence',
+        parameters: {
+            specificItems: ['epigenetics', 'DNA methylation', 'histone modification'],
+            regulationLevel: 'transcriptional',
+            type: 'epigenetic',
+            limit: 3
+        },
+        type: 'gene_expression',
+        context: { difficulty: 'advanced', topic: 'Gene Expression', focus: 'epigenetics' },
+        subparts: [
+            'EPIGENETICS:',
+            '',
+            'Definition:',
+            '  - Heritable changes in gene expression',
+            '  - WITHOUT changing DNA sequence',
+            '  - "Above genetics"',
+            '',
+            'TWO MAIN MECHANISMS:',
+            '',
+            '1. DNA METHYLATION:',
+            '',
+            '  What:',
+            '    - Adding methyl group (CH₃) to cytosine',
+            '    - Especially at CG sequences (CpG islands)',
+            '    - Done by DNA methyltransferases',
+            '',
+            '  Effect: SILENCES GENES',
+            '    - Methylated DNA = gene OFF',
+            '    - Blocks transcription factor binding',
+            '    - Recruits repressor proteins',
+            '',
+            '  Inheritance:',
+            '    - Pattern maintained during replication',
+            '    - Passed to daughter cells',
+            '',
+            '  Examples:',
+            '    X-inactivation:',
+            '      - Females (XX) inactivate one X',
+            '      - Heavily methylated',
+            '      - Becomes Barr body',
+            '    Genomic imprinting:',
+            '      - Parent-specific expression',
+            '      - Some genes only expressed from mom or dad',
+            '',
+            '2. HISTONE MODIFICATIONS:',
+            '',
+            '  What:',
+            '    - Chemical changes to histone proteins',
+            '    - Acetylation, methylation, phosphorylation',
+            '',
+            '  Effects:',
+            '    HISTONE ACETYLATION:',
+            '      - Adds acetyl groups',
+            '      - Loosens DNA-histone binding',
+            '      - Opens chromatin',
+            '      - Result: Gene ACTIVATION',
+            '',
+            '    HISTONE DEACETYLATION:',
+            '      - Removes acetyl groups',
+            '      - Tightens DNA-histone binding',
+            '      - Closes chromatin',
+            '      - Result: Gene SILENCING',
+            '',
+            '    HISTONE METHYLATION:',
+            '      - Can activate OR repress',
+            '      - Depends on which amino acid methylated',
+            '',
+            '  "Histone Code":',
+            '    - Combination of modifications',
+            '    - Determines gene expression state',
+            '',
+            'CHROMATIN REMODELING:',
+            '',
+            '  Heterochromatin (Closed):',
+            '    - Tightly packed',
+            '    - Transcriptionally inactive',
+            '    - Heavily methylated',
+            '    - Deacetylated histones',
+            '',
+            '  Euchromatin (Open):',
+            '    - Loosely packed',
+            '    - Transcriptionally active',
+            '    - Unmethylated',
+            '    - Acetylated histones',
+            '',
+            'WHY IMPORTANT:',
+            '',
+            '  Development:',
+            '    - Cell differentiation',
+            '    - All cells have same DNA',
+            '    - Different epigenetic marks = different cell types',
+            '',
+            '  Environmental Response:',
+            '    - Diet, stress, toxins can change marks',
+            '    - Affects gene expression',
+            '',
+            '  Disease:',
+            '    - Cancer: Abnormal methylation',
+            '      • Tumor suppressors silenced',
+            '      • Oncogenes activated',
+            '    - Aging: Epigenetic changes accumulate',
+            '',
+            '  Inheritance:',
+            '    - Some marks inherited',
+            '    - Environmental effects passed to offspring',
+            '    - Example: Dutch Hunger Winter study',
+            '',
+            'Reversibility:',
+            '  - Unlike mutations, epigenetic changes reversible',
+            '  - Drug targets for cancer treatment',
+            '  - HDAC inhibitors, methylation inhibitors'
+        ],
+        helper: 'Epigenetics = gene control without DNA changes; DNA methylation (OFF), Histone acetylation (ON)',
+        solution: 'Epigenetic: DNA methylation silences genes; Histone modifications open/close chromatin; heritable, reversible',
+        realWorldContext: 'Identical twins have same DNA but different epigenetic marks, causing different traits/disease risks'
+    });
+
+    return relatedProblems;
+}
+
+// ============== INHERITANCE PATTERNS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedInheritancePatterns() {
+    const relatedProblems = [];
+
+    // Problem 1: Autosomal vs Sex-Linked
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Autosomal vs Sex-Linked Inheritance',
+        problem: 'Distinguish between autosomal and sex-linked inheritance patterns',
+        parameters: {
+            specificItems: ['autosomal', 'sex-linked'],
+            inheritancePattern: 'basic',
+            limit: 2
+        },
+        type: 'inheritance_patterns',
+        context: { difficulty: 'beginner', topic: 'Inheritance Patterns', focus: 'chromosome types' },
+        subparts: [
+            'TYPES OF CHROMOSOMES:',
+            '',
+            'Autosomes:',
+            '  - Chromosomes 1-22 (in humans)',
+            '  - Same in males and females',
+            '  - 22 pairs (44 total)',
+            '',
+            'Sex Chromosomes:',
+            '  - Chromosome 23rd pair',
+            '  - Determines biological sex',
+            '  - Females: XX',
+            '  - Males: XY',
+            '',
+            'AUTOSOMAL INHERITANCE:',
+            '',
+            '  - Gene on chromosome 1-22',
+            '  - Affects males and females equally',
+            '  - Not related to sex',
+            '',
+            '  Patterns:',
+            '    Autosomal Dominant:',
+            '      - One mutant allele causes disease',
+            '      - Example: Huntington\'s disease',
+            '    Autosomal Recessive:',
+            '      - Two mutant alleles needed',
+            '      - Example: Cystic fibrosis',
+            '',
+            'SEX-LINKED INHERITANCE:',
+            '',
+            '  - Gene on X or Y chromosome',
+            '  - Different patterns in males vs females',
+            '',
+            '  X-Linked:',
+            '    - Gene on X chromosome',
+            '    - Males more affected (only one X)',
+            '    - Females usually carriers',
+            '    Example: Hemophilia, Color blindness',
+            '',
+            '  Y-Linked:',
+            '    - Gene on Y chromosome',
+            '    - Only males affected',
+            '    - Father to son transmission',
+            '    - Rare',
+            '',
+            'KEY DIFFERENCES:',
+            '',
+            '  Autosomal:',
+            '    - Equal male/female ratio',
+            '    - Carriers can be either sex',
+            '',
+            '  X-Linked:',
+            '    - More males affected',
+            '    - Never father to son',
+            '    - Carrier mothers pass to sons',
+            '',
+            'Why X-Linked Affects Males More:',
+            '  - Males: XY (only one X)',
+            '    • One mutant X = disease',
+            '  - Females: XX (two X\'s)',
+            '    • Need mutant on both X\'s',
+            '    • Usually just carriers'
+        ],
+        helper: 'Autosomal = chromosomes 1-22 (equal M/F); Sex-linked = X or Y (males more affected)',
+        solution: 'Autosomal (chromosomes 1-22, equal M/F); Sex-linked (X or Y, males more affected for X-linked)',
+        realWorldContext: 'Queen Victoria carried hemophilia gene; passed to European royal families'
+    });
+
+    // Problem 2: Incomplete Dominance
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Incomplete Dominance',
+        problem: 'Explain incomplete dominance using snapdragon flower color as an example',
+        parameters: {
+            specificItems: ['incomplete dominance'],
+            inheritancePattern: 'incompleteDominance',
+            limit: 1
+        },
+        type: 'inheritance_patterns',
+        context: { difficulty: 'intermediate', topic: 'Inheritance Patterns', focus: 'incomplete dominance' },
+        subparts: [
+            'INCOMPLETE DOMINANCE:',
+            '',
+            'Definition:',
+            '  - Heterozygote shows INTERMEDIATE phenotype',
+            '  - Blend of two alleles',
+            '  - Neither allele completely dominant',
+            '',
+            'Classic Example: Snapdragon Flowers',
+            '',
+            'Alleles:',
+            '  R = Red flowers',
+            '  W = White flowers',
+            '',
+            'Genotypes and Phenotypes:',
+            '  RR = Red (homozygous)',
+            '  RW = Pink (heterozygous, INTERMEDIATE)',
+            '  WW = White (homozygous)',
+            '',
+            'Cross: RW × RW (Pink × Pink)',
+            '',
+            'Punnett Square:',
+            '       R    W',
+            '   ┌─────────┐',
+            ' R │ RR | RW │',
+            '   ├─────────┤',
+            ' W │ RW | WW │',
+            '   └─────────┘',
+            '',
+            'Offspring:',
+            '  Genotypic ratio: 1 RR : 2 RW : 1 WW',
+            '  Phenotypic ratio: 1 Red : 2 Pink : 1 White',
+            '',
+            'KEY POINT:',
+            '  Genotypic ratio = Phenotypic ratio (1:2:1)',
+            '  Why? Each genotype has unique phenotype',
+            '',
+            'Compare to Complete Dominance:',
+            '',
+            '  Complete Dominance:',
+            '    - AA and Aa look same',
+            '    - Phenotypic ratio: 3:1',
+            '',
+            '  Incomplete Dominance:',
+            '    - RR, RW, WW all look different',
+            '    - Phenotypic ratio: 1:2:1',
+            '',
+            'Molecular Explanation:',
+            '  - RR makes full amount of red pigment',
+            '  - RW makes half amount → pink',
+            '  - WW makes no pigment → white',
+            '',
+            'Other Examples:',
+            '  - Human hair: Straight/wavy/curly',
+            '  - Andalusian chickens: Black/blue/white',
+            '  - Hypercholesterolemia: Normal/intermediate/severe'
+        ],
+        helper: 'Incomplete dominance: heterozygote is BLEND (RW = pink, not red)',
+        solution: 'Incomplete dominance: heterozygote intermediate; 1:2:1 phenotypic ratio (red:pink:white)',
+        realWorldContext: 'Familial hypercholesterolemia shows incomplete dominance (cholesterol levels)'
+    });
+
+    // Problem 3: Codominance
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Codominance',
+        problem: 'Explain codominance using ABO blood types as an example',
+        parameters: {
+            specificItems: ['codominance', 'ABO blood type'],
+            inheritancePattern: 'codominance',
+            limit: 2
+        },
+        type: 'inheritance_patterns',
+        context: { difficulty: 'intermediate', topic: 'Inheritance Patterns', focus: 'codominance' },
+        subparts: [
+            'CODOMINANCE:',
+            '',
+            'Definition:',
+            '  - BOTH alleles fully expressed',
+            '  - No blending',
+            '  - Both traits visible simultaneously',
+            '',
+            'Classic Example: ABO Blood Types',
+            '',
+            'Three Alleles (multiple alleles):',
+            '  Iᴬ = Produces A antigens',
+            '  Iᴮ = Produces B antigens',
+            '  i = Produces no antigens (recessive)',
+            '',
+            'Dominance Relationships:',
+            '  - Iᴬ and Iᴮ are codominant',
+            '  - Both dominant over i',
+            '',
+            'Blood Types:',
+            '  Type A: IᴬIᴬ or Iᴬi',
+            '    - A antigens on red blood cells',
+            '  Type B: IᴮIᴮ or Iᴮi',
+            '    - B antigens on red blood cells',
+            '  Type AB: IᴬIᴮ (CODOMINANCE)',
+            '    - BOTH A and B antigens',
+            '    - Both alleles expressed',
+            '  Type O: ii',
+            '    - No antigens',
+            '',
+            'Example Cross: Type A × Type B',
+            '  Parent 1: Iᴬi (Type A)',
+            '  Parent 2: Iᴮi (Type B)',
+            '',
+            'Punnett Square:',
+            '       Iᴬ   i',
+            '   ┌─────────┐',
+            ' Iᴮ │IᴬIᴮ|Iᴮi│',
+            '   ├─────────┤',
+            ' i │Iᴬi | ii│',
+            '   └─────────┘',
+            '',
+            'Offspring:',
+            '  25% IᴬIᴮ (Type AB) - Codominance!',
+            '  25% Iᴬi (Type A)',
+            '  25% Iᴮi (Type B)',
+            '  25% ii (Type O)',
+            '',
+            'Codominance vs Incomplete Dominance:',
+            '',
+            '  Incomplete Dominance:',
+            '    - Blending (red + white = pink)',
+            '    - Intermediate phenotype',
+            '',
+            '  Codominance:',
+            '    - Both traits visible (AB has A AND B)',
+            '    - No blending',
+            '',
+            'Other Examples:',
+            '  - Roan coat in cattle',
+            '    • Red and white hairs (both present)',
+            '  - Sickle cell trait (HbA HbS)',
+            '    • Both normal and sickle hemoglobin',
+            '',
+            'Importance:',
+            '  - Blood transfusions (must match)',
+            '  - Paternity testing',
+            '  - Forensics'
+        ],
+        helper: 'Codominance: BOTH alleles show (Type AB has A AND B antigens)',
+        solution: 'Codominance: both alleles fully expressed; AB blood type shows both A and B antigens',
+        realWorldContext: 'Blood transfusions require matching; Type O universal donor, AB universal recipient'
+    });
+
+    // Problem 4: X-Linked Recessive
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'X-Linked Recessive Inheritance',
+        problem: 'Explain X-linked recessive inheritance using colorblindness or hemophilia as an example',
+        parameters: {
+            specificItems: ['X-linked recessive'],
+            inheritancePattern: 'xLinkedRecessive',
+            chromosome: 'X',
+            limit: 1
+        },
+        type: 'inheritance_patterns',
+        context: { difficulty: 'intermediate', topic: 'Inheritance Patterns', focus: 'X-linked' },
+        subparts: [
+            'X-LINKED RECESSIVE INHERITANCE:',
+            '',
+            'Characteristics:',
+            '  - Gene on X chromosome',
+            '  - Recessive allele',
+            '  - More males affected',
+            '  - Never father to son transmission',
+            '',
+            'Example: Colorblindness (Red-Green)',
+            '',
+            'Alleles:',
+            '  Xᶜ = Normal color vision (dominant)',
+            '  Xᶜ = Colorblind (recessive)',
+            '',
+            'Genotypes:',
+            '',
+            '  Females (XX):',
+            '    XᶜXᶜ = Normal',
+            '    XᶜXᶜ = Carrier (normal vision)',
+            '    XᶜXᶜ = Colorblind (rare)',
+            '',
+            '  Males (XY):',
+            '    XᶜY = Normal',
+            '    XᶜY = Colorblind',
+            '',
+            'Why Males More Affected:',
+            '  - Males have only ONE X',
+            '  - One recessive allele = disease',
+            '  - Frequency: ~8% of males',
+            '',
+            '  - Females have TWO X\'s',
+            '  - Need recessive on BOTH',
+            '  - Frequency: ~0.5% of females',
+            '',
+            'Example Cross: Carrier Mother × Normal Father',
+            '  Mother: XᶜXᶜ (carrier)',
+            '  Father: XᶜY (normal)',
+            '',
+            'Punnett Square:',
+            '       Xᶜ   Y',
+            '   ┌─────────┐',
+            ' Xᶜ │XᶜXᶜ|XᶜY│',
+            '   ├─────────┤',
+            ' Xᶜ │XᶜXᶜ|XᶜY│',
+            '   └─────────┘',
+            '',
+            'Offspring:',
+            '  Daughters:',
+            '    50% XᶜXᶜ (normal)',
+            '    50% XᶜXᶜ (carrier)',
+            '  Sons:',
+            '    50% XᶜY (normal)',
+            '    50% XᶜY (colorblind)',
+            '',
+            'Pattern Recognition:',
+            '  - Affected males have carrier mothers',
+            '  - Affected males have normal fathers',
+            '  - Skips generations',
+            '  - Maternal grandfather → grandson',
+            '',
+            'Other X-Linked Recessive Diseases:',
+            '  - Hemophilia A (clotting disorder)',
+            '  - Duchenne muscular dystrophy',
+            '  - Fragile X syndrome',
+            '',
+            'Famous Example: Hemophilia in Royal Families',
+            '  - Queen Victoria was carrier',
+            '  - Passed to Russian, Spanish, German royalty',
+            '  - Tsarevich Alexei of Russia affected'
+        ],
+        helper: 'X-linked recessive: males need one copy (XᶜY), females need two (XᶜXᶜ)',
+        solution: 'X-linked recessive: gene on X; males more affected (one X); carrier females pass to sons',
+        realWorldContext: '~8% of males are colorblind; females rarely affected'
+    });
+
+    // Problem 5: Polygenic Inheritance
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Polygenic Inheritance',
+        problem: 'Explain polygenic inheritance and how it produces continuous variation in traits like height',
+        parameters: {
+            specificItems: ['polygenic inheritance'],
+            inheritancePattern: 'polygenicInheritance',
+            limit: 1
+        },
+        type: 'inheritance_patterns',
+        context: { difficulty: 'advanced', topic: 'Inheritance Patterns', focus: 'polygenic' },
+        subparts: [
+            'POLYGENIC INHERITANCE:',
+            '',
+            'Definition:',
+            '  - Multiple genes affect ONE trait',
+            '  - Additive effects',
+            '  - Continuous variation (range)',
+            '  - Bell curve distribution',
+            '',
+            'Characteristics:',
+            '  - No distinct categories',
+            '  - Wide range of phenotypes',
+            '  - Environmental influence common',
+            '  - Many intermediate values',
+            '',
+            'Example: Human Height',
+            '',
+            '  Controlled by:',
+            '    - 100+ genes',
+            '    - Each gene adds small amount',
+            '    - Additive effect',
+            '',
+            '  Simplified Model (3 genes):',
+            '    Genes: A/a, B/b, C/c',
+            '    Capital letters add height',
+            '    Lowercase don\'t add',
+            '',
+            '  Genotypes:',
+            '    AABBCC = Tallest (6 capital letters)',
+            '    AaBbCc = Medium (3 capital letters)',
+            '    aabbcc = Shortest (0 capital letters)',
+            '',
+            '  Distribution:',
+            '    - Few very tall',
+            '    - Few very short',
+            '    - Most in middle',
+            '    - Bell curve (normal distribution)',
+            '',
+            'Other Polygenic Traits:',
+            '',
+            '  Skin Color:',
+            '    - 3-4 main genes',
+            '    - Continuous range',
+            '    - Dark to light',
+            '',
+            '  Eye Color:',
+            '    - 10+ genes',
+            '    - Not just "blue or brown"',
+            '    - Many shades',
+            '',
+            '  Intelligence (IQ):',
+            '    - 1000+ genes',
+            '    - Strong environmental influence',
+            '',
+            '  Weight:',
+            '    - Many genes',
+            '    - Strong environmental effect',
+            '',
+            'Environmental Effects:',
+            '  - Polygenic traits especially influenced',
+            '  - Example: Height',
+            '    • Genetics: ~80%',
+            '    • Nutrition: ~20%',
+            '',
+            'Contrast with Mendelian:',
+            '',
+            '  Mendelian (Single Gene):',
+            '    - Distinct categories',
+            '    - Clear ratios (3:1, 1:2:1)',
+            '    - Example: ABO blood type',
+            '',
+            '  Polygenic (Multiple Genes):',
+            '    - Continuous variation',
+            '    - Bell curve',
+            '    - Example: Height',
+            '',
+            'Importance:',
+            '  - Most human traits are polygenic',
+            '  - Complex diseases (diabetes, heart disease)',
+            '  - Agricultural breeding (crop yield)',
+            '  - Evolution (continuous variation)',
+            '',
+            'Challenges:',
+            '  - Hard to predict offspring',
+            '  - Can\'t use simple Punnett squares',
+            '  - Environmental factors complicate'
+        ],
+        helper: 'Polygenic = many genes, one trait; creates continuous variation (bell curve)',
+        solution: 'Polygenic: multiple genes affect one trait; additive effects; continuous variation; bell curve distribution',
+        realWorldContext: 'Height, skin color, intelligence are polygenic; prediction difficult'
+    });
+
+    return relatedProblems;
+}
+Now I'll create the solver functions for all genetics topics:
+// ============== GENETICS SOLVER FUNCTIONS ==============
+
+function solveMendelianGeneticsProblems() {
+    const problems = generateRelatedMendelianGenetics();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Mendelian Genetics Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'genetics',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePunnettSquaresProblems() {
+    const problems = generateRelatedPunnettSquares();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Punnett Squares Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'genetics',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveDNAStructureProblems() {
+    const problems = generateRelatedDNAStructure();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving DNA Structure Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'molecular',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveDNAReplicationProblems() {
+    const problems = generateRelatedDNAReplication();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving DNA Replication Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'molecular',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveTranscriptionProblems() {
+    const problems = generateRelatedTranscription();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Transcription Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'molecular',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveTranslationProblems() {
+    const problems = generateRelatedTranslation();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Translation Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'molecular',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveMutationsProblems() {
+    const problems = generateRelatedMutations();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Mutations Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'genetics',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveGeneExpressionProblems() {
+    const problems = generateRelatedGeneExpression();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Gene Expression Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'molecular',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveInheritancePatternsProblems() {
+    const problems = generateRelatedInheritancePatterns();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Inheritance Patterns Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedGeneticsMolecularBiologyWorkbook({
+            theme: 'genetics',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION (UPDATED) ==============
+
+async function generateComprehensiveBiologyDocument() {
+    console.log('Generating Comprehensive Biology Workbook with Cell Biology and Genetics...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Biology Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide: Cell Biology and Genetics & Molecular Biology',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Cell Structure, Organelles, Membrane, Division, Transport, Metabolism, and Genetics',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART A: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    // Cell Biology TOC (existing from previous code)
+    let problemNumber = 1;
+    
+    const cellStructureProblems = generateRelatedCellStructure();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part I: Cell Structure and Types (${cellStructureProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    cellStructureProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const membraneProblems = generateRelatedCellMembrane();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part II: Cell Membrane (${membraneProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    membraneProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const organellesProblems = generateRelatedOrganelles();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part III: Cell Organelles (${organellesProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    organellesProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const cellDivisionProblems = generateRelatedCellDivision();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part IV: Cell Division and Cell Cycle (${cellDivisionProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    cellDivisionProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const mitosisProblems = generateRelatedMitosisMeiosis();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part V: Mitosis and Meiosis (${mitosisProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    mitosisProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const transportProblems = generateRelatedCellTransport();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part VI: Cell Transport Mechanisms (${transportProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    transportProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const respirationProblems = generateRelatedCellularRespiration();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part VII: Cellular Respiration (${respirationProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    respirationProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const photosynthesisProblems = generateRelatedPhotosynthesis();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part VIII: Photosynthesis (${photosynthesisProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    photosynthesisProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    // ============== GENETICS TOC ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART B: GENETICS AND MOLECULAR BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 300, after: 100 }
+        })
+    );
+
+    const mendelianProblems = generateRelatedMendelianGenetics();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part IX: Mendelian Genetics (${mendelianProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    mendelianProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const punnettProblems = generateRelatedPunnettSquares();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part X: Punnett Squares (${punnettProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    punnettProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const dnaStructProblems = generateRelatedDNAStructure();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XI: DNA Structure (${dnaStructProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    dnaStructProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const dnaReplProblems = generateRelatedDNAReplication();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XII: DNA Replication (${dnaReplProblems.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    dnaReplProblems.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const transcriptionProbs = generateRelatedTranscription();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XIII: Transcription (${transcriptionProbs.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    transcriptionProbs.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const translationProbs = generateRelatedTranslation();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XIV: Translation (${translationProbs.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    translationProbs.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const mutationProbs = generateRelatedMutations();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XV: Mutations (${mutationProbs.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    mutationProbs.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const geneExprProbs = generateRelatedGeneExpression();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XVI: Gene Expression (${geneExprProbs.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    geneExprProbs.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    const inheritProbs = generateRelatedInheritancePatterns();
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Part XVII: Inheritance Patterns (${inheritProbs.length} Problems)`,
+            spacing: { before: 100, after: 50 },
+            indent: { left: 360 }
+        })
+    );
+    inheritProbs.forEach((problem) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${problemNumber}. ${problem.scenario}`,
+                spacing: { after: 50 },
+                indent: { left: 720 }
+            })
+        );
+        problemNumber++;
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART A: CELL BIOLOGY CONTENT (from previous code) ==============
+    
+    console.log('\n=== PART A: CELL BIOLOGY ===\n');
+    
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART A: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    // Part I: Cell Structure
+    console.log('Processing Part I: Cell Structure...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellStructureSolved = solveCellStructureProblems();
+    let currentProblemNum = 1;
+    cellStructureSolved.forEach((solved) => {
+        console.log(`  Adding Cell Structure Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part II: Cell Membrane
+    console.log('Processing Part II: Cell Membrane...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const membraneSolved = solveCellMembraneProblems();
+    membraneSolved.forEach((solved) => {
+        console.log(`  Adding Cell Membrane Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part III: Organelles
+    console.log('Processing Part III: Cell Organelles...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const organellesSolved = solveOrganellesProblems();
+    organellesSolved.forEach((solved) => {
+        console.log(`  Adding Organelles Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part IV: Cell Division
+    console.log('Processing Part IV: Cell Division...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellDivisionSolved = solveCellDivisionProblems();
+    cellDivisionSolved.forEach((solved) => {
+        console.log(`  Adding Cell Division Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part V: Mitosis and Meiosis
+    console.log('Processing Part V: Mitosis and Meiosis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const mitosisSolved = solveMitosisMeiosisProblems();
+    mitosisSolved.forEach((solved) => {
+        console.log(`  Adding Mitosis/Meiosis Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part VI: Cell Transport
+    console.log('Processing Part VI: Cell Transport...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const transportSolved = solveCellTransportProblems();
+    transportSolved.forEach((solved) => {
+        console.log(`  Adding Cell Transport Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part VII: Cellular Respiration
+    console.log('Processing Part VII: Cellular Respiration...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const respirationSolved = solveCellularRespirationProblems();
+    respirationSolved.forEach((solved) => {
+        console.log(`  Adding Cellular Respiration Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part VIII: Photosynthesis
+    console.log('Processing Part VIII: Photosynthesis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const photosynthesisSolved = solvePhotosynthesisProblems();
+    photosynthesisSolved.forEach((solved) => {
+        console.log(`  Adding Photosynthesis Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // ============== PART B: GENETICS AND MOLECULAR BIOLOGY ==============
+    
+    console.log('\n=== PART B: GENETICS AND MOLECULAR BIOLOGY ===\n');
+    
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART B: GENETICS AND MOLECULAR BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    // Part IX: Mendelian Genetics
+    console.log('Processing Part IX: Mendelian Genetics...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Mendelian Genetics',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const mendelianSolved = solveMendelianGeneticsProblems();
+    mendelianSolved.forEach((solved) => {
+        console.log(`  Adding Mendelian Genetics Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part X: Punnett Squares
+    console.log('Processing Part X: Punnett Squares...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Punnett Squares',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const punnettSolved = solvePunnettSquaresProblems();
+    punnettSolved.forEach((solved) => {
+        console.log(`  Adding Punnett Squares Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XI: DNA Structure
+    console.log('Processing Part XI: DNA Structure...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: DNA Structure',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const dnaStructSolved = solveDNAStructureProblems();
+    dnaStructSolved.forEach((solved) => {
+        console.log(`  Adding DNA Structure Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XII: DNA Replication
+    console.log('Processing Part XII: DNA Replication...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: DNA Replication',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const dnaReplSolved = solveDNAReplicationProblems();
+    dnaReplSolved.forEach((solved) => {
+        console.log(`  Adding DNA Replication Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XIII: Transcription
+    console.log('Processing Part XIII: Transcription...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Transcription',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const transcriptionSolved = solveTranscriptionProblems();
+    transcriptionSolved.forEach((solved) => {
+        console.log(`  Adding Transcription Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XIV: Translation
+    console.log('Processing Part XIV: Translation...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIV: Translation',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const translationSolved = solveTranslationProblems();
+    translationSolved.forEach((solved) => {
+        console.log(`  Adding Translation Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XV: Mutations
+    console.log('Processing Part XV: Mutations...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XV: Mutations',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const mutationsSolved = solveMutationsProblems();
+    mutationsSolved.forEach((solved) => {
+        console.log(`  Adding Mutations Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XVI: Gene Expression
+    console.log('Processing Part XVI: Gene Expression...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XVI: Gene Expression',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const geneExprSolved = solveGeneExpressionProblems();
+    geneExprSolved.forEach((solved) => {
+        console.log(`  Adding Gene Expression Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // Part XVII: Inheritance Patterns
+    console.log('Processing Part XVII: Inheritance Patterns...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XVII: Inheritance Patterns',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const inheritSolved = solveInheritancePatternsProblems();
+    inheritSolved.forEach((solved) => {
+        console.log(`  Adding Inheritance Patterns Problem ${currentProblemNum} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${currentProblemNum}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        currentProblemNum++;
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_biology_workbook_complete.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE BIOLOGY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log(`  • Total Problems: ${currentProblemNum - 1}`);
+        console.log('\n📖 PART A - CELL BIOLOGY:');
+        console.log(`    - Cell Structure: ${cellStructureProblems.length} problems`);
+        console.log(`    - Cell Membrane: ${membraneProblems.length} problems`);
+        console.log(`    - Cell Organelles: ${organellesProblems.length} problems`);
+        console.log(`    - Cell Division: ${cellDivisionProblems.length} problems`);
+        console.log(`    - Mitosis and Meiosis: ${mitosisProblems.length} problems`);
+        console.log(`    - Cell Transport: ${transportProblems.length} problems`);
+        console.log(`    - Cellular Respiration: ${respirationProblems.length} problems`);
+        console.log(`    - Photosynthesis: ${photosynthesisProblems.length} problems`);
+        console.log('\n📖 PART B - GENETICS AND MOLECULAR BIOLOGY:');
+        console.log(`    - Mendelian Genetics: ${mendelianProblems.length} problems`);
+        console.log(`    - Punnett Squares: ${punnettProblems.length} problems`);
+        console.log(`    - DNA Structure: ${dnaStructProblems.length} problems`);
+        console.log(`    - DNA Replication: ${dnaReplProblems.length} problems`);
+        console.log(`    - Transcription: ${transcriptionProbs.length} problems`);
+        console.log(`    - Translation: ${translationProbs.length} problems`);
+        console.log(`    - Mutations: ${mutationProbs.length} problems`);
+        console.log(`    - Gene Expression: ${geneExprProbs.length} problems`);
+        console.log(`    - Inheritance Patterns: ${inheritProbs.length} problems`);
+        console.log('\n📄 EXPECTED PAGES: 300+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step explanation');
+        console.log('  • Detailed biological content');
+        console.log('  • Key concepts and definitions');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common misconceptions addressed');
+        console.log('  • Pedagogical notes for teaching');
+        console.log('  • Comparisons and contrasts');
+        console.log('  • Examples from nature');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveBiologyDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
+

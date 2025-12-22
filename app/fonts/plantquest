@@ -1,0 +1,4124 @@
+Here's the comprehensive integrated code for plant biology related problems, solver functions, and document generation:
+// ============== PLANT STRUCTURE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPlantStructure() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic Plant Organs
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Plant Organ Systems',
+        problem: 'Identify the three main plant organs and describe their primary functions',
+        parameters: {
+            specificItems: ['Root', 'Stem', 'Leaf'],
+            organType: 'basic',
+            limit: 3
+        },
+        type: 'plant_structure',
+        context: { difficulty: 'beginner', topic: 'Plant Structure', focus: 'main organs' },
+        subparts: [
+            'Three Main Plant Organs:',
+            '',
+            '1. ROOT:',
+            '  Functions:',
+            '  - Anchorage: holds plant in soil',
+            '  - Absorption: takes up water and minerals',
+            '  - Storage: stores food and nutrients',
+            '  - Conduction: transports materials to stem',
+            '  Types: Taproot (dicots), Fibrous (monocots)',
+            '',
+            '2. STEM:',
+            '  Functions:',
+            '  - Support: holds leaves, flowers, fruits',
+            '  - Conduction: transports water and nutrients',
+            '  - Storage: stores food in some plants',
+            '  - Photosynthesis: green stems can photosynthesize',
+            '  Parts: Nodes, internodes, buds',
+            '',
+            '3. LEAF:',
+            '  Functions:',
+            '  - Photosynthesis: produces glucose',
+            '  - Gas exchange: CO₂ in, O₂ out',
+            '  - Transpiration: water loss creating pull',
+            '  Parts: Blade, petiole, veins',
+            '',
+            'Together: Form complete vascular plant body'
+        ],
+        helper: 'Roots anchor and absorb; Stems support and transport; Leaves photosynthesize',
+        solution: 'Root (underground, absorbs), Stem (support, transport), Leaf (photosynthesis, gas exchange)',
+        realWorldContext: 'Understanding plant organs helps in agriculture and gardening'
+    });
+
+    // Problem 2: Root Types Comparison
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Taproot vs Fibrous Root Systems',
+        problem: 'Compare taproot and fibrous root systems, explaining their advantages',
+        parameters: {
+            specificItems: ['taproot', 'fibrous'],
+            rootType: 'comparison',
+            limit: 2
+        },
+        type: 'root_systems',
+        context: { difficulty: 'beginner', topic: 'Root Systems', focus: 'root types' },
+        subparts: [
+            'TAPROOT SYSTEM:',
+            '  Structure:',
+            '  - One main primary root growing downward',
+            '  - Smaller lateral roots branch from main root',
+            '  - Deep penetration into soil',
+            '',
+            '  Advantages:',
+            '  - Access deep water and nutrients',
+            '  - Strong anchorage in wind',
+            '  - Drought resistant',
+            '',
+            '  Examples: Carrot, radish, dandelion, most dicots',
+            '',
+            'FIBROUS ROOT SYSTEM:',
+            '  Structure:',
+            '  - Network of similar-sized roots',
+            '  - All from stem base',
+            '  - Shallow, spreading system',
+            '',
+            '  Advantages:',
+            '  - Large surface area for absorption',
+            '  - Excellent erosion control',
+            '  - Efficient in shallow soils',
+            '',
+            '  Examples: Grass, wheat, rice, most monocots',
+            '',
+            'Key Difference:',
+            '  Taproot = deep, one main root',
+            '  Fibrous = shallow, many equal roots'
+        ],
+        helper: 'Taproot goes deep (one main); Fibrous spreads wide (many equal)',
+        solution: 'Taproot: deep penetration, strong anchorage; Fibrous: large surface area, erosion control',
+        realWorldContext: 'Grasses (fibrous) prevent soil erosion; trees (taproot) withstand storms'
+    });
+
+    // Problem 3: Tissue Systems
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Tissue Organization',
+        problem: 'Describe the three plant tissue systems and their locations and functions',
+        parameters: {
+            tissueSystem: 'all',
+            category: 'tissue organization',
+            limit: 3
+        },
+        type: 'plant_anatomy',
+        context: { difficulty: 'intermediate', topic: 'Plant Anatomy', focus: 'tissue systems' },
+        subparts: [
+            'Three Plant Tissue Systems:',
+            '',
+            '1. DERMAL TISSUE SYSTEM:',
+            '   Location: Outermost layer',
+            '   Components:',
+            '   - Epidermis (primary)',
+            '   - Periderm (secondary, in woody plants)',
+            '   Functions:',
+            '   - Protection from water loss',
+            '   - Protection from pathogens',
+            '   - Gas exchange (via stomata)',
+            '   Specializations: Stomata, trichomes, root hairs',
+            '',
+            '2. VASCULAR TISSUE SYSTEM:',
+            '   Location: Throughout plant body',
+            '   Components:',
+            '   - Xylem (water transport)',
+            '   - Phloem (sugar transport)',
+            '   Functions:',
+            '   - Transport water and minerals (xylem)',
+            '   - Transport sugars and organics (phloem)',
+            '   - Support',
+            '   Forms continuous system from roots to leaves',
+            '',
+            '3. GROUND TISSUE SYSTEM:',
+            '   Location: Between dermal and vascular',
+            '   Components:',
+            '   - Parenchyma (storage, photosynthesis)',
+            '   - Collenchyma (flexible support)',
+            '   - Sclerenchyma (rigid support)',
+            '   Functions:',
+            '   - Photosynthesis',
+            '   - Storage',
+            '   - Support',
+            '',
+            'Organization: Dermal (outside) → Ground → Vascular (inside)'
+        ],
+        helper: 'Dermal protects, Vascular transports, Ground fills and supports',
+        solution: 'Dermal (protection), Vascular (transport), Ground (storage and support) - three integrated systems',
+        realWorldContext: 'Tissue organization allows division of labor and efficiency'
+    });
+
+    // Problem 4: Modified Roots
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Specialized Root Modifications',
+        problem: 'Explain different types of modified roots and their specialized functions',
+        parameters: {
+            specificItems: ['storage', 'prop', 'aerial'],
+            function: 'specialized',
+            limit: 4
+        },
+        type: 'root_systems',
+        context: { difficulty: 'intermediate', topic: 'Root Systems', focus: 'modifications' },
+        subparts: [
+            'Modified Roots - Specialized Functions:',
+            '',
+            '1. STORAGE ROOTS:',
+            '   - Enlarged roots storing food (starch)',
+            '   - Types:',
+            '     • Taproot storage: carrot, radish, beet',
+            '     • Tuberous roots: sweet potato, dahlia',
+            '   - Function: Store carbohydrates for next season',
+            '   - Common in biennial plants',
+            '',
+            '2. PROP ROOTS:',
+            '   - Adventitious roots from stem',
+            '   - Provide additional support',
+            '   - Examples: Corn (maize), banyan tree',
+            '   - Function: Mechanical support for tall plants',
+            '',
+            '3. AERIAL ROOTS:',
+            '   - Roots exposed to air',
+            '   - Types:',
+            '     • Epiphytic: orchids (absorb moisture)',
+            '     • Climbing: ivy (attach to surfaces)',
+            '   - Function: Support, absorption, attachment',
+            '',
+            '4. PNEUMATOPHORES:',
+            '   - Vertical aerial roots in waterlogged soils',
+            '   - Examples: Mangroves',
+            '   - Function: Gas exchange in oxygen-poor soils',
+            '',
+            '5. HAUSTORIA:',
+            '   - Parasitic roots penetrating host',
+            '   - Examples: Mistletoe, dodder',
+            '   - Function: Extract nutrients from host',
+            '',
+            'Principle: Structure modified for specific environment/function'
+        ],
+        helper: 'Roots can specialize: storage (food), prop (support), aerial (gas/attachment)',
+        solution: 'Modified roots: storage (food), prop (support), aerial (absorption), pneumatophores (gas exchange)',
+        realWorldContext: 'Carrots and sweet potatoes are storage roots we eat'
+    });
+
+    // Problem 5: Monocot vs Dicot Structure
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Monocot and Dicot Comparison',
+        problem: 'Compare and contrast the structural differences between monocots and dicots',
+        parameters: {
+            category: 'comparison',
+            specificItems: ['monocot', 'dicot'],
+            limit: 2
+        },
+        type: 'plant_structure',
+        context: { difficulty: 'intermediate', topic: 'Plant Structure', focus: 'plant classification' },
+        subparts: [
+            'MONOCOTS vs DICOTS Structural Differences:',
+            '',
+            '1. ROOT SYSTEM:',
+            '   Monocots: Fibrous root system',
+            '   Dicots: Taproot system',
+            '',
+            '2. STEM VASCULAR BUNDLES:',
+            '   Monocots: Scattered throughout stem',
+            '   Dicots: Arranged in ring pattern',
+            '',
+            '3. STEM CAMBIUM:',
+            '   Monocots: Usually absent (no secondary growth)',
+            '   Dicots: Present (vascular cambium for secondary growth)',
+            '',
+            '4. LEAF VENATION:',
+            '   Monocots: Parallel veins',
+            '   Dicots: Netted (reticulate) veins',
+            '',
+            '5. FLOWER PARTS:',
+            '   Monocots: Multiples of 3 (3, 6, 9 petals)',
+            '   Dicots: Multiples of 4 or 5 (4, 5, 8, 10 petals)',
+            '',
+            '6. SEED COTYLEDONS:',
+            '   Monocots: One cotyledon (seed leaf)',
+            '   Dicots: Two cotyledons',
+            '',
+            '7. EXAMPLES:',
+            '   Monocots: Grasses, corn, wheat, lilies, orchids, palm trees',
+            '   Dicots: Roses, oaks, sunflowers, beans, most trees and shrubs',
+            '',
+            'Key Distinctions:',
+            '  - Monocots generally simpler structure',
+            '  - Dicots capable of woody growth',
+            '  - Both highly successful plant groups'
+        ],
+        helper: 'Remember: Monocots (1 cotyledon, parallel veins, scattered bundles); Dicots (2 cotyledons, netted veins, ring bundles)',
+        solution: 'Monocots: fibrous roots, parallel veins, scattered bundles, 3-part flowers; Dicots: taproot, netted veins, ring bundles, 4/5-part flowers',
+        realWorldContext: 'Grasses (monocots) and trees (dicots) dominate different ecosystems'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PLANT TRANSPORT - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPlantTransport() {
+    const relatedProblems = [];
+
+    // Problem 1: Xylem Transport Basics
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Water Transport in Xylem',
+        problem: 'Explain how water moves upward through xylem from roots to leaves',
+        parameters: {
+            specificItems: ['xylem'],
+            function: 'water transport',
+            limit: 1
+        },
+        type: 'plant_transport',
+        context: { difficulty: 'beginner', topic: 'Plant Transport', focus: 'xylem' },
+        subparts: [
+            'XYLEM TRANSPORT:',
+            '  What: Water and dissolved minerals',
+            '  Direction: Unidirectional (roots → leaves)',
+            '  Cells: Tracheids and vessel elements (dead at maturity)',
+            '',
+            'Three Mechanisms:',
+            '',
+            '1. ROOT PRESSURE:',
+            '   - Active transport of minerals into root xylem',
+            '   - Water follows by osmosis',
+            '   - Creates positive pressure pushing upward',
+            '   - Minor role (mainly at night)',
+            '   - Evidence: Guttation (water droplets on leaf edges)',
+            '',
+            '2. CAPILLARY ACTION:',
+            '   - Water molecules adhere to xylem walls',
+            '   - Helps in narrow vessels',
+            '   - Minor contribution',
+            '',
+            '3. TRANSPIRATION-COHESION-TENSION (MAIN):',
+            '   Step 1: Transpiration',
+            '   - Water evaporates from mesophyll cells',
+            '   - Exits through stomata',
+            '   - Creates negative pressure (tension) in xylem',
+            '',
+            '   Step 2: Cohesion',
+            '   - Water molecules stick together (H-bonds)',
+            '   - Form continuous water column',
+            '',
+            '   Step 3: Adhesion',
+            '   - Water molecules stick to xylem walls',
+            '   - Prevents column from breaking',
+            '',
+            '   Step 4: Pull',
+            '   - Tension at top pulls entire water column upward',
+            '   - Can lift water over 100 meters!',
+            '',
+            'Key: Transpiration creates "pull" that lifts water column'
+        ],
+        helper: 'Water pulled up by transpiration (like sucking through straw)',
+        solution: 'Transpiration creates tension → cohesion holds water column → adhesion prevents breaking → water pulled upward',
+        realWorldContext: 'Trees over 100m tall use this mechanism to lift water to their tops'
+    });
+
+    // Problem 2: Phloem Transport
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Sugar Transport in Phloem',
+        problem: 'Describe the pressure-flow mechanism of sugar transport in phloem',
+        parameters: {
+            specificItems: ['phloem'],
+            function: 'sugar transport',
+            limit: 1
+        },
+        type: 'plant_transport',
+        context: { difficulty: 'intermediate', topic: 'Plant Transport', focus: 'phloem' },
+        subparts: [
+            'PHLOEM TRANSPORT (Translocation):',
+            '  What: Sugars (mainly sucrose) and organic compounds',
+            '  Direction: Bidirectional (source → sink)',
+            '  Cells: Sieve tube members and companion cells (living)',
+            '',
+            'PRESSURE-FLOW HYPOTHESIS:',
+            '',
+            'At SOURCE (sugar-producing area):',
+            '  Examples: Mature leaves, storage organs releasing reserves',
+            '',
+            '  Step 1: Sugar Loading',
+            '  - Sugars actively loaded into sieve tubes',
+            '  - Requires ATP (active transport)',
+            '  - Companion cells provide energy',
+            '',
+            '  Step 2: Water Follows',
+            '  - High sugar concentration in sieve tubes',
+            '  - Water enters by osmosis from xylem',
+            '  - Creates HIGH PRESSURE at source',
+            '',
+            'In PHLOEM:',
+            '  - Pressure gradient drives bulk flow',
+            '  - Sugars move from high to low pressure',
+            '  - Bidirectional (different sieve tubes)',
+            '',
+            'At SINK (sugar-consuming area):',
+            '  Examples: Roots, fruits, young leaves, flowers, storage organs',
+            '',
+            '  Step 3: Sugar Unloading',
+            '  - Sugars removed from sieve tubes',
+            '  - Used for growth or stored',
+            '  - Requires ATP',
+            '',
+            '  Step 4: Water Leaves',
+            '  - Lower sugar concentration',
+            '  - Water exits by osmosis to xylem',
+            '  - Creates LOW PRESSURE at sink',
+            '',
+            'KEY CONCEPT:',
+            '  Pressure difference (source high, sink low) drives flow',
+            '  Slower than xylem: 20-150 cm/hour',
+            '',
+            'Source-Sink Dynamics:',
+            '  - Same organ can be source or sink at different times',
+            '  - Example: Potato tuber is sink (growing), then source (sprouting)'
+        ],
+        helper: 'Sugar loaded at source (high pressure) → flows to sink (low pressure)',
+        solution: 'Pressure-flow: sugar loading at source → water follows → high pressure → bulk flow → sugar unloading at sink',
+        realWorldContext: 'This is how sugars from leaves reach growing fruits and roots'
+    });
+
+    // Problem 3: Xylem vs Phloem
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Comparing Plant Transport Systems',
+        problem: 'Create a comprehensive comparison of xylem and phloem transport',
+        parameters: {
+            specificItems: ['xylem', 'phloem'],
+            category: 'comparison',
+            limit: 2
+        },
+        type: 'plant_transport',
+        context: { difficulty: 'intermediate', topic: 'Plant Transport', focus: 'comparison' },
+        subparts: [
+            'XYLEM vs PHLOEM COMPARISON:',
+            '',
+            'MATERIAL TRANSPORTED:',
+            '  Xylem: Water and dissolved minerals',
+            '  Phloem: Sugars, amino acids, hormones',
+            '',
+            'DIRECTION:',
+            '  Xylem: Unidirectional (upward only)',
+            '  Phloem: Bidirectional (source to sink)',
+            '',
+            'CELL TYPE:',
+            '  Xylem: Tracheids and vessels (DEAD at maturity)',
+            '  Phloem: Sieve tubes and companion cells (LIVING)',
+            '',
+            'CELL WALLS:',
+            '  Xylem: Thick, lignified walls',
+            '  Phloem: Thin, cellulose walls',
+            '',
+            'DRIVING FORCE:',
+            '  Xylem: Transpiration pull (passive)',
+            '  Phloem: Pressure flow (active - requires ATP)',
+            '',
+            'ENERGY REQUIRED:',
+            '  Xylem: No (passive transport)',
+            '  Phloem: Yes (ATP for loading/unloading)',
+            '',
+            'SPEED:',
+            '  Xylem: Fast (up to 75 cm/minute)',
+            '  Phloem: Slower (20-150 cm/hour)',
+            '',
+            'FUNCTION:',
+            '  Xylem: Delivers water/minerals for photosynthesis and metabolism',
+            '  Phloem: Distributes photosynthesis products throughout plant',
+            '',
+            'LOCATION IN VASCULAR BUNDLE:',
+            '  Xylem: Toward inside (center)',
+            '  Phloem: Toward outside (periphery)',
+            '',
+            'Both are Essential:',
+            '  - Work together as integrated transport system',
+            '  - Xylem provides raw materials',
+            '  - Phloem distributes products',
+            '  - Form continuous network throughout plant'
+        ],
+        helper: 'Xylem = water up (dead, passive); Phloem = sugar anywhere (living, active)',
+        solution: 'Xylem: water/minerals, unidirectional, dead cells, passive; Phloem: sugars, bidirectional, living cells, active',
+        realWorldContext: 'Girdling (removing bark with phloem) kills trees by cutting off sugar to roots'
+    });
+
+
+// Problem 4: Transpiration Process
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Transpiration and Stomatal Control',
+        problem: 'Explain the process of transpiration and how stomata regulate water loss',
+        parameters: {
+            specificItems: ['transpiration', 'stomata'],
+            function: 'water loss regulation',
+            limit: 2
+        },
+        type: 'plant_transport',
+        context: { difficulty: 'intermediate', topic: 'Plant Transport', focus: 'transpiration' },
+        subparts: [
+            'TRANSPIRATION:',
+            '  Definition: Loss of water vapor from plant surfaces',
+            '  Location: Mainly through stomata in leaves (90%)',
+            '  Also: Lenticels in stems, cuticle (minor)',
+            '',
+            'Process:',
+            '  1. Water evaporates from mesophyll cell walls',
+            '  2. Water vapor accumulates in leaf air spaces',
+            '  3. Vapor diffuses out through stomata',
+            '  4. Creates tension in xylem',
+            '  5. Pulls more water up from roots',
+            '',
+            'Functions:',
+            '  - Drives water transport (main driving force)',
+            '  - Delivers minerals to leaves',
+            '  - Cools leaves (evaporative cooling)',
+            '  - Maintains cell turgor',
+            '',
+            'STOMATAL CONTROL:',
+            '',
+            'Structure:',
+            '  - Pore surrounded by two guard cells',
+            '  - Guard cells: kidney-shaped, contain chloroplasts',
+            '  - Unevenly thickened cell walls',
+            '',
+            'Opening Mechanism:',
+            '  1. Light triggers blue light receptors',
+            '  2. K⁺ ions actively pumped into guard cells',
+            '  3. Water follows by osmosis',
+            '  4. Guard cells become turgid (swell)',
+            '  5. Cells curve, stomatal pore opens',
+            '',
+            'Closing Mechanism:',
+            '  1. Darkness or water stress signal',
+            '  2. K⁺ ions leave guard cells',
+            '  3. Water exits by osmosis',
+            '  4. Guard cells become flaccid',
+            '  5. Pore closes',
+            '',
+            'Regulation Factors:',
+            '  OPEN when:',
+            '  - Light present (photosynthesis needs CO₂)',
+            '  - Low internal CO₂',
+            '  - Adequate water supply',
+            '',
+            '  CLOSE when:',
+            '  - Dark (no photosynthesis)',
+            '  - High internal CO₂',
+            '  - Water stress (ABA hormone signal)',
+            '  - High temperature',
+            '',
+            'Trade-off: CO₂ uptake vs water loss',
+            '  - Open stomata: gain CO₂, lose water',
+            '  - Closed stomata: conserve water, limit photosynthesis'
+        ],
+        helper: 'Transpiration pulls water up; stomata balance CO₂ gain vs water loss',
+        solution: 'Transpiration creates pull for water transport; stomata open (light, low CO₂) or close (dark, water stress) to balance gas exchange and water loss',
+        realWorldContext: 'Plants transpire enormous amounts: large oak tree ~150 gallons/day'
+    });
+
+    // Problem 5: Factors Affecting Transport
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Environmental Effects on Plant Transport',
+        problem: 'Analyze how environmental factors affect transpiration rate and plant transport',
+        parameters: {
+            function: 'environmental response',
+            category: 'regulation',
+            limit: 3
+        },
+        type: 'plant_transport',
+        context: { difficulty: 'advanced', topic: 'Plant Transport', focus: 'environmental factors' },
+        subparts: [
+            'FACTORS AFFECTING TRANSPIRATION RATE:',
+            '',
+            '1. LIGHT INTENSITY:',
+            '   Effect: More light → more transpiration',
+            '   Mechanism:',
+            '   - Light triggers stomatal opening',
+            '   - More open stomata → more water loss',
+            '   - Also increases leaf temperature',
+            '   Practical: Transpiration highest at midday',
+            '',
+            '2. TEMPERATURE:',
+            '   Effect: Higher temperature → faster transpiration',
+            '   Mechanism:',
+            '   - Increases evaporation rate',
+            '   - More kinetic energy in water molecules',
+            '   - Warmer air holds more water vapor',
+            '   Problem: Very high temp → stomata close (stress response)',
+            '',
+            '3. HUMIDITY:',
+            '   Effect: Lower humidity → more transpiration',
+            '   Mechanism:',
+            '   - Steep water vapor gradient (leaf to air)',
+            '   - Dry air "pulls" water out faster',
+            '   - High humidity reduces gradient',
+            '   Practical: Plants transpire less on humid days',
+            '',
+            '4. WIND/AIR MOVEMENT:',
+            '   Effect: More wind → initially more transpiration',
+            '   Mechanism:',
+            '   - Removes humid air layer near leaf',
+            '   - Maintains steep concentration gradient',
+            '   - But: Strong wind → stomata may close',
+            '   Practical: Windbreaks help reduce crop water loss',
+            '',
+            '5. SOIL WATER AVAILABILITY:',
+            '   Effect: Less soil water → reduced transpiration',
+            '   Mechanism:',
+            '   - Water stress triggers ABA production',
+            '   - ABA closes stomata',
+            '   - Protects plant from dehydration',
+            '   Practical: Wilting is visible sign',
+            '',
+            '6. LEAF SURFACE AREA:',
+            '   Effect: Larger area → more transpiration',
+            '   Mechanism:',
+            '   - More surface for evaporation',
+            '   - More stomata',
+            '   Adaptation: Desert plants have small leaves',
+            '',
+            '7. CUTICLE THICKNESS:',
+            '   Effect: Thicker cuticle → less transpiration',
+            '   Mechanism:',
+            '   - Waxy layer reduces evaporation',
+            '   Adaptation: Xerophytes have thick cuticles',
+            '',
+            '8. STOMATAL DENSITY:',
+            '   Effect: More stomata → more transpiration potential',
+            '   Mechanism:',
+            '   - More pores for water vapor exit',
+            '   - But: Can be regulated by opening/closing',
+            '',
+            'Plant Adaptations to Control Transpiration:',
+            '',
+            'Xerophytes (Dry Environments):',
+            '  - Small or no leaves (spines)',
+            '  - Thick cuticle',
+            '  - Sunken stomata',
+            '  - Dense trichomes (hairs)',
+            '  - CAM photosynthesis (stomata open at night)',
+            '',
+            'Hydrophytes (Aquatic):',
+            '  - Thin or no cuticle',
+            '  - Stomata on upper surface only',
+            '  - Large air spaces (buoyancy)',
+            '  - Minimal transpiration issues',
+            '',
+            'Mesophytes (Moderate):',
+            '  - Moderate cuticle',
+            '  - Stomata mainly on lower surface',
+            '  - Balance CO₂ uptake and water loss'
+        ],
+        helper: 'Light, temperature, and low humidity increase transpiration; plants adapt structure to environment',
+        solution: 'Transpiration increases with: light, temperature, low humidity, wind; decreases with: water stress, thick cuticle, reduced stomata',
+        realWorldContext: 'Understanding these factors helps farmers manage irrigation and crop water use'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PLANT REPRODUCTION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPlantReproduction() {
+    const relatedProblems = [];
+
+    // Problem 1: Flower Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Parts of a Flower',
+        problem: 'Identify and describe the four whorls of a complete flower',
+        parameters: {
+            specificItems: ['flower structure'],
+            category: 'anatomy',
+            limit: 1
+        },
+        type: 'plant_reproduction',
+        context: { difficulty: 'beginner', topic: 'Plant Reproduction', focus: 'flower anatomy' },
+        subparts: [
+            'FLOWER STRUCTURE (from outside to inside):',
+            '',
+            '1. SEPALS (Calyx):',
+            '   - Outermost whorl',
+            '   - Usually green, leaf-like',
+            '   - Function: Protect flower bud',
+            '   - Collectively called calyx',
+            '',
+            '2. PETALS (Corolla):',
+            '   - Second whorl',
+            '   - Usually colorful',
+            '   - Function: Attract pollinators',
+            '   - Collectively called corolla',
+            '',
+            '3. STAMENS (Androecium) - MALE:',
+            '   - Third whorl',
+            '   - Parts:',
+            '     • Filament: stalk',
+            '     • Anther: pollen-producing structure',
+            '   - Function: Produce pollen (male gametophytes)',
+            '   - Collectively called androecium',
+            '',
+            '4. CARPELS (Gynoecium/Pistil) - FEMALE:',
+            '   - Innermost whorl (center)',
+            '   - Parts:',
+            '     • Stigma: sticky top, receives pollen',
+            '     • Style: connects stigma to ovary',
+            '     • Ovary: contains ovules',
+            '   - Function: Produce ovules (female gametophytes)',
+            '   - Collectively called gynoecium or pistil',
+            '',
+            'Complete Flower: Has all four whorls',
+            'Incomplete Flower: Missing one or more whorls',
+            '',
+            'Perfect Flower: Has both stamens and carpels (bisexual)',
+            'Imperfect Flower: Has either stamens or carpels (unisexual)',
+            '',
+            'Receptacle: Base where all parts attach'
+        ],
+        helper: 'From outside in: Sepals (protect), Petals (attract), Stamens (male), Carpels (female)',
+        solution: 'Four whorls: Sepals (protection), Petals (attraction), Stamens (pollen/male), Carpels (ovules/female)',
+        realWorldContext: 'Flower structure has evolved to maximize successful reproduction'
+    });
+
+    // Problem 2: Pollination Methods
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Pollination Mechanisms',
+        problem: 'Compare self-pollination and cross-pollination, including advantages and disadvantages',
+        parameters: {
+            specificItems: ['pollination'],
+            category: 'process',
+            limit: 2
+        },
+        type: 'plant_reproduction',
+        context: { difficulty: 'beginner', topic: 'Plant Reproduction', focus: 'pollination' },
+        subparts: [
+            'POLLINATION: Transfer of pollen from anther to stigma',
+            '',
+            'SELF-POLLINATION:',
+            '  Definition: Pollen from same flower or same plant',
+            '',
+            '  Advantages:',
+            '  - Ensures reproduction when pollinators scarce',
+            '  - Preserves successful gene combinations',
+            '  - Doesn\'t depend on external agents',
+            '  - Efficient',
+            '',
+            '  Disadvantages:',
+            '  - Reduces genetic variation',
+            '  - Can accumulate harmful mutations (inbreeding)',
+            '  - Less adaptation to changing environment',
+            '  - Weaker offspring over generations',
+            '',
+            '  Examples: Peas, tomatoes, wheat',
+            '',
+            'CROSS-POLLINATION:',
+            '  Definition: Pollen from different plant of same species',
+            '',
+            '  Advantages:',
+            '  - Increases genetic variation',
+            '  - Produces stronger offspring (hybrid vigor)',
+            '  - Better adaptation to environment',
+            '  - Evolutionary advantage',
+            '  - Masks harmful recessive alleles',
+            '',
+            '  Disadvantages:',
+            '  - Depends on pollinators or wind',
+            '  - Less reliable',
+            '  - Energy cost (producing nectar, scent)',
+            '  - May not find compatible plant',
+            '',
+            '  Agents:',
+            '  - Insects (bees, butterflies, moths, beetles)',
+            '  - Wind (grasses, oaks, pines)',
+            '  - Birds (hummingbirds)',
+            '  - Bats, water',
+            '',
+            'Plant Adaptations for Cross-Pollination:',
+            '  - Separate male/female flowers',
+            '  - Stamens and stigmas mature at different times',
+            '  - Self-incompatibility genes',
+            '  - Physical barriers to self-pollination',
+            '',
+            'Most plants: Mix of both strategies'
+        ],
+        helper: 'Self = reliable but no variation; Cross = variation but needs pollinator',
+        solution: 'Self-pollination: reliable, preserves genes, but reduces variation; Cross-pollination: increases variation, stronger offspring, but less reliable',
+        realWorldContext: 'Most crops benefit from cross-pollination by bees and other insects'
+    });
+
+    // Problem 3: Double Fertilization
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Double Fertilization in Angiosperms',
+        problem: 'Explain the process of double fertilization unique to flowering plants',
+        parameters: {
+            specificItems: ['fertilization', 'double fertilization'],
+            category: 'process',
+            limit: 1
+        },
+        type: 'plant_reproduction',
+        context: { difficulty: 'intermediate', topic: 'Plant Reproduction', focus: 'fertilization' },
+        subparts: [
+            'DOUBLE FERTILIZATION (unique to angiosperms):',
+            '',
+            'Preparation:',
+            '  - Pollen grain lands on stigma',
+            '  - Pollen tube grows down through style',
+            '  - Enters ovary, grows toward ovule',
+            '  - Pollen tube enters ovule through micropyle',
+            '  - Contains 2 sperm cells',
+            '',
+            'Inside Ovule (Embryo Sac):',
+            '  - Egg cell (n)',
+            '  - Two polar nuclei (n + n) in central cell',
+            '  - Other cells degenerate',
+            '',
+            'TWO FERTILIZATION EVENTS:',
+            '',
+            '1. FIRST FERTILIZATION:',
+            '   - Sperm 1 + Egg cell → Zygote (2n)',
+            '   - Zygote develops into EMBRYO',
+            '   - Embryo becomes new plant',
+            '',
+            '2. SECOND FERTILIZATION:',
+            '   - Sperm 2 + Two polar nuclei → Triploid cell (3n)',
+            '   - Triploid cell develops into ENDOSPERM',
+            '   - Endosperm = nutritive tissue for embryo',
+            '   - Food storage for seed',
+            '',
+            'Products:',
+            '  - Embryo (2n): future plant',
+            '  - Endosperm (3n): food for embryo',
+            '  - Seed coat: from ovule integuments',
+            '',
+            'Significance:',
+            '  - Produces both embryo AND food in one event',
+            '  - Food only produced if fertilization occurs',
+            '  - Efficient (no wasted resources)',
+            '  - Unique to flowering plants',
+            '',
+            'After Double Fertilization:',
+            '  - Ovule → Seed',
+            '  - Ovary → Fruit',
+            '  - Other flower parts wither',
+            '',
+            'Endosperm Fate:',
+            '  Monocots: Remains in seed (corn, wheat)',
+            '  Dicots: Often absorbed by cotyledons (beans, peas)'
+        ],
+        helper: 'Two sperm: one makes embryo (2n), one makes food/endosperm (3n)',
+        solution: 'Double fertilization: Sperm 1 + egg → embryo (2n); Sperm 2 + polar nuclei → endosperm (3n) for nutrition',
+        realWorldContext: 'The endosperm we eat in corn and wheat comes from double fertilization'
+    });
+
+    // Problem 4: Sexual vs Asexual Reproduction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Reproduction Strategies',
+        problem: 'Compare sexual and asexual reproduction in plants, including methods and trade-offs',
+        parameters: {
+            reproductionType: 'both',
+            category: 'comparison',
+            limit: 2
+        },
+        type: 'plant_reproduction',
+        context: { difficulty: 'intermediate', topic: 'Plant Reproduction', focus: 'reproduction types' },
+        subparts: [
+            'SEXUAL REPRODUCTION:',
+            '',
+            '  Method: Flowers, pollination, fertilization, seeds',
+            '',
+            '  Advantages:',
+            '  - Genetic variation (different combinations)',
+            '  - Adaptation to changing environment',
+            '  - Evolution possible',
+            '  - Offspring may be better adapted',
+            '  - Seeds can disperse far',
+            '  - Seeds can remain dormant',
+            '',
+            '  Disadvantages:',
+            '  - Slow process',
+            '  - Requires pollinator or wind',
+            '  - Energy expensive (flowers, nectar)',
+            '  - Less reliable',
+            '  - Need compatible plant nearby',
+            '',
+            '  Outcome: Genetically diverse offspring',
+            '',
+            'ASEXUAL REPRODUCTION (Vegetative Propagation):',
+            '',
+            '  Methods:',
+            '  - Runners/Stolons: horizontal stems (strawberry)',
+            '  - Rhizomes: underground stems (ginger, iris)',
+            '  - Tubers: swollen underground stems (potato)',
+            '  - Bulbs: short stems with fleshy leaves (onion)',
+            '  - Corms: short underground stems (gladiolus)',
+            '  - Suckers: shoots from roots (raspberry)',
+            '  - Plantlets: small plants on leaves (kalanchoe)',
+            '  - Fragmentation: pieces break off and grow',
+            '',
+            '  Advantages:',
+            '  - Rapid reproduction',
+            '  - No need for pollinator',
+            '  - Preserves successful genotype',
+            '  - Colonizes area quickly',
+            '  - Single plant can reproduce',
+            '  - Reliable',
+            '',
+            '  Disadvantages:',
+            '  - No genetic variation (all clones)',
+            '  - All susceptible to same diseases',
+            '  - No adaptation to change',
+            '  - Accumulation of harmful mutations',
+            '  - Limited dispersal',
+            '',
+            '  Outcome: Genetically identical offspring (clones)',
+            '',
+            'ARTIFICIAL METHODS (Horticultural):',
+            '  - Cuttings: stem/leaf pieces in soil',
+            '  - Grafting: joining two plants',
+            '  - Layering: induce roots while attached',
+            '  - Tissue culture: growing from cells',
+            '',
+            'Many Plants Use Both:',
+            '  - Sexual when conditions favorable (variation)',
+            '  - Asexual for rapid spread (efficiency)',
+            '  - Hedges bets for survival'
+        ],
+        helper: 'Sexual = variation but slow; Asexual = fast clones but no variation',
+        solution: 'Sexual: genetic variation, adaptation, but slow and needs pollinator; Asexual: rapid, reliable, but no variation',
+        realWorldContext: 'Farmers use asexual methods (cuttings, grafting) to preserve desirable traits'
+    });
+
+    // Problem 5: Seed and Fruit Development
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'From Flower to Seed and Fruit',
+        problem: 'Trace the development from fertilization through seed and fruit formation to dispersal',
+        parameters: {
+            specificItems: ['seed', 'fruit', 'dispersal'],
+            category: 'development',
+            limit: 3
+        },
+        type: 'plant_reproduction',
+        context: { difficulty: 'advanced', topic: 'Plant Reproduction', focus: 'seed and fruit' },
+        subparts: [
+            'SEED DEVELOPMENT:',
+            '',
+            'After Double Fertilization:',
+            '  1. Zygote → Embryo',
+            '  2. Triploid cell → Endosperm',
+            '  3. Ovule integuments → Seed coat',
+            '',
+            'Embryo Development:',
+            '  - Zygote divides many times',
+            '  - Forms embryo with:',
+            '    • Radicle (embryonic root)',
+            '    • Hypocotyl (embryonic stem below cotyledons)',
+            '    • Epicotyl/Plumule (embryonic stem above)',
+            '    • Cotyledon(s) (seed leaves: 1 in monocots, 2 in dicots)',
+            '',
+            'Mature Seed Parts:',
+            '  1. EMBRYO: Young plant',
+            '  2. ENDOSPERM: Food storage (if present)',
+            '     - Monocots: Endosperm remains',
+            '     - Dicots: Often absorbed into cotyledons',
+            '  3. SEED COAT: Protective covering',
+            '     - Develops from integuments',
+            '     - Hard, waterproof',
+            '',
+            'Seed Dormancy:',
+            '  - Metabolic shutdown',
+            '  - Awaits favorable conditions',
+            '  - Broken by: cold, heat, light, scarification',
+            '',
+            'FRUIT DEVELOPMENT:',
+            '',
+            'After Fertilization:',
+            '  - Ovary wall → Fruit (pericarp)',
+            '  - Other flower parts usually wither',
+            '',
+            'Fruit Types:',
+            '',
+            '  SIMPLE FRUITS (one ovary):',
+            '   Fleshy:',
+            '   - Berry: soft throughout (tomato, grape)',
+            '   - Drupe: hard pit/stone (peach, cherry)',
+            '   - Pome: core (apple, pear)',
+            '',
+            '   Dry:',
+            '   - Dehiscent: splits open (pea pod, milkweed)',
+            '   - Indehiscent: doesn\'t split (nut, grain)',
+            '',
+            '  AGGREGATE FRUITS (many ovaries, one flower):',
+            '   - Raspberry, strawberry',
+            '',
+            '  MULTIPLE FRUITS (many flowers):',
+            '   - Pineapple, fig',
+            '',
+            'Fruit Functions:',
+            '  1. Protect seeds',
+            '  2. Aid seed dispersal',
+            '',
+            'SEED DISPERSAL MECHANISMS:',
+            '',
+            '  1. WIND:',
+            '     Adaptations: Wings, hairs, light',
+            '     Examples: Maple (samara), dandelion',
+            '',
+            '  2. ANIMALS:',
+            '     Fleshy Fruits: Eaten, seeds pass through',
+            '     Examples: Berries, apples',
+            '     Hooks/Burrs: Stick to fur',
+            '     Examples: Cocklebur, burdock',
+            '',
+            '  3. WATER:',
+            '     Adaptations: Buoyant, waterproof',
+            '     Examples: Coconut, water lily',
+            '',
+            '  4. EXPLOSIVE:',
+            '     Mechanism: Pod bursts, shoots seeds',
+            '     Examples: Touch-me-not, squirting cucumber',
+            '',
+            '  5. GRAVITY:',
+            '     Simply falls near parent',
+            '     Examples: Acorns, apples',
+            '',
+            'Importance of Dispersal:',
+            '  - Reduces competition with parent',
+            '  - Colonizes new areas',
+            '  - Genetic mixing',
+            '  - Species survival'
+        ],
+        helper: 'Ovule → seed (embryo + food + coat); Ovary → fruit (protects and disperses)',
+        solution: 'Fertilization → ovule becomes seed (embryo + endosperm + coat), ovary becomes fruit; fruit aids dispersal by wind, animals, water, or explosion',
+        realWorldContext: 'Fruits evolved to entice animals to disperse seeds far from parent plant'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PLANT HORMONES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPlantHormones() {
+    const relatedProblems = [];
+
+    // Problem 1: Auxin Effects
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Auxin Functions',
+        problem: 'Describe the major effects of auxin on plant growth and development',
+        parameters: {
+            specificItems: ['auxin'],
+            category: 'growth promoter',
+            limit: 1
+        },
+        type: 'plant_hormones',
+        context: { difficulty: 'beginner', topic: 'Plant Hormones', focus: 'auxin' },
+        subparts: [
+            'AUXIN (Indole-3-Acetic Acid, IAA):',
+            '',
+            'Synthesis: Shoot apical meristem, young leaves, developing seeds',
+            'Transport: Polar (tip to base), cell-to-cell',
+            '',
+            'MAJOR EFFECTS:',
+            '',
+            '1. CELL ELONGATION:',
+            '   - Promotes cell elongation in stems',
+            '   - Acid growth hypothesis:',
+            '     • Auxin activates H⁺ pump',
+            '     • Acidifies cell wall',
+            '     • Activates expansins (loosen wall)',
+            '     • Cell expands due to turgor pressure',
+            '',
+            '2. PHOTOTROPISM:',
+            '   - Causes bending toward light',
+            '   - More auxin on shaded side',
+            '   - Shaded side grows faster → bending',
+            '',
+            '3. GRAVITROPISM:',
+            '   - Roots: Grow downward',
+            '   - Shoots: Grow upward',
+            '   - Auxin redistributes in response to gravity',
+            '',
+            '4. APICAL DOMINANCE:',
+            '   - Inhibits lateral bud growth',
+            '   - Main stem grows stronger',
+            '   - Remove apex → lateral buds grow',
+            '   - Used in pruning',
+            '',
+            '5. ROOT INITIATION:',
+            '   - Promotes adventitious root formation',
+            '   - Used in rooting hormone for cuttings',
+            '',
+            '6. FRUIT DEVELOPMENT:',
+            '   - From developing seeds',
+            '   - Stimulates ovary growth',
+            '   - Can cause parthenocarpy (seedless fruit)',
+            '',
+            '7. PREVENTS ABSCISSION:',
+            '   - High auxin delays leaf/fruit drop',
+            '   - As auxin declines → abscission occurs',
+            '',
+            'Concentration Effects:',
+            '  - Low: Promotes growth',
+            '  - High: Can inhibit growth (especially roots)',
+            '',
+            'Applications:',
+            '  - Rooting powder',
+            '  - Prevent fruit drop',
+            '  - Herbicides (synthetic auxins like 2,4-D)',
+            '  - Produce seedless fruits'
+        ],
+        helper: 'Auxin = growth hormone (elongation, bending, apical dominance)',
+        solution: 'Auxin promotes: cell elongation, phototropism, gravitropism, apical dominance, root initiation, fruit development',
+        realWorldContext: 'Rooting hormone contains auxin; herbicide 2,4-D is synthetic auxin killing weeds'
+    });
+
+    // Problem 2: Five Major Hormones
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Hormone Overview',
+        problem: 'Compare the five major plant hormones and their primary functions',
+        parameters: {
+            category: 'all hormones',
+            limit: 5
+        },
+        type: 'plant_hormones',
+        context: { difficulty: 'intermediate', topic: 'Plant Hormones', focus: 'hormone comparison' },
+        subparts: [
+            'FIVE MAJOR PLANT HORMONES:',
+            '',
+            '1. AUXIN (IAA):',
+            '   Main Effects: Cell elongation, phototropism, apical dominance',
+            '   Source: Shoot tips, young leaves',
+            '   Type: Growth promoter',
+            '   Key Role: Directional growth responses',
+            '',
+            '2. GIBBERELLIN (GA):',
+            '   Main Effects: Stem elongation, seed germination, flowering',
+            '   Source: Young tissues, seeds',
+            '   Type: Growth promoter',
+            '   Key Role: Breaking dormancy, elongation',
+            '   Discovery: From fungus causing rice overgrowth',
+            '',
+            '3. CYTOKININ:',
+            '   Main Effects: Cell division, delays senescence, shoot growth',
+            '   Source: Root tips, developing seeds',
+            '   Type: Growth promoter',
+            '   Key Role: Cell division, anti-aging',
+            '   Interaction: Works with auxin (ratio matters)',
+            '',
+            '4. ABSCISIC ACID (ABA):',
+            '   Main Effects: Stomatal closure, seed dormancy, stress response',
+            '   Source: Mature leaves, roots, seeds',
+            '   Type: Growth inhibitor',
+            '   Key Role: Stress hormone (drought)',
+            '   Called: "Stress hormone"',
+            '',
+            '5. ETHYLENE (C₂H₄):',
+            '   Main Effects: Fruit ripening, senescence, abscission',
+            '   Source: Ripening fruits, senescing tissues',
+            '   Type: Growth inhibitor',
+            '   Key Role: Ripening and aging',
+            '   Unique: Only gaseous hormone',
+            '',
+            'SUMMARY TABLE:',
+            '',
+            'Growth Promoters:',
+            '  Auxin: Elongation, bending',
+            '  Gibberellin: Elongation, germination',
+            '  Cytokinin: Division, delay aging',
+            '',
+            'Growth Inhibitors:',
+            '  Abscisic Acid: Dormancy, stress response',
+            '  Ethylene: Ripening, aging',
+            '',
+            'Hormone Interactions:',
+            '  - Often work together or antagonistically',
+            '  - Ratios important (auxin/cytokinin)',
+            '  - Multiple hormones regulate same process',
+            '  - Complex regulatory networks'
+        ],
+        helper: 'Promoters: Auxin (bend), GA (tall), Cytokinin (divide); Inhibitors: ABA (dormancy), Ethylene (ripen)',
+        solution: 'Auxin (elongation), Gibberellin (stem elongation), Cytokinin (division), ABA (stress), Ethylene (ripening)',
+        realWorldContext: 'Hormone balance determines plant form; applications in agriculture are widespread'
+    });
+
+// Problem 3: Gibberellin and Germination
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Gibberellin in Seed Germination',
+        problem: 'Explain how gibberellin promotes seed germination and the role of the aleurone layer',
+        parameters: {
+            specificItems: ['gibberellin'],
+            function: 'germination',
+            limit: 1
+        },
+        type: 'plant_hormones',
+        context: { difficulty: 'intermediate', topic: 'Plant Hormones', focus: 'gibberellin' },
+        subparts: [
+            'GIBBERELLIN ROLE IN SEED GERMINATION:',
+            '',
+            'The Process (using cereal seeds as model):',
+            '',
+            'Step 1: IMBIBITION',
+            '  - Seed absorbs water',
+            '  - Swells',
+            '  - Metabolism activated',
+            '',
+            'Step 2: EMBRYO PRODUCES GA',
+            '  - Embryo synthesizes gibberellin',
+            '  - GA diffuses to aleurone layer',
+            '',
+            'Step 3: ALEURONE LAYER ACTIVATED',
+            '  - Aleurone = specialized cells surrounding endosperm',
+            '  - GA triggers gene expression',
+            '  - Aleurone cells produce hydrolytic enzymes',
+            '',
+            'Step 4: ENZYME SYNTHESIS',
+            '  - Main enzyme: α-amylase',
+            '  - Also: Proteases, lipases',
+            '  - Enzymes secreted into endosperm',
+            '',
+            'Step 5: ENDOSPERM DIGESTION',
+            '  - α-amylase breaks down starch → sugars',
+            '  - Proteases break down proteins → amino acids',
+            '  - Lipases break down lipids → fatty acids',
+            '',
+            'Step 6: NUTRIENT MOBILIZATION',
+            '  - Sugars, amino acids absorbed by embryo',
+            '  - Provides energy and building blocks',
+            '  - Embryo grows',
+            '',
+            'Step 7: SEEDLING EMERGENCE',
+            '  - Radicle breaks through seed coat',
+            '  - Shoot emerges',
+            '  - Establishment',
+            '',
+            'KEY ROLES OF GA:',
+            '  1. Breaks seed dormancy',
+            '  2. Activates enzyme production',
+            '  3. Mobilizes food reserves',
+            '  4. Promotes embryo growth',
+            '',
+            'Without GA:',
+            '  - Seeds remain dormant',
+            '  - No enzyme production',
+            '  - No germination',
+            '',
+            'Regulation:',
+            '  - ABA opposes GA (maintains dormancy)',
+            '  - GA/ABA ratio determines germination',
+            '  - Environmental signals shift balance',
+            '',
+            'Commercial Application:',
+            '  - Brewing industry uses GA',
+            '  - Barley germination for malting',
+            '  - Uniform germination',
+            '  - Increased enzyme production'
+        ],
+        helper: 'GA from embryo → aleurone makes enzymes → digest stored food → embryo grows',
+        solution: 'Gibberellin triggers aleurone layer to produce α-amylase, which digests starch into sugars for embryo growth',
+        realWorldContext: 'Brewers use gibberellin to enhance barley germination for beer production'
+    });
+
+    // Problem 4: Auxin-Cytokinin Ratio
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Hormone Interactions in Development',
+        problem: 'Explain how auxin-cytokinin ratio controls plant organ development in tissue culture',
+        parameters: {
+            specificItems: ['auxin', 'cytokinin'],
+            function: 'interaction',
+            limit: 2
+        },
+        type: 'plant_hormones',
+        context: { difficulty: 'advanced', topic: 'Plant Hormones', focus: 'hormone interactions' },
+        subparts: [
+            'AUXIN-CYTOKININ RATIO in Tissue Culture:',
+            '',
+            'Principle: Ratio of two hormones determines developmental pathway',
+            '',
+            'THREE OUTCOMES:',
+            '',
+            '1. HIGH AUXIN : LOW CYTOKININ',
+            '   Result: ROOT DEVELOPMENT',
+            '   - Promotes root initiation',
+            '   - Inhibits shoot formation',
+            '   - Example ratio: 10:1',
+            '   Application: Rooting cuttings',
+            '',
+            '2. LOW AUXIN : HIGH CYTOKININ',
+            '   Result: SHOOT DEVELOPMENT',
+            '   - Promotes shoot/bud formation',
+            '   - Inhibits root formation',
+            '   - Example ratio: 1:10',
+            '   Application: Propagating shoots',
+            '',
+            '3. BALANCED AUXIN : CYTOKININ',
+            '   Result: UNDIFFERENTIATED CALLUS',
+            '   - Cell division without differentiation',
+            '   - Forms callus (mass of unspecialized cells)',
+            '   - Example ratio: 1:1',
+            '   Application: Maintaining cell cultures',
+            '',
+            'Tissue Culture Process:',
+            '',
+            'Stage 1: CALLUS FORMATION',
+            '  - Take explant (tissue piece)',
+            '  - Place on medium with balanced hormones',
+            '  - Forms callus (undifferentiated cells)',
+            '',
+            'Stage 2: SHOOT REGENERATION',
+            '  - Transfer to high cytokinin medium',
+            '  - Shoots develop from callus',
+            '  - Multiple shoots can form',
+            '',
+            'Stage 3: ROOT INDUCTION',
+            '  - Transfer shoots to high auxin medium',
+            '  - Roots develop',
+            '  - Complete plantlet formed',
+            '',
+            'Stage 4: ACCLIMATIZATION',
+            '  - Transfer to soil',
+            '  - Gradual adaptation',
+            '  - Normal growth',
+            '',
+            'Molecular Mechanism:',
+            '  - Hormones activate different genes',
+            '  - Auxin: Root development genes',
+            '  - Cytokinin: Shoot development genes',
+            '  - Ratio determines which pathway dominates',
+            '',
+            'Natural Applications:',
+            '',
+            '  Apical Dominance:',
+            '  - High auxin from apex inhibits lateral buds',
+            '  - Cytokinins from roots promote lateral growth',
+            '  - Remove apex → auxin decreases → buds grow',
+            '',
+            '  Aging:',
+            '  - Cytokinins delay senescence',
+            '  - Declining cytokinin → aging',
+            '  - Auxin role in leaf abscission',
+            '',
+            'Practical Applications:',
+            '  - Micropropagation (mass cloning)',
+            '  - Producing disease-free plants',
+            '  - Rare plant conservation',
+            '  - Generating transgenic plants',
+            '  - Maintaining cell lines'
+        ],
+        helper: 'High auxin = roots; High cytokinin = shoots; Balanced = callus',
+        solution: 'Auxin-cytokinin ratio determines fate: high auxin → roots; high cytokinin → shoots; balanced → undifferentiated callus',
+        realWorldContext: 'Plant tissue culture uses hormone ratios to clone plants commercially'
+    });
+
+    // Problem 5: Ethylene and Fruit Ripening
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Ethylene in Fruit Development',
+        problem: 'Describe how ethylene triggers fruit ripening and the commercial applications of this knowledge',
+        parameters: {
+            specificItems: ['ethylene'],
+            function: 'ripening',
+            limit: 1
+        },
+        type: 'plant_hormones',
+        context: { difficulty: 'advanced', topic: 'Plant Hormones', focus: 'ethylene' },
+        subparts: [
+            'ETHYLENE (C₂H₄) - The Ripening Hormone:',
+            '',
+            'Properties:',
+            '  - Only gaseous plant hormone',
+            '  - Diffuses easily through air',
+            '  - Simple two-carbon molecule',
+            '  - Can affect nearby fruits',
+            '',
+            'FRUIT RIPENING PROCESS:',
+            '',
+            'Climacteric Fruits (respond to ethylene):',
+            '  Examples: Banana, tomato, apple, avocado, mango',
+            '',
+            '  Stage 1: MATURE BUT UNRIPE',
+            '    - Fruit reaches full size',
+            '    - Still hard, green, starchy',
+            '    - Low ethylene production',
+            '',
+            '  Stage 2: ETHYLENE BURST',
+            '    - Sudden increase in ethylene synthesis',
+            '    - Triggers ripening cascade',
+            '    - Self-perpetuating (positive feedback)',
+            '',
+            '  Stage 3: RIPENING CHANGES',
+            '    Multiple coordinated processes:',
+            '',
+            '    a) Color Change:',
+            '       - Chlorophyll breakdown (green → other colors)',
+            '       - Carotenoid synthesis (yellow, orange, red)',
+            '       - Anthocyanin synthesis (red, purple)',
+            '',
+            '    b) Texture Changes:',
+            '       - Pectinase breaks down pectin',
+            '       - Cell walls soften',
+            '       - Fruit becomes tender',
+            '',
+            '    c) Flavor Development:',
+            '       - Starch → Sugar conversion',
+            '       - Acid content decreases',
+            '       - Aroma compounds synthesized',
+            '       - Fruit becomes sweet and fragrant',
+            '',
+            '    d) Nutritional Changes:',
+            '       - Vitamin synthesis',
+            '       - Antioxidant production',
+            '',
+            '  Stage 4: SENESCENCE',
+            '    - Over-ripening',
+            '    - Spoilage begins',
+            '',
+            'Non-Climacteric Fruits (don\'t respond to ethylene after harvest):',
+            '  Examples: Grape, cherry, strawberry, citrus',
+            '  - Must ripen on plant',
+            '  - No ripening after picking',
+            '',
+            'POSITIVE FEEDBACK LOOP:',
+            '  1. Small amount of ethylene produced',
+            '  2. Triggers more ethylene synthesis',
+            '  3. Accelerates ripening',
+            '  4. More ethylene produced',
+            '  5. Cascade continues',
+            '  - "One bad apple spoils the bunch"',
+            '',
+            'COMMERCIAL APPLICATIONS:',
+            '',
+            '  1. DELAY RIPENING (Storage/Transport):',
+            '     Methods:',
+            '     - Cool temperatures (slow ethylene production)',
+            '     - Modified atmosphere (low O₂, high CO₂)',
+            '     - Ethylene inhibitors (1-MCP blocks receptors)',
+            '     - Remove ethylene from storage',
+            '     - Controlled atmosphere storage',
+            '     Benefits: Extends shelf life, allows long-distance transport',
+            '',
+            '  2. INDUCE RIPENING (At Market):',
+            '     Methods:',
+            '     - Expose to ethylene gas',
+            '     - Warm temperatures',
+            '     - Ripen on demand',
+            '     Benefits: Uniform ripening, ripe fruit when needed',
+            '',
+            '  3. HARVESTING STRATEGIES:',
+            '     - Pick climacteric fruits unripe',
+            '     - Transport while hard (less damage)',
+            '     - Ripen near market with ethylene',
+            '     - Examples: Bananas, tomatoes',
+            '',
+            '  4. HOME APPLICATIONS:',
+            '     - Place apple with unripe fruit (ethylene source)',
+            '     - Paper bag concentrates ethylene',
+            '     - Speeds ripening',
+            '     - Separate ripe from unripe fruits',
+            '',
+            'Genetic Engineering:',
+            '  - Delayed ripening tomatoes (Flavr Savr)',
+            '  - Reduced ethylene production',
+            '  - Extended shelf life',
+            '  - Less spoilage'
+        ],
+        helper: 'Ethylene = ripening gas (softens, sweetens, changes color); one ripe fruit ripens others',
+        solution: 'Ethylene triggers ripening: starch → sugar, chlorophyll breakdown, softening; commercial use: delay (cold,inhibitors) or induce (ethylene gas) ripening',
+        realWorldContext: 'Bananas shipped green, ripened with ethylene gas at destination; refrigeration slows ethylene production'
+    });
+
+    return relatedProblems;
+}
+
+// ============== TROPISMS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedTropisms() {
+    const relatedProblems = [];
+
+    // Problem 1: Phototropism Basics
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Plant Response to Light',
+        problem: 'Explain how phototropism works and the role of auxin in this response',
+        parameters: {
+            specificItems: ['phototropism'],
+            stimulus: 'light',
+            limit: 1
+        },
+        type: 'tropisms',
+        context: { difficulty: 'beginner', topic: 'Tropisms', focus: 'phototropism' },
+        subparts: [
+            'PHOTOTROPISM: Growth response to light direction',
+            '',
+            'Types:',
+            '  Positive: Growth toward light (shoots)',
+            '  Negative: Growth away from light (some roots)',
+            '',
+            'MECHANISM (Shoot Phototropism):',
+            '',
+            'Step 1: LIGHT DETECTION',
+            '  - Phototropins (blue light receptors) in shoot tip',
+            '  - Detect light direction',
+            '  - More activation on lighted side',
+            '',
+            'Step 2: SIGNAL TRANSDUCTION',
+            '  - Light signal processed',
+            '  - Triggers auxin redistribution',
+            '',
+            'Step 3: AUXIN REDISTRIBUTION',
+            '  - Auxin moves from lighted side to shaded side',
+            '  - Shaded side accumulates more auxin',
+            '  - Lighted side has less auxin',
+            '',
+            'Step 4: DIFFERENTIAL GROWTH',
+            '  - Shaded side: High auxin → more cell elongation',
+            '  - Lighted side: Low auxin → less cell elongation',
+            '  - Unequal growth causes bending',
+            '',
+            'Step 5: BENDING TOWARD LIGHT',
+            '  - Shoot curves toward light source',
+            '  - Continues until light equal on all sides',
+            '',
+            'Classic Experiments:',
+            '',
+            'Darwin (1880):',
+            '  - Covered shoot tip → no bending',
+            '  - Covered below tip → bending occurred',
+            '  - Conclusion: Tip perceives light, sends signal down',
+            '',
+            'Went (1926):',
+            '  - Isolated diffusible substance from tips (auxin)',
+            '  - Applied asymmetrically → caused bending',
+            '  - Conclusion: Auxin is the signal',
+            '',
+            'Adaptive Value:',
+            '  - Maximizes light capture for photosynthesis',
+            '  - Seedlings grow toward light to escape shade',
+            '  - Competitive advantage',
+            '',
+            'Other Examples:',
+            '  - Houseplants lean toward windows',
+            '  - Seedlings under rocks curve toward openings',
+            '  - Sunflowers track sun (young plants)'
+        ],
+        helper: 'Light → auxin moves to shaded side → shaded side grows more → bends toward light',
+        solution: 'Phototropism: light detected by phototropins → auxin redistributed to shaded side → differential growth → bending toward light',
+        realWorldContext: 'Seedlings buried under soil grow toward any light opening'
+    });
+
+    // Problem 2: Gravitropism
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Response to Gravity',
+        problem: 'Describe gravitropism in roots and shoots, explaining the statolith theory',
+        parameters: {
+            specificItems: ['gravitropism'],
+            stimulus: 'gravity',
+            limit: 1
+        },
+        type: 'tropisms',
+        context: { difficulty: 'intermediate', topic: 'Tropisms', focus: 'gravitropism' },
+        subparts: [
+            'GRAVITROPISM (Geotropism): Growth response to gravity',
+            '',
+            'Types:',
+            '  Positive: Growth toward gravity (roots downward)',
+            '  Negative: Growth away from gravity (shoots upward)',
+            '  Diagravitropism: Growth perpendicular (lateral roots/branches)',
+            '',
+            'STATOLITH THEORY:',
+            '',
+            'Statoliths: Dense starch-filled plastids (amyloplasts)',
+            '',
+            'In ROOTS (Positive Gravitropism):',
+            '',
+            '  Location: Columella cells in root cap',
+            '',
+            '  Step 1: GRAVITY SENSING',
+            '    - Statoliths settle to bottom of cells due to gravity',
+            '    - Pressure on cell membrane',
+            '',
+            '  Step 2: SIGNAL TRANSDUCTION',
+            '    - Membrane pressure triggers signal cascade',
+            '    - Ca²⁺ and other messengers involved',
+            '',
+            '  Step 3: AUXIN REDISTRIBUTION',
+            '    - Auxin transported to lower side of root',
+            '    - Lower side accumulates more auxin',
+            '',
+            '  Step 4: DIFFERENTIAL GROWTH',
+            '    - Lower side: HIGH auxin → INHIBITS elongation (roots sensitive)',
+            '    - Upper side: Lower auxin → continues elongation',
+            '    - Unequal growth causes downward bending',
+            '',
+            '  Step 5: DOWNWARD GROWTH',
+            '    - Root grows toward gravity',
+            '    - Anchors plant, accesses water',
+            '',
+            'In SHOOTS (Negative Gravitropism):',
+            '',
+            '  Location: Statoliths in endodermis cells',
+            '',
+            '  Step 1-3: Same as roots (gravity sensing, signaling, auxin redistribution)',
+            '',
+            '  Step 4: DIFFERENTIAL GROWTH',
+            '    - Lower side: High auxin → PROMOTES elongation (shoots less sensitive)',
+            '    - Upper side: Lower auxin → less elongation',
+            '    - Unequal growth causes upward bending',
+            '',
+            '  Step 5: UPWARD GROWTH',
+            '    - Shoot grows away from gravity',
+            '    - Positions leaves for light',
+            '',
+            'KEY DIFFERENCE:',
+            '  Roots: High auxin inhibits growth',
+            '  Shoots: High auxin promotes growth',
+            '  (Roots more sensitive to auxin)',
+            '',
+            'Adaptive Value:',
+            '  - Orients plant correctly regardless of seed position',
+            '  - Roots grow down (water, minerals, anchorage)',
+            '  - Shoots grow up (light for photosynthesis)',
+            '',
+            'Evidence for Statolith Theory:',
+            '  - Removing statoliths disrupts response',
+            '  - Microgravity (space) → disoriented growth',
+            '  - Centrifuge experiments: artificial gravity works',
+            '',
+            'Space Experiments:',
+            '  - Plants in space show random growth direction',
+            '  - Confirms gravity sensing mechanism',
+            '  - Important for space agriculture'
+        ],
+        helper: 'Statoliths sense gravity → auxin to lower side → roots (inhibited) bend down, shoots (promoted) bend up',
+        solution: 'Gravitropism: statoliths settle → auxin redistributed to lower side → roots (inhibited) grow down, shoots (promoted) grow up',
+        realWorldContext: 'No matter how you plant a seed, roots grow down and shoots grow up'
+    });
+
+    // Problem 3: Thigmotropism
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Response to Touch',
+        problem: 'Explain thigmotropism and how plants like vines use it for climbing',
+        parameters: {
+            specificItems: ['thigmotropism'],
+            stimulus: 'touch',
+            limit: 1
+        },
+        type: 'tropisms',
+        context: { difficulty: 'intermediate', topic: 'Tropisms', focus: 'thigmotropism' },
+        subparts: [
+            'THIGMOTROPISM: Growth response to touch/contact with solid object',
+            '',
+            'Common in:',
+            '  - Tendrils (modified leaves or stems)',
+            '  - Twining stems',
+            '  - Climbing roots',
+            '',
+            'TENDRIL THIGMOTROPISM (best studied):',
+            '',
+            'Step 1: TOUCH DETECTION',
+            '  - Specialized epidermal cells detect contact',
+            '  - Mechanoreceptors in tendril',
+            '  - Very sensitive (can detect thread)',
+            '',
+            'Step 2: SIGNAL TRANSDUCTION',
+            '  - Touch triggers electrical signal',
+            '  - Ca²⁺ influx',
+            '  - Signal propagates through tendril',
+            '',
+            'Step 3: HORMONE RESPONSE',
+            '  - Auxin and ethylene involved',
+            '  - Hormones redistribute',
+            '',
+            'Step 4: DIFFERENTIAL GROWTH',
+            '  - Contact side: Growth SLOWS',
+            '  - Opposite side: Growth CONTINUES',
+            '  - Creates curvature',
+            '',
+            'Step 5: COILING',
+            '  - Tendril wraps around support',
+            '  - Can occur in minutes!',
+            '  - Very rapid response',
+            '',
+            'Step 6: STRENGTHENING',
+            '  - Coiled tendril thickens',
+            '  - Lignification increases',
+            '  - Forms strong attachment',
+            '',
+            'Mechanism Details:',
+            '',
+            '  Speed:',
+            '  - Some tendrils coil in 5-10 minutes',
+            '  - Among fastest plant movements',
+            '',
+            '  Specificity:',
+            '  - Responds to solid objects, not rain or wind',
+            '  - Discriminates touch type',
+            '',
+            '  Hormone Involvement:',
+            '  - Auxin: Promotes growth on non-contact side',
+            '  - Ethylene: May inhibit contact side',
+            '',
+            'Other Thigmotropic Responses:',
+            '',
+            '  1. TWINING STEMS:',
+            '     - Entire stem wraps around support',
+            '     - Circular growth pattern',
+            '     - Examples: Morning glory, beans, hops',
+            '     - Some clockwise, some counterclockwise',
+            '',
+            '  2. CLIMBING ROOTS:',
+            '     - Adventitious roots grow toward and attach to surfaces',
+            '     - Examples: Ivy, climbing fig',
+            '     - Secrete adhesive compounds',
+            '',
+            'Adaptive Value:',
+            '  - Allows climbing without thick supportive stems',
+            '  - Saves energy and resources',
+            '  - Accesses light in crowded environments',
+            '  - Competitive advantage',
+            '',
+            'Examples in Nature:',
+            '  - Pea tendrils (modified leaves)',
+            '  - Grape tendrils (modified stems)',
+            '  - Cucumber tendrils',
+            '  - Passion flower tendrils',
+            '',
+            'Thigmomorphogenesis (Related):',
+            '  - Growth response to mechanical stress (wind, touch)',
+            '  - Results in shorter, stockier plants',
+            '  - Thicker stems',
+            '  - Strengthened tissues',
+            '  - Different from tropism (not directional)'
+        ],
+        helper: 'Touch → contact side grows slower → opposite side grows faster → coiling around support',
+        solution: 'Thigmotropism: touch detected → differential growth (contact side slows) → tendril coils around support in minutes',
+        realWorldContext: 'Garden peas and grapes climb using thigmotropic tendrils'
+    });
+
+    // Problem 4: Comparing Tropisms
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Overview of Plant Tropisms',
+        problem: 'Compare phototropism, gravitropism, and thigmotropism in terms of stimulus, mechanism, and function',
+        parameters: {
+            category: 'comparison',
+            limit: 3
+        },
+        type: 'tropisms',
+        context: { difficulty: 'intermediate', topic: 'Tropisms', focus: 'tropism comparison' },
+        subparts: [
+            'TROPISM COMPARISON:',
+            '',
+            'Definition: Directional growth response to environmental stimulus',
+            '',
+            '1. PHOTOTROPISM:',
+            '   Stimulus: Light direction',
+            '   Response: Shoots toward light, roots away (sometimes)',
+            '   Mechanism: Auxin redistribution (to shaded side)',
+            '   Receptor: Phototropins (blue light)',
+            '   Speed: Hours to days',
+            '   Function: Maximize light capture for photosynthesis',
+            '   Examples: Seedlings bending to window, sunflower tracking',
+            '',
+            '2. GRAVITROPISM:',
+            '   Stimulus: Gravity direction',
+            '   Response: Roots down, shoots up, lateral organs horizontal',
+            '   Mechanism: Statoliths sense gravity, auxin redistributed',
+            '   Receptor: Statoliths (starch-filled plastids)',
+            '   Speed: Hours to days',
+            '   Function: Proper orientation (roots down for water, shoots up for light)',
+            '   Examples: Germinating seed orientation, fallen plant righting itself',
+            '',
+            '3. THIGMOTROPISM:',
+            '   Stimulus: Touch/physical contact',
+            '   Response: Growth toward or around object',
+            '   Mechanism: Touch detection, differential growth',
+            '   Receptor: Mechanoreceptors in epidermis',
+            '   Speed: Minutes to hours (FASTEST)',
+            '   Function: Climbing support, attachment',
+            '   Examples: Pea tendrils coiling, ivy attaching to wall',
+            '',
+            'OTHER TROPISMS:',
+            '',
+            '4. HYDROTROPISM:',
+            '   Stimulus: Water/moisture gradient',
+            '   Response: Roots grow toward water',
+            '   Function: Access water in heterogeneous soil',
+            '   Can override gravitropism',
+            '',
+            '5. CHEMOTROPISM:',
+            '   Stimulus: Chemical gradient',
+            '   Response: Growth toward/away from chemicals',
+            '   Examples: Pollen tube toward ovule, roots toward nutrients',
+            '',
+            '6. THERMOTROPISM:',
+            '   Stimulus: Temperature gradient',
+            '   Response: Growth toward optimal temperature',
+            '   Function: Root zone temperature optimization',
+            '',
+            'GENERAL CHARACTERISTICS:',
+            '',
+            'All Tropisms:',
+            '  - Directional (toward or away from stimulus)',
+            '  - Growth-based (permanent)',
+            '  - Slow compared to animal movements',
+            '  - Mediated by hormones (especially auxin)',
+            '  - Adaptive (increase survival)',
+            '',
+            'Tropism vs Nastic Movement:',
+            '  Tropism: Directional, growth-based, irreversible, slow',
+            '  Nastic: Non-directional, turgor-based, reversible, fast',
+            '',
+            'Hormone Common Thread:',
+            '  - Most involve auxin redistribution',
+            '  - Differential growth pattern',
+            '  - One side grows more than other',
+            '',
+            'Multiple Tropisms Interact:',
+            '  - Plant integrates multiple signals',
+            '  - Phototropism + gravitropism → optimal orientation',
+            '  - Hydrotropism can override gravitropism in drought',
+            '  - Complex environmental responses'
+        ],
+        helper: 'Photo = light, Gravi = gravity, Thigmo = touch; all use auxin, differential growth',
+        solution: 'Phototropism (light, hours), Gravitropism (gravity, hours), Thigmotropism (touch, minutes); all involve auxin and differential growth',
+        realWorldContext: 'Plants integrate multiple tropisms to optimize position and resource access'
+    });
+
+// Problem 5: Tropisms vs Nastic Movements
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Directed vs Non-Directed Plant Movements',
+        problem: 'Distinguish between tropisms and nastic movements, providing examples of each',
+        parameters: {
+            category: 'comparison',
+            specificItems: ['tropisms', 'nastic movements'],
+            limit: 2
+        },
+        type: 'tropisms',
+        context: { difficulty: 'advanced', topic: 'Tropisms', focus: 'movement types' },
+        subparts: [
+            'PLANT MOVEMENTS: Two Major Types',
+            '',
+            'TROPISMS (Growth Movements):',
+            '',
+            '  Characteristics:',
+            '  - DIRECTIONAL (response direction determined by stimulus direction)',
+            '  - Growth-based (cell elongation)',
+            '  - SLOW (hours to days)',
+            '  - IRREVERSIBLE (permanent)',
+            '  - Hormone-mediated (auxin)',
+            '',
+            '  Examples:',
+            '  - Phototropism: toward/away from light',
+            '  - Gravitropism: toward/away from gravity',
+            '  - Thigmotropism: toward touch stimulus',
+            '  - Hydrotropism: toward water',
+            '',
+            'NASTIC MOVEMENTS (Turgor Movements):',
+            '',
+            '  Characteristics:',
+            '  - NON-DIRECTIONAL (response independent of stimulus direction)',
+            '  - Turgor pressure changes (water movement)',
+            '  - FAST (seconds to hours)',
+            '  - REVERSIBLE (can return to original state)',
+            '  - Not necessarily hormone-mediated',
+            '',
+            '  Types and Examples:',
+            '',
+            '  1. PHOTONASTY (Light response):',
+            '     - Stimulus: Light presence/absence (not direction)',
+            '     - Examples:',
+            '       • Flowers opening at dawn, closing at dusk',
+            '       • Morning glory, tulips, crocuses',
+            '     - Mechanism: Differential growth rates on petal sides',
+            '',
+            '  2. NYCTINASTY (Sleep movements):',
+            '     - Stimulus: Day/night cycle (circadian rhythm)',
+            '     - Examples:',
+            '       • Legume leaves fold at night',
+            '       • Prayer plant leaves fold upward at night',
+            '       • Clover, beans',
+            '     - Mechanism: Turgor changes in pulvinus (specialized cells at leaf base)',
+            '     - Function: May reduce heat loss, prevent dew damage',
+            '',
+            '  3. THIGMONASTY (Touch response):',
+            '     - Stimulus: Touch/vibration (non-directional)',
+            '     - Examples:',
+            '',
+            '       MIMOSA PUDICA (Sensitive Plant):',
+            '       - Touch triggers rapid leaf folding',
+            '       - Mechanism:',
+            '         1. Touch sensed by specialized cells',
+            '         2. Electrical signal propagates',
+            '         3. Rapid water loss from pulvinus cells',
+            '         4. Leaflets fold, petiole droops',
+            '         5. Recovery in 15-30 minutes',
+            '       - Adaptive value: Deters herbivores, reduces water loss',
+            '',
+            '       VENUS FLYTRAP:',
+            '       - Two trigger hairs touched within 20 seconds',
+            '       - Trap snaps shut in <1 second',
+            '       - Mechanism:',
+            '         1. Electrical signal generated',
+            '         2. Rapid cell expansion on outer surface',
+            '         3. Trap closes',
+            '         4. Digestion takes days',
+            '       - Adaptive value: Capture insects for nitrogen',
+            '',
+            '  4. THERMONASTY (Temperature response):',
+            '     - Stimulus: Temperature change',
+            '     - Examples: Tulip flowers open when warm, close when cold',
+            '     - Mechanism: Differential growth of inner vs outer petal surfaces',
+            '',
+            '  5. SEISMONASTY (Vibration response):',
+            '     - Stimulus: Shaking, vibration',
+            '     - Example: Mimosa response to wind',
+            '',
+            'DETAILED COMPARISON:',
+            '',
+            'Feature        | Tropism           | Nastic Movement',
+            '---------------|-------------------|------------------',
+            'Direction      | Directional       | Non-directional',
+            'Mechanism      | Growth            | Turgor pressure',
+            'Speed          | Slow (hrs-days)   | Fast (sec-hrs)',
+            'Reversibility  | Irreversible      | Reversible',
+            'Stimulus       | Direction matters | Direction irrelevant',
+            'Mediator       | Hormones (auxin)  | Ion movements, electrical signals',
+            'Examples       | Photo-, gravi-,   | Photo-, nycti-,',
+            '               | thigmo-tropism    | thigmonasty',
+            '',
+            'Pulvinus:',
+            '  - Specialized motor organ at base of leaves',
+            '  - Controls nastic movements',
+            '  - Rapid water movement in/out',
+            '  - Found in legumes, prayer plants',
+            '',
+            'Adaptive Significance:',
+            '',
+            '  Tropisms:',
+            '  - Long-term positioning',
+            '  - Resource acquisition',
+            '  - Development optimization',
+            '',
+            '  Nastic Movements:',
+            '  - Rapid responses',
+            '  - Protection (folding, closing)',
+            '  - Daily rhythms',
+            '  - Pollinator attraction (flower opening)',
+            '',
+            'Both types allow plants to respond to environment despite being rooted'
+        ],
+        helper: 'Tropisms = slow, directional, growth; Nastic = fast, non-directional, turgor',
+        solution: 'Tropisms: directional, slow, growth-based, irreversible; Nastic movements: non-directional, fast, turgor-based, reversible',
+        realWorldContext: 'Mimosa pudica and Venus flytrap show dramatic nastic movements; tropisms are subtle but universal'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PLANT ANATOMY - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPlantAnatomy() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple vs Complex Tissues
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Plant Tissue Classification',
+        problem: 'Distinguish between simple and complex plant tissues with examples',
+        parameters: {
+            tissueSystem: 'classification',
+            category: 'tissue types',
+            limit: 2
+        },
+        type: 'plant_anatomy',
+        context: { difficulty: 'beginner', topic: 'Plant Anatomy', focus: 'tissue classification' },
+        subparts: [
+            'PLANT TISSUE CLASSIFICATION:',
+            '',
+            'SIMPLE TISSUES (one cell type):',
+            '',
+            '1. PARENCHYMA:',
+            '   Structure:',
+            '   - Living cells at maturity',
+            '   - Thin primary cell walls',
+            '   - Large central vacuole',
+            '   - Loosely packed with air spaces',
+            '   - Most common plant tissue',
+            '',
+            '   Functions:',
+            '   - Photosynthesis (chlorenchyma)',
+            '   - Storage (starch, proteins, oils)',
+            '   - Secretion',
+            '   - Wound healing and regeneration',
+            '',
+            '   Locations:',
+            '   - Leaf mesophyll',
+            '   - Stem cortex and pith',
+            '   - Root cortex',
+            '   - Fruit flesh',
+            '',
+            '2. COLLENCHYMA:',
+            '   Structure:',
+            '   - Living cells at maturity',
+            '   - Unevenly thickened primary walls (at corners)',
+            '   - Elongated cells',
+            '   - No secondary walls',
+            '',
+            '   Functions:',
+            '   - Flexible structural support',
+            '   - Support for growing regions',
+            '   - Can photosynthesize (some)',
+            '',
+            '   Locations:',
+            '   - Just below epidermis in stems',
+            '   - Leaf petioles',
+            '   - Leaf veins',
+            '   - Example: "strings" in celery stalks',
+            '',
+            '3. SCLERENCHYMA:',
+            '   Structure:',
+            '   - Dead cells at maturity',
+            '   - Thick secondary cell walls (lignified)',
+            '   - Very strong and rigid',
+            '',
+            '   Two Types:',
+            '   a) FIBERS:',
+            '      - Long, slender cells',
+            '      - Provide strength',
+            '      - Examples: Hemp, flax, jute',
+            '      - Used in textiles, rope',
+            '',
+            '   b) SCLEREIDS (Stone Cells):',
+            '      - Shorter, irregular shape',
+            '      - Very hard',
+            '      - Examples: Nutshells, seed coats',
+            '      - "Gritty" texture in pears',
+            '',
+            '   Functions:',
+            '   - Rigid structural support',
+            '   - Protection',
+            '',
+            '   Locations:',
+            '   - Throughout mature plant organs',
+            '   - Seed coats',
+            '   - Nutshells',
+            '   - Around vascular bundles',
+            '',
+            'COMPLEX TISSUES (multiple cell types):',
+            '',
+            '1. XYLEM:',
+            '   Cell Types:',
+            '   - Tracheids (conducting, dead)',
+            '   - Vessel elements (conducting, dead)',
+            '   - Xylem parenchyma (storage, living)',
+            '   - Xylem fibers (support, dead)',
+            '',
+            '   Primary Function: Water and mineral transport',
+            '',
+            '2. PHLOEM:',
+            '   Cell Types:',
+            '   - Sieve tube elements (conducting, living)',
+            '   - Companion cells (support sieve tubes, living)',
+            '   - Phloem parenchyma (storage, living)',
+            '   - Phloem fibers (support, dead)',
+            '',
+            '   Primary Function: Sugar and organic transport',
+            '',
+            '3. EPIDERMIS:',
+            '   Cell Types:',
+            '   - Epidermal cells (protection)',
+            '   - Guard cells (stomatal control)',
+            '   - Trichomes (hair-like structures)',
+            '   - Root hairs (absorption)',
+            '',
+            '   Primary Function: Protection, gas exchange',
+            '',
+            'KEY DISTINCTION:',
+            '  Simple = One cell type throughout',
+            '  Complex = Multiple specialized cell types working together'
+        ],
+        helper: 'Simple tissues: one cell type (parenchyma, collenchyma, sclerenchyma); Complex: multiple types (xylem, phloem)',
+        solution: 'Simple tissues have one cell type (parenchyma/storage, collenchyma/flexible support, sclerenchyma/rigid support); Complex tissues have multiple types (xylem, phloem, epidermis)',
+        realWorldContext: 'Celery strings are collenchyma; pear grittiness is sclereids; wood is xylem'
+    });
+
+    // Problem 2: Meristematic vs Permanent Tissues
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Plant Growth Tissues',
+        problem: 'Compare meristematic and permanent tissues in terms of structure, location, and function',
+        parameters: {
+            category: 'tissue classification',
+            specificItems: ['meristematic', 'permanent'],
+            limit: 2
+        },
+        type: 'plant_anatomy',
+        context: { difficulty: 'beginner', topic: 'Plant Anatomy', focus: 'tissue development' },
+        subparts: [
+            'MERISTEMATIC TISSUES:',
+            '',
+            'Definition: Undifferentiated cells capable of continuous division',
+            '',
+            'Characteristics:',
+            '  - Actively dividing (mitosis)',
+            '  - Small, isodiametric cells',
+            '  - Thin cell walls',
+            '  - Dense cytoplasm',
+            '  - Large nucleus',
+            '  - No vacuoles (or very small)',
+            '  - No intercellular spaces',
+            '',
+            'Types by Location:',
+            '',
+            '1. APICAL MERISTEMS:',
+            '   Location: Tips of roots and shoots',
+            '   Function: Primary growth (increase length)',
+            '   Produces: All primary tissues',
+            '   Activity: Throughout plant life',
+            '',
+            '2. LATERAL MERISTEMS:',
+            '   Types:',
+            '   a) Vascular Cambium:',
+            '      - Between xylem and phloem',
+            '      - Produces secondary xylem (wood) inward',
+            '      - Produces secondary phloem outward',
+            '      - Function: Secondary growth (increase width)',
+            '',
+            '   b) Cork Cambium (Phellogen):',
+            '      - In bark',
+            '      - Produces cork (phellem) outward',
+            '      - Produces phelloderm inward',
+            '      - Function: Forms protective bark',
+            '',
+            '3. INTERCALARY MERISTEMS:',
+            '   Location: Base of leaves, internodes (mainly grasses)',
+            '   Function: Regrowth after grazing/mowing',
+            '   Example: Why grass grows back after cutting',
+            '',
+            'PERMANENT TISSUES:',
+            '',
+            'Definition: Differentiated cells that have lost ability to divide',
+            '',
+            'Origin: From meristematic tissues',
+            '',
+            'Characteristics:',
+            '  - No longer dividing',
+            '  - Larger, specialized cells',
+            '  - Thick cell walls (many types)',
+            '  - Large vacuoles (if living)',
+            '  - Intercellular spaces present',
+            '  - Mature shape and function',
+            '',
+            'Types:',
+            '',
+            '1. SIMPLE PERMANENT TISSUES:',
+            '   - Parenchyma',
+            '   - Collenchyma',
+            '   - Sclerenchyma',
+            '',
+            '2. COMPLEX PERMANENT TISSUES:',
+            '   - Xylem',
+            '   - Phloem',
+            '   - Epidermis',
+            '',
+            'Process: DIFFERENTIATION',
+            '  Meristematic → Permanent',
+            '  Undifferentiated → Specialized',
+            '',
+            'COMPARISON:',
+            '',
+            'Feature         | Meristematic    | Permanent',
+            '----------------|-----------------|------------------',
+            'Division        | Active          | None (usually)',
+            'Cell Size       | Small           | Larger',
+            'Cell Wall       | Thin            | Often thick',
+            'Vacuoles        | Absent/tiny     | Large (if living)',
+            'Cytoplasm       | Dense           | Thin layer',
+            'Intercellular   | None            | Present',
+            'Spaces          |                 |',
+            'Function        | Growth          | Specialized tasks',
+            'Location        | Growing regions | Throughout plant',
+            '',
+            'Relationship:',
+            '  - Meristems produce new cells',
+            '  - New cells differentiate into permanent tissues',
+            '  - Permanent tissues perform specialized functions',
+            '  - Some permanent tissues can dedifferentiate (callus)',
+            '',
+            'Regeneration:',
+            '  - Parenchyma can dedifferentiate',
+            '  - Return to meristematic state',
+            '  - Important for wound healing',
+            '  - Basis of plant tissue culture'
+        ],
+        helper: 'Meristematic = dividing, growing regions; Permanent = specialized, mature tissues',
+        solution: 'Meristematic: actively dividing, small cells, produce new growth at tips/sides; Permanent: differentiated, specialized functions throughout plant',
+        realWorldContext: 'Grass grows back because intercalary meristems at base keep dividing even after mowing'
+    });
+
+    // Problem 3: Dermal Tissue System Details
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Protection System',
+        problem: 'Describe the dermal tissue system, including epidermis, cuticle, stomata, and trichomes',
+        parameters: {
+            tissueSystem: 'dermal',
+            specificItems: ['epidermis'],
+            limit: 1
+        },
+        type: 'plant_anatomy',
+        context: { difficulty: 'intermediate', topic: 'Plant Anatomy', focus: 'dermal tissue' },
+        subparts: [
+            'DERMAL TISSUE SYSTEM:',
+            '',
+            'Function: Outermost protective covering of plant',
+            '',
+            'EPIDERMIS (Primary Dermal Tissue):',
+            '',
+            'Structure:',
+            '  - Usually single layer of cells',
+            '  - Tightly packed (no intercellular spaces)',
+            '  - Living cells',
+            '  - Usually lack chloroplasts (except guard cells)',
+            '  - Transparent (allows light through to mesophyll)',
+            '',
+            'CUTICLE:',
+            '  - Waxy layer covering outer surface',
+            '  - Composed of cutin (waxy polymer)',
+            '  - Secreted by epidermal cells',
+            '  - Waterproof',
+            '',
+            '  Functions:',
+            '  - Reduces water loss (transpiration)',
+            '  - Protection from UV radiation',
+            '  - Pathogen barrier',
+            '  - Prevents gas exchange (need stomata)',
+            '',
+            '  Variation:',
+            '  - Thicker in dry climates (xerophytes)',
+            '  - Thinner in wet climates (hydrophytes)',
+            '  - Thicker on upper leaf surface',
+            '',
+            'STOMATA (singular: stoma):',
+            '  - Pores in epidermis',
+            '  - Mostly on leaf underside (lower epidermis)',
+            '  - Some plants: upper surface too',
+            '',
+            '  Structure:',
+            '  - Two guard cells surround pore',
+            '  - Guard cells: kidney-shaped',
+            '  - Contain chloroplasts (unusual for epidermis)',
+            '  - Unevenly thickened cell walls',
+            '',
+            '  Functions:',
+            '  - Gas exchange (CO₂ in, O₂ out)',
+            '  - Transpiration (water vapor out)',
+            '  - Regulate water loss',
+            '',
+            '  Opening/Closing:',
+            '  Open:',
+            '  - Light, low CO₂, adequate water',
+            '  - K⁺ pumped in → water follows → turgid → open',
+            '  Close:',
+            '  - Dark, high CO₂, water stress',
+            '  - K⁺ pumped out → water follows → flaccid → close',
+            '',
+            '  Distribution:',
+            '  - More on lower surface (less evaporation)',
+            '  - Aquatic plants: upper surface only',
+            '  - Desert plants: sunken stomata (reduce water loss)',
+            '',
+            'TRICHOMES (Plant Hairs):',
+            '  - Hair-like outgrowths from epidermis',
+            '  - Varied structure and function',
+            '',
+            '  Types and Functions:',
+            '',
+            '  1. NON-GLANDULAR:',
+            '     - No secretions',
+            '     Functions:',
+            '     - Reflect excess light (reduce heating)',
+            '     - Trap air layer (reduce water loss)',
+            '     - Physical defense (deterrent)',
+            '     - Example: Fuzzy mullein leaves',
+            '',
+            '  2. GLANDULAR:',
+            '     - Secrete substances',
+            '     Functions:',
+            '     - Secrete toxins (defense)',
+            '     - Secrete sticky substances (trap insects)',
+            '     - Secrete fragrant oils',
+            '     - Examples: Mint oils, tomato smell, stinging nettle',
+            '',
+            '  3. ROOT HAIRS:',
+            '     - Extensions of root epidermal cells',
+            '     - Enormously increase surface area',
+            '     - Short-lived (few days)',
+            '     - Function: Water and mineral absorption',
+            '',
+            'SPECIALIZED EPIDERMAL CELLS:',
+            '',
+            '1. GUARD CELLS:',
+            '   - Control stomatal opening',
+            '   - Contain chloroplasts',
+            '   - Responsive to environmental signals',
+            '',
+            '2. SUBSIDIARY CELLS:',
+            '   - Surround guard cells',
+            '   - Support stomatal function',
+            '',
+            '3. BULLIFORM CELLS:',
+            '   - Large, thin-walled cells',
+            '   - In grass leaves',
+            '   - Collapse when water-stressed',
+            '   - Cause leaf rolling (reduce water loss)',
+            '',
+            'PERIDERM (Secondary Dermal Tissue):',
+            '',
+            'Replaces epidermis in woody plants:',
+            '',
+            'Components:',
+            '  1. Cork (Phellem):',
+            '     - Dead cells at maturity',
+            '     - Cell walls impregnated with suberin (waxy)',
+            '     - Waterproof',
+            '     - Insulating',
+            '     - Forms bark',
+            '',
+            '  2. Cork Cambium (Phellogen):',
+            '     - Meristematic layer',
+            '     - Produces cork outward',
+            '     - Produces phelloderm inward',
+            '',
+            '  3. Phelloderm:',
+            '     - Parenchyma cells',
+            '     - Living',
+            '     - Inside cork cambium',
+            '',
+            'LENTICELS:',
+            '  - Pores in bark',
+            '  - Allow gas exchange',
+            '  - Loose, spongy cells',
+            '  - Visible as dots/lines on bark',
+            '  - Replace stomatal function in woody stems',
+            '',
+            'Adaptive Variations:',
+            '  - Desert plants: Thick cuticle, sunken stomata, dense trichomes',
+            '  - Aquatic plants: Thin/no cuticle, stomata on upper surface',
+            '  - Shade plants: Thinner cuticle, more stomata',
+            '  - Sun plants: Thicker cuticle, fewer stomata'
+        ],
+        helper: 'Dermal = outer protection: epidermis (covering), cuticle (waterproof), stomata (gas exchange), trichomes (hairs)',
+        solution: 'Dermal tissue: epidermis (protective layer), cuticle (waxy waterproofing), stomata (gas exchange pores), trichomes (protective hairs)',
+        realWorldContext: 'Cork from cork oak bark (periderm); leaf fuzziness from trichomes; stomata open during day for photosynthesis'
+    });
+
+    // Problem 4: Vascular Tissue Details
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Plant Transport Tissue Anatomy',
+        problem: 'Describe the cellular composition and organization of xylem and phloem tissues',
+        parameters: {
+            tissueSystem: 'vascular',
+            specificItems: ['xylem', 'phloem'],
+            limit: 2
+        },
+        type: 'plant_anatomy',
+        context: { difficulty: 'intermediate', topic: 'Plant Anatomy', focus: 'vascular tissue' },
+        subparts: [
+            'VASCULAR TISSUE SYSTEM:',
+            '',
+            'Function: Transport water, minerals, and sugars throughout plant',
+            '',
+            'XYLEM (Water Transport):',
+            '',
+            'Cell Types:',
+            '',
+            '1. TRACHEIDS:',
+            '   Structure:',
+            '   - Long, tapered cells',
+            '   - Overlap at ends',
+            '   - Dead at maturity (hollow)',
+            '   - Thick, lignified secondary walls',
+            '   - Pits in walls (allow water passage)',
+            '',
+            '   Features:',
+            '   - Found in ALL vascular plants',
+            '   - Only conducting cell in gymnosperms',
+            '   - Less efficient than vessels',
+            '   - Provide support',
+            '',
+            '2. VESSEL ELEMENTS:',
+            '   Structure:',
+            '   - Shorter, wider than tracheids',
+            '   - Stacked end-to-end',
+            '   - Dead at maturity (hollow)',
+            '   - Thick, lignified walls',
+            '   - Perforation plates at ends (large holes)',
+            '   - Form continuous tubes (vessels)',
+            '',
+            '   Features:',
+            '   - Found only in angiosperms',
+            '   - More efficient than tracheids',
+            '   - Faster water transport',
+            '   - Risk: Air bubbles can block vessel',
+            '',
+            '3. XYLEM PARENCHYMA:',
+            '   - Living cells',
+            '   - Store nutrients',
+            '   - Lateral transport',
+            '   - Can become meristematic (repair)',
+            '',
+            '4. XYLEM FIBERS (Fiber Tracheids):',
+            '   - Dead sclerenchyma cells',
+            '   - Very thick walls',
+            '   - Provide mechanical support',
+            '   - Don\'t conduct water',
+            '',
+            'Xylem Formation:',
+            '  Primary Xylem: From apical meristem',
+            '  - Protoxylem (first formed, smaller)',
+            '  - Metaxylem (later formed, larger)',
+            '',
+            '  Secondary Xylem: From vascular cambium',
+            '  - Forms wood in woody plants',
+            '  - Annual rings visible',
+            '  - Heartwood (older, non-functional)',
+            '  - Sapwood (younger, functional)',
+            '',
+            'PHLOEM (Sugar Transport):',
+            '',
+            'Cell Types:',
+            '',
+            '1. SIEVE TUBE ELEMENTS (Angiosperms):',
+            '   Structure:',
+            '   - Living cells at maturity',
+            '   - No nucleus (at maturity)',
+            '   - Modified protoplast',
+            '   - Thin cell walls',
+            '   - Sieve plates at ends (clustered pores)',
+            '   - Stacked end-to-end forming sieve tubes',
+            '',
+            '   Features:',
+            '   - Primary conducting cells',
+            '   - Contain P-protein (plugs damage)',
+            '   - Callose deposited around pores',
+            '',
+            '2. COMPANION CELLS:',
+            '   Structure:',
+            '   - Living cells',
+            '   - Nucleus and dense cytoplasm',
+            '   - Derived from same mother cell as sieve tube',
+            '   - Connected by plasmodesmata',
+            '',
+            '   Functions:',
+            '   - Metabolic support for sieve tubes',
+            '   - Load/unload sugars',
+            '   - Provide ATP, proteins',
+            '   - Regulate sieve tube function',
+            '   - "Life support" for sieve tubes',
+            '',
+            '   Note: Sieve tube element dies when companion cell dies',
+            '',
+            '3. SIEVE CELLS (Gymnosperms):',
+            '   - Less specialized than sieve tube elements',
+            '   - Sieve areas (not plates)',
+            '   - Tapered ends',
+            '   - No companion cells (have albuminous cells instead)',
+            '',
+            '4. PHLOEM PARENCHYMA:',
+            '   - Living storage cells',
+            '   - Store nutrients',
+            '   - Lateral transport',
+            '',
+            '5. PHLOEM FIBERS:',
+            '   - Dead sclerenchyma',
+            '   - Mechanical support',
+            '   - Don\'t conduct',
+            '   - Example: Hemp, flax fibers',
+            '',
+            'Phloem Formation:',
+            '  Primary Phloem: From apical meristem',
+            '  - Protophloem (first formed)',
+            '  - Metaphloem (later formed)',
+            '',
+            '  Secondary Phloem: From vascular cambium',
+            '  - Forms bark (inner part)',
+            '  - Pushed outward as new layers form',
+            '  - Crushed and sloughed off',
+            '',
+            'VASCULAR BUNDLE ORGANIZATION:',
+            '',
+            'Arrangement in Stems:',
+            '',
+            'DICOTS:',
+            '  - Vascular bundles in ring',
+            '  - Xylem toward inside',
+            '  - Phloem toward outside',
+            '  - Vascular cambium between (if present)',
+            '',
+            'MONOCOTS:',
+            '  - Vascular bundles scattered',
+            '  - No regular pattern',
+            '  - Usually no vascular cambium',
+            '  - Xylem and phloem in bundles',
+            '',
+            'Arrangement in Roots:',
+            '  - Central vascular cylinder (stele)',
+            '  - Xylem forms star shape in center',
+            '  - Phloem between xylem arms',
+            '  - Pericycle surrounds vascular tissue',
+            '',
+            'Arrangement in Leaves:',
+            '  - Veins (vascular bundles)',
+            '  - Xylem on upper side',
+            '  - Phloem on lower side',
+            '  - Bundle sheath surrounds',
+            '',
+            'KEY DIFFERENCES: XYLEM vs PHLOEM',
+            '',
+            'Xylem:',
+            '  - Dead conducting cells',
+            '  - Very thick, lignified walls',
+            '  - Transport water and minerals',
+            '  - One-way (up)',
+            '  - Passive (transpiration pull)',
+            '',
+            'Phloem:',
+            '  - Living conducting cells',
+            '  - Thin cellulose walls',
+            '  - Transport sugars and organics',
+            '  - Two-way (source to sink)',
+            '  - Active (pressure flow, ATP)',
+            '',
+            'Both Essential:',
+            '  - Form integrated transport system',
+            '  - Always found together',
+            '  - Interdependent functions'
+        ],
+        helper: 'Xylem: dead, thick walls, water up; Phloem: living, thin walls, sugar both ways',
+        solution: 'Xylem: tracheids and vessels (dead, hollow, thick walls) transport water; Phloem: sieve tubes and companion cells (living) transport sugars',
+        realWorldContext: 'Wood is xylem; removing bark (phloem) kills tree by cutting off sugar to roots'
+    });
+
+    // Problem 5: Primary vs Secondary Growth
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Plant Growth Patterns',
+        problem: 'Compare primary and secondary growth in plants, explaining tissues involved and outcomes',
+        parameters: {
+            growthType: 'both',
+            category: 'growth comparison',
+            limit: 2
+        },
+        type: 'plant_anatomy',
+        context: { difficulty: 'advanced', topic: 'Plant Anatomy', focus: 'growth types' },
+        subparts: [
+            'PLANT GROWTH TYPES:',
+            '',
+            'PRIMARY GROWTH (Length):',
+            '',
+            'Definition: Increase in plant length/height',
+            '',
+            'Origin: APICAL MERISTEMS',
+            '  - Shoot apical meristem (SAM)',
+            '  - Root apical meristem (RAM)',
+            '',
+            'Location: Tips of shoots and roots',
+            '',
+            'Process:',
+            '  1. Cell division in apical meristem',
+            '  2. Three primary meristems formed:',
+            '     - Protoderm → Epidermis',
+            '     - Procambium → Primary vascular tissue',
+            '     - Ground meristem → Cortex, pith',
+            '  3. Cell elongation',
+            '  4. Cell differentiation',
+            '',
+            'Tissues Produced:',
+            '  PRIMARY TISSUES:',
+            '  - Primary xylem',
+            '  - Primary phloem',
+            '  - Epidermis',
+            '  - Cortex',
+            '  - Pith (in stems)',
+            '',
+            'Characteristics:',
+            '  - Occurs in ALL plants',
+            '  - Throughout life',
+            '  - Herbaceous structure',
+            '  - Soft, flexible stems',
+            '',
+            'Result:',
+            '  - Plant grows taller',
+            '  - Roots grow deeper/longer',
+            '  - New leaves, branches',
+            '  - Primary plant body',
+            '',
+            'SECONDARY GROWTH (Width):',
+            '',
+            'Definition: Increase in plant girth/diameter',
+            '',
+            'Origin: LATERAL MERISTEMS',
+            '  1. Vascular cambium',
+            '  2. Cork cambium (phellogen)',
+            '',
+            'Location: Sides of stems and roots',
+            '',
+            'Occurs in:',
+            '  - Most dicots',
+            '  - Gymnosperms',
+            '  - Some monocots (palms)',
+            '  - NOT in most monocots and herbaceous plants',
+            '',
+            'VASCULAR CAMBIUM:',
+            '',
+            'Structure:',
+            '  - Cylinder of meristematic cells',
+            '  - Between primary xylem and phloem',
+            '  - Formed from procambium',
+            '',
+            'Activity:',
+            '  - Divides periclinally (parallel to surface)',
+            '  - Produces cells inward and outward',
+            '',
+            'Products:',
+            '  INWARD:',
+            '  - Secondary xylem (wood)',
+            '  - More xylem than phloem produced',
+            '  - Forms majority of woody stem',
+            '',
+            '  OUTWARD:',
+            '  - Secondary phloem',
+            '  - Less than xylem',
+            '  - Pushed outward, eventually crushed',
+            '',
+            'Wood Formation:',
+            '  ANNUAL RINGS:',
+            '  - Spring wood (early wood):',
+            '    • Large diameter vessels',
+            '    • Thin walls',
+            '    • Light colored',
+            '    • Rapid growth season',
+            '',
+            '  - Summer wood (late wood):',
+            '    • Smaller diameter vessels',
+            '    • Thick walls',
+            '    • Dark colored',
+            '    • Slow growth season',
+            '',
+            '  One light + one dark ring = one year',
+            '  Age determination: Count rings',
+            '',
+            'HEARTWOOD vs SAPWOOD:',
+            '  Sapwood (outer):',
+            '  - Younger secondary xylem',
+            '  - Functional (conducts water)',
+            '  - Light colored',
+            '  - Living parenchyma cells',
+            '',
+            '  Heartwood (inner):',
+            '  - Older secondary xylem',
+            '  - Non-functional (clogged with resins, tannins)',
+            '  - Dark colored',
+            '  - Dead parenchyma',
+            '  - Provides structural support',
+            '  - Resists decay',
+            '',
+            'CORK CAMBIUM (Phellogen):',
+            '',
+            'Structure:',
+            '  - Meristematic layer',
+            '  - Forms in cortex or epidermis',
+            '',
+            'Activity:',
+            '  - Produces cells outward and inward',
+            '',
+            'Products:',
+            '  OUTWARD:',
+            '  - Cork (phellem)',
+            '  - Dead cells at maturity',
+            '  - Waxy, waterproof (suberin)',
+            '  - Protective',
+            '',
+            '  INWARD:',
+            '  - Phelloderm',
+            '  - Living parenchyma',
+            '',
+            'PERIDERM = Cork + Cork cambium + Phelloderm',
+            '  - Replaces epidermis in woody plants',
+            '  - Forms protective bark',
+            '',
+            'BARK:',
+            '  Inner bark: Secondary phloem (living, functional)',
+            '  Outer bark: Periderm (dead, protective)',
+            '',
+            'Lenticels in Bark:',
+            '  - Pores for gas exchange',
+            '  - Replace stomata',
+            '  - Visible as dots on bark',
+            '',
+            'COMPARISON:',
+            '',
+            'Feature         | Primary Growth    | Secondary Growth',
+            '----------------|-------------------|------------------',
+            'Direction       | Length (vertical) | Width (horizontal)',
+            'Meristem        | Apical            | Lateral (cambium)',
+            'Occurs in       | All plants        | Woody plants mainly',
+            'Duration        | Throughout life   | After primary',
+            'Tissues         | Primary           | Secondary',
+            'Result          | Height, leaves    | Girth, wood, bark',
+            'Structure       | Herbaceous        | Woody',
+            '',
+            'Coordination:',
+            '  - Both can occur simultaneously',
+            '  - Plant grows taller AND wider',
+            '  - Primary establishes basic structure',
+            '  - Secondary provides strength and bulk',
+            '',
+            'Evolutionary Advantage:',
+            '  Secondary growth allows:',
+            '  - Large size (trees)',
+            '  - Greater height (light competition)',
+            '  - Longevity (perennial woody plants)',
+            '  - Mechanical support',
+            '  - More vascular tissue (more leaves supported)',
+            '',
+            'Economic Importance:',
+            '  - Timber from secondary xylem',
+            '  - Cork from periderm',
+            '  - Tree age from annual rings',
+            '  - Climate history from ring widths'
+        ],
+        helper: 'Primary = length (apical meristems); Secondary = width (lateral meristems, wood)',
+        solution: 'Primary growth: apical meristems → length increase, primary tissues; Secondary growth: vascular/cork cambium → width increase, wood and bark',
+        realWorldContext: 'Trees grow taller (primary) and thicker (secondary); annual rings show age and climate history'
+    });
+
+    // Problem 6: Leaf Anatomy
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Internal Leaf Structure',
+        problem: 'Describe the internal anatomy of a leaf and explain how structure relates to photosynthesis',
+        parameters: {
+            tissueSystem: 'all',
+            organType: 'leaf',
+            function: 'photosynthesis',
+            limit: 1
+        },
+        type: 'leaf_structure',
+        context: { difficulty: 'advanced', topic: 'Leaf Structure', focus: 'anatomy and function' },
+        subparts: [
+            'LEAF INTERNAL ANATOMY:',
+            '',
+            'Cross-Section (top to bottom):',
+            '',
+            '1. UPPER EPIDERMIS:',
+            '   Structure:',
+            '   - Single layer of cells',
+            '   - Tightly packed',
+            '   - Transparent (no chloroplasts)',
+            '   - Thick cuticle on upper surface',
+            '   - Few or no stomata',
+            '',
+            '   Function:',
+            '   - Protection',
+            '   - Reduces water loss',
+            '   - Allows light penetration',
+            '',
+            '2. PALISADE MESOPHYLL:',
+            '   Structure:',
+            '   - 1-3 layers of elongated cells',
+            '   - Cells arranged perpendicular to surface',
+            '   - Tightly packed (some air spaces)',
+            '   - MANY chloroplasts (most in leaf)',
+            '   - Located just below upper epidermis',
+            '',
+            '   Function:',
+            '   - PRIMARY site of photosynthesis',
+            '   - Optimized for light capture',
+            '   - ~80% of leaf photosynthesis',
+            '',
+            '   Adaptations:',
+            '   - Column shape maximizes chloroplast exposure',
+            '   - Near upper surface (most light)',
+            '   - Vertical orientation reduces shading',
+            '',
+            '3. SPONGY MESOPHYLL:',
+            '   Structure:',
+            '   - Irregular, rounded cells',
+            '   - Loosely arranged',
+            '   - LARGE intercellular air spaces (30-70% volume)',
+            '   - Fewer chloroplasts than palisade',
+            '   - Located in lower portion of leaf',
+            '',
+            '   Function:',
+            '   - Gas exchange (CO₂ distribution)',
+            '   - Some photosynthesis',
+            '   - Allows CO₂ diffusion to all cells',
+            '   - Allows O₂ exit',
+            '',
+            '   Adaptations:',
+            '   - Air spaces maximize surface area',
+            '   - Moist cell surfaces for gas dissolution',
+            '   - Connected to stomata',
+            '',
+            '4. VASCULAR BUNDLES (Veins):',
+            '   Structure:',
+            '   - Embedded in mesophyll',
+            '   - Surrounded by bundle sheath',
+            '',
+            '   Components:',
+            '   - Xylem (upper side)',
+            '   - Phloem (lower side)',
+            '   - Bundle sheath cells (surround)',
+            '',
+            '   Functions:',
+            '   - Xylem: Delivers water and minerals',
+            '   - Phloem: Exports sugars produced',
+            '   - Support structure',
+            '',
+            '   Organization:',
+            '   - Major veins (large)',
+            '   - Minor veins (small, extensive)',
+            '   - Branch throughout mesophyll',
+            '   - Ensure all cells near vascular tissue',
+            '',
+            '5. LOWER EPIDERMIS:',
+            '   Structure:',
+            '   - Single layer of cells',
+            '   - Tightly packed',
+            '   - Transparent',
+            '   - Thinner cuticle than upper',
+            '   - MANY stomata',
+            '',
+            '   Function:',
+            '   - Protection',
+            '   - Gas exchange through stomata',
+            '',
+            'STOMATA (detailed):',
+            '',
+            'Location: Mainly lower epidermis',
+            '',
+            'Structure:',
+            '  - Stomatal pore',
+            '  - Two guard cells (kidney-shaped)',
+            '  - Guard cells contain chloroplasts',
+            '  - Subsidiary cells may surround',
+            '',
+            'Function:',
+            '  - CO₂ entry for photosynthesis',
+            '  - O₂ exit (photosynthesis product)',
+            '  - Water vapor exit (transpiration)',
+            '',
+            'Opening Mechanism:',
+            '  Light → Photosynthesis in guard cells →',
+            '  Sugar production → K⁺ uptake →',
+            '  Water enters osmosis → Guard cells swell →',
+            '  Thicker inner walls cause curvature → OPEN',
+            '',
+            'STRUCTURE-FUNCTION RELATIONSHIPS:',
+            '',
+            '1. LIGHT CAPTURE:',
+            '   - Broad, flat blade maximizes area',
+            '   - Thin (0.1-0.5 mm) allows light penetration',
+            '   - Upper epidermis transparent',
+            '   - Palisade cells near top',
+            '   - Multiple chloroplast layers',
+            '',
+            '2. GAS EXCHANGE:',
+            '   - Stomata provide entry/exit',
+            '   - Spongy mesophyll air spaces',
+            '   - Moist cell surfaces',
+            '   - Large internal surface area',
+            '   - Short diffusion distances',
+            '',
+            '3. WATER AND NUTRIENT DELIVERY:',
+            '   - Extensive vein network',
+            '   - Xylem delivers water to all cells',
+            '   - No cell far from vein',
+            '',
+            '4. SUGAR EXPORT:',
+            '   - Phloem in all veins',
+            '   - Removes sugars continuously',
+            '   - Maintains concentration gradient',
+            '',
+            '5. WATER CONSERVATION:',
+            '   - Cuticle reduces evaporation',
+            '   - Stomata on lower surface (less heat)',
+            '   - Stomata close when water-stressed',
+            '',
+            'PHOTOSYNTHESIS OPTIMIZATION:',
+            '',
+            'The Process in Leaf:',
+            '  1. Light captured by palisade chloroplasts',
+            '  2. Water from xylem',
+            '  3. CO₂ from stomata → spongy mesophyll → cells',
+            '  4. Photosynthesis: CO₂ + H₂O + Light → Glucose + O₂',
+            '  5. O₂ exits through stomata',
+            '  6. Glucose to phloem → exported',
+            '',
+            'Efficiency Features:',
+            '  - ~500,000 chloroplasts per mm²',
+            '  - 100-200 stomata per mm² (lower surface)',
+            '  - Internal surface area ~30× external area',
+            '  - All cells within 2-3 cells of vein',
+            '',
+            'VARIATIONS IN LEAF ANATOMY:',
+            '',
+            'SUN LEAVES (high light):',
+            '  - Smaller, thicker',
+            '  - More palisade layers',
+            '  - Thicker cuticle',
+            '  - More stomata per area',
+            '',
+            'SHADE LEAVES (low light):',
+            '  - Larger, thinner',
+            '  - Single palisade layer',
+            '  - Thinner cuticle',
+            '  - Fewer stomata',
+            '',
+            'XEROPHYTE LEAVES (dry climate):',
+            '  - Very thick cuticle',
+            '  - Sunken stomata',
+            '  - Dense trichomes',
+            '  - Reduced surface area',
+            '  - Some: succulent mesophyll',
+            '',
+            'HYDROPHYTE LEAVES (aquatic):',
+            '  - Thin or no cuticle',
+            '  - Stomata on upper surface only',
+            '  - Large air spaces (buoyancy)',
+            '  - Reduced vascular tissue',
+            '',
+            'C4 LEAF ANATOMY (special):',
+            '  - Kranz anatomy',
+            '  - Bundle sheath cells large, with chloroplasts',
+            '  - Mesophyll cells radiate around',
+            '  - Reduces photorespiration',
+            '  - Examples: Corn, sugarcane'
+        ],
+        helper: 'Leaf layers top-down: epidermis (protection), palisade (photosynthesis), spongy (gas), veins (transport), epidermis with stomata',
+        solution: 'Leaf anatomy: upper epidermis (transparent), palisade mesophyll (photosynthesis), spongy mesophyll (gas exchange), veins (transport), lower epidermis (stomata)',
+        realWorldContext: 'A single leaf can have millions of chloroplasts and thousands of stomata optimized for photosynthesis'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVER FUNCTIONS FOR PLANT BIOLOGY ==============
+
+function solvePlantStructureProblems() {
+    const problems = generateRelatedPlantStructure();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Plant Structure Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedPlantBiologyWorkbook({
+            theme: 'botanical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handlePlantProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePlantTransportProblems() {
+    const problems = generateRelatedPlantTransport();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Plant Transport Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedPlantBiologyWorkbook({
+            theme: 'botanical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handlePlantProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePlantReproductionProblems() {
+    const problems = generateRelatedPlantReproduction();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Plant Reproduction Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedPlantBiologyWorkbook({
+            theme: 'botanical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handlePlantProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePlantHormoneProblems() {
+    const problems = generateRelatedPlantHormones();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Plant Hormone Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedPlantBiologyWorkbook({
+            theme: 'botanical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handlePlantProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveTropismsProblems() {
+    const problems = generateRelatedTropisms();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Tropisms Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedPlantBiologyWorkbook({
+            theme: 'botanical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handlePlantProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePlantAnatomyProblems() {
+    const problems = generateRelatedPlantAnatomy();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Plant Anatomy Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedPlantBiologyWorkbook({
+            theme: 'botanical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handlePlantProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION INCLUDING PLANT BIOLOGY ==============
+
+async function generateComprehensiveBiologyDocument() {
+    console.log('Generating Comprehensive Biology Workbook with Cell and Plant Biology...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Biology Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide: Cell Biology and Plant Biology',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Cell Structure, Organelles, Transport, Metabolism, Plant Anatomy, Transport, Reproduction',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION A: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    // Cell Biology TOC (existing 8 parts, 42 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane (6 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles (6 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    // Plant Biology TOC (6 parts, 31 problems)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION B: PLANT BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 300, after: 100 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Plant Structure and Organization (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Plant Transport Systems (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: Plant Reproduction (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: Plant Hormones and Regulation (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Tropisms and Plant Movements (5 Problems)',
+            spacing: { after: 50 },
+            indent: { left: 360 }
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIV: Plant Anatomy and Tissue Systems (6 Problems)',
+            spacing: { after: 400 },
+            indent: { left: 360 }
+        })
+    );
+
+    // ============== SECTION A: CELL BIOLOGY ==============
+    // (Include all existing cell biology parts I-VIII as before)
+    // For brevity, I'll show the structure for one part
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION A: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    // [Include all 8 cell biology parts with their problems here - same as before]
+    // Parts I-VIII processing code goes here...
+
+    // ============== SECTION B: PLANT BIOLOGY ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'SECTION B: PLANT BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    // ============== PART IX: PLANT STRUCTURE ==============
+    console.log('\nProcessing Part IX: Plant Structure and Organization...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Plant Structure and Organization',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const plantStructureSolved = solvePlantStructureProblems();
+    plantStructureSolved.forEach((solved, index) => {
+        console.log(`  Adding Plant Structure Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${43 + index}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART X: PLANT TRANSPORT ==============
+    console.log('\nProcessing Part X: Plant Transport Systems...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Plant Transport Systems',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const plantTransportSolved = solvePlantTransportProblems();
+    plantTransportSolved.forEach((solved, index) => {
+        console.log(`  Adding Plant Transport Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${48 + index}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART XI: PLANT REPRODUCTION ==============
+    console.log('\nProcessing Part XI: Plant Reproduction...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: Plant Reproduction',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const plantReproductionSolved = solvePlantReproductionProblems();
+    plantReproductionSolved.forEach((solved, index) => {
+        console.log(`  Adding Plant Reproduction Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${53 + index}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART XII: PLANT HORMONES ==============
+    console.log('\nProcessing Part XII: Plant Hormones and Regulation...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: Plant Hormones and Regulation',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const plantHormoneSolved = solvePlantHormoneProblems();
+    plantHormoneSolved.forEach((solved, index) => {
+        console.log(`  Adding Plant Hormone Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${58 + index}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART XIII: TROPISMS ==============
+    console.log('\nProcessing Part XIII: Tropisms and Plant Movements...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Tropisms and Plant Movements',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const tropismsSolved = solveTropismsProblems();
+    tropismsSolved.forEach((solved, index) => {
+        console.log(`  Adding Tropisms Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${63 + index}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART XIV: PLANT ANATOMY ==============
+    console.log('\nProcessing Part XIV: Plant Anatomy and Tissue Systems...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIV: Plant Anatomy and Tissue Systems',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const plantAnatomySolved = solvePlantAnatomyProblems();
+    plantAnatomySolved.forEach((solved, index) => {
+        console.log(`  Adding Plant Anatomy Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${68 + index}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_biology_workbook_cell_and_plant.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE BIOLOGY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 73');
+        console.log('\n  SECTION A: CELL BIOLOGY (42 problems)');
+        console.log('    - Part I: Cell Structure: 5 problems');
+        console.log('    - Part II: Cell Membrane: 6 problems');
+        console.log('    - Part III: Cell Organelles: 6 problems');
+        console.log('    - Part IV: Cell Division: 5 problems');
+        console.log('    - Part V: Mitosis and Meiosis: 5 problems');
+        console.log('    - Part VI: Cell Transport: 5 problems');
+        console.log('    - Part VII: Cellular Respiration: 5 problems');
+        console.log('    - Part VIII: Photosynthesis: 5 problems');
+        console.log('\n  SECTION B: PLANT BIOLOGY (31 problems)');
+        console.log('    - Part IX: Plant Structure: 5 problems');
+        console.log('    - Part X: Plant Transport: 5 problems');
+        console.log('    - Part XI: Plant Reproduction: 5 problems');
+        console.log('    - Part XII: Plant Hormones: 5 problems');
+        console.log('    - Part XIII: Tropisms: 5 problems');
+        console.log('    - Part XIV: Plant Anatomy: 6 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Problems 1-42: Cell Biology (8 parts)');
+        console.log('  • Problems 43-73: Plant Biology (6 parts)');
+        console.log('\n📄 EXPECTED PAGES: 250+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step explanation');
+        console.log('  • Detailed biological content');
+        console.log('  • Key concepts and definitions');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common misconceptions addressed');
+        console.log('  • Pedagogical notes for teaching');
+        console.log('  • Comparisons and contrasts');
+        console.log('  • Examples from nature');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== HELPER FUNCTION FOR GENERATING PROBLEM SECTIONS ==============
+
+function generateProblemSections(workbook) {
+    const sections = [];
+
+    // Add detailed explanation section
+    if (workbook.contentSteps && workbook.contentSteps.length > 0) {
+        sections.push(
+            new docx.Paragraph({
+                text: 'Detailed Explanation:',
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 300, after: 200 }
+            })
+        );
+
+        workbook.contentSteps.forEach(step => {
+            if (typeof step === 'string') {
+                sections.push(
+                    new docx.Paragraph({
+                        text: step,
+                        spacing: { after: 100 }
+                    })
+                );
+            }
+        });
+    }
+
+    // Add key concepts section
+    if (workbook.currentContent && workbook.currentContent.keyDefinitions) {
+        sections.push(
+            new docx.Paragraph({
+                text: 'Key Concepts and Definitions:',
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 300, after: 200 }
+            })
+        );
+
+        Object.entries(workbook.currentContent.keyDefinitions).forEach(([term, definition]) => {
+            sections.push(
+                new docx.Paragraph({
+                    text: `${term}: ${definition}`,
+                    spacing: { after: 100 },
+                    bullet: { level: 0 }
+                })
+            );
+        });
+    }
+
+    // Add main categories/components section
+    if (workbook.currentContent) {
+        // For plant structure organs
+        if (workbook.currentContent.organs) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Plant Organs:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            workbook.currentContent.organs.forEach(organ => {
+                sections.push(
+                    new docx.Paragraph({
+                        text: `${organ.name} (${organ.type})`,
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                if (organ.mainFunctions) {
+                    organ.mainFunctions.forEach(func => {
+                        sections.push(
+                            new docx.Paragraph({
+                                text: `• ${func}`,
+                                spacing: { after: 50 },
+                                indent: { left: 360 }
+                            })
+                        );
+                    });
+                }
+            });
+        }
+
+        // For transport systems
+        if (workbook.currentContent.transportSystems) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Transport Systems:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            Object.entries(workbook.currentContent.transportSystems).forEach(([key, system]) => {
+                sections.push(
+                    new docx.Paragraph({
+                        text: system.name,
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `What: ${system.what}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `How: ${system.how}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `Direction: ${system.direction}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+            });
+        }
+
+        // For plant hormones
+        if (workbook.currentContent.majorHormones) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Plant Hormones:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            Object.entries(workbook.currentContent.majorHormones).forEach(([key, hormone]) => {
+                sections.push(
+                    new docx.Paragraph({
+                        text: `${hormone.name} (${hormone.type})`,
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                if (hormone.synthesis) {
+                    sections.push(
+                        new docx.Paragraph({
+                            text: `Synthesis: ${hormone.synthesis}`,
+                            spacing: { after: 50 },
+                            indent: { left: 360 }
+                        })
+                    );
+                }
+
+                if (hormone.effects) {
+                    if (hormone.effects.promotion) {
+                        sections.push(
+                            new docx.Paragraph({
+                                text: 'Promotes:',
+                                spacing: { after: 50 },
+                                indent: { left: 360 },
+                                italics: true
+                            })
+                        );
+                        hormone.effects.promotion.forEach(effect => {
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: `• ${effect}`,
+                                    spacing: { after: 30 },
+                                    indent: { left: 720 }
+                                })
+                            );
+                        });
+                    }
+
+                    if (hormone.effects.inhibition) {
+                        sections.push(
+                            new docx.Paragraph({
+                                text: 'Inhibits:',
+                                spacing: { after: 50 },
+                                indent: { left: 360 },
+                                italics: true
+                            })
+                        );
+                        hormone.effects.inhibition.forEach(effect => {
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: `• ${effect}`,
+                                    spacing: { after: 30 },
+                                    indent: { left: 720 }
+                                })
+                            );
+                        });
+                    }
+                }
+            });
+        }
+
+        // For tropisms
+        if (workbook.currentContent.majorTropisms) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Major Tropisms:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            Object.entries(workbook.currentContent.majorTropisms).forEach(([key, tropism]) => {
+                sections.push(
+                    new docx.Paragraph({
+                        text: tropism.name,
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `Stimulus: ${tropism.stimulus}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `Response: ${tropism.response}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `Function: ${tropism.adaptiveValue}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+            });
+        }
+
+        // For tissue systems
+        if (workbook.currentContent.tissueSystems) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Tissue Systems:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            Object.entries(workbook.currentContent.tissueSystems).forEach(([key, tissue]) => {
+                sections.push(
+                    new docx.Paragraph({
+                        text: tissue.name,
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                sections.push(
+                    new docx.Paragraph({
+                        text: `Location: ${tissue.location}`,
+                        spacing: { after: 50 },
+                        indent: { left: 360 }
+                    })
+                );
+
+                if (tissue.components) {
+                    sections.push(
+                        new docx.Paragraph({
+                            text: 'Components:',
+                            spacing: { after: 50 },
+                            indent: { left: 360 },
+                            italics: true
+                        })
+                    );
+
+                    Object.entries(tissue.components).forEach(([compKey, component]) => {
+                        const compText = typeof component === 'string' ? component : component.description || compKey;
+                        sections.push(
+                            new docx.Paragraph({
+                                text: `• ${compText}`,
+                                spacing: { after: 30 },
+                                indent: { left: 720 }
+                            })
+                        );
+                    });
+                }
+            });
+        }
+
+        // For reproduction structures
+        if (workbook.currentContent.sexualReproduction) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Sexual Reproduction:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            const sexual = workbook.currentContent.sexualReproduction;
+            
+            if (sexual.flowerStructure) {
+                sections.push(
+                    new docx.Paragraph({
+                        text: 'Flower Structure:',
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                Object.entries(sexual.flowerStructure).forEach(([part, details]) => {
+                    sections.push(
+                        new docx.Paragraph({
+                            text: `${part}: ${typeof details === 'string' ? details : details.description || ''}`,
+                            spacing: { after: 50 },
+                            indent: { left: 360 }
+                        })
+                    );
+                });
+            }
+        }
+
+        if (workbook.currentContent.asexualReproduction) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Asexual Reproduction:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            const asexual = workbook.currentContent.asexualReproduction;
+            
+            if (asexual.methods) {
+                Object.entries(asexual.methods).forEach(([method, details]) => {
+                    sections.push(
+                        new docx.Paragraph({
+                            text: `${method}: ${typeof details === 'string' ? details : details.description || ''}`,
+                            spacing: { after: 50 },
+                            indent: { left: 360 }
+                        })
+                    );
+                });
+            }
+        }
+    }
+
+    // Add applications section
+    if (workbook.currentContent && workbook.currentContent.applications) {
+        sections.push(
+            new docx.Paragraph({
+                text: 'Real-World Applications:',
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 300, after: 200 }
+            })
+        );
+
+        workbook.currentContent.applications.forEach(app => {
+            sections.push(
+                new docx.Paragraph({
+                    text: `• ${app}`,
+                    spacing: { after: 100 }
+                })
+            );
+        });
+    }
+
+    // Add common misconceptions
+    if (workbook.includeCommonMisconceptions && workbook.currentContent && workbook.currentContent.category) {
+        const misconceptions = workbook.commonMisconceptions[workbook.currentContent.category];
+        if (misconceptions) {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Common Misconceptions:',
+                    heading: docx.HeadingLevel.HEADING_3,
+                    spacing: { before: 300, after: 200 }
+                })
+            );
+
+            Object.entries(misconceptions).forEach(([category, items]) => {
+                sections.push(
+                    new docx.Paragraph({
+                        text: category,
+                        spacing: { after: 100 },
+                        bold: true
+                    })
+                );
+
+                items.forEach(item => {
+                    sections.push(
+                        new docx.Paragraph({
+                            text: `• ${item}`,
+                            spacing: { after: 50 },
+                            indent: { left: 360 }
+                        })
+                    );
+                });
+            });
+        }
+    }
+
+    return sections;
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveBiologyDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});

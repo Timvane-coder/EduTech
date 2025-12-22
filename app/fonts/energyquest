@@ -1,0 +1,5140 @@
+// ============== ATP - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedATP() {
+    const relatedProblems = [];
+
+    // Problem 1: ATP Structure and Function
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'ATP Structure and Energy Storage',
+        problem: 'Describe the structure of ATP and explain how it stores and releases energy',
+        parameters: {
+            specificItems: ['ATP', 'structure', 'energy'],
+            category: 'energy_molecules',
+            limit: 1
+        },
+        type: 'atp',
+        context: { difficulty: 'beginner', topic: 'ATP', focus: 'structure and function' },
+        subparts: [
+            'ATP Structure:',
+            '  1. ADENINE: Nitrogenous base (purine)',
+            '  2. RIBOSE: 5-carbon sugar',
+            '  3. THREE PHOSPHATE GROUPS:',
+            '     - α (alpha) phosphate',
+            '     - β (beta) phosphate',
+            '     - γ (gamma) phosphate',
+            '',
+            'Energy Storage:',
+            '  - High-energy bonds between phosphates',
+            '  - Especially between β and γ phosphates',
+            '  - Phosphoanhydride bonds',
+            '',
+            'Energy Release:',
+            '  ATP + H₂O → ADP + Pi + Energy',
+            '  - Hydrolysis breaks terminal phosphate bond',
+            '  - Releases ~7.3 kcal/mol (standard conditions)',
+            '  - In cells: ~12 kcal/mol',
+            '',
+            'Why ATP?',
+            '  - Universal energy currency',
+            '  - Intermediate energy level (not too high, not too low)',
+            '  - Easily regenerated',
+            '  - Fast energy transfer'
+        ],
+        helper: 'ATP = Adenine + Ribose + 3 Phosphates; breaking last bond releases energy',
+        solution: 'ATP has adenine, ribose, and 3 phosphates; hydrolysis of terminal phosphate releases ~7.3 kcal/mol',
+        realWorldContext: 'Your body recycles its weight in ATP daily - each molecule reused 500-750 times!'
+    });
+
+    // Problem 2: ATP Uses in Cells
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Cellular Uses of ATP',
+        problem: 'Identify and explain the major ways cells use ATP energy',
+        parameters: {
+            specificItems: ['ATP', 'functions', 'uses'],
+            category: 'energy_molecules',
+            limit: 1
+        },
+        type: 'atp',
+        context: { difficulty: 'intermediate', topic: 'ATP', focus: 'cellular functions' },
+        subparts: [
+            'Major Uses of ATP:',
+            '',
+            '1. MECHANICAL WORK:',
+            '   Muscle Contraction:',
+            '   - ATP binds to myosin',
+            '   - Myosin head changes shape',
+            '   - Pulls actin filament',
+            '   - Powers movement',
+            '',
+            '   Chromosome Movement:',
+            '   - Spindle fibers pull chromosomes',
+            '   - During cell division',
+            '',
+            '2. TRANSPORT WORK (Active Transport):',
+            '   Sodium-Potassium Pump:',
+            '   - 3 Na⁺ out, 2 K⁺ in',
+            '   - Maintains gradients',
+            '   - Uses 1 ATP per cycle',
+            '   - Consumes 30% of cell\'s ATP!',
+            '',
+            '   Other Pumps:',
+            '   - Calcium pumps',
+            '   - Proton pumps',
+            '   - Various cotransporters',
+            '',
+            '3. CHEMICAL WORK (Biosynthesis):',
+            '   - Protein synthesis',
+            '   - DNA/RNA synthesis',
+            '   - Phospholipid synthesis',
+            '   - Glucose synthesis (gluconeogenesis)',
+            '',
+            '4. SIGNAL TRANSDUCTION:',
+            '   - Phosphorylation of proteins',
+            '   - Activates/deactivates enzymes',
+            '   - Cell communication',
+            '',
+            '5. BIOLUMINESCENCE:',
+            '   - Fireflies, jellyfish',
+            '   - ATP-dependent light production',
+            '',
+            'ATP Turnover:',
+            '  - Human body: ~50-75 kg ATP per day',
+            '  - Only ~250g in body at any time',
+            '  - Each ATP recycled 500-750 times daily'
+        ],
+        helper: 'ATP powers 3 types of work: mechanical (movement), transport (pumps), chemical (synthesis)',
+        solution: 'ATP powers mechanical work (muscle), transport work (pumps), and chemical work (synthesis)',
+        realWorldContext: 'Every heartbeat, thought, and movement requires ATP hydrolysis'
+    });
+
+    // Problem 3: ATP vs ADP Cycle
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'ATP-ADP Cycle',
+        problem: 'Explain the ATP-ADP cycle and how cells regenerate ATP',
+        parameters: {
+            specificItems: ['ATP', 'ADP', 'cycle', 'regeneration'],
+            category: 'energy_molecules',
+            limit: 1
+        },
+        type: 'atp',
+        context: { difficulty: 'intermediate', topic: 'ATP', focus: 'regeneration cycle' },
+        subparts: [
+            'ATP-ADP CYCLE:',
+            '',
+            'ATP HYDROLYSIS (Energy Release):',
+            '  ATP + H₂O → ADP + Pi + Energy',
+            '  - Exergonic reaction',
+            '  - Releases ~7.3 kcal/mol',
+            '  - Powers cellular work',
+            '',
+            'ATP SYNTHESIS (Energy Storage):',
+            '  ADP + Pi + Energy → ATP + H₂O',
+            '  - Endergonic reaction',
+            '  - Requires energy input',
+            '  - Stores energy in bond',
+            '',
+            'Three Ways to Make ATP:',
+            '',
+            '1. SUBSTRATE-LEVEL PHOSPHORYLATION:',
+            '   - Direct transfer of phosphate to ADP',
+            '   - From high-energy substrate',
+            '   - In glycolysis and Krebs cycle',
+            '   - Fast but produces little ATP',
+            '',
+            '2. OXIDATIVE PHOSPHORYLATION:',
+            '   - Uses electron transport chain',
+            '   - In mitochondria',
+            '   - Produces most ATP (~34 per glucose)',
+            '   - Requires oxygen',
+            '',
+            '3. PHOTOPHOSPHORYLATION:',
+            '   - Uses light energy',
+            '   - In chloroplasts (plants)',
+            '   - Light reactions of photosynthesis',
+            '',
+            'Cycle Characteristics:',
+            '  - Continuous recycling',
+            '  - Very rapid (milliseconds)',
+            '  - Highly regulated',
+            '  - Responds to energy needs',
+            '',
+            'Energy Coupling:',
+            '  - ATP hydrolysis (exergonic)',
+            '  - Coupled to endergonic reactions',
+            '  - Makes unfavorable reactions possible'
+        ],
+        helper: 'ATP ↔ ADP cycle: ATP breaks down (releases energy), ADP rebuilt (stores energy)',
+        solution: 'ATP hydrolysis releases energy for work; ADP + Pi regenerated to ATP via substrate-level, oxidative, or photophosphorylation',
+        realWorldContext: 'ATP recycling is so fast that resting uses ~40 kg ATP/day, exercise can use >0.5 kg ATP/hour'
+    });
+
+    // Problem 4: Energy Coupling with ATP
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Energy Coupling Mechanisms',
+        problem: 'Explain how ATP couples exergonic and endergonic reactions to drive cellular processes',
+        parameters: {
+            specificItems: ['ATP', 'energy coupling', 'phosphorylation'],
+            category: 'energy_molecules',
+            includeComparisons: true
+        },
+        type: 'atp',
+        context: { difficulty: 'advanced', topic: 'ATP', focus: 'energy coupling' },
+        subparts: [
+            'ENERGY COUPLING WITH ATP:',
+            '',
+            'Principle:',
+            '  - Exergonic reactions release energy',
+            '  - Endergonic reactions require energy',
+            '  - ATP couples these reactions',
+            '',
+            'Without ATP (Unfavorable):',
+            '  Glucose + Fructose → Sucrose',
+            '  ΔG = +5.5 kcal/mol (endergonic)',
+            '  - Won\'t occur spontaneously',
+            '',
+            'With ATP (Favorable):',
+            '  Step 1: Glucose + ATP → Glucose-P + ADP',
+            '          ΔG = -4 kcal/mol',
+            '  Step 2: Glucose-P + Fructose → Sucrose + Pi',
+            '          ΔG = -1.5 kcal/mol',
+            '  Net: ΔG = -5.5 kcal/mol (exergonic!)',
+            '',
+            'Mechanisms of Coupling:',
+            '',
+            '1. PHOSPHORYLATION:',
+            '   - ATP transfers phosphate to substrate',
+            '   - Makes substrate more reactive',
+            '   - Lowers activation energy',
+            '   Example: Glucose → Glucose-6-phosphate',
+            '',
+            '2. CONFORMATIONAL CHANGE:',
+            '   - ATP binding changes protein shape',
+            '   - Enables chemical reaction',
+            '   Example: Myosin in muscle contraction',
+            '',
+            '3. PHOSPHORYLATION CASCADE:',
+            '   - ATP phosphorylates enzyme',
+            '   - Activates/deactivates enzyme',
+            '   - Signal amplification',
+            '   Example: Protein kinase cascades',
+            '',
+            'Why ATP is Ideal:',
+            '  - Intermediate energy level',
+            '  - Not too stable (easy to break)',
+            '  - Not too unstable (controllable)',
+            '  - ΔG = -7.3 kcal/mol (perfect range)',
+            '',
+            'Alternative Energy Carriers:',
+            '  - GTP (protein synthesis, signaling)',
+            '  - CTP (lipid synthesis)',
+            '  - UTP (carbohydrate metabolism)',
+            '  - But ATP is most common (90%)'
+        ],
+        helper: 'ATP makes unfavorable reactions favorable by transferring phosphate (phosphorylation)',
+        solution: 'ATP couples reactions by transferring phosphate groups, changing protein conformations, or activating enzymes via phosphorylation',
+        realWorldContext: 'Drug development targets ATP-binding sites to control cellular processes'
+    });
+
+    // Problem 5: ATP and Cellular Respiration
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'ATP Production in Respiration',
+        problem: 'Calculate and explain the total ATP yield from one glucose molecule through cellular respiration',
+        parameters: {
+            specificItems: ['ATP', 'cellular respiration', 'yield'],
+            category: 'energy_molecules',
+            includeEnergyAccounting: true
+        },
+        type: 'atp',
+        context: { difficulty: 'advanced', topic: 'ATP', focus: 'production accounting' },
+        subparts: [
+            'ATP PRODUCTION FROM GLUCOSE:',
+            '',
+            'Overall: C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP',
+            '',
+            'Stage-by-Stage Accounting:',
+            '',
+            '1. GLYCOLYSIS (Cytoplasm):',
+            '   Direct ATP (substrate-level):',
+            '   - Uses: 2 ATP (investment)',
+            '   - Produces: 4 ATP (payoff)',
+            '   - Net: 2 ATP',
+            '',
+            '   NADH produced:',
+            '   - 2 NADH',
+            '   - Worth 3-5 ATP (via shuttle systems)',
+            '',
+            '2. PYRUVATE OXIDATION:',
+            '   - 2 NADH (one per pyruvate)',
+            '   - Worth ~5 ATP',
+            '',
+            '3. KREBS CYCLE (Matrix):',
+            '   Direct ATP:',
+            '   - 2 ATP (or GTP)',
+            '',
+            '   NADH produced:',
+            '   - 6 NADH',
+            '   - Worth ~15 ATP',
+            '',
+            '   FADH₂ produced:',
+            '   - 2 FADH₂',
+            '   - Worth ~3 ATP',
+            '',
+            '4. ELECTRON TRANSPORT CHAIN:',
+            '   NADH → ATP:',
+            '   - Each NADH → ~2.5 ATP',
+            '   - 10 NADH total × 2.5 = 25 ATP',
+            '',
+            '   FADH₂ → ATP:',
+            '   - Each FADH₂ → ~1.5 ATP',
+            '   - 2 FADH₂ × 1.5 = 3 ATP',
+            '',
+            'TOTAL ATP CALCULATION:',
+            '  Substrate-level: 4 ATP (2 + 2)',
+            '  Oxidative phosphorylation: 28-30 ATP',
+            '  GRAND TOTAL: 32-34 ATP per glucose',
+            '',
+            'Why Range?',
+            '  - Shuttle systems vary (malate-aspartate vs glycerol-3-phosphate)',
+            '  - Proton leak reduces efficiency',
+            '  - Transport costs (ADP/ATP exchange)',
+            '',
+            'Efficiency:',
+            '  - Glucose contains ~686 kcal/mol',
+            '  - ATP captures ~7.3 kcal/mol',
+            '  - 32 ATP × 7.3 = 234 kcal',
+            '  - Efficiency = 234/686 = 34%',
+            '  - Rest lost as heat (keeps body warm!)'
+        ],
+        helper: 'Total ATP: Glycolysis (2) + Krebs (2) + ETC (~28-30) = 32-34 ATP per glucose',
+        solution: 'Glucose yields 32-34 ATP: 4 from substrate-level phosphorylation, 28-30 from oxidative phosphorylation',
+        realWorldContext: 'At rest, your body produces ~50 kg ATP daily; during intense exercise, >0.5 kg/hour'
+    });
+
+    return relatedProblems;
+}
+
+// ============== GLYCOLYSIS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedGlycolysis() {
+    const relatedProblems = [];
+
+    // Problem 1: Glycolysis Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Glycolysis Pathway Overview',
+        problem: 'Describe the overall process of glycolysis, including inputs, outputs, and location',
+        parameters: {
+            specificItems: ['Glycolysis', 'overview'],
+            category: 'cellular_respiration',
+            limit: 1
+        },
+        type: 'glycolysis',
+        context: { difficulty: 'beginner', topic: 'Glycolysis', focus: 'overview' },
+        subparts: [
+            'GLYCOLYSIS OVERVIEW:',
+            '',
+            'Definition: "Sugar splitting" - breakdown of glucose',
+            '',
+            'Location: Cytoplasm (cytosol)',
+            '',
+            'Oxygen: NOT required (anaerobic)',
+            '  - Ancient pathway',
+            '  - Evolved before oxygen in atmosphere',
+            '  - Present in virtually all living cells',
+            '',
+            'Overall Equation:',
+            '  Glucose (C₆H₁₂O₆) + 2 NAD⁺ + 2 ADP + 2 Pi',
+            '  →',
+            '  2 Pyruvate (C₃H₄O₃) + 2 NADH + 2 H⁺ + 2 ATP + 2 H₂O',
+            '',
+            'INPUTS (per glucose):',
+            '  - 1 Glucose (6-carbon)',
+            '  - 2 NAD⁺',
+            '  - 2 ADP + 2 Pi',
+            '  - (2 ATP for investment)',
+            '',
+            'OUTPUTS (per glucose):',
+            '  - 2 Pyruvate (3-carbon each)',
+            '  - 2 NADH',
+            '  - 4 ATP produced - 2 ATP used = 2 ATP NET',
+            '',
+            'Key Features:',
+            '  - 10 enzyme-catalyzed steps',
+            '  - Two phases: investment and payoff',
+            '  - Produces small amount of ATP quickly',
+            '  - Partially oxidizes glucose',
+            '  - Most energy still in pyruvate',
+            '',
+            'Fate of Products:',
+            '  If O₂ present (aerobic):',
+            '  - Pyruvate → Mitochondria → Krebs cycle',
+            '  - NADH → Electron transport chain',
+            '',
+            '  If NO O₂ (anaerobic):',
+            '  - Pyruvate → Fermentation',
+            '  - Regenerates NAD⁺ for glycolysis to continue'
+        ],
+        helper: 'Glycolysis = glucose (6C) → 2 pyruvate (3C) + 2 ATP net + 2 NADH in cytoplasm',
+        solution: 'Glycolysis splits glucose into 2 pyruvate in cytoplasm, producing 2 ATP (net) and 2 NADH anaerobically',
+        realWorldContext: 'Glycolysis is why you can sprint even when out of breath - doesn\'t need oxygen'
+    });
+
+    // Problem 2: Energy Investment Phase
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Glycolysis Energy Investment Phase',
+        problem: 'Explain the energy investment phase of glycolysis and why ATP must be invested',
+        parameters: {
+            specificItems: ['Glycolysis', 'energy investment'],
+            stageNumber: 1,
+            category: 'cellular_respiration'
+        },
+        type: 'glycolysis',
+        context: { difficulty: 'intermediate', topic: 'Glycolysis', focus: 'investment phase' },
+        subparts: [
+            'ENERGY INVESTMENT PHASE (Steps 1-5):',
+            '',
+            'Purpose: Activate and destabilize glucose',
+            'Cost: 2 ATP',
+            'Result: Glucose → 2 G3P (ready for energy harvest)',
+            '',
+            'Step 1: Glucose Phosphorylation',
+            '  Reaction: Glucose + ATP → Glucose-6-phosphate + ADP',
+            '  Enzyme: Hexokinase (or Glucokinase in liver)',
+            '  Purpose:',
+            '  - Traps glucose in cell (charged, can\'t cross membrane)',
+            '  - Activates glucose for next reaction',
+            '  - Destabilizes molecule',
+            '  Energy: Uses 1 ATP',
+            '',
+            'Step 2: Isomerization',
+            '  Reaction: Glucose-6-P ↔ Fructose-6-P',
+            '  Enzyme: Phosphoglucose isomerase',
+            '  Purpose: Convert aldose to ketose',
+            '  Energy: None (reversible)',
+            '',
+            'Step 3: Second Phosphorylation',
+            '  Reaction: Fructose-6-P + ATP → Fructose-1,6-bisphosphate + ADP',
+            '  Enzyme: Phosphofructokinase (PFK)',
+            '  Purpose:',
+            '  - Adds second phosphate',
+            '  - COMMITS glucose to glycolysis',
+            '  - KEY REGULATORY STEP',
+            '  Energy: Uses 1 ATP',
+            '  Regulation:',
+            '  - Inhibited by ATP, citrate (high energy)',
+            '  - Activated by AMP, ADP (low energy)',
+            '',
+            'Step 4: Cleavage',
+            '  Reaction: Fructose-1,6-BP → DHAP + G3P',
+            '  Enzyme: Aldolase',
+            '  Purpose: Split 6-carbon into two 3-carbon molecules',
+            '  Products:',
+            '  - DHAP (dihydroxyacetone phosphate)',
+            '  - G3P (glyceraldehyde-3-phosphate)',
+            '',
+            'Step 5: Isomerization',
+            '  Reaction: DHAP ↔ G3P',
+            '  Enzyme: Triose phosphate isomerase',
+            '  Purpose: Convert DHAP to G3P',
+            '  Note: Only G3P continues in glycolysis',
+            '',
+            'Why Investment Needed:',
+            '  - Glucose is stable molecule',
+            '  - Phosphorylation destabilizes it',
+            '  - Makes subsequent reactions favorable',
+            '  - "You have to spend money to make money"'
+        ],
+        helper: 'Investment phase: 2 ATP spent to phosphorylate and split glucose into 2 G3P',
+        solution: 'Energy investment uses 2 ATP to phosphorylate glucose (steps 1,3) and split it into 2 G3P molecules (steps 4-5)',
+        realWorldContext: 'Like a business investment - spend resources upfront for greater returns later'
+    });
+
+    // Problem 3: Energy Payoff Phase
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Glycolysis Energy Payoff Phase',
+        problem: 'Describe the energy payoff phase and how ATP and NADH are produced',
+        parameters: {
+            specificItems: ['Glycolysis', 'energy payoff'],
+            products: ['ATP', 'NADH'],
+            category: 'cellular_respiration'
+        },
+        type: 'glycolysis',
+        context: { difficulty: 'intermediate', topic: 'Glycolysis', focus: 'payoff phase' },
+        subparts: [
+            'ENERGY PAYOFF PHASE (Steps 6-10):',
+            '',
+            'Purpose: Harvest energy from G3P',
+            'Gain: 4 ATP + 2 NADH (per glucose)',
+            'Result: 2 G3P → 2 Pyruvate + energy',
+            'Note: All steps occur TWICE (2 G3P)',
+            '',
+            'Step 6: Oxidation and Phosphorylation',
+            '  Reaction: G3P + NAD⁺ + Pi → 1,3-Bisphosphoglycerate + NADH + H⁺',
+            '  Enzyme: Glyceraldehyde-3-phosphate dehydrogenase',
+            '  Energy harvest:',
+            '  - G3P oxidized (loses electrons)',
+            '  - NAD⁺ reduced to NADH',
+            '  - Coupled to phosphorylation',
+            '  Product: High-energy phosphate bond',
+            '  Yield: 2 NADH (×2 per glucose)',
+            '',
+            'Step 7: First ATP Generation',
+            '  Reaction: 1,3-BPG + ADP → 3-Phosphoglycerate + ATP',
+            '  Enzyme: Phosphoglycerate kinase',
+            '  Mechanism: Substrate-level phosphorylation',
+            '  - Direct transfer of phosphate to ADP',
+            '  - High-energy phosphate → ATP',
+            '  Yield: 2 ATP (×2 per glucose)',
+            '',
+            'Step 8: Rearrangement',
+            '  Reaction: 3-PG → 2-PG',
+            '  Enzyme: Phosphoglycerate mutase',
+            '  Purpose: Move phosphate group',
+            '  Prepares for next oxidation',
+            '',
+            'Step 9: Dehydration',
+            '  Reaction: 2-PG → Phosphoenolpyruvate (PEP) + H₂O',
+            '  Enzyme: Enolase',
+            '  Purpose: Remove water',
+            '  Result: Creates very high-energy phosphate',
+            '  PEP has highest phosphate transfer potential',
+            '',
+            'Step 10: Second ATP Generation',
+            '  Reaction: PEP + ADP → Pyruvate + ATP',
+            '  Enzyme: Pyruvate kinase',
+            '  Mechanism: Substrate-level phosphorylation',
+            '  - Transfer of high-energy phosphate',
+            '  - Essentially irreversible',
+            '  Regulation:',
+            '  - Inhibited by ATP (high energy)',
+            '  - Activated by F-1,6-BP (feedforward)',
+            '  Yield: 2 ATP (×2 per glucose)',
+            '',
+            'Total Energy Payoff:',
+            '  4 ATP produced (steps 7 and 10, ×2)',
+            '  2 NADH produced (step 6, ×2)',
+            '  Net ATP: 4 - 2 = 2 ATP'
+        ],
+        helper: 'Payoff phase: oxidize 2 G3P → 2 pyruvate, produce 4 ATP + 2 NADH',
+        solution: 'Energy payoff produces 4 ATP (substrate-level) and 2 NADH from oxidation of 2 G3P to 2 pyruvate',
+        realWorldContext: 'Substrate-level phosphorylation is fast - why muscles can produce ATP quickly during sprint'
+    });
+
+    // Problem 4: Glycolysis Regulation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Regulation of Glycolysis',
+        problem: 'Explain how glycolysis is regulated at its three key control points',
+        parameters: {
+            specificItems: ['Glycolysis', 'regulation'],
+            enzyme: ['Hexokinase', 'Phosphofructokinase', 'Pyruvate kinase'],
+            includeRegulation: true
+        },
+        type: 'glycolysis',
+        context: { difficulty: 'advanced', topic: 'Glycolysis', focus: 'regulation' },
+        subparts: [
+            'GLYCOLYSIS REGULATION:',
+            '',
+            'General Principle:',
+            '  High energy (↑ATP) → Slow glycolysis',
+            '  Low energy (↑AMP/ADP) → Speed up glycolysis',
+            '',
+            'THREE KEY REGULATORY ENZYMES:',
+            '',
+            '1. HEXOKINASE (Step 1):',
+            '   Reaction: Glucose + ATP → G6P + ADP',
+            '',
+            '   Inhibition:',
+            '   - Product inhibition by G6P',
+            '   - When G6P accumulates, enzyme slows',
+            '   - Prevents excessive glucose phosphorylation',
+            '',
+            '   Tissue-specific:',
+            '   - Hexokinase: Most tissues (Km ~0.1 mM)',
+            '     • Saturated at normal glucose levels',
+            '     • Always working near max rate',
+            '   - Glucokinase: Liver (Km ~10 mM)',
+            '     • Only active when glucose high',
+            '     • Acts as "glucose sensor"',
+            '     • Not inhibited by G6P',
+            '',
+            '2. PHOSPHOFRUCTOKINASE (PFK) (Step 3):',
+            '   Reaction: F6P + ATP → F-1,6-BP + ADP',
+            '',
+            '   MAIN CONTROL POINT (rate-limiting step)',
+            '',
+            '   Inhibitors (slow glycolysis):',
+            '   - ATP (high energy signal)',
+            '     • Allosteric inhibitor',
+            '     • When energy abundant, slow down',
+            '   - Citrate (from Krebs cycle)',
+            '     • Indicates plenty of biosynthetic precursors',
+            '   - H⁺ (low pH)',
+            '     • Prevents lactate buildup',
+            '',
+            '   Activators (speed glycolysis):',
+            '   - AMP (low energy signal)',
+            '     • Allosteric activator',
+            '     • Overcomes ATP inhibition',
+            '   - ADP',
+            '   - F-2,6-BP (fructose-2,6-bisphosphate)',
+            '     • Powerful activator',
+            '     • Produced when insulin present',
+            '',
+            '   ATP/AMP Ratio:',
+            '   - High ratio → Glycolysis OFF',
+            '   - Low ratio → Glycolysis ON',
+            '',
+            '3. PYRUVATE KINASE (Step 10):',
+            '   Reaction: PEP + ADP → Pyruvate + ATP',
+            '',
+            '   Inhibitors:',
+            '   - ATP (high energy)',
+            '   - Acetyl-CoA (biosynthetic precursor abundant)',
+            '   - Alanine (amino acid from pyruvate)',
+            '   - Long-chain fatty acids',
+            '',
+            '   Activators:',
+            '   - F-1,6-BP (feedforward activation)',
+            '     • Product of PFK activates pyruvate kinase',
+            '     • Ensures coordinated flow',
+            '',
+            '   Covalent modification:',
+            '   - Phosphorylation inactivates (glucagon signal)',
+            '   - Dephosphorylation activates (insulin signal)',
+            '',
+            'Hormonal Regulation:',
+            '  Insulin (fed state):',
+            '  - Activates PFK',
+            '  - Activates pyruvate kinase',
+            '  - Stimulates glycolysis',
+            '',
+            '  Glucagon (fasting state):',
+            '  - Inhibits PFK',
+            '  - Inhibits pyruvate kinase',
+            '  - Slows glycolysis',
+            '  - Promotes gluconeogenesis instead'
+        ],
+        helper: 'Three control points: Hexokinase (step 1), PFK (step 3 - MAIN), Pyruvate kinase (step 10)',
+        solution: 'Glycolysis regulated at hexokinase (G6P inhibits), PFK (ATP inhibits, AMP activates), pyruvate kinase (ATP inhibits, F-1,6-BP activates)',
+        realWorldContext: 'PFK is therapeutic target - controlling it affects cancer cell metabolism (Warburg effect)'
+    });
+
+    // Problem 5: Fate of Pyruvate
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Pyruvate Metabolism Pathways',
+        problem: 'Compare the different metabolic fates of pyruvate under aerobic and anaerobic conditions',
+        parameters: {
+            specificItems: ['Glycolysis', 'pyruvate', 'fermentation'],
+            oxygenRequirement: 'both',
+            includeComparisons: true
+        },
+        type: 'glycolysis',
+        context: { difficulty: 'advanced', topic: 'Glycolysis', focus: 'pyruvate fate' },
+        subparts: [
+            'FATE OF PYRUVATE:',
+            '',
+            'AEROBIC CONDITIONS (O₂ present):',
+            '',
+            '  Pyruvate Oxidation:',
+            '   Location: Mitochondrial matrix',
+            '   Reaction: Pyruvate + CoA + NAD⁺ → Acetyl-CoA + CO₂+ NADH + H⁺',
+            '   Enzyme: Pyruvate dehydrogenase complex',
+            '   Products:',
+            '   - Acetyl-CoA (enters Krebs cycle)',
+            '   - CO₂ (released as waste)',
+            '   - NADH (to electron transport chain)',
+            '',
+            '   Then:',
+            '   - Acetyl-CoA → Krebs cycle',
+            '   - Complete oxidation to CO₂',
+            '   - Produces NADH, FADH₂, ATP',
+            '   - Total: ~36-38 ATP per glucose',
+            '',
+            'ANAEROBIC CONDITIONS (NO O₂):',
+            '',
+            '  Problem:',
+            '  - Glycolysis produces NADH',
+            '  - Limited NAD⁺ in cell',
+            '  - Without NAD⁺ regeneration, glycolysis stops',
+            '',
+            '  Solution: FERMENTATION',
+            '  - Regenerates NAD⁺',
+            '  - Allows glycolysis to continue',
+            '  - Only 2 ATP per glucose (from glycolysis)',
+            '',
+            '1. LACTIC ACID FERMENTATION:',
+            '   Organisms: Animals, some bacteria',
+            '   Location: Cytoplasm',
+            '   Reaction: Pyruvate + NADH → Lactate + NAD⁺',
+            '   Enzyme: Lactate dehydrogenase',
+            '',
+            '   When it occurs:',
+            '   - Intense muscle exercise',
+            '   - O₂ supply insufficient',
+            '   - "Oxygen debt"',
+            '',
+            '   Effects:',
+            '   - Lactate accumulates',
+            '   - Lowers pH (more acidic)',
+            '   - Causes muscle fatigue',
+            '   - Reversible when O₂ available',
+            '',
+            '   Recovery (Cori Cycle):',
+            '   - Lactate → bloodstream → liver',
+            '   - Liver converts lactate back to glucose',
+            '   - Glucose returns to muscles',
+            '',
+            '2. ALCOHOLIC FERMENTATION:',
+            '   Organisms: Yeast, some bacteria',
+            '   Location: Cytoplasm',
+            '   Two Steps:',
+            '',
+            '   Step 1: Decarboxylation',
+            '   Pyruvate → Acetaldehyde + CO₂',
+            '   Enzyme: Pyruvate decarboxylase',
+            '',
+            '   Step 2: Reduction',
+            '   Acetaldehyde + NADH → Ethanol + NAD⁺',
+            '   Enzyme: Alcohol dehydrogenase',
+            '',
+            '   Applications:',
+            '   - Brewing (beer, wine)',
+            '   - Baking (CO₂ makes bread rise)',
+            '   - Biofuel production',
+            '',
+            '3. OTHER PYRUVATE FATES:',
+            '',
+            '   Alanine synthesis:',
+            '   - Pyruvate + Glutamate → Alanine + α-ketoglutarate',
+            '   - Amino acid metabolism',
+            '',
+            '   Oxaloacetate synthesis:',
+            '   - Pyruvate + CO₂ → Oxaloacetate',
+            '   - Gluconeogenesis',
+            '   - Replenishes Krebs cycle',
+            '',
+            'COMPARISON:',
+            '',
+            '  Aerobic (O₂ present):',
+            '  - Pyruvate → Acetyl-CoA → Krebs → ETC',
+            '  - Complete oxidation to CO₂',
+            '  - ~36-38 ATP per glucose',
+            '  - Very efficient',
+            '',
+            '  Anaerobic (NO O₂):',
+            '  - Pyruvate → Lactate or Ethanol',
+            '  - Incomplete oxidation',
+            '  - Only 2 ATP per glucose',
+            '  - Less efficient but fast',
+            '',
+            'Why Fermentation?',
+            '  - Allows survival when O₂ unavailable',
+            '  - Fast ATP production',
+            '  - Ancient pathway',
+            '  - Enables short bursts of activity'
+        ],
+        helper: 'With O₂: pyruvate → Krebs cycle (efficient); Without O₂: pyruvate → fermentation (regenerates NAD⁺)',
+        solution: 'Aerobic: pyruvate → acetyl-CoA → Krebs cycle (38 ATP); Anaerobic: pyruvate → lactate/ethanol fermentation (2 ATP)',
+        realWorldContext: 'Sprint = lactic acid fermentation; Marathon = aerobic pyruvate oxidation'
+    });
+
+    return relatedProblems;
+}
+
+// ============== KREBS CYCLE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedKrebsCycle() {
+    const relatedProblems = [];
+
+    // Problem 1: Krebs Cycle Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Krebs Cycle Overview',
+        problem: 'Describe the overall purpose and location of the Krebs cycle in cellular respiration',
+        parameters: {
+            specificItems: ['Krebs Cycle', 'overview'],
+            location: 'mitochondrial matrix',
+            category: 'cellular_respiration'
+        },
+        type: 'krebs_cycle',
+        context: { difficulty: 'beginner', topic: 'Krebs Cycle', focus: 'overview' },
+        subparts: [
+            'KREBS CYCLE (CITRIC ACID CYCLE / TCA CYCLE):',
+            '',
+            'Location: Mitochondrial matrix',
+            '',
+            'Other Names:',
+            '  - Citric Acid Cycle (first product)',
+            '  - TCA Cycle (tricarboxylic acid)',
+            '  - Szent-Györgyi-Krebs Cycle',
+            '',
+            'Discoverer: Hans Krebs (1937)',
+            '  - Nobel Prize 1953',
+            '',
+            'Purpose:',
+            '  - Complete oxidation of glucose derivatives',
+            '  - Convert acetyl-CoA to CO₂',
+            '  - Generate electron carriers (NADH, FADH₂)',
+            '  - Produce small amount of ATP',
+            '',
+            'Overall Equation (per Acetyl-CoA):',
+            '  Acetyl-CoA + 3 NAD⁺ + FAD + GDP + Pi + 2 H₂O',
+            '  →',
+            '  2 CO₂ + 3 NADH + 3 H⁺ + FADH₂ + GTP + CoA',
+            '',
+            'Per Glucose (2 Acetyl-CoA):',
+            '  - 2 cycles run',
+            '  - Double all products',
+            '',
+            'Preparation: Pyruvate Oxidation',
+            '  Before cycle:',
+            '  Pyruvate + NAD⁺ + CoA → Acetyl-CoA + NADH + CO₂',
+            '  - Occurs twice per glucose',
+            '  - In mitochondrial matrix',
+            '  - Links glycolysis to Krebs cycle',
+            '',
+            'Key Features:',
+            '  - Cyclic pathway (regenerates starting material)',
+            '  - 8 enzyme-catalyzed steps',
+            '  - Aerobic (requires O₂ indirectly)',
+            '  - Central hub of metabolism',
+            '',
+            'Products per Glucose:',
+            '  Preparation: 2 NADH, 2 CO₂',
+            '  Krebs cycle: 6 NADH, 2 FADH₂, 2 ATP, 4 CO₂',
+            '  Total: 8 NADH, 2 FADH₂, 2 ATP, 6 CO₂',
+            '',
+            'Energy Accounting:',
+            '  - Direct ATP: 2 (substrate-level)',
+            '  - NADH → ~15 ATP (via ETC)',
+            '  - FADH₂ → ~3 ATP (via ETC)',
+            '  - Total: ~20 ATP per glucose'
+        ],
+        helper: 'Krebs cycle = acetyl-CoA completely oxidized to CO₂, makes NADH/FADH₂ for ETC',
+        solution: 'Krebs cycle in matrix oxidizes acetyl-CoA to CO₂, producing 3 NADH, 1 FADH₂, 1 ATP per turn',
+        realWorldContext: 'The CO₂ you exhale comes from decarboxylation reactions in Krebs cycle'
+    });
+
+    // Problem 2: Pyruvate to Acetyl-CoA
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Pyruvate Oxidation (Link Reaction)',
+        problem: 'Explain how pyruvate is converted to acetyl-CoA and why this is an important link reaction',
+        parameters: {
+            specificItems: ['Krebs Cycle', 'pyruvate oxidation', 'link reaction'],
+            stageNumber: 0,
+            products: ['Acetyl-CoA', 'NADH', 'CO₂']
+        },
+        type: 'krebs_cycle',
+        context: { difficulty: 'intermediate', topic: 'Krebs Cycle', focus: 'preparation step' },
+        subparts: [
+            'PYRUVATE OXIDATION (LINK REACTION):',
+            '',
+            'Location: Mitochondrial matrix',
+            '',
+            'Overall Reaction:',
+            '  Pyruvate (3C) + NAD⁺ + CoA',
+            '  →',
+            '  Acetyl-CoA (2C) + NADH + H⁺ + CO₂',
+            '',
+            'Enzyme Complex: Pyruvate Dehydrogenase Complex',
+            '  - One of largest enzyme complexes',
+            '  - Contains 3 enzymes (E1, E2, E3)',
+            '  - 5 coenzymes (TPP, lipoic acid, CoA, FAD, NAD⁺)',
+            '  - ~60 protein subunits',
+            '',
+            'Three Sequential Reactions:',
+            '',
+            '  Step 1: Decarboxylation',
+            '  Enzyme: E1 (pyruvate dehydrogenase)',
+            '  - Removes CO₂ from pyruvate (3C → 2C)',
+            '  - Forms hydroxyethyl group',
+            '  - Coenzyme: TPP (thiamine pyrophosphate)',
+            '  - Vitamin B1 derivative',
+            '',
+            '  Step 2: Oxidation and Transfer to CoA',
+            '  Enzyme: E2 (dihydrolipoyl transacetylase)',
+            '  - Hydroxyethyl oxidized to acetyl',
+            '  - Transferred to Coenzyme A',
+            '  - Forms Acetyl-CoA',
+            '  - Coenzyme: Lipoic acid',
+            '',
+            '  Step 3: Regeneration',
+            '  Enzyme: E3 (dihydrolipoyl dehydrogenase)',
+            '  - Regenerates oxidized lipoic acid',
+            '  - Reduces NAD⁺ to NADH',
+            '  - Coenzymes: FAD, NAD⁺',
+            '',
+            'Products (per pyruvate):',
+            '  - 1 Acetyl-CoA (enters Krebs cycle)',
+            '  - 1 NADH (to electron transport)',
+            '  - 1 CO₂ (waste, exhaled)',
+            '',
+            'Per Glucose (2 pyruvates):',
+            '  - 2 Acetyl-CoA',
+            '  - 2 NADH (~5 ATP)',
+            '  - 2 CO₂',
+            '',
+            'Why "Link Reaction"?',
+            '  - Links glycolysis to Krebs cycle',
+            '  - Connects anaerobic to aerobic metabolism',
+            '  - One-way reaction (irreversible)',
+            '  - Commits pyruvate to complete oxidation',
+            '',
+            'Regulation:',
+            '  Inhibitors (high energy):',
+            '  - ATP',
+            '  - NADH',
+            '  - Acetyl-CoA (product inhibition)',
+            '',
+            '  Activators (low energy):',
+            '  - ADP',
+            '  - NAD⁺',
+            '  - Ca²⁺ (muscle contraction signal)',
+            '',
+            '  Covalent modification:',
+            '  - Phosphorylation inactivates',
+            '  - Dephosphorylation activates',
+            '',
+            'Clinical Significance:',
+            '  Thiamine (B1) Deficiency:',
+            '  - Pyruvate dehydrogenase can\'t function',
+            '  - Pyruvate and lactate accumulate',
+            '  - Beriberi disease',
+            '  - Neurological problems',
+            '',
+            'Importance:',
+            '  - Point of no return for pyruvate',
+            '  - First CO₂ production in respiration',
+            '  - Essential for aerobic metabolism'
+        ],
+        helper: 'Link reaction: pyruvate (3C) → acetyl-CoA (2C) + CO₂ + NADH in matrix',
+        solution: 'Pyruvate dehydrogenase complex converts pyruvate to acetyl-CoA, releasing CO₂ and making NADH',
+        realWorldContext: 'Arsenic poisoning blocks this enzyme - stops cellular respiration, causes death'
+    });
+
+    // Problem 3: Eight Steps of Krebs Cycle
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Krebs Cycle Steps',
+        problem: 'Describe the eight steps of the Krebs cycle, identifying where CO₂, NADH, FADH₂, and ATP are produced',
+        parameters: {
+            specificItems: ['Krebs Cycle', 'cycle steps'],
+            products: ['CO₂', 'NADH', 'FADH₂', 'ATP'],
+            includeEnergyAccounting: true
+        },
+        type: 'krebs_cycle',
+        context: { difficulty: 'advanced', topic: 'Krebs Cycle', focus: 'detailed steps' },
+        subparts: [
+            'THE KREBS CYCLE - 8 STEPS:',
+            '',
+            'STEP 1: Condensation',
+            '  Reaction: Acetyl-CoA (2C) + Oxaloacetate (4C) + H₂O',
+            '           → Citrate (6C) + CoA',
+            '  Enzyme: Citrate synthase',
+            '  Type: Condensation (C-C bond formation)',
+            '  Regulation: Inhibited by ATP, NADH, citrate',
+            '  Note: Only step that consumes acetyl-CoA',
+            '',
+            'STEP 2: Isomerization (First)',
+            '  Reaction: Citrate (6C) → Isocitrate (6C)',
+            '  Enzyme: Aconitase',
+            '  Intermediate: cis-Aconitate',
+            '  Mechanism: Dehydration then rehydration',
+            '  Purpose: Prepares for oxidation',
+            '  Note: Tertiary alcohol → secondary alcohol',
+            '',
+            'STEP 3: First Oxidation/Decarboxylation',
+            '  Reaction: Isocitrate (6C) + NAD⁺',
+            '           → α-Ketoglutarate (5C) + NADH + H⁺ + CO₂',
+            '  Enzyme: Isocitrate dehydrogenase',
+            '  Products: ✓ NADH, ✓ CO₂',
+            '  Regulation: RATE-LIMITING STEP',
+            '  - Activated by ADP, Ca²⁺',
+            '  - Inhibited by ATP, NADH',
+            '  Note: First CO₂ released, first NADH made',
+            '',
+            'STEP 4: Second Oxidation/Decarboxylation',
+            '  Reaction: α-Ketoglutarate (5C) + NAD⁺ + CoA',
+            '           → Succinyl-CoA (4C) + NADH + H⁺ + CO₂',
+            '  Enzyme: α-Ketoglutarate dehydrogenase complex',
+            '  Products: ✓ NADH, ✓ CO₂',
+            '  Similar to: Pyruvate dehydrogenase',
+            '  Regulation: Inhibited by ATP, NADH, succinyl-CoA',
+            '  Note: Second CO₂ released, second NADH made',
+            '',
+            'STEP 5: Substrate-Level Phosphorylation',
+            '  Reaction: Succinyl-CoA (4C) + GDP + Pi',
+            '           → Succinate (4C) + GTP + CoA',
+            '  Enzyme: Succinyl-CoA synthetase (Succinate thiokinase)',
+            '  Products: ✓ GTP (≈ ATP)',
+            '  Mechanism: Substrate-level phosphorylation',
+            '  - High-energy thioester bond',
+            '  - Energy → GTP',
+            '  - GTP + ADP ↔ GDP + ATP',
+            '  Note: Only substrate-level phosphorylation in cycle',
+            '',
+            'STEP 6: Oxidation (FAD)',
+            '  Reaction: Succinate (4C) + FAD',
+            '           → Fumarate (4C) + FADH₂',
+            '  Enzyme: Succinate dehydrogenase',
+            '  Products: ✓ FADH₂',
+            '  Special: Only enzyme embedded in inner membrane',
+            '  - Also Complex II of electron transport chain',
+            '  - Directly feeds electrons to ETC',
+            '  Note: Creates C=C double bond',
+            '',
+            'STEP 7: Hydration',
+            '  Reaction: Fumarate (4C) + H₂O → Malate (4C)',
+            '  Enzyme: Fumarase',
+            '  Type: Hydration (adds water across double bond)',
+            '  Stereospecific: Only produces L-malate',
+            '  Reversible: Near equilibrium',
+            '',
+            'STEP 8: Final Oxidation',
+            '  Reaction: Malate (4C) + NAD⁺',
+            '           → Oxaloacetate (4C) + NADH + H⁺',
+            '  Enzyme: Malate dehydrogenase',
+            '  Products: ✓ NADH, ✓ Oxaloacetate (regenerated)',
+            '  Note: Regenerates starting material',
+            '  - Cycle ready to accept another acetyl-CoA',
+            '  - Third and final NADH',
+            '',
+            'SUMMARY PER ACETYL-CoA:',
+            '  Carbon: 2C in (acetyl-CoA) → 2 CO₂ out',
+            '  NADH: 3 (steps 3, 4, 8)',
+            '  FADH₂: 1 (step 6)',
+            '  ATP: 1 (step 5, as GTP)',
+            '  Oxaloacetate: Regenerated (cycle continues)',
+            '',
+            'PER GLUCOSE (2 Acetyl-CoA):',
+            '  Turns: 2',
+            '  CO₂: 4 (plus 2 from prep = 6 total)',
+            '  NADH: 6 (plus 2 from prep = 8 total)',
+            '  FADH₂: 2',
+            '  ATP: 2',
+            '',
+            'ATP Value from Electron Carriers:',
+            '  8 NADH × 2.5 ATP = 20 ATP',
+            '  2 FADH₂ × 1.5 ATP = 3 ATP',
+            '  2 ATP direct = 2 ATP',
+            '  Total: ~25 ATP per glucose from Krebs'
+        ],
+        helper: 'Remember: 3 NADH (steps 3,4,8), 1 FADH₂ (step 6), 1 ATP (step 5), 2 CO₂ (steps 3,4)',
+        solution: 'Krebs cycle: 8 steps oxidize acetyl-CoA, producing 3 NADH, 1 FADH₂, 1 ATP, 2 CO₂ per turn',
+        realWorldContext: 'Cycle intermediates are starting points for amino acid and nucleotide synthesis'
+    });
+
+    // Problem 4: Amphibolic Nature
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Krebs Cycle as Metabolic Hub',
+        problem: 'Explain the amphibolic nature of the Krebs cycle and its role as a metabolic hub',
+        parameters: {
+            specificItems: ['Krebs Cycle', 'amphibolic', 'metabolic hub'],
+            includeExamples: true
+        },
+        type: 'krebs_cycle',
+        context: { difficulty: 'advanced', topic: 'Krebs Cycle', focus: 'metabolic integration' },
+        subparts: [
+            'AMPHIBOLIC NATURE OF KREBS CYCLE:',
+            '',
+            'Definition:',
+            '  Amphibolic = Both catabolic AND anabolic',
+            '  - Catabolic: Breaks down molecules (releases energy)',
+            '  - Anabolic: Builds molecules (requires energy)',
+            '',
+            'CATABOLIC FUNCTIONS (Energy Production):',
+            '',
+            '  1. Acetyl-CoA Oxidation:',
+            '     - Complete breakdown to CO₂',
+            '     - Generates NADH, FADH₂',
+            '     - Feeds electron transport chain',
+            '     - Produces ATP',
+            '',
+            '  2. Energy Carrier Production:',
+            '     - 3 NADH per turn',
+            '     - 1 FADH₂ per turn',
+            '     - Worth ~10 ATP via ETC',
+            '',
+            'ANABOLIC FUNCTIONS (Biosynthesis):',
+            '',
+            '  Cycle Intermediates as Biosynthetic Precursors:',
+            '',
+            '  1. CITRATE → Fatty Acid Synthesis:',
+            '     - Exported from mitochondria',
+            '     - Citrate → Acetyl-CoA (cytoplasm)',
+            '     - Acetyl-CoA → Fatty acids',
+            '     - Important when energy abundant',
+            '',
+            '  2. α-KETOGLUTARATE → Amino Acids:',
+            '     - Glutamate synthesis:',
+            '       α-Ketoglutarate + NH₄⁺ → Glutamate',
+            '     - Glutamate → other amino acids:',
+            '       • Glutamine',
+            '       • Proline',
+            '       • Arginine',
+            '     - Also: Neurotransmitter (glutamate)',
+            '',
+            '  3. SUCCINYL-CoA → Heme Synthesis:',
+            '     - Succinyl-CoA + Glycine → δ-Aminolevulinic acid',
+            '     - Eventually → Heme',
+            '     - Heme used in:',
+            '       • Hemoglobin (oxygen transport)',
+            '       • Myoglobin (muscle oxygen)',
+            '       • Cytochromes (electron transport)',
+            '',
+            '  4. OXALOACETATE → Multiple Pathways:',
+            '     - Aspartate synthesis:',
+            '       Oxaloacetate → Aspartate',
+            '     - Aspartate → other amino acids:',
+            '       • Asparagine',
+            '       • Methionine',
+            '       • Threonine',
+            '       • Lysine',
+            '     - Nucleotide synthesis:',
+            '       Aspartate → Pyrimidines',
+            '     - Gluconeogenesis:',
+            '       Oxaloacetate → Phosphoenolpyruvate → Glucose',
+            '',
+            '  5. MALATE → NADPH Production:',
+            '     - Malate exported from mitochondria',
+            '     - Malate → Pyruvate + NADPH (malic enzyme)',
+            '     - NADPH for:',
+            '       • Fatty acid synthesis',
+            '       • Cholesterol synthesis',
+            '       • Antioxidant defense',
+            '',
+            'ANAPLEROTIC REACTIONS:',
+            '  (Reactions that replenish cycle intermediates)',
+            '',
+            '  Problem: Intermediates withdrawn for biosynthesis',
+            '  Solution: Anaplerotic reactions add them back',
+            '',
+            '  Major Anaplerotic Reaction:',
+            '  Pyruvate + CO₂ + ATP → Oxaloacetate + ADP + Pi',
+            '  Enzyme: Pyruvate carboxylase',
+            '  - Replenishes oxaloacetate',
+            '  - Activated by acetyl-CoA',
+            '  - Essential when cycle intermediates low',
+            '',
+            '  Other Anaplerotic Sources:',
+            '  - Amino acid catabolism',
+            '  - Propionyl-CoA → Succinyl-CoA',
+            '  - Fatty acid catabolism (odd-chain)',
+            '',
+            'KREBS CYCLE AS METABOLIC HUB:',
+            '',
+            '  Inputs to Cycle:',
+            '  - Acetyl-CoA (from carbs, fats, proteins)',
+            '  - Amino acids (various entry points)',
+            '  - Fatty acids (odd-chain → succinyl-CoA)',
+            '',
+            '  Outputs from Cycle:',
+            '  - Energy (ATP, NADH, FADH₂)',
+            '  - Biosynthetic precursors',
+            '  - Regulatory molecules',
+            '',
+            'Regulation Responds to Cell Needs:',
+            '  High energy need:',
+            '  - Cycle runs for ATP production',
+            '  - Catabolic mode',
+            '',
+            '  High biosynthetic need:',
+            '  - Intermediates withdrawn',
+            '  - Anaplerotic reactions activated',
+            '  - Anabolic mode',
+            '',
+            'Integration with Other Pathways:',
+            '  - Glycolysis',
+            '  - Gluconeogenesis',
+            '  - Fatty acid synthesis/oxidation',
+            '  - Amino acid metabolism',
+            '  - Nucleotide synthesis'
+        ],
+        helper: 'Amphibolic = both breaks down (energy) and builds up (biosynthesis) molecules',
+        solution: 'Krebs cycle is amphibolic: catabolic (energy production) and anabolic (biosynthetic precursors for amino acids, heme, nucleotides)',
+        realWorldContext: 'Krebs cycle mutations cause metabolic diseases affecting multiple body systems'
+    });
+
+    // Problem 5: Krebs Cycle Regulation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Regulation of Krebs Cycle',
+        problem: 'Explain how the Krebs cycle is regulated at its three main control points',
+        parameters: {
+            specificItems: ['Krebs Cycle', 'regulation'],
+            enzyme: ['Citrate synthase', 'Isocitrate dehydrogenase', 'α-Ketoglutarate dehydrogenase'],
+            includeRegulation: true
+        },
+        type: 'krebs_cycle',
+        context: { difficulty: 'advanced', topic: 'Krebs Cycle', focus: 'regulation' },
+        subparts: [
+            'KREBS CYCLE REGULATION:',
+            '',
+            'General Principles:',
+            '  High energy (↑ATP, ↑NADH) → Slow cycle',
+            '  Low energy (↑ADP, ↑NAD⁺, ↑Ca²⁺) → Speed cycle',
+            '',
+            'THREE MAIN REGULATORY POINTS:',
+            '',
+            '1. CITRATE SYNTHASE (Step 1):',
+            '   Reaction: Acetyl-CoA + Oxaloacetate → Citrate',
+            '',
+            '   Inhibitors (Negative Feedback):',
+            '   - ATP (high energy signal)',
+            '     • Allosteric inhibitor',
+            '     • When energy abundant, slow entry',
+            '   - NADH (high reducing power)',
+            '     • Indicator of reduced electron carriers',
+            '   - Citrate (product inhibition)',
+            '     • Prevents citrate accumulation',
+            '   - Succinyl-CoA',
+            '     • Downstream product feedback',
+            '',
+            '   Activators:',
+            '   - ADP (low energy signal)',
+            '   - Ca²⁺ (muscle contraction signal)',
+            '     • Increases energy demand',
+            '',
+            '   Substrate Availability:',
+            '   - Requires acetyl-CoA AND oxaloacetate',
+            '   - Oxaloacetate often limiting',
+            '   - Must be regenerated or replenished',
+            '',
+            '2. ISOCITRATE DEHYDROGENASE (Step 3):',
+            '   Reaction: Isocitrate + NAD⁺ → α-Ketoglutarate + NADH + CO₂',
+            '',
+            '   MAIN RATE-LIMITING ENZYME',
+            '',
+            '   Inhibitors:',
+            '   - ATP (allosteric inhibitor)',
+            '     • High energy stops cycle',
+            '   - NADH',
+            '     • High NADH/NAD⁺ ratio',
+            '     • Indicates electron carriers saturated',
+            '',
+            '   Activators:',
+            '   - ADP (allosteric activator)',
+            '     • Most important activator',
+            '     • Overcomes ATP inhibition',
+            '     • Low energy speeds cycle',
+            '   - Ca²⁺',
+            '     • Muscle contraction',
+            '     • Neuronal activity',
+            '     • Signals high energy demand',
+            '   - NAD⁺',
+            '     • High NAD⁺/NADH ratio',
+            '     • Indicates capacity for oxidation',
+            '',
+            '   Mechanism:',
+            '   - Allosteric regulation',
+            '   - Conformational changes',
+            '   - Affects substrate binding',
+            '',
+            '3. α-KETOGLUTARATE DEHYDROGENASE (Step 4):',
+            '   Reaction: α-Ketoglutarate + NAD⁺ + CoA',
+            '            → Succinyl-CoA + NADH + CO₂',
+            '',
+            '   Inhibitors:',
+            '   - ATP',
+            '   - NADH',
+            '   - Succinyl-CoA (product inhibition)',
+            '     • Direct product feedback',
+            '     • Prevents accumulation',
+            '   - GTP',
+            '     • Energy signal',
+            '',
+            '   Activators:',
+            '   - Ca²⁺',
+            '     • Increases Vmax',
+            '     • Responds to energy demand',
+            '',
+            '   Similar to:',
+            '   - Pyruvate dehydrogenase complex',
+            '   - Both are large multienzyme complexes',
+            '   - Similar regulatory mechanisms',
+            '',
+            'ADDITIONAL REGULATION:',
+            '',
+            'Substrate Availability:',
+            '  NAD⁺/NADH Ratio:',
+            '  - High NAD⁺ → Cycle speeds up',
+            '  - High NADH → Cycle slows down',
+            '  - Electron transport must function',
+            '',
+            '  CoA Availability:',
+            '  - Free CoA required for steps 1 and 4',
+            '  - Recycled throughout cycle',
+            '  - Can be limiting factor',
+            '',
+            'Calcium Regulation (Muscle/Nerve):',
+            '  - Ca²⁺ released during contraction',
+            '  - Activates all three regulated enzymes',
+            '  - Increases ATP production',
+            '  - Matches energy supply to demand',
+            '',
+            'Feedback from Electron Transport:',
+            '  - If ETC blocked → NADH accumulates',
+            '  - High NADH inhibits cycle',
+            '  - Prevents over-reduction',
+            '',
+            'Integration with Other Pathways:',
+            '  High fatty acids:',
+            '  - β-oxidation produces acetyl-CoA, NADH',
+            '  - Inhibits pyruvate dehydrogenase',
+            '  - Spares glucose (glucose-fatty acid cycle)',
+            '',
+            '  Biosynthetic needs:',
+            '  - Citrate exported for fatty acid synthesis',
+            '  - α-ketoglutarate for amino acids',
+            '  - Anaplerotic reactions activated',
+            '',
+            'Coordinated Regulation:',
+            '  All three control points respond to:',
+            '  - ATP/ADP ratio (energy charge)',
+            '  - NADH/NAD⁺ ratio (redox state)',
+            '  - Ca²⁺ (activity signal)',
+            '',
+            'Summary:',
+            '  High ATP + NADH → All 3 enzymes inhibited',
+            '  Low ADP + NAD⁺ + Ca²⁺ → All 3 enzymes activated',
+            '  Result: Tight coupling to energy needs'
+        ],
+        helper: 'Three control points: Citrate synthase, Isocitrate dehydrogenase (MAIN), α-Ketoglutarate dehydrogenase',
+        solution: 'Krebs cycle regulated by energy charge (ATP/ADP), redox state (NADH/NAD⁺), and Ca²⁺ at three key enzymes',
+        realWorldContext: 'Exercise increases Ca²⁺, activating Krebs cycle to produce more ATP for muscle contraction'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ELECTRON TRANSPORT CHAIN - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedElectronTransport() {
+    const relatedProblems = [];
+
+    // Problem 1: ETC Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Electron Transport Chain Overview',
+        problem: 'Describe the overall purpose and location of the electron transport chain in cellular respiration',
+        parameters: {
+            specificItems: ['Electron Transport Chain', 'overview'],
+            location: 'inner mitochondrial membrane',
+            category: 'cellular_respiration'
+        },
+        type: 'electron_transport',
+        context: { difficulty: 'beginner', topic: 'Electron Transport Chain', focus: 'overview' },
+        subparts: [
+            'ELECTRON TRANSPORT CHAIN (ETC):',
+            '',
+            'Location: Inner mitochondrial membrane (cristae)',
+            '',
+            'Purpose:',
+            '  - Harvest energy from NADH and FADH₂',
+            '  - Create proton gradient',
+            '  - Produce most ATP (oxidative phosphorylation)',
+            '  - Consume oxygen (final electron acceptor)',
+            '',
+            'Components: 4 protein complexes + 2 mobile carriers',
+            '',
+            '  Complex I: NADH dehydrogenase',
+            '  Complex II: Succinate dehydrogenase',
+            '  Complex III: Cytochrome bc₁ complex',
+            '  Complex IV: Cytochrome c oxidase',
+            '',
+            '  Mobile Carriers:',
+            '  - Ubiquinone (Coenzyme Q)',
+            '  - Cytochrome c',
+            '',
+            'Overall Process:',
+            '  1. NADH and FADH₂ donate electrons',
+            '  2. Electrons pass through complexes',
+            '  3. Energy released pumps H⁺ across membrane',
+            '  4. H⁺ gradient created (high in intermembrane space)',
+            '  5. Oxygen accepts electrons → forms water',
+            '  6. H⁺ flows back through ATP synthase',
+            '  7. ATP produced (chemiosmosis)',
+            '',
+            'Electron Flow:',
+            '  NADH → Complex I → Q → Complex III → Cyt c → Complex IV → O₂',
+            '  FADH₂ → Complex II → Q → Complex III → Cyt c → Complex IV → O₂',
+            '',
+            'Oxygen\'s Role:',
+            '  - Final electron acceptor',
+            '  - O₂ + 4e⁻ + 4H⁺ → 2H₂O',
+            '  - Without O₂, ETC stops',
+            '  - NADH accumulates',
+            '  - Cellular respiration halts',
+            '',
+            'ATP Production:',
+            '  - Each NADH → ~2.5 ATP',
+            '  - Each FADH₂ → ~1.5 ATP',
+            '  - Per glucose: ~28-32 ATP from ETC',
+            '  - Most ATP in cellular respiration',
+            '',
+            'Key Features:',
+            '  - Aerobic (requires oxygen)',
+            '  - Highly efficient energy extraction',
+            '  - Coupled to ATP synthesis',
+            '  - Final stage of cellular respiration'
+        ],
+        helper: 'ETC = electrons from NADH/FADH₂ → pump H⁺ → gradient → ATP synthase → ATP',
+        solution: 'ETC in inner membrane uses electron energy to pump H⁺, creating gradient for ATP synthesis via chemiosmosis',
+        realWorldContext: 'Cyanide is deadly because it blocks Complex IV, stopping all ATP production from ETC'
+    });
+
+    // Problem 2: Four Complexes
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'ETC Protein Complexes',
+        problem: 'Describe the four protein complexes of the electron transport chain and their functions',
+        parameters: {
+            specificItems: ['Electron Transport Chain', 'complexes'],
+            category: 'cellular_respiration',
+            limit: 4
+        },
+        type: 'electron_transport',
+        context: { difficulty: 'intermediate', topic: 'Electron Transport Chain', focus: 'complexes' },
+        subparts: [
+            'FOUR ETC PROTEIN COMPLEXES:',
+            '',
+            'COMPLEX I: NADH Dehydrogenase',
+            '  (NADH-Coenzyme Q Reductase)',
+            '',
+            '  Function:',
+            '  - Accepts electrons from NADH',
+            '  - First entry point for electrons',
+            '  - Transfers to Coenzyme Q (ubiquinone)',
+            '',
+            '  Reaction:',
+            '  NADH + H⁺ + Q → NAD⁺ + QH₂',
+            '',
+            '  Proton Pumping:',
+            '  - Pumps 4 H⁺ per NADH',
+            '  - From matrix → intermembrane space',
+            '  - Uses electron energy',
+            '',
+            '  Structure:',
+            '  - Largest complex (~45 subunits)',
+            '  - L-shaped structure',
+            '  - Contains FMN and Fe-S clusters',
+            '',
+            '  Inhibitors:',
+            '  - Rotenone (insecticide)',
+            '  - Amytal (barbiturate)',
+            '',
+            'COMPLEX II: Succinate Dehydrogenase',
+            '  (Succinate-Coenzyme Q Reductase)',
+            '',
+            '  Function:',
+            '  - Accepts electrons from FADH₂',
+            '  - Second entry point (lower energy)',
+            '  - Also part of Krebs cycle (Step 6)',
+            '  - Transfers to Coenzyme Q',
+            '',
+            '  Reaction:',
+            '  Succinate + FAD + Q → Fumarate + FADH₂ + QH₂',
+            '',
+            '  Proton Pumping:',
+            '  - Does NOT pump protons',
+            '  - Lower energy electrons',
+            '',
+            '  Structure:',
+            '  - Only complex fully embedded in membrane',
+            '  - Contains FAD and Fe-S clusters',
+            '',
+            '  Special Feature:',
+            '  - Connects Krebs cycle to ETC',
+            '  - Dual function enzyme',
+            '',
+            'Coenzyme Q (Ubiquinone):',
+            '  - Small, lipid-soluble molecule',
+            '  - Moves freely in membrane',
+            '  - Collects electrons from Complex I and II',
+            '  - Delivers to Complex III',
+            '  - Can carry 2 electrons and 2 protons',
+            '',
+            'COMPLEX III: Cytochrome bc₁ Complex',
+            '  (Coenzyme Q-Cytochrome c Reductase)',
+            '',
+            '  Function:',
+            '  - Accepts electrons from QH₂',
+            '  - Transfers to cytochrome c',
+            '  - Q cycle mechanism (complex)',
+            '',
+            '  Reaction:',
+            '  QH₂ + 2 Cyt c (oxidized) → Q + 2 Cyt c (reduced) + 2H⁺',
+            '',
+            '  Proton Pumping:',
+            '  - Pumps 4 H⁺ per 2 electrons',
+            '  - Via Q cycle mechanism',
+            '',
+            '  Structure:',
+            '  - Contains cytochromes b and c₁',
+            '  - Iron-sulfur protein (Rieske protein)',
+            '  - Heme groups',
+            '',
+            '  Inhibitors:',
+            '  - Antimycin A (antibiotic)',
+            '',
+            'Cytochrome c:',
+            '  - Small protein (~12 kDa)',
+            '  - Mobile carrier in intermembrane space',
+            '  - Carries one electron at a time',
+            '  - Shuttles between Complex III and IV',
+            '  - Highly conserved (evolution)',
+            '  - Also involved in apoptosis',
+            '',
+            'COMPLEX IV: Cytochrome c Oxidase',
+            '  (Cytochrome c-Oxygen Reductase)',
+            '',
+            '  Function:',
+            '  - Accepts electrons from cytochrome c',
+            '  - Transfers to oxygen (final acceptor)',
+            '  - Reduces O₂ to H₂O',
+            '',
+            '  Reaction:',
+            '  4 Cyt c (reduced) + O₂ + 4H⁺ → 4 Cyt c (oxidized) + 2H₂O',
+            '',
+            '  Proton Pumping:',
+            '  - Pumps 2 H⁺ per 2 electrons',
+            '  - Also consumes 4 H⁺ for water formation',
+            '',
+            '  Structure:',
+            '  - Contains cytochromes a and a₃',
+            '  - Copper centers (CuA, CuB)',
+            '  - 13 subunits',
+            '',
+            '  Inhibitors:',
+            '  - Cyanide (CN⁻) - DEADLY',
+            '  - Carbon monoxide (CO)',
+            '  - Azide (N₃⁻)',
+            '  - All block O₂ binding site',
+            '',
+            '  Importance:',
+            '  - Only site where O₂ used',
+            '  - Final step of respiration',
+            '',
+            'TOTAL H⁺ PUMPED:',
+            '  Per NADH:',
+            '  - Complex I: 4 H⁺',
+            '  - Complex III: 4 H⁺',
+            '  - Complex IV: 2 H⁺',
+            '  - Total: 10 H⁺',
+            '',
+            '  Per FADH₂:',
+            '  - (Skips Complex I)',
+            '  - Complex III: 4 H⁺',
+            '  - Complex IV: 2 H⁺',
+            '  - Total: 6 H⁺',
+            '',
+            'ATP Yield:',
+            '  - ~3 H⁺ needed per ATP',
+            '  - NADH: 10 H⁺ → ~2.5-3 ATP',
+            '  - FADH₂: 6 H⁺ → ~1.5-2 ATP'
+        ],
+        helper: 'Complex I (NADH, 4H⁺), Complex II (FADH₂, 0H⁺), Complex III (4H⁺), Complex IV (O₂→H₂O, 2H⁺)',
+        solution: 'Four complexes: I (NADH→Q), II (FADH₂→Q), III (Q→cyt c), IV (cyt c→O₂); Complexes I, III, IV pump H⁺',
+        realWorldContext: 'Carbon monoxide poisoning: CO binds Complex IV 200× stronger than O₂, blocking respiration'
+    });
+
+    // Problem 3: Chemiosmosis and ATP Synthase
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Chemiosmosis and ATP Synthesis',
+        problem: 'Explain chemiosmosis and how ATP synthase uses the proton gradient to produce ATP',
+        parameters: {
+            specificItems: ['Electron Transport Chain', 'chemiosmosis', 'ATP synthase'],
+            category: 'cellular_respiration'
+        },
+        type: 'electron_transport',
+        context: { difficulty: 'intermediate', topic: 'Electron Transport Chain', focus: 'ATP synthesis' },
+        subparts: [
+            'CHEMIOSMOSIS:',
+            '',
+            'Definition:',
+            '  - ATP synthesis driven by proton gradient',
+            '  - Couples electron transport to ATP production',
+            '  - Discovered by Peter Mitchell (Nobel Prize 1978)',
+            '',
+            'The Proton Gradient:',
+            '',
+            '  Creation:',
+            '  - Electron transport complexes pump H⁺',
+            '  - H⁺ moves from matrix → intermembrane space',
+            '  - Creates gradient across inner membrane',
+            '',
+            '  Two Components:',
+            '  1. Chemical gradient (pH difference):',
+            '     - Intermembrane space: pH ~6.5 (high H⁺)',
+            '     - Matrix: pH ~8.0 (low H⁺)',
+            '     - Difference: ~1.5 pH units',
+            '',
+            '  2. Electrical gradient (charge difference):',
+            '     - Intermembrane space: More positive',
+            '     - Matrix: More negative',
+            '     - Voltage: ~180 mV',
+            '',
+            '  Combined: Electrochemical gradient',
+            '  - Also called "proton-motive force"',
+            '  - Stores potential energy',
+            '  - Like water behind dam',
+            '',
+            'ATP SYNTHASE:',
+            '',
+            'Also called: Complex V',
+            '',
+            'Structure: Two main parts',
+            '',
+            '  F₀ Portion (Membrane-Embedded):',
+            '  - Forms proton channel',
+            '  - Spans inner membrane',
+            '  - Contains c-ring (rotor)',
+            '  - 10-14 c subunits',
+            '  - Anchored by a subunit (stator)',
+            '',
+            '  F₁ Portion (Matrix-Facing):',
+            '  - Catalytic head',
+            '  - Projects into matrix',
+            '  - Contains 3 α and 3 β subunits',
+            '  - β subunits are catalytic',
+            '  - γ subunit connects to F₀ (rotor shaft)',
+            '',
+            'Mechanism: Rotary Catalysis',
+            '',
+            '  Step 1: Proton Flow',
+            '  - H⁺ flows down gradient',
+            '  - Through F₀ channel',
+            '  - From intermembrane space → matrix',
+            '',
+            '  Step 2: Rotation',
+            '  - H⁺ flow causes c-ring to rotate',
+            '  - γ subunit rotates with c-ring',
+            '  - Like water turning waterwheel',
+            '',
+            '  Step 3: Conformational Changes',
+            '  - γ rotation causes β subunits to change shape',
+            '  - Three conformations cycle:',
+            '    • Loose (L): Binds ADP + Pi',
+            '    • Tight (T): Catalyzes ATP formation',
+            '    • Open (O): Releases ATP',
+            '',
+            '  Step 4: ATP Synthesis',
+            '  - Each 120° rotation:',
+            '    • L → T (binds substrates)',
+            '    • T → O (makes and releases ATP)',
+            '    • O → L (ready for new cycle)',
+            '  - Full 360° rotation produces 3 ATP',
+            '',
+            'Energy Requirements:',
+            '  - ~3-4 H⁺ per ATP synthesized',
+            '  - 10 H⁺ from NADH → ~2.5-3 ATP',
+            '  - 6 H⁺ from FADH₂ → ~1.5-2 ATP',
+            '',
+            'Binding Change Mechanism:',
+            '  - Proposed by Paul Boyer (Nobel Prize 1997)',
+            '  - ATP synthesis requires little energy',
+            '  - Energy mainly for releasing ATP',
+            '  - Rotation provides conformational energy',
+            '',
+            'Efficiency:',
+            '  - Very high efficiency (~60%)',
+            '  - Most efficient molecular motor known',
+            '  - Rotates at ~6,000 rpm',
+            '',
+            'Chemiosmotic Theory:',
+            '  Mitchell\'s Key Insights (1961):',
+            '  1. Membrane must be intact and impermeable',
+            '  2. Energy stored as H⁺ gradient (not chemical intermediate)',
+            '  3. ATP synthesis coupled to H⁺ flow',
+            '  4. Same mechanism in mitochondria and chloroplasts',
+            '',
+            '  Evidence:',
+            '  - Artificial H⁺ gradient can drive ATP synthesis',
+            '  - Uncouplers dissipate gradient, stop ATP synthesis',
+            '  - pH gradient measurable',
+            '',
+            'Uncouplers:',
+            '  - Make membrane permeable to H⁺',
+            '  - H⁺ leaks back without going through ATP synthase',
+            '  - Energy released as heat instead of ATP',
+            '',
+            '  Examples:',
+            '  - DNP (2,4-dinitrophenol):',
+            '    • Weight loss drug (now banned)',
+            '    • Can cause fatal hyperthermia',
+            '  - Thermogenin (UCP1):',
+            '    • Natural uncoupler in brown fat',
+            '    • Generates heat (non-shivering thermogenesis)',
+            '    • Keeps babies and hibernating animals warm',
+            '',
+            'Comparison to Photosynthesis:',
+            '  Similarities:',
+            '  - Both use chemiosmosis',
+            '  - Both have ATP synthase',
+            '  - Same rotary mechanism',
+            '',
+            '  Differences:',
+            '  - Mitochondria: H⁺ high in intermembrane space',
+            '  - Chloroplasts: H⁺ high in thylakoid lumen',
+            '  - Opposite membrane topology'
+        ],
+        helper: 'Chemiosmosis = H⁺ gradient drives ATP synthase rotation → conformational changes → ATP synthesis',
+        solution: 'Electron transport pumps H⁺, creating gradient; H⁺ flows through ATP synthase, rotating it to synthesize ATP',
+        realWorldContext: 'ATP synthase is molecular motor - visualization shows it literally spinning as it makes ATP'
+    });
+
+    // Problem 4: Role of Oxygen
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Oxygen as Final Electron Acceptor',
+        problem: 'Explain why oxygen is essential for the electron transport chain and what happens without it',
+        parameters: {
+            specificItems: ['Electron Transport Chain', 'oxygen'],
+            oxygenRequirement: 'aerobic',
+            includeComparisons: true
+        },
+        type: 'electron_transport',
+        context: { difficulty: 'advanced', topic: 'Electron Transport Chain', focus: 'oxygen requirement' },
+        subparts: [
+            'OXYGEN\'S ROLE IN ETC:',
+            '',
+            'FINAL ELECTRON ACCEPTOR:',
+            '',
+            '  At Complex IV:',
+            '  Reaction: O₂ + 4e⁻ + 4H⁺ → 2H₂O',
+            '',
+            '  - Oxygen accepts electrons at end of chain',
+            '  - Reduced to water',
+            '  - Only at Complex IV (cytochrome c oxidase)',
+            '  - Consumes ~90% of oxygen we breathe',
+            '',
+            'Why Oxygen?',
+            '',
+            '  1. HIGH ELECTRONEGATIVITY:',
+            '     - Very strong electron acceptor',
+            '     - Creates large energy drop',
+            '     - Drives entire electron flow',
+            '     - Makes process thermodynamically favorable',
+            '',
+            '  2. FINAL DESTINATION:',
+            '     - Removes electrons from system',
+            '     - Prevents backup',
+            '     - Keeps chain flowing',
+            '',
+            '  3. STABLE PRODUCT:',
+            '     - Water is harmless',
+            '     - Easily excreted or reused',
+            '     - No toxic byproducts (when working properly)',
+            '',
+            'WITHOUT OXYGEN:',
+            '',
+            '  Immediate Effects:',
+            '  1. Complex IV stops (no electron acceptor)',
+            '  2. Cytochrome c backs up (stays reduced)',
+            '  3. Complex III stops (can\'t pass electrons)',
+            '  4. Coenzyme Q backs up',
+            '  5. Complex I and II stop',
+            '  6. NADH and FADH₂ accumulate (can\'t be oxidized)',
+            '',
+            '  Cascade Effects:',
+            '  7. NAD⁺ depleted (all converted to NADH)',
+            '  8. Krebs cycle stops (needs NAD⁺)',
+            '  9. Pyruvate oxidation stops (needs NAD⁺)',
+            '  10. Glycolysis continues briefly',
+            '  11. Must use fermentation (regenerate NAD⁺)',
+            '  12. Only 2 ATP per glucose (from glycolysis)',
+            '',
+            '  Time Course:',
+            '  - Seconds: ETC stops',
+            '  - Minutes: ATP depleted',
+            '  - Minutes: Cell damage begins',
+            '  - 4-6 minutes: Brain damage (neurons die)',
+            '  - Death if prolonged',
+            '',
+            'ALTERNATIVE ELECTRON ACCEPTORS:',
+            '',
+            '  Some Organisms Can Use:',
+            '  - Nitrate (NO₃⁻) → Nitrite (NO₂⁻)',
+            '  - Sulfate (SO₄²⁻) → Hydrogen sulfide (H₂S)',
+            '  - Iron (Fe³⁺) → Iron (Fe²⁺)',
+            '  - Carbon dioxide (CO₂) → Methane (CH₄)',
+            '',
+            '  Examples:',
+            '  - Denitrifying bacteria',
+            '  - Sulfate-reducing bacteria',
+            '  - Methanogens',
+            '',
+            '  But NOT in humans:',
+            '  - We are obligate aerobes',
+            '  - Absolutely require oxygen',
+            '  - Cannot survive without it',
+            '',
+            'REACTIVE OXYGEN SPECIES (ROS):',
+            '',
+            '  Problem:',
+            '  - ~1-2% of electrons leak from ETC',
+            '  - Prematurely reduce O₂',
+            '  - Form dangerous ROS',
+            '',
+            '  Types of ROS:',
+            '  - Superoxide (O₂⁻)',
+            '  - Hydrogen peroxide (H₂O₂)',
+            '  - Hydroxyl radical (•OH)',
+            '',
+            '  Damage:',
+            '  - Oxidize proteins (denature)',
+            '  - Damage lipids (membrane peroxidation)',
+            '  - Mutate DNA',
+            '  - Contribute to aging',
+            '  - Linked to diseases (cancer, neurodegeneration)',
+            '',
+            '  Defense Systems:',
+            '  - Superoxide dismutase (SOD):',
+            '    O₂⁻ → H₂O₂',
+            '  - Catalase:',
+            '    H₂O₂ → H₂O + O₂',
+            '  - Glutathione peroxidase',
+            '  - Vitamin E, Vitamin C (antioxidants)',
+            '',
+            'HYPOXIA (Low Oxygen):',
+            '',
+            '  Causes:',
+            '  - High altitude',
+            '  - Lung disease',
+            '  - Heart failure',
+            '  - Blood loss',
+            '  - Carbon monoxide poisoning',
+            '',
+            '  Cellular Responses:',
+            '  - HIF-1 (hypoxia-inducible factor) activated',
+            '  - Increases glycolysis enzymes',
+            '  - Increases red blood cell production',
+            '  - Increases blood vessel formation',
+            '  - Metabolic adjustments',
+            '',
+            '  Adaptations:',
+            '  - High-altitude populations',
+            '  - More efficient O₂ extraction',
+            '  - Higher red blood cell count',
+            '  - Faster breathing rate',
+            '',
+            'OXYGEN PARADOX:',
+            '  - Essential for life (energy production)',
+            '  - But also toxic (ROS production)',
+            '  - Balance required',
+            '  - Antioxidant defenses critical',
+            '',
+            'Clinical Relevance:',
+            '  Heart Attack:',
+            '  - Blocked coronary artery',
+            '  - No oxygen to heart muscle',
+            '  - Cells die within minutes',
+            '',
+            '  Stroke:',
+            '  - Blocked blood flow to brain',
+            '  - Neurons extremely sensitive',
+            '  - Permanent damage quickly',
+            '',
+            '  Cyanide Poisoning:',
+            '  - Blocks Complex IV',
+            '  - Same effect as no oxygen',
+            '  - Rapid death',
+            '',
+            '  Carbon Monoxide (CO):',
+            '  - Binds hemoglobin 200× stronger than O₂',
+            '  - Blocks O₂ transport',
+            '  - Also binds Complex IV',
+            '  - Double toxicity'
+        ],
+        helper: 'O₂ is final electron acceptor; without it, ETC stops, NADH accumulates, respiration halts',
+        solution: 'Oxygen accepts electrons at Complex IV forming water; without O₂, electron flow stops, NAD⁺ depletes, only fermentation works',
+        realWorldContext: 'Brain damage occurs in 4-6 minutes without oxygen - why CPR must start immediately'
+    });
+
+    // Problem 5: ATP Accounting
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Complete ATP Accounting',
+        problem: 'Calculate the complete ATP yield from one glucose molecule through cellular respiration',
+        parameters: {
+            specificItems: ['Electron Transport Chain', 'ATP yield'],
+            includeEnergyAccounting: true,
+            minATP: 30
+        },
+        type: 'electron_transport',
+        context: { difficulty: 'advanced', topic: 'Electron Transport Chain', focus: 'ATP yield' },
+        subparts: [
+            'COMPLETE ATP ACCOUNTING PER GLUCOSE:',
+            '',
+            'STAGE 1: GLYCOLYSIS (Cytoplasm):',
+            '',
+            '  Direct ATP (Substrate-level):',
+            '  - Investment: -2 ATP',
+            '  - Payoff: +4 ATP',
+            '  - Net: 2 ATP',
+            '',
+            '  NADH produced:',
+            '  - 2 NADH (from G3P oxidation)',
+            '  - But in cytoplasm!',
+            '  - Must use shuttle systems',
+            '',
+            '  Shuttle Systems:',
+            '  Option A: Malate-Aspartate Shuttle',
+            '    - Heart, liver, kidney',
+            '    - Produces mitochondrial NADH',
+            '    - 2 NADH × 2.5 ATP = 5 ATP',
+            '',
+            '  Option B: Glycerol-3-Phosphate Shuttle',
+            '    - Brain, skeletal muscle',
+            '    - Produces mitochondrial FADH₂',
+            '    - 2 FADH₂ × 1.5 ATP = 3 ATP',
+            '',
+            '  Glycolysis Total: 2 ATP + 3-5 ATP = 5-7 ATP',
+            '',
+            'STAGE 2: PYRUVATE OXIDATION (Matrix):',
+            '',
+            '  Per Pyruvate:',
+            '  - 1 NADH',
+            '',
+            '  Per Glucose (2 pyruvates):',
+            '  - 2 NADH × 2.5 ATP = 5 ATP',
+            '',
+            'STAGE 3: KREBS CYCLE (Matrix):',
+            '',
+            '  Direct ATP:',
+            '  - 2 GTP (= 2 ATP)',
+            '',
+            '  NADH produced:',
+            '  - 6 NADH (3 per turn × 2 turns)',
+            '  - 6 NADH × 2.5 ATP = 15 ATP',
+            '',
+            '  FADH₂ produced:',
+            '  - 2 FADH₂ (1 per turn × 2 turns)',
+            '  - 2 FADH₂ × 1.5 ATP = 3 ATP',
+            '',
+            '  Krebs Total: 2 + 15 + 3 = 20 ATP',
+            '',
+            'STAGE 4: ELECTRON TRANSPORT CHAIN:',
+            '',
+            '  ATP Yield per Electron Carrier:',
+            '  - NADH → ~2.5 ATP',
+            '  - FADH₂ → ~1.5 ATP',
+            '',
+            '  Why Not Whole Numbers?',
+            '  - ~3-4 H⁺ per ATP (not exact)',
+            '  - Proton leak (some H⁺ leak through membrane)',
+            '  - Transport costs (moving ADP/ATP across membrane)',
+            '',
+            '  Total NADH:',
+            '  - Glycolysis: 2 NADH',
+            '  - Pyruvate oxidation: 2 NADH',
+            '  - Krebs cycle: 6 NADH',
+            '  - Total: 10 NADH',
+            '',
+            '  Total FADH₂:',
+            '  - Krebs cycle only: 2 FADH₂',
+            '',
+            '  ETC ATP Production:',
+            '  - 10 NADH × 2.5 = 25 ATP',
+            '  - 2 FADH₂ × 1.5 = 3 ATP',
+            '  - Total from ETC: 28 ATP',
+            '',
+            'GRAND TOTAL ATP PER GLUCOSE:',
+            '',
+            '  Maximum (Malate-Aspartate Shuttle):',
+            '  - Glycolysis: 2 ATP + 5 ATP (NADH) = 7 ATP',
+            '  - Pyruvate oxidation: 5 ATP',
+            '  - Krebs cycle: 2 ATP + 18 ATP (carriers) = 20 ATP',
+            '  - TOTAL: 32 ATP',
+            '',
+            '  Minimum (Glycerol-3-Phosphate Shuttle):',
+            '  - Glycolysis: 2 ATP + 3 ATP (FADH₂) = 5 ATP',
+            '  - Pyruvate oxidation: 5 ATP',
+            '  - Krebs cycle: 20 ATP',
+            '  - TOTAL: 30 ATP',
+            '',
+            '  Typical Range: 30-32 ATP per glucose',
+            '',
+            'THEORETICAL MAXIMUM:',
+            '  Old Textbooks: 38 ATP',
+            '  - Based on 3 ATP per NADH, 2 per FADH₂',
+            '  - Outdated values',
+            '',
+            '  Why Lower Now?',
+            '  - More accurate H⁺/ATP ratio measured',
+            '  - Accounts for proton leak',
+            '  - Includes transport costs',
+            '',
+            'BREAKDOWN BY PHOSPHORYLATION TYPE:',
+            '',
+            '  Substrate-Level Phosphorylation:',
+            '  - Glycolysis: 2 ATP',
+            '  - Krebs cycle: 2 ATP',
+            '  - Total: 4 ATP (13%)',
+            '',
+            '  Oxidative Phosphorylation (ETC):',
+            '  - From all NADH and FADH₂',
+            '  - Total: 26-28 ATP (87%)',
+            '',
+            'EFFICIENCY CALCULATION:',
+            '',
+            '  Glucose Energy Content:',
+            '  - Complete combustion: ~686 kcal/mol',
+            '',
+            '  ATP Energy Value:',
+            '  - Per ATP: ~7.3 kcal/mol (standard)',
+            '  - In cells: ~12 kcal/mol',
+            '',
+            '  Energy Captured:',
+            '  - 32 ATP × 7.3 = 234 kcal',
+            '  - Efficiency: 234/686 = 34%',
+            '',
+            '  Energy Lost:',
+            '  - ~66% lost as heat',
+            '  - Keeps body warm (37°C)',
+            '  - Much better than car engine (~25%)',
+            '',
+            'FACTORS AFFECTING YIELD:',
+            '',
+            '  1. Shuttle System Used:',
+            '     - Tissue-specific',
+            '     - 2 ATP difference',
+            '',
+            '  2. Proton Leak:',
+            '     - More leak = less ATP',
+            '     - Increases in brown fat (thermogenesis)',
+            '',
+            '  3. Transport Costs:',
+            '     - Moving ADP/ATP across membrane',
+            '     - Moving Pi into matrix',
+            '     - Costs ~1 H⁺ per ATP',
+            '',
+            '  4. Use of Intermediates:',
+            '     - Some glucose → biosynthesis',
+            '     - Not all completely oxidized',
+            '',
+            'COMPARISON TO FERMENTATION:',
+            '',
+            '  Aerobic Respiration:',
+            '  - 30-32 ATP per glucose',
+            '  - Complete oxidation',
+            '  - Requires oxygen',
+            '  - Very efficient',
+            '',
+            '  Fermentation:',
+            '  - 2 ATP per glucose',
+            '  - Partial oxidation',
+            '  - No oxygen needed',
+            '  - 15-16× less efficient',
+            '',
+            'ATP TURNOVER:',
+            '',
+            '  Resting Human:',
+            '  - ~40 kg ATP per day',
+            '  - From ~160 g glucose equivalent',
+            '',
+            '  During Exercise:',
+            '  - Up to 0.5 kg ATP per hour',
+            '  - Massive increase in demand',
+            '',
+            '  ATP Pool:',
+            '  - Only ~250 g ATP in body at any time',
+            '  - Each ATP molecule recycled 500-750 times/day',
+            '  - Very rapid turnover',
+            '',
+            'CLINICAL SIGNIFICANCE:',
+            '',
+            '  Mitochondrial Diseases:',
+            '  - Mutations in ETC complexes',
+            '  - Reduced ATP production',
+            '  - Affects high-energy tissues most:',
+            '    • Brain',
+            '    • Muscle',
+            '    • Heart',
+            '',
+            '  Cyanide Poisoning:',
+            '  - Blocks Complex IV',
+            '  - ATP production drops to 2/glucose',
+            '  - Rapid death',
+            '',
+            '  Exercise Physiology:',
+            '  - Moderate: Aerobic (32 ATP)',
+            '  - Intense: Mixed aerobic/anaerobic',
+            '  - Sprint: Fermentation (2 ATP)'
+        ],
+        helper: 'Total: ~30-32 ATP per glucose (4 substrate-level, 26-28 oxidative phosphorylation)',
+        solution: 'Complete oxidation yields 30-32 ATP: glycolysis (5-7), pyruvate oxidation (5), Krebs (20), mostly from ETC',
+        realWorldContext: 'Each glucose molecule produces enough ATP to power ~10 trillion molecular processes'
+    });
+
+    return relatedProblems;
+}
+
+// ============== FERMENTATION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedFermentation() {
+    const relatedProblems = [];
+
+    // Problem 1: Fermentation Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Fermentation Overview',
+        problem: 'Explain what fermentation is and why cells perform it when oxygen is unavailable',
+        parameters: {
+            specificItems: ['Fermentation', 'overview'],
+            oxygenRequirement: 'anaerobic',
+            category: 'anaerobic_metabolism'
+        },
+        type: 'fermentation',
+        context: { difficulty: 'beginner', topic: 'Fermentation', focus: 'overview' },
+        subparts: [
+            'FERMENTATION OVERVIEW:',
+            '',
+            'Definition:',
+            '  - Anaerobic process (no oxygen required)',
+            '  - Partial breakdown of glucose',
+            '  - Regenerates NAD⁺ for glycolysis',
+            '  - Produces only 2 ATP per glucose',
+            '',
+            'Why Fermentation?',
+            '',
+            '  The Problem:',
+            '  - Glycolysis produces NADH',
+            '  - Glycolysis requires NAD⁺',
+            '  - Limited NAD⁺ in cell (~0.5 mM)',
+            '  - NADH accumulates → NAD⁺ depleted',
+            '  - Without NAD⁺, glycolysis stops',
+            '  - NO ATP production!',
+            '',
+            '  The Solution - Fermentation:',
+            '  - Oxidizes NADH back to NAD⁺',
+            '  - Uses pyruvate as electron acceptor',
+            '  - No oxygen required',
+            '  - Allows glycolysis to continue',
+            '  - Produces 2 ATP (better than 0!)',
+            '',
+            'When Does It Occur?',
+            '  1. Oxygen not available',
+            '  2. Oxygen demand exceeds supply (intense exercise)',
+            '  3. Organism lacks mitochondria',
+            '  4. Organism is anaerobic',
+            '',
+            'TWO MAIN TYPES:',
+            '',
+            '1. LACTIC ACID FERMENTATION:',
+            '   Equation:',
+            '   Glucose → 2 Lactate + 2 ATP',
+            '',
+            '   Organisms:',
+            '   - Animal muscle cells',
+            '   - Some bacteria (Lactobacillus)',
+            '   - Some fungi',
+            '',
+            '   Product: Lactate (lactic acid)',
+            '',
+            '2. ALCOHOLIC FERMENTATION:',
+            '   Equation:',
+            '   Glucose → 2 Ethanol + 2 CO₂ + 2 ATP',
+            '',
+            '   Organisms:',
+            '   - Yeast (Saccharomyces)',
+            '   - Some bacteria',
+            '',
+            '   Products: Ethanol and CO₂',
+            '',
+            'Key Point:',
+            '  - Fermentation itself makes NO ATP',
+            '  - ATP comes from glycolysis',
+            '  - Fermentation only regenerates NAD⁺',
+            '  - Allows glycolysis to continue',
+            '',
+            'Efficiency Comparison:',
+            '  Fermentation: 2 ATP per glucose',
+            '  Aerobic respiration: 32 ATP per glucose',
+            '  - Fermentation is 16× less efficient',
+            '  - But works without oxygen',
+            '',
+            'Energy Content:',
+            '  - Lactate/ethanol still contains energy',
+            '  - Not fully oxidized',
+            '  - Only ~2% of glucose energy captured',
+            '  - Rest remains in end products',
+            '',
+            'Evolutionary Perspective:',
+            '  - Ancient pathway',
+            '  - Evolved before oxygen in atmosphere',
+            '  - Still useful as backup',
+            '  - Allows survival in anaerobic conditions'
+        ],
+        helper: 'Fermentation = regenerate NAD⁺ from NADH so glycolysis can continue (no O₂ needed)',
+        solution: 'Fermentation regenerates NAD⁺ anaerobically, allowing glycolysis to continue producing 2 ATP per glucose',
+        realWorldContext: 'Sprint uses fermentation when muscles can\'t get enough oxygen for aerobic respiration'
+    });
+
+    // Problem 2: Lactic Acid Fermentation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Lactic Acid Fermentation',
+        problem: 'Describe lactic acid fermentation and explain its role in muscle fatigue and food production',
+        parameters: {
+            specificItems: ['Fermentation', 'lactic acid'],
+            processType: 'anaerobic',
+            application: 'muscle fatigue'
+        },
+        type: 'fermentation',
+        context: { difficulty: 'intermediate', topic: 'Fermentation', focus: 'lactic acid' },
+        subparts: [
+            'LACTIC ACID FERMENTATION:',
+            '',
+            'Overall Process:',
+            '  Glucose → 2 Lactate + 2 ATP (from glycolysis)',
+            '',
+            'Two Steps:',
+            '',
+            '  Step 1: GLYCOLYSIS',
+            '  Glucose → 2 Pyruvate + 2 ATP + 2 NADH',
+            '  - Occurs in cytoplasm',
+            '  - Same as aerobic respiration',
+            '',
+            '  Step 2: LACTATE FORMATION',
+            '  Pyruvate + NADH + H⁺ → Lactate + NAD⁺',
+            '  Enzyme: Lactate dehydrogenase (LDH)',
+            '  - Reduces pyruvate to lactate',
+            '  - Oxidizes NADH to NAD⁺',
+            '  - Simple one-step reaction',
+            '',
+            'Net Result:',
+            '  - 2 ATP produced (from glycolysis)',
+            '  - NAD⁺ regenerated',
+            '  - 2 Lactate formed',
+            '  - No CO₂ produced',
+            '',
+            'MUSCLE METABOLISM:',
+            '',
+            'When It Occurs:',
+            '  - Intense exercise (sprinting, weightlifting)',
+            '  - Oxygen demand > oxygen supply',
+            '  - "Oxygen debt"',
+            '  - Muscles switch to fermentation',
+            '',
+            'Lactate Buildup:',
+            '  Effects:',
+            '  - Accumulates in muscle',
+            '  - Lowers pH (more acidic)',
+            '  - Contributes to muscle fatigue',
+            '  - Burning sensation',
+            '  - Muscles feel heavy',
+            '',
+            '  Note: Lactate itself doesn\'t cause soreness',
+            '  - Delayed onset muscle soreness (DOMS)',
+            '  - Caused by muscle damage, not lactate',
+            '',
+            'Recovery - Cori Cycle:',
+            '  1. Lactate released into bloodstream',
+            '  2. Transported to liver',
+            '  3. Liver converts lactate → glucose',
+            '     - Requires ATP and oxygen',
+            '     - Uses gluconeogenesis pathway',
+            '  4. Glucose returns to muscles',
+            '  5. Cycle continues',
+            '',
+            '  Why "Oxygen Debt"?',
+            '  - Extra oxygen needed after exercise',
+            '  - To power lactate → glucose conversion',
+            '  - Repay ATP used',
+            '  - Restore oxygen stores (myoglobin)',
+            '  - Heavy breathing continues after stopping',
+            '',
+            'FOOD PRODUCTION:',
+            '',
+            '1. YOGURT PRODUCTION:',
+            '   Bacteria: Lactobacillus bulgaricus, Streptococcus thermophilus',
+            '   Process:',
+            '   - Bacteria ferment lactose (milk sugar)',
+            '   - Produce lactic acid',
+            '   - Lowers pH (~4.5)',
+            '   - Milk proteins denature (coagulate)',
+            '   - Thick, tangy yogurt',
+            '',
+            '2. CHEESE PRODUCTION:',
+            '   Bacteria: Various lactic acid bacteria',
+            '   Process:',
+            '   - Ferment lactose in milk',
+            '   - Lactic acid production',
+            '   - Curdles milk (separates curds and whey)',
+            '   - Different bacteria = different cheese types',
+            '',
+            '3. SAUERKRAUT:',
+            '   Bacteria: Lactobacillus',
+            '   Process:',
+            '   - Ferment sugars in cabbage',
+            '   - Produce lactic acid',
+            '   - Preserves cabbage',
+            '   - Tangy flavor',
+            '',
+            '4. KIMCHI:',
+            '   Bacteria: Lactobacillus kimchii, others',
+            '   Process:',
+            '   - Ferment vegetables',
+            '   - Lactic acid preserves',
+            '   - Develops complex flavors',
+            '',
+            '5. PICKLES:',
+            '   Bacteria: Lactobacillus',
+            '   Process:',
+            '   - Ferment cucumbers',
+            '   - Lactic acid production',
+            '   - Sour flavor',
+            '   - Natural preservation',
+            '',
+            'Benefits of Lactic Acid Fermentation:',
+            '  Food Preservation:',
+            '  - Low pH inhibits spoilage bacteria',
+            '  - Extends shelf life',
+            '  - Natural method',
+            '',
+            '  Nutrition:',
+            '  - Probiotics (beneficial bacteria)',
+            '  - Increased vitamin content',
+            '  - Easier to digest',
+            '',
+            '  Flavor:',
+            '  - Tangy, sour taste',
+            '  - Complex flavor development',
+            '',
+            'Industrial Scale:',
+            '  - Billion-dollar industry',
+            '  - Dairy products',
+            '  - Fermented vegetables',
+            '  - Meat products (fermented sausages)'
+        ],
+        helper: 'Lactic acid fermentation: pyruvate + NADH → lactate + NAD⁺ (muscles, yogurt, pickles)',
+        solution: 'Lactic acid fermentation converts pyruvate to lactate, regenerating NAD⁺; causes muscle fatigue, produces yogurt/pickles',
+        realWorldContext: '100m sprint = almost pure lactic acid fermentation; marathon = aerobic respiration'
+    });
+
+    // Problem 3: Alcoholic Fermentation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Alcoholic Fermentation',
+        problem: 'Explain alcoholic fermentation and its applications in food and beverage production',
+        parameters: {
+            specificItems: ['Fermentation', 'alcoholic'],
+            processType: 'anaerobic',
+            application: 'brewing'
+        },
+        type: 'fermentation',
+        context: { difficulty: 'intermediate', topic: 'Fermentation', focus: 'alcoholic' },
+        subparts: [
+            'ALCOHOLIC FERMENTATION:',
+            '',
+            'Overall Process:',
+            '  Glucose → 2 Ethanol + 2 CO₂ + 2 ATP',
+            '',
+            'Three Steps:',
+            '',
+            '  Step 1: GLYCOLYSIS',
+            '  Glucose → 2 Pyruvate + 2 ATP + 2 NADH',
+            '  - Same as all fermentation',
+            '  - Occurs in cytoplasm',
+            '',
+            '  Step 2: DECARBOXYLATION',
+            '  Pyruvate → Acetaldehyde + CO₂',
+            '  Enzyme: Pyruvate decarboxylase',
+            '  - Removes CO₂ from pyruvate',
+            '  - Forms acetaldehyde (2-carbon)',
+            '  - Irreversible reaction',
+            '  - CO₂ released as gas',
+            '',
+            '  Step 3: REDUCTION',
+            '  Acetaldehyde + NADH + H⁺ → Ethanol + NAD⁺',
+            '  Enzyme: Alcohol dehydrogenase',
+            '  - Reduces acetaldehyde',
+            '  - Oxidizes NADH to NAD⁺',
+            '  - Regenerates NAD⁺ for glycolysis',
+            '',
+            'Net Result:',
+            '  - 2 ATP (from glycolysis)',
+            '  - 2 Ethanol',
+            '  - 2 CO₂',
+            '  - NAD⁺ regenerated',
+            '',
+            'Primary Organisms:',
+            '  Yeast (Saccharomyces cerevisiae)',
+            '  - Facultative anaerobe',
+            '  - Prefers aerobic respiration',
+            '  - Uses fermentation when no O₂',
+            '  - Alcohol tolerance: up to ~15%',
+            '',
+            'BEER PRODUCTION:',
+            '',
+            'Process:',
+            '  1. Malting:',
+            '     - Barley grains germinated',
+            '     - Produces enzymes (amylase)',
+            '     - Dried (malt)',
+            '',
+            '  2. Mashing:',
+            '     - Malt crushed and mixed with water',
+            '     - Enzymes convert starch → maltose',
+            '     - Sweet liquid (wort)',
+            '',
+            '  3. Boiling:',
+            '     - Add hops (flavor, preservation)',
+            '     - Sterilize',
+            '',
+            '  4. Fermentation:',
+            '     - Add yeast',
+            '     - Ferment maltose → ethanol + CO₂',
+            '     - 1-2 weeks',
+            '     - Temperature controlled',
+            '',
+            '  5. Conditioning:',
+            '     - Aging/maturation',
+            '     - Flavor development',
+            '',
+            '  Results:',
+            '  - Alcohol: 4-8% typically',
+            '  - CO₂: Carbonation',
+            '  - Flavors from hops, malt, yeast',
+            '',
+            'WINE PRODUCTION:',
+            '',
+            'Process:',
+            '  1. Crushing:',
+            '     - Grapes crushed',
+            '     - Release juice',
+            '',
+            '  2. Fermentation:',
+            '     - Natural yeast on grape skins',
+            '     - Or added cultured yeast',
+            '     - Ferment grape sugars (glucose, fructose)',
+            '     - 1-4 weeks',
+            '',
+            '  3. Aging:',
+            '     - Oak barrels or stainless steel',
+            '     - Months to years',
+            '     - Flavor development',
+            '',
+            '  Results:',
+            '  - Alcohol: 10-15% typically',
+            '  - Yeast dies when alcohol >15%',
+            '  - CO₂ escapes (still wine)',
+            '  - Or trapped (sparkling wine)',
+            '',
+            '  Types:',
+            '  - Red: Ferment with skins',
+            '  - White: Ferment juice only',
+            '  - Rosé: Brief skin contact',
+            '',
+            'BREAD MAKING:',
+            '',
+            'Process:',
+            '  1. Mixing:',
+            '     - Flour, water, yeast, salt',
+            '     - Dough formation',
+            '',
+            '  2. Kneading:',
+            '     - Develops gluten network',
+            '     - Traps gas',
+            '',
+            '  3. Rising (Fermentation):',
+            '     - Yeast ferments sugars in flour',
+            '     - Produces CO₂ and ethanol',
+            '     - CO₂ trapped in gluten network',
+            '     - Dough rises (doubles in size)',
+            '     - 1-2 hours',
+            '',
+            '  4. Baking:',
+            '     - High heat (350-450°F)',
+            '     - CO₂ expands (more rise)',
+            '     - Ethanol evaporates',
+            '     - Yeast dies',
+            '     - Proteins set (structure)',
+            '',
+            '  Result:',
+            '  - Light, airy bread',
+            '  - CO₂ creates holes/texture',
+            '  - Alcohol evaporates (none in final product)',
+            '',
+            'SPIRITS (DISTILLED BEVERAGES):',
+            '',
+            'Process:',
+            '  1. Fermentation:',
+            '     - Beer, wine, or fermented mash',
+            '     - Produces 5-15% alcohol',
+            '',
+            '  2. Distillation:',
+            '     - Heat fermented liquid',
+            '     - Alcohol boils at 78°C (water at 100°C)',
+            '     - Alcohol vapor collected and condensed',
+            '     - Concentrates alcohol',
+            '',
+            '  Examples:',
+            '  - Whiskey: Fermented grain, distilled',
+            '  - Vodka: Fermented grain/potato, distilled',
+            '  - Rum: Fermented molasses, distilled',
+            '  - Tequila: Fermented agave, distilled',
+            '',
+            '  Alcohol Content: 40-50% (80-100 proof)',
+            '',
+            'BIOFUEL PRODUCTION:',
+            '',
+            'Bioethanol:',
+            '  Source:',
+            '  - Corn (USA)',
+            '  - Sugarcane (Brazil)',
+            '  - Cellulose (future)',
+            '',
+            '  Process:',
+            '  1. Break down starch/cellulose → sugars',
+            '  2. Yeast fermentation',
+            '  3. Distillation to purify',
+            '  4. Blend with gasoline (E10, E85)',
+            '',
+            '  Benefits:',
+            '  - Renewable',
+            '  - Reduces fossil fuel use',
+            '  - Lower emissions',
+            '',
+            '  Challenges:',
+            '  - Food vs fuel debate',
+            '  - Energy intensive production',
+            '  - Land use',
+            '',
+            'Industrial Importance:',
+            '  - Trillion-dollar global industry',
+            '  - Beverages, food, fuel',
+            '  - Ancient technology (8000+ years)',
+            '  - Modern biotechnology applications'
+        ],
+        helper: 'Alcoholic fermentation: pyruvate → acetaldehyde + CO₂, then acetaldehyde + NADH → ethanol + NAD⁺',
+        solution: 'Alcoholic fermentation produces ethanol and CO₂ from pyruvate; used in brewing, winemaking, baking, biofuels',
+        realWorldContext: 'Yeast stops fermenting when alcohol reaches ~15% - why wine is ~12-15% but spirits require distillation'
+    });
+
+    // Problem 4: Fermentation vs Aerobic Respiration
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Comparing Fermentation and Aerobic Respiration',
+        problem: 'Compare fermentation and aerobic respiration in terms of efficiency, products, and when each is used',
+        parameters: {
+            specificItems: ['Fermentation', 'aerobic respiration'],
+            includeComparisons: true,
+            includeEnergyAccounting: true
+        },
+        type: 'fermentation',
+        context: { difficulty: 'advanced', topic: 'Fermentation', focus: 'comparison' },
+        subparts: [
+            'FERMENTATION VS AEROBIC RESPIRATION:',
+            '',
+            'OXYGEN REQUIREMENT:',
+            '',
+            '  Fermentation:',
+            '  - Anaerobic (no oxygen)',
+            '  - Works in absence of O₂',
+            '  - Ancient pathway',
+            '',
+            '  Aerobic Respiration:',
+            '  - Requires oxygen',
+            '  - O₂ is final electron acceptor',
+            '  - Evolved after O₂ in atmosphere',
+            '',
+            'PATHWAYS USED:',
+            '',
+            '  Fermentation:',
+            '  - Glycolysis only',
+            '  - Pyruvate → Lactate or Ethanol',
+            '  - Cytoplasm only',
+            '',
+            '  Aerobic Respiration:',
+            '  - Glycolysis',
+            '  - Pyruvate oxidation',
+            '  - Krebs cycle',
+            '  - Electron transport chain',
+            '  - Cytoplasm + Mitochondria',
+            '',
+            'ATP PRODUCTION:',
+            '',
+            '  Fermentation:',
+            '  - 2 ATP per glucose',
+            '  - All from glycolysis',
+            '  - Substrate-level phosphorylation only',
+            '',
+            '  Aerobic Respiration:',
+            '  - 32 ATP per glucose',
+            '  - 4 ATP substrate-level',
+            '  - 28 ATP oxidative phosphorylation',
+            '  - 16× more efficient!',
+            '',
+            'OXIDATION OF GLUCOSE:',
+            '',
+            '  Fermentation:',
+            '  - Partial oxidation',
+            '  - Glucose → Lactate or Ethanol',
+            '  - Much energy remains in products',
+            '  - Only ~2% energy captured',
+            '',
+            '  Aerobic Respiration:',
+            '  - Complete oxidation',
+            '  - Glucose → CO₂ + H₂O',
+            '  - Most energy extracted',
+            '  - ~34% energy captured',
+            '',
+            'PRODUCTS:',
+            '',
+            '  Lactic Acid Fermentation:',
+            '  - 2 Lactate',
+            '  - 2 ATP',
+            '  - No CO₂',
+            '',
+            '  Alcoholic Fermentation:',
+            '  - 2 Ethanol',
+            '  - 2 CO₂',
+            '  - 2 ATP',
+            '',
+            '  Aerobic Respiration:',
+            '  - 6 CO₂',
+            '  - 6 H₂O',
+            '  - 32 ATP',
+            '',
+            'NAD⁺ REGENERATION:',
+            '',
+            '  Fermentation:',
+            '  - Pyruvate is electron acceptor',
+            '  - NADH → NAD⁺ (pyruvate → lactate/ethanol)',
+            '  - Simple, direct',
+            '',
+            '  Aerobic Respiration:',
+            '  - Oxygen is final electron acceptor',
+            '  - NADH → NAD⁺ (via ETC)',
+            '  - Produces lots of ATP',
+            '',
+            'SPEED:',
+            '',
+            '  Fermentation:',
+            '  - Very fast',
+            '  - Simple pathway',
+            '  - Quick ATP',
+            '',
+            '  Aerobic Respiration:',
+            '  - Slower',
+            '  - Complex pathway',
+            '  - Takes more time',
+            '  - But much more ATP',
+            '',
+            'WHEN USED:',
+            '',
+            '  Fermentation:',
+            '  1. No oxygen available',
+            '  2. Oxygen demand exceeds supply (intense exercise)',
+            '  3. Need quick ATP burst',
+            '  4. Obligate anaerobes (some bacteria)',
+            '  5. Facultative anaerobes in anaerobic conditions',
+            '',
+            '  Aerobic Respiration:',
+            '  1. Oxygen available',
+            '  2. Sustained activity',
+            '  3. Maximum efficiency needed',
+            '  4. Resting or moderate activity',
+            '',
+            'SUSTAINABILITY:',
+            '',
+            '  Fermentation:',
+            '  - Cannot sustain long-term',
+            '  - Products accumulate (lactate)',
+            '  - Lowers pH',
+            '  - Muscles fatigue',
+            '  - Need to stop or slow down',
+            '',
+            '  Aerobic Respiration:',
+            '  - Sustainable indefinitely',
+            '  - Products (CO₂, H₂O) easily removed',
+            '  - Can continue for hours',
+            '  - Limited by fuel availability',
+            '',
+            'EXAMPLES IN HUMANS:',
+            '',
+            '  Activities Using Fermentation:',
+            '  - 100m sprint',
+            '  - Weightlifting',
+            '  - Any intense, short burst',
+            '  - First 2 minutes of exercise',
+            '',
+            '  Activities Using Aerobic Respiration:',
+            '  - Marathon running',
+            '  - Jogging',
+            '  - Walking',
+            '  - Daily activities',
+            '  - Most of the time',
+            '',
+            'MUSCLE FIBER TYPES:',
+            '',
+            '  Fast-Twitch (Type II):',
+            '  - Rely more on fermentation',
+            '  - Quick, powerful contractions',
+            '  - Fatigue quickly',
+            '  - Sprinters have more',
+            '',
+            '  Slow-Twitch (Type I):',
+            '  - Rely on aerobic respiration',
+            '  - Many mitochondria',
+            '  - Sustained contractions',
+            '  - Fatigue resistant',
+            '  - Marathon runners have more',
+            '',
+            'ORGANISM TYPES:',
+            '',
+            '  Obligate Aerobes:',
+            '  - Must have oxygen',
+            '  - Die without it',
+            '  - Example: Humans',
+            '',
+            '  Obligate Anaerobes:',
+            '  - Cannot tolerate oxygen',
+            '  - Oxygen is toxic',
+            '  - Only fermentation',
+            '  - Example: Clostridium tetani (tetanus)',
+            '',
+            '  Facultative Anaerobes:',
+            '  - Can use either',
+            '  - Prefer aerobic when O₂ available',
+            '  - Switch to fermentation without O₂',
+            '  - Example: Yeast, E. coli',
+            '',
+            'EVOLUTIONARY PERSPECTIVE:',
+            '',
+            '  Fermentation:',
+            '  - Ancient (>3.5 billion years)',
+            '  - Evolved first',
+            '  - Before O₂ in atmosphere',
+            '  - Still essential today',
+            '',
+            '  Aerobic Respiration:',
+            '  - Evolved ~2 billion years ago',
+            '  - After cyanobacteria produced O₂',
+            '  - Endosymbiosis (mitochondria)',
+            '  - Huge evolutionary advantage',
+            '',
+            'KEY INSIGHT:',
+            '  Efficiency vs Speed Tradeoff:',
+            '  - Fermentation: Fast but inefficient',
+            '  - Aerobic: Slow but highly efficient',
+            '  - Cells use both depending on needs',
+            '',
+            'METABOLIC FLEXIBILITY:',
+            '  - Humans primarily aerobic',
+            '  - Can switch to fermentation when needed',
+            '  - Training increases aerobic capacity',
+            '  - Best of both worlds'
+        ],
+        helper: 'Fermentation: 2 ATP, anaerobic, fast; Aerobic: 32 ATP, requires O₂, efficient',
+        solution: 'Fermentation produces 2 ATP anaerobically (fast, inefficient); Aerobic respiration produces 32 ATP with O₂ (slow, efficient)',
+        realWorldContext: 'Athletes train to increase aerobic capacity - delays switch to fermentation, improves endurance'
+    });
+
+    // Problem 5: Industrial and Medical Applications
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Applications of Fermentation',
+        problem: 'Describe the industrial, medical, and biotechnology applications of fermentation',
+        parameters: {
+            specificItems: ['Fermentation', 'applications'],
+            includeExamples: true,
+            application: 'biotechnology'
+        },
+        type: 'fermentation',
+        context: { difficulty: 'advanced', topic: 'Fermentation', focus: 'applications' },
+        subparts: [
+            'INDUSTRIAL APPLICATIONS OF FERMENTATION:',
+            '',
+            '1. FOOD AND BEVERAGE INDUSTRY:',
+            '',
+            '  Dairy Products:',
+            '  - Yogurt (Lactobacillus)',
+            '  - Cheese (various LAB)',
+            '  - Kefir (bacteria and yeast)',
+            '  - Sour cream',
+            '  Market: Billion-dollar industry',
+            '',
+            '  Alcoholic Beverages:',
+            '  - Beer (Saccharomyces cerevisiae)',
+            '  - Wine (S. cerevisiae)',
+            '  - Sake (Aspergillus + yeast)',
+            '  - Spirits (fermentation + distillation)',
+            '  Market: Trillion-dollar global industry',
+            '',
+            '  Baked Goods:',
+            '  - Bread (yeast)',
+            '  - Sourdough (wild yeast + bacteria)',
+            '  - Pastries',
+            '',
+            '  Fermented Vegetables:',
+            '  - Sauerkraut',
+            '  - Kimchi',
+            '  - Pickles',
+            '  - Miso',
+            '  - Soy sauce',
+            '  - Tempeh',
+            '',
+            '2. BIOFUEL PRODUCTION:',
+            '',
+            '  Bioethanol:',
+            '  Feedstock:',
+            '  - Corn (USA: 15 billion gallons/year)',
+            '  - Sugarcane (Brazil)',
+            '  - Cellulosic biomass (future)',
+            '',
+            '  Process:',
+            '  - Enzymatic breakdown of starch/cellulose',
+            '  - Yeast fermentation',
+            '  - Distillation',
+            '  - Dehydration (pure ethanol)',
+            '',
+            '  Uses:',
+            '  - E10 (10% ethanol, 90% gasoline)',
+            '  - E85 (85% ethanol, flex-fuel vehicles)',
+            '  - Pure ethanol (Brazil)',
+            '',
+            '  Benefits:',
+            '  - Renewable',
+            '  - Reduces greenhouse gases (debated)',
+            '  - Domestic fuel source',
+            '',
+            '  Challenges:',
+            '  - Food vs fuel',
+            '  - Land use',
+            '  - Water consumption',
+            '  - Energy input vs output',
+            '',
+            '  Biobutanol:',
+            '  - Better fuel properties than ethanol',
+            '  - Produced by Clostridium',
+            '  - More research needed',
+            '',
+            '3. PHARMACEUTICAL PRODUCTION:',
+            '',
+            '  Antibiotics:',
+            '  - Penicillin (Penicillium mold fermentation)',
+            '  - Streptomycin (Streptomyces)',
+            '  - Many others',
+            '  - Fermentation in large tanks (fermenters)',
+            '',
+            '  Vitamins:',
+            '  - Vitamin B12 (bacterial fermentation)',
+            '  - Vitamin C (partial fermentation process)',
+            '  - Riboflavin (B2)',
+            '',
+            '  Hormones:',
+            '  - Insulin (genetically engineered bacteria)',
+            '  - Human growth hormone',
+            '  - Using recombinant DNA technology',
+            '',
+            '  Enzymes:',
+            '  - Amylase (starch breakdown)',
+            '  - Protease (protein digestion)',
+            '  - Lactase (lactose digestion)',
+            '  - Industrial and medical uses',
+            '',
+            '4. ORGANIC ACID PRODUCTION:',
+            '',
+            '  Citric Acid:',
+            '  - Aspergillus niger fermentation',
+            '  - Food additive, flavoring',
+            '  - Soft drinks, candies',
+            '  - 1.6 million tons/year',
+            '',
+            '  Lactic Acid:',
+            '  - Bacterial fermentation',
+            '  - Food preservative',
+            '  - Biodegradable plastics (PLA)',
+            '  - Pharmaceutical applications',
+            '',
+            '  Acetic Acid (Vinegar):',
+            '  - Acetobacter fermentation',
+            '  - Food preservation',
+            '  - Condiment',
+            '',
+            '5. AMINO ACID PRODUCTION:',
+            '',
+            '  Glutamic Acid (MSG):',
+            '  - Corynebacterium glutamicum',
+            '  - Flavor enhancer',
+            '  - 3 million tons/year',
+            '',
+            '  Lysine:',
+            '  - Animal feed supplement',
+            '  - Essential amino acid',
+            '',
+            '6. BIOPLASTICS:',
+            '',
+            '  Polylactic Acid (PLA):',
+            '  - From lactic acid (fermentation)',
+            '  - Biodegradable plastic',
+            '  - Packaging, fibers, medical devices',
+            '',
+            '  Polyhydroxyalkanoates (PHA):',
+            '  - Bacterial fermentation',
+            '  - Biodegradable',
+            '  - Medical implants',
+            '',
+            'MEDICAL APPLICATIONS:',
+            '',
+            '1. DIAGNOSTICS:',
+            '',
+            '  Lactate Dehydrogenase (LDH) Test:',
+            '  - Measures LDH enzyme in blood',
+            '  - Elevated in tissue damage:',
+            '    • Heart attack',
+            '    • Liver disease',
+            '    • Muscle damage',
+            '    • Hemolysis',
+            '',
+            '  Lactate Testing:',
+            '  - Blood lactate levels',
+            '  - Indicates:',
+            '    • Tissue hypoxia (low oxygen)',
+            '    • Sepsis',
+            '    • Shock',
+            '    • Metabolic disorders',
+            '',
+            '2. THERAPEUTIC APPLICATIONS:',
+            '',
+            '  Probiotics:',
+            '  - Live beneficial bacteria',
+            '  - Lactobacillus, Bifidobacterium',
+            '  - Improve gut health',
+            '  - Treat diarrhea, IBS',
+            '  - Boost immune system',
+            '',
+            '  Fecal Microbiota Transplantation:',
+            '  - Transfer gut bacteria',
+            '  - Treats C. difficile infection',
+            '  - Restores healthy fermentation',
+            '',
+            '3. METABOLIC DISORDERS:',
+            '',
+            '  Lactic Acidosis:',
+            '  - Excessive lactate accumulation',
+            '  - Causes: Sepsis, shock, medications',
+            '  - pH drops dangerously',
+            '  - Medical emergency',
+            '',
+            '  Mitochondrial Diseases:',
+            '  - Impaired aerobic respiration',
+            '  - Excessive reliance on fermentation',
+            '  - Chronic lactate elevation',
+            '  - Muscle weakness, neurological issues',
+            '',
+            'BIOTECHNOLOGY APPLICATIONS:',
+            '',
+            '1. GENETIC ENGINEERING:',
+            '',
+            '  Recombinant Protein Production:',
+            '  - Bacteria fermentation',
+            '  - Genetically modified organisms',
+            '  - Produce human proteins:',
+            '    • Insulin',
+            '    • Growth hormone',
+            '    • Clotting factors',
+            '    • Vaccines',
+            '',
+            '2. METABOLIC ENGINEERING:',
+            '',
+            '  Optimizing Fermentation:',
+            '  - Modify organisms for higher yields',
+            '  - Produce novel compounds',
+            '  - Improve efficiency',
+            '',
+            '  Examples:',
+            '  - Enhanced ethanol production',
+            '  - Production of rare chemicals',
+            '  - Pharmaceutical precursors',
+            '',
+            '3. SYNTHETIC BIOLOGY:',
+            '',
+            '  Designer Microbes:',
+            '  - Engineer new metabolic pathways',
+            '  - Produce fuels, chemicals, materials',
+            '  - Artemisinin (antimalarial drug)',
+            '  - Future: Custom molecules',
+            '',
+            '4. BIOREMEDIATION:',
+            '',
+            '  Environmental Cleanup:',
+            '  - Bacteria ferment pollutants',
+            '  - Degrade toxic compounds',
+            '  - Oil spill cleanup',
+            '  - Heavy metal removal',
+            '',
+            'FUTURE DIRECTIONS:',
+            '',
+            '1. Sustainable Chemistry:',
+            '   - Replace petroleum-based production',
+            '   - Fermentation from renewable sources',
+            '',
+            '2. Personalized Medicine:',
+            '   - Microbiome analysis',
+            '   - Tailored probiotic treatments',
+            '',
+            '3. Space Exploration:',
+            '   - Fermentation for food production',
+            '   - Waste recycling',
+            '   - Oxygen generation',
+            '',
+            '4. Climate Change:',
+            '   - Carbon capture and conversion',
+            '   - Biofuel alternatives',
+            '',
+            'ECONOMIC IMPACT:',
+            '  - Food/beverage: Hundreds of billions',
+            '  - Pharmaceuticals: Tens of billions',
+            '  - Biofuels: Tens of billions',
+            '  - Total: Major portion of global economy',
+            '',
+            'HISTORICAL PERSPECTIVE:',
+            '  - Used for 8,000+ years (beer, bread)',
+            '  - Modern understanding: ~150 years (Pasteur)',
+            '  - Industrial scale: ~100 years',
+            '  - Biotechnology revolution: ~40 years',
+            '  - Future: Unlimited potential'
+        ],
+        helper: 'Fermentation applications: food/drink, biofuels, pharmaceuticals, bioplastics, medical diagnostics',
+        solution: 'Fermentation produces foods (yogurt, beer, bread), biofuels (ethanol), pharmaceuticals (insulin, antibiotics), and chemicals (organic acids)',
+        realWorldContext: 'Your morning yogurt, evening beer, and insulin (if diabetic) all depend on fermentation'
+    });
+
+    return relatedProblems;
+}
+
+
+// ============== CALVIN CYCLE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCalvinCycle() {
+    const relatedProblems = [];
+
+    // Problem 1: Calvin Cycle Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Calvin Cycle Overview',
+        problem: 'Describe the overall purpose, location, and products of the Calvin cycle',
+        parameters: {
+            specificItems: ['Calvin Cycle', 'overview'],
+            location: 'stroma',
+            category: 'photosynthesis'
+        },
+        type: 'calvin_cycle',
+        context: { difficulty: 'beginner', topic: 'Calvin Cycle', focus: 'overview' },
+        subparts: [
+            'CALVIN CYCLE (LIGHT-INDEPENDENT REACTIONS):',
+            '',
+            'Also Called:',
+            '  - Light-independent reactions',
+            '  - Dark reactions (misleading - still needs light products)',
+            '  - C3 Cycle (first product is 3-carbon)',
+            '  - Calvin-Benson Cycle',
+            '',
+            'Discoverer: Melvin Calvin (Nobel Prize 1961)',
+            '',
+            'Location: Stroma of chloroplast',
+            '  - Fluid-filled space surrounding thylakoids',
+            '  - Contains enzymes for cycle',
+            '',
+            'Purpose:',
+            '  - Fix CO₂ into organic molecules',
+            '  - Produce glucose (sugar)',
+            '  - Use ATP and NADPH from light reactions',
+            '  - "Synthesis" phase of photosynthesis',
+            '',
+            'Overall Equation (for 1 G3P output):',
+            '  3 CO₂ + 9 ATP + 6 NADPH + 6 H⁺',
+            '  →',
+            '  G3P + 9 ADP + 8 Pi + 6 NADP⁺ + 3 H₂O',
+            '',
+            'For One Glucose (6-carbon):',
+            '  6 CO₂ + 18 ATP + 12 NADPH',
+            '  →',
+            '  C₆H₁₂O₆ + 18 ADP + 16 Pi + 12 NADP⁺',
+            '',
+            'Three Phases:',
+            '',
+            '  1. CARBON FIXATION:',
+            '     - CO₂ attached to RuBP (5-carbon)',
+            '     - Forms two 3-PGA (3-carbon)',
+            '     - Enzyme: RuBisCO',
+            '',
+            '  2. REDUCTION:',
+            '     - 3-PGA reduced to G3P',
+            '     - Uses ATP and NADPH',
+            '     - Energy from light reactions invested',
+            '',
+            '  3. REGENERATION:',
+            '     - G3P rearranged to regenerate RuBP',
+            '     - Uses ATP',
+            '     - Cycle continues',
+            '',
+            'Key Features:',
+            '  - Cyclic pathway',
+            '  - Doesn\'t directly need light',
+            '  - But requires ATP and NADPH (from light reactions)',
+            '  - Runs during day when light reactions active',
+            '',
+            'Products:',
+            '  - G3P (glyceraldehyde-3-phosphate)',
+            '  - Used to make glucose',
+            '  - Also used for other organic molecules',
+            '',
+            'Cycle Turns:',
+            '  - 3 turns = 1 G3P (3-carbon) exits',
+            '  - 6 turns = 2 G3P = 1 Glucose (6-carbon)',
+            '',
+            'Energy Cost per Glucose:',
+            '  - 18 ATP',
+            '  - 12 NADPH',
+            '  - Expensive process!',
+            '',
+            'Importance:',
+            '  - Basis of food chains',
+            '  - Converts inorganic carbon (CO₂) to organic (glucose)',
+            '  - All plant biomass comes from this',
+            '  - Removes CO₂ from atmosphere'
+        ],
+        helper: 'Calvin cycle: CO₂ + ATP + NADPH → glucose in stroma (light-independent)',
+        solution: 'Calvin cycle in stroma fixes CO₂ using ATP and NADPH from light reactions to produce G3P/glucose',
+        realWorldContext: 'All the carbon in your body was once CO₂ fixed by Calvin cycle in plants'
+    });
+
+    // Problem 2: Carbon Fixation Phase
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Carbon Fixation by RuBisCO',
+        problem: 'Explain the carbon fixation phase of the Calvin cycle and the role of RuBisCO',
+        parameters: {
+            specificItems: ['Calvin Cycle', 'carbon fixation', 'RuBisCO'],
+            enzyme: 'RuBisCO',
+            stageNumber: 1
+        },
+        type: 'calvin_cycle',
+        context: { difficulty: 'intermediate', topic: 'Calvin Cycle', focus: 'carbon fixation' },
+        subparts: [
+            'PHASE 1: CARBON FIXATION',
+            '',
+            'Purpose: Incorporate CO₂ into organic molecule',
+            '',
+            'The Reaction:',
+            '  CO₂ + RuBP (5C) → 2 × 3-PGA (3C)',
+            '',
+            '  Input:',
+            '  - 1 CO₂ (1-carbon)',
+            '  - 1 RuBP (ribulose-1,5-bisphosphate, 5-carbon)',
+            '',
+            '  Intermediate:',
+            '  - Unstable 6-carbon compound',
+            '  - Immediately splits',
+            '',
+            '  Output:',
+            '  - 2 × 3-PGA (3-phosphoglycerate, 3-carbon each)',
+            '',
+            'Enzyme: RuBisCO',
+            '',
+            'RUBISCO (Full Name):',
+            '  Ribulose-1,5-bisphosphate carboxylase/oxygenase',
+            '',
+            'Significance:',
+            '  - Most abundant protein on Earth',
+            '  - ~50% of protein in leaves',
+            '  - Critical for all life',
+            '  - Fixes essentially all carbon on Earth',
+            '',
+            'Structure:',
+            '  - Large enzyme complex',
+            '  - 8 large subunits (coded by chloroplast DNA)',
+            '  - 8 small subunits (coded by nuclear DNA)',
+            '  - Total molecular weight ~550 kDa',
+            '',
+            'Properties:',
+            '  - Very slow enzyme',
+            '  - Only ~3 reactions per second',
+            '  - Compare to: most enzymes do 1000s/second',
+            '  - Compensated by huge abundance',
+            '',
+            'Dual Activity (Problem!):',
+            '',
+            '  1. CARBOXYLASE Activity (Desired):',
+            '     - Fixes CO₂',
+            '     - Productive reaction',
+            '     - What we want',
+            '',
+            '  2. OXYGENASE Activity (Undesired):',
+            '     - Fixes O₂ instead of CO₂',
+            '     - Wasteful reaction',
+            '     - Causes photorespiration',
+            '',
+            'Why Both Activities?',
+            '  - CO₂ and O₂ are similar size',
+            '  - Active site can bind either',
+            '  - Cannot perfectly distinguish',
+            '  - Evolved when atmosphere had:',
+            '    • Much more CO₂',
+            '    • Much less O₂',
+            '  - Now problem because O₂ is 21%',
+            '',
+            'Competition Between CO₂ and O₂:',
+            '  - Depends on concentrations',
+            '  - Normal conditions: ~75% CO₂, 25% O₂',
+            '  - Hot/dry: worse (stomata close, O₂ builds up)',
+            '',
+            'Activation Requirements:',
+            '  - Requires Mg²⁺ ion',
+            '  - Requires CO₂ (for activation, separate from substrate)',
+            '  - pH dependent (works best at pH 8)',
+            '  - Light activates indirectly:',
+            '    • Light reactions raise stromal pH',
+            '    • Light reactions reduce ferredoxin',
+            '    • Activates RuBisCO activase',
+            '',
+            'Regulation:',
+            '  - RuBisCO activase (enzyme)',
+            '  - Keeps RuBisCO in active form',
+            '  - Removes inhibitory molecules',
+            '  - Light-activated',
+            '',
+            'Per 3 CO₂ (3 Turns):',
+            '  - 3 CO₂ fixed',
+            '  - 3 RuBP consumed',
+            '  - 6 × 3-PGA produced',
+            '',
+            'Per Glucose (6 CO₂):',
+            '  - 6 turns of cycle',
+            '  - 6 CO₂ fixed',
+            '  - 12 × 3-PGA produced',
+            '',
+            'Importance:',
+            '  - First step "commits" CO₂',
+            '  - Only step that adds carbon',
+            '  - Rate-limiting for entire cycle',
+            '',
+            'Evolution:',
+            '  - Very ancient enzyme',
+            '  - Present in nearly all photosynthetic organisms',
+            '  - Highly conserved',
+            '  - Minor variations between species',
+            '',
+            'Research:',
+            '  - Major target for improvement',
+            '  - Engineering better RuBisCO:',
+            '    • Faster catalysis',
+            '    • Better CO₂/O₂ discrimination',
+            '    • Could increase crop yields 30-40%',
+            '  - Very difficult to engineer (complex)',
+            '',
+            'Agricultural Significance:',
+            '  - Limits crop productivity',
+            '  - Improving it could help feed world',
+            '  - Active research area'
+        ],
+        helper: 'Carbon fixation: RuBisCO adds CO₂ to RuBP (5C) → 2 × 3-PGA (3C)',
+        solution: 'RuBisCO catalyzes CO₂ + RuBP → 2 × 3-PGA; most abundant protein on Earth, but slow enzyme',
+        realWorldContext: 'RuBisCO engineering could increase crop yields 30-40% - could help feed world population'
+    });
+
+    // Problem 3: Reduction Phase
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Reduction Phase of Calvin Cycle',
+        problem: 'Describe the reduction phase and explain how ATP and NADPH are used to produce G3P',
+        parameters: {
+            specificItems: ['Calvin Cycle', 'reduction phase'],
+            energyType: ['ATP', 'NADPH'],
+            products: ['G3P'],
+            stageNumber: 2
+        },
+        type: 'calvin_cycle',
+        context: { difficulty: 'intermediate', topic: 'Calvin Cycle', focus: 'reduction' },
+        subparts: [
+            'PHASE 2: REDUCTION',
+            '',
+            'Purpose: Reduce 3-PGA to G3P using energy',
+            '',
+            'Starting Material: 3-PGA (from carbon fixation)',
+            '',
+            'Two Steps:',
+            '',
+            'STEP 1: PHOSPHORYLATION',
+            '  Reaction: 3-PGA + ATP → 1,3-Bisphosphoglycerate + ADP',
+            '  Enzyme: Phosphoglycerate kinase',
+            '',
+            '  What Happens:',
+            '  - ATP transfers phosphate to 3-PGA',
+            '  - Creates high-energy intermediate',
+            '  - 1,3-BPG has two phosphate groups',
+            '  - Prepares for reduction',
+            '',
+            '  Energy Investment:',
+            '  - Uses ATP from light reactions',
+            '  - 1 ATP per 3-PGA',
+            '  - Per 3 CO₂: 6 ATP (6 × 3-PGA)',
+            '',
+            'STEP 2: REDUCTION',
+            '  Reaction: 1,3-BPG + NADPH + H⁺ → G3P + NADP⁺ + Pi',
+            '  Enzyme: Glyceraldehyde-3-phosphate dehydrogenase',
+            '',
+            '  What Happens:',
+            '  - NADPH donates electrons (reduces)',
+            '  - Aldehyde group formed',
+            '  - G3P is a sugar (carbohydrate)',
+            '  - NADP⁺ returns to light reactions',
+            '',
+            '  Energy Investment:',
+            '  - Uses NADPH from light reactions',
+            '  - 1 NADPH per 3-PGA',
+            '  - Per 3 CO₂: 6 NADPH',
+            '',
+            'Overall Reduction Phase:',
+            '  6 × 3-PGA + 6 ATP + 6 NADPH',
+            '  →',
+            '  6 × G3P + 6 ADP + 6 NADP⁺ + 6 Pi',
+            '',
+            'Products:',
+            '  G3P (Glyceraldehyde-3-Phosphate):',
+            '  - 3-carbon sugar',
+            '  - Phosphorylated',
+            '  - Same as product from glycolysis',
+            '  - High-energy molecule',
+            '',
+            'Fate of G3P:',
+            '',
+            '  For 3 CO₂ fixed (3 turns):',
+            '  - 6 G3P produced',
+            '  - 1 G3P exits cycle (net gain)',
+            '  - 5 G3P stay in cycle',
+            '  - 5 G3P used to regenerate RuBP',
+            '',
+            '  For 6 CO₂ fixed (6 turns):',
+            '  - 12 G3P produced',
+            '  - 2 G3P exit cycle',
+            '  - 10 G3P regenerate RuBP',
+            '  - 2 G3P → 1 Glucose',
+            '',
+            'Energy Accounting Per 3 CO₂:',
+            '  ATP used: 6 (in reduction)',
+            '  NADPH used: 6 (in reduction)',
+            '  Note: More ATP needed in regeneration phase',
+            '',
+            'Why "Reduction"?',
+            '  - Chemical reduction = gain of electrons',
+            '  - NADPH provides electrons',
+            '  - Converts oxidized carbon (CO₂) to reduced carbon (sugar)',
+            '  - Stores energy in C-H bonds',
+            '',
+            'Connection to Light Reactions:',
+            '',
+            '  ATP:',
+            '  - Made by ATP synthase',
+            '  - From proton gradient',
+            '  - Powers phosphorylation',
+            '',
+            '  NADPH:',
+            '  - Made by Photosystem I',
+            '  - From excited electrons',
+            '  - Provides reducing power',
+            '',
+            '  Cycle:',
+            '  - Calvin cycle uses ATP and NADPH',
+            '  - Returns ADP, Pi, NADP⁺',
+            '  - Light reactions regenerate ATP and NADPH',
+            '  - Continuous cycle',
+            '',
+            'Stoichiometry:',
+            '  Ratio needed: 3 ATP : 2 NADPH',
+            '  Light reactions produce: ~1.5 ATP : 1 NADPH',
+            '  Solution: Cyclic photophosphorylation',
+            '  - Makes extra ATP without NADPH',
+            '  - Adjusts ratio as needed',
+            '',
+            'Comparison to Glycolysis:',
+            '  - Reverse of glycolysis steps',
+            '  - Glycolysis: G3P → 3-PGA (oxidation, makes ATP)',
+            '  - Calvin: 3-PGA → G3P (reduction, uses ATP)',
+            '  - Same enzymes (run backwards)',
+            '',
+            'Energy Storage:',
+            '  - Light energy (photons)',
+            '  - → Chemical energy (ATP, NADPH)',
+            '  - → Stored in bonds of sugar (G3P)',
+            '  - Usable by all organisms'
+        ],
+        helper: 'Reduction: 3-PGA + ATP → 1,3-BPG, then 1,3-BPG + NADPH → G3P',
+        solution: 'Reduction phase uses 6 ATP and 6 NADPH to convert 6 × 3-PGA to 6 × G3P (per 3 CO₂)',
+        realWorldContext: 'This is where light energy becomes chemical energy stored in sugar bonds'
+    });
+
+    // Problem 4: Regeneration Phase
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Regeneration of RuBP',
+        problem: 'Explain the regeneration phase and why it is necessary for the Calvin cycle to continue',
+        parameters: {
+            specificItems: ['Calvin Cycle', 'regeneration', 'RuBP'],
+            stageNumber: 3,
+            includeEnergyAccounting: true
+        },
+        type: 'calvin_cycle',
+        context: { difficulty: 'advanced', topic: 'Calvin Cycle', focus: 'regeneration' },
+        subparts: [
+            'PHASE 3: REGENERATION OF RuBP',
+            '',
+            'Purpose: Regenerate RuBP so cycle can continue',
+            '',
+            'The Problem:',
+            '  - RuBP consumed in carbon fixation',
+            '  - CO₂ added to RuBP → two 3-PGA',
+            '  - RuBP is gone',
+            '  - Need to remake RuBP',
+            '  - Otherwise cycle stops',
+            '',
+            'The Solution:',
+            '  - Use 5 G3P to regenerate 3 RuBP',
+            '  - Complex series of reactions',
+            '  - Rearrange carbon skeletons',
+            '',
+            'Carbon Accounting (per 3 CO₂):',
+            '',
+            '  Starting with 6 G3P:',
+            '  - 6 G3P = 18 carbons (6 × 3C)',
+            '',
+            '  Split:',
+            '  - 1 G3P exits (3 carbons) = Net product',
+            '  - 5 G3P remain (15 carbons)',
+            '',
+            '  Rearrangement:',
+            '  - 5 G3P (15C) → 3 RuBP (15C)',
+            '  - 15 carbons in = 15 carbons out',
+            '  - Carbon atoms rearranged',
+            '  - 3-carbon molecules → 5-carbon molecules',
+            '',
+            'The Rearrangement Reactions:',
+            '',
+            '  Complex Pathway:',
+            '  - Multiple enzyme-catalyzed steps',
+            '  - Forms 4C, 5C, 6C, 7C intermediates',
+            '  - Shuffles carbons around',
+            '',
+            '  Key Enzymes:',
+            '  - Transketolase (transfers 2C units)',
+            '  - Aldolase (transfers 3C units)',
+            '  - Sedoheptulose bisphosphatase',
+            '  - Phosphopentose epimerase',
+            '  - Phosphopentose isomerase',
+            '  - Phosphoribulokinase (final step)',
+            '',
+            '  Don\'t need to memorize all steps!',
+            '  - Just understand the principle',
+            '  - 5 × 3C → 3 × 5C',
+            '',
+            'Final Step: Make RuBP',
+            '  Reaction: Ribulose-5-P + ATP → RuBP + ADP',
+            '  Enzyme: Phosphoribulokinase',
+            '',
+            '  - Adds second phosphate',
+            '  - Ribulose-5-phosphate → Ribulose-1,5-bisphosphate',
+            '  - Requires ATP',
+            '  - 3 ATP needed (one per RuBP)',
+            '',
+            'Energy Accounting:',
+            '',
+            '  Per 3 CO₂ (3 turns, 1 G3P output):',
+            '  - Carbon fixation: 0 ATP',
+            '  - Reduction: 6 ATP + 6 NADPH',
+            '  - Regeneration: 3 ATP',
+            '  - TOTAL: 9 ATP + 6 NADPH',
+            '',
+            '  Per Glucose (6 CO₂, 6 turns):',
+            '  - Double everything',
+            '  - TOTAL: 18 ATP + 12 NADPH',
+            '',
+            'Why Regeneration Necessary:',
+            '',
+            '  Without Regeneration:',
+            '  - RuBP runs out after first turn',
+            '  - No acceptor for CO₂',
+            '  - Cycle stops',
+            '  - No more sugar production',
+            '',
+            '  With Regeneration:',
+            '  - RuBP constantly remade',
+            '  - Cycle continues indefinitely',
+            '  - Continuous CO₂ fixation',
+            '  - Steady sugar production',
+            '',
+            'The "Cycle" Concept:',
+            '  - Starts with RuBP',
+            '  - Ends with RuBP',
+            '  - Same molecule regenerated',
+            '  - Catalytic (RuBP not consumed overall)',
+            '  - Similar to Krebs cycle',
+            '',
+            'Net Result of Complete Cycle:',
+            '',
+            '  Input (per 3 turns):',
+            '  - 3 CO₂',
+            '  - 9 ATP',
+            '  - 6 NADPH',
+            '',
+            '  Output (per 3 turns):',
+            '  - 1 G3P (net)',
+            '  - 9 ADP',
+            '  - 8 Pi',
+            '  - 6 NADP⁺',
+            '',
+            '  RuBP: Regenerated (cycle continues)',
+            '',
+            'Regulation:',
+            '',
+            '  Light Regulation:',
+            '  - Several enzymes light-activated',
+            '  - Via reduced ferredoxin from PSI',
+            '  - Ensures cycle active when light available',
+            '',
+            '  Key Regulated Enzymes:',
+            '  - Sedoheptulose bisphosphatase',
+            '  - Fructose bisphosphatase',
+            '  - Phosphoribulokinase',
+            '  - RuBisCO activase',
+            '',
+            '  Feedback Regulation:',
+            '  - Products inhibit enzymes',
+            '  - Prevents overproduction',
+            '',
+            'Comparison to Pentose Phosphate Pathway:',
+            '  - Similar carbon-shuffling reactions',
+            '  - But opposite direction',
+            '  - Uses same intermediates',
+            '  - Different purpose (synthesis vs breakdown)'
+        ],
+        helper: 'Regeneration: 5 G3P (15C) rearranged → 3 RuBP (15C) using 3 ATP',
+        solution: 'Regeneration phase uses 3 ATP to convert 5 G3P into 3 RuBP, allowing cycle to continue',
+        realWorldContext: 'Without regeneration, photosynthesis would stop after first cycle - no food production'
+    });
+
+    // Problem 5: Complete Calvin Cycle Energy Accounting
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Complete Calvin Cycle Accounting',
+        problem: 'Calculate the complete energy cost and products for synthesizing one glucose molecule via the Calvin cycle',
+        parameters: {
+            specificItems: ['Calvin Cycle', 'glucose synthesis'],
+            includeEnergyAccounting: true,
+            minATP: 18
+        },
+        type: 'calvin_cycle',
+        context: { difficulty: 'advanced', topic: 'Calvin Cycle', focus: 'complete accounting' },
+        subparts: [
+            'COMPLETE CALVIN CYCLE ACCOUNTING:',
+            '',
+            'FOR ONE G3P OUTPUT (3 Turns):',
+            '',
+            'Phase 1: Carbon Fixation',
+            '  - 3 CO₂ + 3 RuBP → 6 × 3-PGA',
+            '  - ATP: 0',
+            '  - NADPH: 0',
+            '',
+            'Phase 2: Reduction',
+            '  - 6 × 3-PGA → 6 × G3P',
+            '  - ATP: 6',
+            '  - NADPH: 6',
+            '',
+            'Phase 3: Regeneration',
+            '  - 5 × G3P → 3 × RuBP',
+            '  - ATP: 3',
+            '  - NADPH: 0',
+            '',
+            'Net for 1 G3P:',
+            '  Input:',
+            '  - 3 CO₂',
+            '  - 9 ATP',
+            '  - 6 NADPH',
+            '',
+            '  Output:',
+            '  - 1 G3P (3-carbon sugar)',
+            '  - 9 ADP + 8 Pi',
+            '  - 6 NADP⁺',
+            '',
+            'FOR ONE GLUCOSE (6 Turns):',
+            '',
+            '  Input:',
+            '  - 6 CO₂',
+            '  - 18 ATP',
+            '  - 12 NADPH',
+            '',
+            '  Output:',
+            '  - 1 Glucose (C₆H₁₂O₆)',
+            '  - 18 ADP + 16 Pi',
+            '  - 12 NADP⁺',
+            '',
+            '  Formation:',
+            '  - 2 G3P combine → 1 Glucose',
+            '  - Or 2 G3P → Glucose-6-phosphate → Glucose',
+            '',
+            'COMPARISON TO CELLULAR RESPIRATION:',
+            '',
+            '  Cellular Respiration:',
+            '  Glucose + 6 O₂ → 6 CO₂ + 6 H₂O + 32 ATP',
+            '',
+            '  Photosynthesis (Overall):',
+            '  6 CO₂ + 6 H₂O + light → Glucose + 6 O₂',
+            '',
+            '  - Reverse processes',
+            '  - Photosynthesis stores energy',
+            '  - Respiration releases energy',
+            '',
+            'ENERGY SOURCE BREAKDOWN:',
+            '',
+            '  Light Reactions Produce:',
+            '  - ATP (from photophosphorylation)',
+            '  - NADPH (from electron transport)',
+            '',
+            '  How Much Light Needed?',
+            '  - Each photon excites one electron',
+            '  - Two photosystems per electron',
+            '  - 2 photons per electron transferred',
+            '',
+            '  For 12 NADPH:',
+            '  - 12 NADPH = 24 electrons',
+            '  - 24 electrons × 2 photosystems = 48 photons',
+            '',
+            '  For 18 ATP:',
+            '  - From both non-cyclic and cyclic',
+            '  - Additional photons needed',
+            '  - Total: ~48-72 photons per glucose',
+            '',
+            'EFFICIENCY CALCULATION:',
+            '',
+            '  Energy Input (Light):',
+            '  - Red light photon: ~43 kcal/mol photons',
+            '  - 48 photons × 43 = ~2064 kcal',
+            '',
+            '  Energy Output (Glucose):',
+            '  - Glucose combustion: 686 kcal/mol',
+            '',
+            '  Efficiency:',
+            '  - 686 / 2064 = 33%',
+            '  - Quite efficient for biological process',
+            '',
+            'FACTORS AFFECTING YIELD:',
+            '',
+            '  1. Photorespiration:',
+            '     - Wastes energy',
+            '     - RuBisCO fixes O₂ instead of CO₂',
+            '     - Can reduce yield by 25-50%',
+            '',
+            '  2. Light Intensity:',
+            '     - Low light: Limited ATP/NADPH',
+            '     - High light: Photoinhibition possible',
+            '',
+            '  3. CO₂ Concentration:',
+            '     - Low CO₂: Rate limiting',
+            '     - High CO₂: Increased yield',
+            '',
+            '  4. Temperature:',
+            '     - Affects enzyme activity',
+            '     - Affects photorespiration rate',
+            '',
+            'COMPLETE PHOTOSYNTHESIS ACCOUNTING:',
+            '',
+            'Light Reactions (per 12 NADPH + 18 ATP):',
+            '  12 H₂O + 12 NADP⁺ + 18 ADP + 18 Pi + light',
+            '  →',
+            '  6 O₂ + 12 NADPH + 18 ATP',
+            '',
+            'Calvin Cycle:',
+            '  6 CO₂ + 18 ATP + 12 NADPH',
+            '  →',
+            '  C₆H₁₂O₆ + 18 ADP + 16 Pi + 12 NADP⁺',
+            '',
+            'Overall Photosynthesis:',
+            '  6 CO₂ + 12 H₂O + light energy',
+            '  →',
+            '  C₆H₁₂O₆ + 6 O₂ + 6 H₂O',
+            '',
+            '  Simplified:',
+            '  6 CO₂ + 6 H₂O + light → C₆H₁₂O₆ + 6 O₂',
+            '',
+            'USES OF G3P:',
+            '',
+            '  1. Glucose/Sucrose:',
+            '     - Energy storage',
+            '     - Transport sugar (sucrose)',
+            '',
+            '  2. Starch:',
+            '     - Long-term storage in chloroplasts',
+            '     - Broken down at night',
+            '',
+            '  3. Cellulose:',
+            '     - Cell wall structure',
+            '     - Most abundant organic compound',
+            '',
+            '  4. Amino Acids:',
+            '     - Add nitrogen',
+            '     - Make proteins',
+            '',
+            '  5. Fatty Acids:',
+            '     - Lipid synthesis',
+            '     - Membranes, energy storage',
+            '',
+            '  6. Nucleotides:',
+            '     - DNA and RNA',
+            '',
+            'GLOBAL SIGNIFICANCE:',
+            '',
+            '  Carbon Fixation:',
+            '  - ~120 billion tons CO₂ fixed annually',
+            '  - By all plants and algae',
+            '  - Basis of food chains',
+            '',
+            '  Oxygen Production:',
+            '  - Maintains atmospheric O₂ at 21%',
+            '  - Supports all aerobic life',
+            '',
+            '  Climate Regulation:',
+            '  - Removes CO₂ from atmosphere',
+            '  - Mitigates greenhouse effect',
+            '  - Forests as "carbon sinks"',
+            '',
+            'AGRICULTURAL APPLICATIONS:',
+            '',
+            '  Maximizing Productivity:',
+            '  - Optimize light (greenhouses)',
+            '  - Increase CO₂ (enrichment to 0.1%)',
+            '  - Control temperature',
+            '  - Reduce photorespiration',
+            '',
+            '  Crop Improvement:',
+            '  - Engineer better RuBisCO',
+            '  - Add C4 pathway to C3 crops',
+            '  - Increase photosynthetic efficiency',
+            '  - Could increase yields 30-60%',
+            '',
+            'ECONOMIC VALUE:',
+            '  - All food ultimately from photosynthesis',
+            '  - ~$8 trillion global food production',
+            '  - Biofuels from plant biomass',
+            '  - Wood, paper, textiles',
+            '  - Pharmaceutical compounds',
+            '',
+            'EVOLUTIONARY PERSPECTIVE:',
+            '  - Evolved ~3 billion years ago',
+            '  - Oxygenic photosynthesis ~2.4 billion years ago',
+            '  - Changed Earth\'s atmosphere',
+            '  - Enabled complex life',
+            '  - Most important biochemical pathway'
+        ],
+        helper: 'Total cost per glucose: 18 ATP + 12 NADPH + 6 CO₂ → 1 glucose',
+        solution: 'One glucose requires 6 turns of Calvin cycle, consuming 18 ATP and 12 NADPH to fix 6 CO₂',
+        realWorldContext: 'Every glucose molecule in every organism started as 6 CO₂ fixed by Calvin cycle'
+    });
+
+    return relatedProblems;
+}
+
+
+
+// ============== LIGHT REACTIONS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedLightReactions() {
+    const relatedProblems = [];
+
+    // Problem 1: Light Reactions Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Light Reactions Overview',
+        problem: 'Describe the overall purpose, location, and products of the light reactions of photosynthesis',
+        parameters: {
+            specificItems: ['Light Reactions', 'overview'],
+            location: 'thylakoid membrane',
+            category: 'photosynthesis'
+        },
+        type: 'light_reactions',
+        context: { difficulty: 'beginner', topic: 'Light Reactions', focus: 'overview' },
+        subparts: [
+            'LIGHT REACTIONS OF PHOTOSYNTHESIS:',
+            '',
+            'Also Called:',
+            '  - Light-dependent reactions',
+            '  - Photo-reactions',
+            '  - Hill reactions',
+            '',
+            'Location: Thylakoid membranes in chloroplasts',
+            '',
+            'Purpose:',
+            '  - Convert light energy to chemical energy',
+            '  - Produce ATP (energy)',
+            '  - Produce NADPH (reducing power)',
+            '  - Release O₂ (byproduct)',
+            '  - Provide energy for Calvin cycle',
+            '',
+            'Overall Equation:',
+            '  2 H₂O + 2 NADP⁺ + 3 ADP + 3 Pi + light',
+            '  →',
+            '  O₂ + 2 NADPH + 3 ATP',
+            '',
+            'Key Components:',
+            '  - Photosystem II (P680)',
+            '  - Electron transport chain',
+            '  - Photosystem I (P700)',
+            '  - ATP synthase',
+            '',
+            'Three Main Events:',
+            '',
+            '  1. LIGHT ABSORPTION:',
+            '     - Chlorophyll captures light energy',
+            '     - Excites electrons to higher energy',
+            '     - Two photosystems involved',
+            '',
+            '  2. WATER SPLITTING (Photolysis):',
+            '     - 2 H₂O → O₂ + 4 H⁺ + 4 e⁻',
+            '     - Source of electrons',
+            '     - Source of O₂ we breathe',
+            '     - Occurs at Photosystem II',
+            '',
+            '  3. ATP AND NADPH PRODUCTION:',
+            '     - Electron transport creates H⁺ gradient',
+            '     - ATP synthase makes ATP (photophosphorylation)',
+            '     - NADP⁺ reduced to NADPH',
+            '',
+            'Products (per 2 H₂O):',
+            '  - 1 O₂ (released to atmosphere)',
+            '  - 2 NADPH (for Calvin cycle)',
+            '  - 3 ATP (for Calvin cycle)',
+            '',
+            'Energy Flow:',
+            '  Light → Excited electrons → Electron transport →',
+            '  H⁺ gradient → ATP + NADPH',
+            '',
+            'Importance:',
+            '  - Powers Calvin cycle (makes glucose)',
+            '  - Source of atmospheric O₂',
+            '  - Converts unusable light to usable chemical energy',
+            '  - Foundation of most ecosystems',
+            '',
+            'Connection to Dark Reactions:',
+            '  - ATP and NADPH used in Calvin cycle',
+            '  - ADP, Pi, and NADP⁺ returned',
+            '  - Continuous cycle',
+            '',
+            'Unique Features:',
+            '  - Only system that can oxidize water',
+            '  - Releases O₂ that supports aerobic life',
+            '  - Uses same chemiosmosis as mitochondria',
+            '  - But H⁺ gradient reversed (high in lumen)'
+        ],
+        helper: 'Light reactions: light energy → split water → make ATP + NADPH + release O₂',
+        solution: 'Light reactions in thylakoid membranes use light to split water, producing O₂, ATP, and NADPH for Calvin cycle',
+        realWorldContext: 'Every breath of oxygen you take comes from photolysis of water in photosystem II'
+    });
+
+    // Problem 2: Photosystem II and Water Splitting
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Photosystem II and Photolysis',
+        problem: 'Explain how Photosystem II captures light energy and splits water molecules',
+        parameters: {
+            specificItems: ['Light Reactions', 'Photosystem II', 'photolysis'],
+            products: ['O₂'],
+            category: 'photosynthesis'
+        },
+        type: 'light_reactions',
+        context: { difficulty: 'intermediate', topic: 'Light Reactions', focus: 'Photosystem II' },
+        subparts: [
+            'PHOTOSYSTEM II (PSII):',
+            '',
+            'Name: P680',
+            '  - Absorbs light at 680 nm wavelength',
+            '  - Called "II" but operates first',
+            '  - Historical naming (discovered second)',
+            '',
+            'Location: Thylakoid membrane',
+            '',
+            'Structure:',
+            '  - Large protein complex',
+            '  - Contains ~20 protein subunits',
+            '  - Two main parts:',
+            '',
+            '  1. Antenna Complex (Light-Harvesting):',
+            '     - 200-300 chlorophyll molecules',
+            '     - Accessory pigments (carotenoids)',
+            '     - Captures light energy',
+            '     - Funnels energy to reaction center',
+            '',
+            '  2. Reaction Center:',
+            '     - Special pair of chlorophyll a (P680)',
+            '     - Primary electron acceptor (pheophytin)',
+            '     - Site of charge separation',
+            '',
+            'LIGHT ABSORPTION PROCESS:',
+            '',
+            'Step 1: Light Capture',
+            '  - Antenna pigments absorb photons',
+            '  - Various wavelengths absorbed',
+            '  - Energy transferred between pigments',
+            '  - Resonance energy transfer (very fast)',
+            '',
+            'Step 2: Energy Funneling',
+            '  - Energy moves to reaction center',
+            '  - Like funnel directing energy',
+            '  - Reaches P680 chlorophyll',
+            '  - Takes femtoseconds (10⁻¹⁵ s)',
+            '',
+            'Step 3: Electron Excitation',
+            '  - P680 absorbs energy',
+            '  - Electron excited to higher orbital',
+            '  - P680 becomes P680*  (excited state)',
+            '  - Very high energy electron',
+            '',
+            'Step 4: Electron Transfer',
+            '  - P680* donates electron to acceptor',
+            '  - Pheophytin accepts electron',
+            '  - P680 becomes P680⁺ (oxidized, electron-deficient)',
+            '  - Strongest biological oxidant known',
+            '',
+            'WATER SPLITTING (PHOTOLYSIS):',
+            '',
+            'The Problem:',
+            '  - P680⁺ missing an electron',
+            '  - Must be replaced',
+            '  - Need electron source',
+            '',
+            'The Solution: Split Water',
+            '  Overall Reaction:',
+            '  2 H₂O → O₂ + 4 H⁺ + 4 e⁻',
+            '',
+            '  Enzyme: Oxygen-Evolving Complex (OEC)',
+            '  - Also called: Water-splitting enzyme',
+            '  - Contains manganese cluster (Mn₄CaO₅)',
+            '  - Most complex enzyme in nature',
+            '',
+            'Mechanism (Kok Cycle):',
+            '',
+            '  - Requires 4 photons (4 turnovers)',
+            '  - Mn cluster cycles through 5 states (S0-S4)',
+            '  - Accumulates oxidizing equivalents',
+            '',
+            '  Step-by-Step:',
+            '  1. S0 state (resting)',
+            '  2. Photon 1 → S1 (one electron removed)',
+            '  3. Photon 2 → S2 (two electrons removed)',
+            '  4. Photon 3 → S3 (three electrons removed)',
+            '  5. Photon 4 → S4 (four electrons removed)',
+            '  6. S4 → S0 + O₂ (releases oxygen, returns to start)',
+            '',
+            'Products of Photolysis:',
+            '',
+            '  1. ELECTRONS (4 e⁻):',
+            '     - Replace electrons lost from P680',
+            '     - One at a time',
+            '     - Keep photosystem functioning',
+            '',
+            '  2. PROTONS (4 H⁺):',
+            '     - Released into thylakoid lumen',
+            '     - Contribute to H⁺ gradient',
+            '     - Used for ATP synthesis',
+            '',
+            '  3. OXYGEN (O₂):',
+            '     - Byproduct (waste)',
+            '     - Released to atmosphere',
+            '     - Source of all atmospheric O₂',
+            '     - Supports aerobic life',
+            '',
+            'Energetics:',
+            '  - Water is very stable molecule',
+            '  - Requires strong oxidant to split',
+            '  - P680⁺ is strong enough',
+            '  - Redox potential: +1.25 V',
+            '  - Only biological system that can do this',
+            '',
+            'Significance:',
+            '',
+            '  1. Electron Source:',
+            '     - Water is abundant',
+            '     - Renewable source',
+            '     - Unlike other photosynthetic bacteria',
+            '',
+            '  2. Oxygen Production:',
+            '     - Changed Earth\'s atmosphere',
+            '     - Enabled aerobic respiration',
+            '     - Supports complex life',
+            '     - Ozone layer formation',
+            '',
+            '  3. Hydrogen Source:',
+            '     - H⁺ contributes to gradient',
+            '     - Powers ATP synthesis',
+            '',
+            'Evolution:',
+            '  - Evolved ~2.4 billion years ago',
+            '  - Great Oxygenation Event',
+            '  - Cyanobacteria developed it first',
+            '  - Transformed Earth',
+            '',
+            'Inhibitors:',
+            '  - DCMU (herbicide)',
+            '  - Atrazine (herbicide)',
+            '  - Block electron flow from PSII',
+            '  - Kill plants',
+            '',
+            'Research Interest:',
+            '  - Artificial photosynthesis',
+            '  - Solar fuel production',
+            '  - Split water with light',
+            '  - Produce hydrogen gas (fuel)',
+            '  - "Holy grail" of renewable energy'
+        ],
+        helper: 'PSII: light excites P680 → electron to acceptor → P680⁺ splits water → O₂ released',
+        solution: 'Photosystem II absorbs light, exciting electrons; P680⁺ oxidizes water, releasing O₂, H⁺, and electrons',
+        realWorldContext: 'Herbicides target PSII - block it, plant can\'t make energy, dies'
+    });
+
+
+    return relatedProblems;
+
+}
+// ============== Now for the solver functions and document generation ==============
+
+// Add after the existing solver functions:
+
+function solveATPProblems() {
+    const problems = generateRelatedATP();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving ATP Problem ${index + 1}: ${problem.scenario}`);
+
+        // Import the energy workbook class
+        const { EnhancedEnergyInLivingSystemsWorkbook } = require('./energyworkbook.js');
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveGlycolysisProblems() {
+    const problems = generateRelatedGlycolysis();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Glycolysis Problem ${index + 1}: ${problem.scenario}`);
+
+        const { EnhancedEnergyInLivingSystemsWorkbook } = require('./energyworkbook.js');
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveKrebsCycleProblems() {
+    const problems = generateRelatedKrebsCycle();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Krebs Cycle Problem ${index + 1}: ${problem.scenario}`);
+
+        const { EnhancedEnergyInLivingSystemsWorkbook } = require('./energyworkbook.js');
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveElectronTransportProblems() {
+    const problems = generateRelatedElectronTransport();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Electron Transport Problem ${index + 1}: ${problem.scenario}`);
+
+        const { EnhancedEnergyInLivingSystemsWorkbook } = require('./energyworkbook.js');
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveFermentationProblems() {
+    const problems = generateRelatedFermentation();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Fermentation Problem ${index + 1}: ${problem.scenario}`);
+
+        const { EnhancedEnergyInLivingSystemsWorkbook } = require('./energyworkbook.js');
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveLightReactionsProblems() {
+    const problems = generateRelatedLightReactions();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Light Reactions Problem ${index + 1}: ${problem.scenario}`);
+
+        const { EnhancedEnergyInLivingSystemsWorkbook } = require('./energyworkbook.js');
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCalvinCycleProblems() {
+    const problems = generateRelatedCalvinCycle();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Calvin Cycle Problem ${index + 1}: ${problem.scenario}`);
+
+        
+
+        const workbook = new EnhancedEnergyInLivingSystemsWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleEnergyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic:null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== UPDATE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+// Replace the existing generateComprehensiveBiologyDocument function with this updated version:
+
+async function generateComprehensiveBiologyDocument() {
+    console.log('Generating Comprehensive Biology Workbook with Cell Biology and Energy Topics...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Biology Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Cell Biology and Energy in Living Systems',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // PART I - CELL BIOLOGY (Problems 1-42)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART I: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 300, after: 200 }
+        })
+    );
+
+    // Part I-A: Cell Structure
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-A: Cell Structure and Types (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellStructureProblems = generateRelatedCellStructure();
+    cellStructureProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-B: Cell Membrane
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-B: Cell Membrane (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const membraneProblems = generateRelatedCellMembrane();
+    membraneProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 6}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-C: Organelles
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-C: Cell Organelles (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const organellesProblems = generateRelatedOrganelles();
+    organellesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 12}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-D: Cell Division
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-D: Cell Division and Cell Cycle (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellDivisionProblems = generateRelatedCellDivision();
+    cellDivisionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 18}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-E: Mitosis and Meiosis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-E: Mitosis and Meiosis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const mitosisProblems = generateRelatedMitosisMeiosis();
+    mitosisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 23}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-F: Cell Transport
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-F: Cell Transport Mechanisms (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const transportProblems = generateRelatedCellTransport();
+    transportProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 28}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-G: Cellular Respiration
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-G: Cellular Respiration (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const respirationProblems = generateRelatedCellularRespiration();
+    respirationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 33}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part I-H: Photosynthesis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-H: Photosynthesis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const photosynthesisProblems = generateRelatedPhotosynthesis();
+    photosynthesisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 38}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // PART II - ENERGY IN LIVING SYSTEMS (Problems 43-69+)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART II: ENERGY IN LIVING SYSTEMS',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 300, after: 200 }
+        })
+    );
+
+    // Part II-A: ATP
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-A: ATP - The Universal Energy Currency (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const atpProblems = generateRelatedATP();
+    atpProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 43}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II-B: Glycolysis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-B: Glycolysis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const glycolysisProblems = generateRelatedGlycolysis();
+    glycolysisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 48}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II-C: Krebs Cycle
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-C: Krebs Cycle (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const krebsProblems = generateRelatedKrebsCycle();
+    krebsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 53}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II-D: Electron Transport Chain
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-D: Electron Transport Chain (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const etcProblems = generateRelatedElectronTransport();
+    etcProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 58}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II-E: Fermentation
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-E: Fermentation (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const fermentationProblems = generateRelatedFermentation();
+    fermentationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 63}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II-F: Light Reactions
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-F: Light Reactions of Photosynthesis (2+ Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const lightReactionsProblems = generateRelatedLightReactions();
+    lightReactionsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 68}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II-G: Calvin Cycle (will be added when complete)
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-G: Calvin Cycle (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    // Note: generateRelatedCalvinCycle() needs to be completed
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '[Calvin Cycle problems to be added]',
+            spacing: { after: 100 },
+            indent: { left: 360 },
+            italics: true
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: CELL BIOLOGY PROBLEMS ==============
+    console.log('\nProcessing Part I: Cell Biology Problems...');
+
+    // Part I-A: Cell Structure
+    console.log('\nProcessing Part I-A: Cell Structure...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART I: CELL BIOLOGY',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 },
+            pageBreakBefore: true
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I-A: Cell Structure and Types',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 }
+        })
+    );
+
+    const cellStructureSolved = solveCellStructureProblems();
+    cellStructureSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Structure Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part I-B through I-H (existing cell biology sections)
+    // [Keep all existing cell biology problem processing code here - same as before]
+
+    // ============== PART II: ENERGY IN LIVING SYSTEMS ==============
+    console.log('\nProcessing Part II: Energy in Living Systems...');
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'PART II: ENERGY IN LIVING SYSTEMS',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    // Part II-A: ATP
+    console.log('\nProcessing Part II-A: ATP...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-A: ATP - The Universal Energy Currency',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 }
+        })
+    );
+
+    const atpSolved = solveATPProblems();
+    atpSolved.forEach((solved, index) => {
+        console.log(`  Adding ATP Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 43}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part II-B: Glycolysis
+    console.log('\nProcessing Part II-B: Glycolysis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-B: Glycolysis',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const glycolysisSolved = solveGlycolysisProblems();
+    glycolysisSolved.forEach((solved, index) => {
+        console.log(`  Adding Glycolysis Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 48}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part II-C: Krebs Cycle
+    console.log('\nProcessing Part II-C: Krebs Cycle...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-C: Krebs Cycle',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const krebsSolved = solveKrebsCycleProblems();
+    krebsSolved.forEach((solved, index) => {
+        console.log(`  Adding Krebs Cycle Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 53}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part II-D: Electron Transport Chain
+    console.log('\nProcessing Part II-D: Electron Transport Chain...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-D: Electron Transport Chain',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const etcSolved = solveElectronTransportProblems();
+    etcSolved.forEach((solved, index) => {
+        console.log(`  Adding Electron Transport Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 58}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part II-E: Fermentation
+    console.log('\nProcessing Part II-E: Fermentation...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-E: Fermentation',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const fermentationSolved = solveFermentationProblems();
+    fermentationSolved.forEach((solved, index) => {
+        console.log(`  Adding Fermentation Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 63}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part II-F: Light Reactions
+    console.log('\nProcessing Part II-F: Light Reactions...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-F: Light Reactions of Photosynthesis',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const lightReactionsSolved = solveLightReactionsProblems();
+    lightReactionsSolved.forEach((solved, index) => {
+        console.log(`  Adding Light Reactions Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 68}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // Part II-G: Calvin Cycle (when complete)
+    console.log('\nProcessing Part II-G: Calvin Cycle...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II-G: Calvin Cycle',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const calvinCycleSolved = solveCalvinCycleProblems();
+    calvinCycleSolved.forEach((solved, index) => {
+        console.log(`  Adding Calvin Cycle Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 70}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_3,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_biology_workbook_complete.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE BIOLOGY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 70+');
+        console.log('');
+        console.log('  PART I: CELL BIOLOGY (42 problems)');
+        console.log('    - Cell Structure: 5 problems');
+        console.log('    - Cell Membrane: 6 problems');
+        console.log('    - Cell Organelles: 6 problems');
+        console.log('    - Cell Division: 5 problems');
+        console.log('    - Mitosis and Meiosis: 5 problems');
+        console.log('    - Cell Transport: 5 problems');
+        console.log('    - Cellular Respiration: 5 problems');
+        console.log('    - Photosynthesis: 5 problems');
+        console.log('');
+        console.log('  PART II: ENERGY IN LIVING SYSTEMS (28+ problems)');
+        console.log('    - ATP: 5 problems');
+        console.log('    - Glycolysis: 5 problems');
+        console.log('    - Krebs Cycle: 5 problems');
+        console.log('    - Electron Transport Chain: 5 problems');
+        console.log('    - Fermentation: 5 problems');
+        console.log('    - Light Reactions: 2+ problems');
+        console.log('    - Calvin Cycle: 5 problems');
+        console.log('\n📄 EXPECTED PAGES: 250+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step explanation');
+        console.log('  • Detailed biological content');
+        console.log('  • Key concepts and definitions');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common misconceptions addressed');
+        console.log('  • Pedagogical notes for teaching');
+        console.log('  • Comparisons and contrasts');
+        console.log('  • Examples from nature');
+        console.log('  • Energy accounting (where applicable)');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveBiologyDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
