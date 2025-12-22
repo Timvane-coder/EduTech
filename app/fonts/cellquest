@@ -1,0 +1,3445 @@
+import { EnhancedCellBiologyWorkbook } from './cellbiologyworkbook.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a biology topic
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content
+        if (section.data && Array.isArray(section.data)) {
+            section.data.forEach(row => {
+                if (Array.isArray(row)) {
+                    // Handle table-like data
+                    if (row.length === 2 && row[0] && row[1]) {
+                        // Check if it's a header or separator
+                        if (row[0] === '' && row[1] === '') {
+                            // Spacing row
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: '',
+                                    spacing: { after: 200 }
+                                })
+                            );
+                        } else if (row[0].toUpperCase() === row[0] && row[1] === '') {
+                            // Section header
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: row[0],
+                                    heading: docx.HeadingLevel.HEADING_3,
+                                    spacing: { before: 200, after: 100 }
+                                })
+                            );
+                        } else if (row[0] === '•') {
+                            // Bullet point
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: row[1],
+                                    bullet: {
+                                        level: 0
+                                    },
+                                    spacing: { after: 50 }
+                                })
+                            );
+                        } else {
+                            // Key-value pair
+                            sections.push(
+                                new docx.Paragraph({
+                                    children: [
+                                        new docx.TextRun({
+                                            text: `${row[0]}: `,
+                                            bold: true
+                                        }),
+                                        new docx.TextRun({
+                                            text: String(row[1])
+                                        })
+                                    ],
+                                    spacing: { after: 100 }
+                                })
+                            );
+                        }
+                    } else if (row.length > 2) {
+                        // Multi-column row (table headers or data)
+                        const isHeader = row.every(cell => 
+                            typeof cell === 'string' && 
+                            (cell.includes('Type') || cell.includes('Name') || cell.includes('Category'))
+                        );
+                        
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: row.join(' | '),
+                                        bold: isHeader
+                                    })
+                                ],
+                                spacing: { after: isHeader ? 150 : 100 }
+                            })
+                        );
+                    }
+                }
+            });
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+// ============== CELL STRUCTURE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCellStructure() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic Cell Types
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Cell Classification',
+        problem: 'Compare prokaryotic and eukaryotic cells, highlighting their key structural differences',
+        parameters: {
+            specificItems: ['Prokaryotic', 'Eukaryotic'],
+            category: 'Basic cell type',
+            limit: 2
+        },
+        type: 'cell_types',
+        context: { difficulty: 'beginner', topic: 'Cell Types', focus: 'basic classification' },
+        subparts: [
+            'Prokaryotic Cells:',
+            '  - No membrane-bound nucleus',
+            '  - DNA in nucleoid region (circular)',
+            '  - No membrane-bound organelles',
+            '  - Size: 1-10 μm',
+            '  - Examples: Bacteria, Archaea',
+            '',
+            'Eukaryotic Cells:',
+            '  - Membrane-bound nucleus present',
+            '  - Linear DNA in chromosomes',
+            '  - Multiple membrane-bound organelles',
+            '  - Size: 10-100 μm',
+            '  - Examples: Animal, Plant, Fungal cells',
+            '',
+            'Key Difference: Presence of nucleus and organelles'
+        ],
+        helper: 'Focus on nucleus presence and complexity',
+        solution: 'Prokaryotes lack nucleus; Eukaryotes have nucleus and organelles',
+        realWorldContext: 'Understanding cell complexity helps classify all life forms'
+    });
+
+    // Problem 2: Animal vs Plant Cells
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Animal vs Plant Cell Comparison',
+        problem: 'Identify the unique structures that distinguish animal cells from plant cells',
+        parameters: {
+            specificItems: ['Animal Cell', 'Plant Cell'],
+            limit: 2
+        },
+        type: 'cell_types',
+        context: { difficulty: 'beginner', topic: 'Cell Types', focus: 'animal vs plant' },
+        subparts: [
+            'Animal Cell Unique Features:',
+            '  - No cell wall (flexible membrane only)',
+            '  - No chloroplasts',
+            '  - Small or no vacuoles',
+            '  - Centrioles present',
+            '  - Irregular or round shape',
+            '',
+            'Plant Cell Unique Features:',
+            '  - Rigid cell wall (cellulose)',
+            '  - Chloroplasts for photosynthesis',
+            '  - Large central vacuole',
+            '  - No centrioles',
+            '  - Fixed rectangular shape',
+            '',
+            'Shared Features: Nucleus, mitochondria, ER, Golgi, ribosomes'
+        ],
+        helper: 'Remember: Plants have walls, chloroplasts, and large vacuoles',
+        solution: 'Plant cells have cell wall, chloroplasts, and large vacuole; Animal cells have centrioles',
+        realWorldContext: 'Different structures support different lifestyles (autotroph vs heterotroph)'
+    });
+
+    // Problem 3: Bacterial Cell Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Bacterial Cell Components',
+        problem: 'Describe the key structures found in a typical bacterial cell',
+        parameters: {
+            specificItems: ['Bacterial Cell'],
+            category: 'Prokaryotic specialized type',
+            limit: 1
+        },
+        type: 'cell_types',
+        context: { difficulty: 'beginner', topic: 'Cell Types', focus: 'bacterial structure' },
+        subparts: [
+            'Bacterial Cell Components:',
+            '  1. Cell Wall: Peptidoglycan (protection)',
+            '  2. Plasma Membrane: Controls entry/exit',
+            '  3. Nucleoid: Circular DNA region',
+            '  4. Ribosomes: 70S (protein synthesis)',
+            '  5. Capsule: Extra protection (some species)',
+            '  6. Flagella: Movement (some species)',
+            '  7. Pili: DNA transfer and attachment',
+            '  8. Plasmids: Small circular DNA',
+            '',
+            'No nucleus or membrane-bound organelles'
+        ],
+        helper: 'Bacteria are simple but highly successful organisms',
+        solution: 'Key structures: cell wall, membrane, nucleoid, ribosomes, and optional capsule/flagella',
+        realWorldContext: 'Understanding bacterial structure aids antibiotic development'
+    });
+
+    // Problem 4: Cell Specialization
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Specialized Cell Types',
+        problem: 'Explain how different cell types are specialized for their specific functions',
+        parameters: {
+            specificItems: ['Animal Cell', 'Plant Cell'],
+            foundIn: 'specialized'
+        },
+        type: 'cell_types',
+        context: { difficulty: 'intermediate', topic: 'Cell Types', focus: 'specialization' },
+        subparts: [
+            'Cell Specialization Examples:',
+            '',
+            'Nerve Cells (Neurons):',
+            '  - Long axons for signal transmission',
+            '  - Many dendrites for connections',
+            '  - Specialized for rapid communication',
+            '',
+            'Red Blood Cells:',
+            '  - No nucleus (more space for hemoglobin)',
+            '  - Biconcave shape (increased surface area)',
+            '  - Specialized for oxygen transport',
+            '',
+            'Leaf Mesophyll Cells:',
+            '  - Many chloroplasts for photosynthesis',
+            '  - Large surface area for gas exchange',
+            '  - Specialized for energy production',
+            '',
+            'Principle: Structure reflects function'
+        ],
+        helper: 'Cell structure always matches its specific job',
+        solution: 'Cells develop specialized structures that optimize their specific functions',
+        realWorldContext: 'Specialization allows complex multicellular organisms to exist'
+    });
+
+    // Problem 5: Cell Size Limitations
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Why Cells Are Small',
+        problem: 'Explain why cells remain small and the importance of surface area to volume ratio',
+        parameters: {
+            category: 'cell properties',
+            limit: 3
+        },
+        type: 'cell_types',
+        context: { difficulty: 'intermediate', topic: 'Cell Types', focus: 'size constraints' },
+        subparts: [
+            'Surface Area to Volume Ratio:',
+            '  - As cells grow, volume increases faster than surface area',
+            '  - Small cells have higher SA:V ratio',
+            '  - Higher ratio = more efficient exchange',
+            '',
+            'Why Small Size Matters:',
+            '  1. Nutrient Intake: Must enter through surface',
+            '  2. Waste Removal: Must exit through surface',
+            '  3. Heat Dissipation: Through surface area',
+            '  4. Communication: Signals must reach entire cell',
+            '',
+            'Solutions to Size Limitations:',
+            '  - Cell division (stay small)',
+            '  - Flattened shapes (increase SA)',
+            '  - Folded membranes (more surface)',
+            '',
+            'Result: Most cells are microscopic (10-100 μm)'
+        ],
+        helper: 'Think of surface area as "cell doors" for materials',
+        solution: 'Cells stay small to maintain efficient SA:V ratio for material exchange',
+        realWorldContext: 'This principle explains why blue whales have trillions of tiny cells'
+    });
+
+    return relatedProblems;
+}
+
+// ============== CELL MEMBRANE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCellMembrane() {
+    const relatedProblems = [];
+
+    // Problem 1: Fluid Mosaic Model
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Fluid Mosaic Model Basics',
+        problem: 'Describe the fluid mosaic model of the cell membrane and its key features',
+        parameters: {
+            specificItems: ['Fluid Mosaic Model'],
+            category: 'membrane model'
+        },
+        subTopic: 'model',
+        type: 'cell_membrane',
+        context: { difficulty: 'beginner', topic: 'Cell Membrane', focus: 'membrane model' },
+        subparts: [
+            'Fluid Mosaic Model (Singer & Nicolson, 1972):',
+            '',
+            'Key Features:',
+            '  1. FLUID: Phospholipids and proteins can move laterally',
+            '  2. MOSAIC: Proteins scattered like tiles in mosaic pattern',
+            '  3. Phospholipid Bilayer: Forms flexible foundation',
+            '  4. Embedded Proteins: Float within or attach to bilayer',
+            '  5. Dynamic Structure: Components constantly moving',
+            '',
+            'Why "Fluid"?',
+            '  - Lipids slide past each other',
+            '  - Proteins drift laterally',
+            '  - Membrane can self-repair',
+            '',
+            'Why "Mosaic"?',
+            '  - Proteins distributed irregularly',
+            '  - Creates patchwork appearance',
+            '  - Different regions have different proteins'
+        ],
+        helper: 'Think of it as a flexible "sea" of lipids with floating protein "islands"',
+        solution: 'Fluid mosaic model: flexible lipid bilayer with embedded mobile proteins',
+        realWorldContext: 'This model explains membrane flexibility and selective permeability'
+    });
+
+    // Problem 2: Phospholipid Bilayer Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Phospholipid Bilayer Organization',
+        problem: 'Explain how phospholipids arrange themselves to form the cell membrane',
+        parameters: {
+            specificItems: ['Phospholipid Bilayer', 'structure'],
+            category: 'membrane structure'
+        },
+        subTopic: 'structure',
+        type: 'cell_membrane',
+        context: { difficulty: 'beginner', topic: 'Cell Membrane', focus: 'bilayer formation' },
+        subparts: [
+            'Phospholipid Structure:',
+            '  - HEAD: Phosphate group (hydrophilic/water-loving)',
+            '  - TAILS: Two fatty acid chains (hydrophobic/water-fearing)',
+            '',
+            'Bilayer Formation:',
+            '  1. In aqueous environment, phospholipids self-assemble',
+            '  2. Hydrophilic heads face outward (toward water)',
+            '  3. Hydrophobic tails face inward (away from water)',
+            '  4. Forms two layers (bilayer)',
+            '',
+            'Properties:',
+            '  - Spontaneous formation (no energy needed)',
+            '  - Stable in water',
+            '  - Acts as barrier to polar molecules',
+            '  - Permeable to small nonpolar molecules',
+            '',
+            'Thickness: ~7-8 nanometers'
+        ],
+        helper: 'Heads love water, tails fear water - they organize accordingly',
+        solution: 'Phospholipids form bilayer with hydrophilic heads out, hydrophobic tails in',
+        realWorldContext: 'This self-assembly property is fundamental to all cellular membranes'
+    });
+
+    // Problem 3: Membrane Proteins
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Membrane Protein Functions',
+        problem: 'Identify the different types of membrane proteins and their functions',
+        parameters: {
+            specificItems: ['Proteins', 'Integral', 'Peripheral'],
+            category: 'membrane proteins'
+        },
+        subTopic: 'components',
+        type: 'cell_membrane',
+        context: { difficulty: 'intermediate', topic: 'Cell Membrane', focus: 'protein types' },
+        subparts: [
+            'Types of Membrane Proteins:',
+            '',
+            '1. INTEGRAL PROTEINS:',
+            '  - Permanently embedded in membrane',
+            '  - Transmembrane proteins span entire membrane',
+            '  - Amphipathic (hydrophobic middle, hydrophilic ends)',
+            '  - Examples: Channels, carriers, receptors',
+            '',
+            '2. PERIPHERAL PROTEINS:',
+            '  - Temporarily attached to surface',
+            '  - Bound to integral proteins or lipid heads',
+            '  - Easily removed without disrupting membrane',
+            '  - Examples: Enzymes, structural proteins',
+            '',
+            'Functions:',
+            '  - Transport: Move substances across membrane',
+            '  - Enzymatic activity: Catalyze reactions',
+            '  - Signal transduction: Receive signals',
+            '  - Cell recognition: Identify cells',
+            '  - Attachment: Connect to cytoskeleton'
+        ],
+        helper: 'Integral = IN membrane; Peripheral = ON membrane surface',
+        solution: 'Integral proteins embedded in membrane; peripheral proteins attached to surface',
+        realWorldContext: 'Membrane proteins perform most membrane functions'
+    });
+
+// Problem 4: Selective Permeability
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Selective Permeability Mechanism',
+        problem: 'Explain how the cell membrane achieves selective permeability',
+        parameters: {
+            specificItems: ['selective permeability', 'transport'],
+            category: 'membrane function'
+        },
+        subTopic: 'function',
+        type: 'cell_membrane',
+        context: { difficulty: 'intermediate', topic: 'Cell Membrane', focus: 'permeability' },
+        subparts: [
+            'Selective Permeability Definition:',
+            '  - Membrane allows some substances through, blocks others',
+            '',
+            'What Can Pass Easily:',
+            '  1. Small nonpolar molecules (O₂, CO₂)',
+            '  2. Small uncharged polar molecules (H₂O, ethanol)',
+            '  - Pass through lipid bilayer directly',
+            '',
+            'What Cannot Pass (needs help):',
+            '  1. Large polar molecules (glucose)',
+            '  2. Ions (Na⁺, K⁺, Cl⁻)',
+            '  3. Charged molecules',
+            '  - Require protein channels or carriers',
+            '',
+            'Factors Determining Permeability:',
+            '  - Size: Smaller passes easier',
+            '  - Polarity: Nonpolar passes easier',
+            '  - Charge: Uncharged passes easier',
+            '',
+            'Importance: Maintains cell homeostasis'
+        ],
+        helper: 'Small and nonpolar pass easily; large and polar need protein help',
+        solution: 'Membrane is selectively permeable based on molecule size, polarity, and charge',
+        realWorldContext: 'Selective permeability allows cells to control internal environment'
+    });
+
+    // Problem 5: Membrane Fluidity
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Factors Affecting Membrane Fluidity',
+        problem: 'Analyze the factors that influence membrane fluidity and why it matters',
+        parameters: {
+            specificItems: ['Cholesterol', 'fluidity', 'temperature'],
+            category: 'membrane properties'
+        },
+        subTopic: 'structure',
+        type: 'cell_membrane',
+        context: { difficulty: 'intermediate', topic: 'Cell Membrane', focus: 'fluidity regulation' },
+        subparts: [
+            'Membrane Fluidity Factors:',
+            '',
+            '1. TEMPERATURE:',
+            '  - Higher temperature → More fluid',
+            '  - Lower temperature → Less fluid/more rigid',
+            '',
+            '2. FATTY ACID SATURATION:',
+            '  - Saturated (no double bonds) → Straight chains → Less fluid',
+            '  - Unsaturated (double bonds) → Kinked chains → More fluid',
+            '  - Kinks prevent tight packing',
+            '',
+            '3. CHOLESTEROL (in animal cells):',
+            '  - At high temp: Restrains movement → Reduces fluidity',
+            '  - At low temp: Prevents tight packing → Maintains fluidity',
+            '  - Acts as "fluidity buffer"',
+            '',
+            'Why Fluidity Matters:',
+            '  - Allows membrane repair',
+            '  - Enables cell growth',
+            '  - Permits endocytosis/exocytosis',
+            '  - Required for protein movement'
+        ],
+        helper: 'Fluidity is like "Goldilocks" - not too rigid, not too fluid',
+        solution: 'Temperature, fatty acid saturation, and cholesterol regulate membrane fluidity',
+        realWorldContext: 'Arctic fish have more unsaturated fats for fluidity in cold water'
+    });
+
+    // Problem 6: Glycocalyx
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Glycocalyx Structure and Function',
+        problem: 'Describe the glycocalyx and its roles in cell recognition and protection',
+        parameters: {
+            specificItems: ['Carbohydrates', 'Glycoproteins', 'Glycolipids'],
+            category: 'membrane components'
+        },
+        subTopic: 'structure',
+        type: 'cell_membrane',
+        context: { difficulty: 'intermediate', topic: 'Cell Membrane', focus: 'carbohydrate layer' },
+        subparts: [
+            'Glycocalyx (Carbohydrate Coat):',
+            '',
+            'Components:',
+            '  1. Glycoproteins: Proteins + carbohydrate chains',
+            '  2. Glycolipids: Lipids + carbohydrate chains',
+            '  - Always on OUTER surface only',
+            '',
+            'Functions:',
+            '  1. CELL RECOGNITION:',
+            '     - Acts as "cellular ID tag"',
+            '     - Immune system identifies self vs foreign',
+            '     - Example: ABO blood types',
+            '',
+            '  2. PROTECTION:',
+            '     - Physical barrier',
+            '     - Protects from mechanical/chemical damage',
+            '',
+            '  3. CELL ADHESION:',
+            '     - Helps cells stick together',
+            '     - Forms tissues',
+            '',
+            '  4. SIGNALING:',
+            '     - Receptors for hormones',
+            '     - Cell communication'
+        ],
+        helper: 'Glycocalyx is the "sugar coat" that identifies and protects cells',
+        solution: 'Glycocalyx (glycoproteins + glycolipids) provides recognition and protection',
+        realWorldContext: 'Blood type incompatibility reactions involve glycocalyx recognition'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ORGANELLES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedOrganelles() {
+    const relatedProblems = [];
+
+    // Problem 1: Energy-Producing Organelles
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Energy Production Organelles',
+        problem: 'Compare mitochondria and chloroplasts as energy-converting organelles',
+        parameters: {
+            specificItems: ['Mitochondria', 'Chloroplast'],
+            category: 'energy',
+            limit: 2
+        },
+        type: 'organelles',
+        context: { difficulty: 'beginner', topic: 'Cell Organelles', focus: 'energy production' },
+        subparts: [
+            'MITOCHONDRIA (All eukaryotes):',
+            '  - Function: Cellular respiration → ATP production',
+            '  - Equation: Glucose + O₂ → CO₂ + H₂O + ATP',
+            '  - Structure: Double membrane, cristae (folds)',
+            '  - Found in: All eukaryotic cells',
+            '  - Produces: ~38 ATP per glucose',
+            '',
+            'CHLOROPLASTS (Plants/algae only):',
+            '  - Function: Photosynthesis → Glucose production',
+            '  - Equation: CO₂ + H₂O + Light → Glucose + O₂',
+            '  - Structure: Double membrane, thylakoids in stacks (grana)',
+            '  - Found in: Plant cells and some protists',
+            '  - Produces: Glucose (stored energy)',
+            '',
+            'Both have:',
+            '  - Double membranes',
+            '  - Own DNA (circular)',
+            '  - Own ribosomes (70S)',
+            '  - Evidence for endosymbiotic theory'
+        ],
+        helper: 'Mitochondria break down food; Chloroplasts make food',
+        solution: 'Mitochondria (respiration/ATP) in all cells; Chloroplasts (photosynthesis/glucose) in plants',
+        realWorldContext: 'These organelles are why animals eat and plants don\'t need to'
+    });
+
+    // Problem 2: Nucleus - Control Center
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Nucleus Structure and Function',
+        problem: 'Describe the structure of the nucleus and explain how it controls cell activities',
+        parameters: {
+            specificItems: ['Nucleus'],
+            category: 'genetic',
+            limit: 1
+        },
+        type: 'organelles',
+        context: { difficulty: 'beginner', topic: 'Cell Organelles', focus: 'nucleus' },
+        subparts: [
+            'Nucleus Structure:',
+            '  1. Nuclear Envelope: Double membrane with pores',
+            '     - Controls what enters/exits nucleus',
+            '     - Pores allow mRNA to exit, proteins to enter',
+            '',
+            '  2. Chromatin: DNA + protein complex',
+            '     - Relaxed form during interphase',
+            '     - Condenses into chromosomes during division',
+            '',
+            '  3. Nucleolus: Dense region inside nucleus',
+            '     - Produces ribosomal RNA (rRNA)',
+            '     - Assembles ribosome subunits',
+            '',
+            '  4. Nucleoplasm: Gel-like fluid inside',
+            '',
+            'Functions:',
+            '  - Stores genetic information (DNA)',
+            '  - Controls gene expression (which proteins made)',
+            '  - Site of DNA replication',
+            '  - Site of transcription (DNA → RNA)',
+            '',
+            'Analogy: Nucleus is like the "brain" or "control center" of cell'
+        ],
+        helper: 'Nucleus = genetic control center with DNA instructions',
+        solution: 'Nucleus contains DNA, controls cell activities through gene expression',
+        realWorldContext: 'Nucleus allows cells to respond to environment by making needed proteins'
+    });
+
+    // Problem 3: Endomembrane System
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Endomembrane System Pathway',
+        problem: 'Trace the path of a protein through the endomembrane system from synthesis to secretion',
+        parameters: {
+            specificItems: ['Endoplasmic Reticulum', 'Golgi Apparatus', 'Vesicle'],
+            category: 'synthesis',
+            limit: 4
+        },
+        type: 'organelles',
+        context: { difficulty: 'intermediate', topic: 'Cell Organelles', focus: 'protein processing' },
+        subparts: [
+            'Protein Journey Through Endomembrane System:',
+            '',
+            '1. SYNTHESIS (Rough ER):',
+            '   - Ribosome on rough ER makes protein',
+            '   - Protein enters ER lumen',
+            '   - Initial folding occurs',
+            '   - Some modifications (add sugars)',
+            '',
+            '2. TRANSPORT TO GOLGI:',
+            '   - Protein packaged in transport vesicle',
+            '   - Vesicle buds from ER',
+            '   - Vesicle travels to Golgi apparatus',
+            '   - Fuses with Golgi (cis face)',
+            '',
+            '3. PROCESSING (Golgi):',
+            '   - Protein modified (add/remove groups)',
+            '   - Further glycosylation (add sugars)',
+            '   - Sorted and tagged for destination',
+            '   - Moves from cis → medial → trans face',
+            '',
+            '4. SHIPPING (Trans Golgi):',
+            '   - Packaged in secretory vesicle',
+            '   - Vesicle travels to plasma membrane',
+            '   - Fuses with membrane (exocytosis)',
+            '   - Protein released outside cell'
+        ],
+        helper: 'ER makes it, Golgi modifies it, vesicles ship it',
+        solution: 'Protein path: Rough ER → Transport vesicle → Golgi → Secretory vesicle → Outside cell',
+        realWorldContext: 'This pathway produces hormones, antibodies, and digestive enzymes'
+    });
+
+    // Problem 4: Lysosomes - Cellular Digestion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Lysosome Function and Importance',
+        problem: 'Explain the role of lysosomes in cellular digestion and why their pH must be acidic',
+        parameters: {
+            specificItems: ['Lysosome'],
+            category: 'breakdown',
+            limit: 1
+        },
+        type: 'organelles',
+        context: { difficulty: 'intermediate', topic: 'Cell Organelles', focus: 'lysosomes' },
+        subparts: [
+            'Lysosome Structure:',
+            '  - Single membrane vesicle',
+            '  - Contains ~40 different hydrolytic enzymes',
+            '  - Internal pH ~5 (acidic)',
+            '  - Found mainly in animal cells',
+            '',
+            'Functions:',
+            '  1. INTRACELLULAR DIGESTION:',
+            '     - Breaks down food particles',
+            '     - Recycles worn-out organelles (autophagy)',
+            '',
+            '  2. DEFENSE:',
+            '     - Destroys bacteria/viruses',
+            '     - White blood cells use lysosomes',
+            '',
+            '  3. PROGRAMMED CELL DEATH:',
+            '     - Controlled cell destruction (apoptosis)',
+            '     - Tadpole tail resorption',
+            '',
+            'Why Acidic pH?:',
+            '  - Enzymes work best at pH 5',
+            '  - If lysosome ruptures, enzymes inactive at cytoplasm pH 7',
+            '  - Safety mechanism prevents cell damage',
+            '',
+            'Disease: Tay-Sachs (lysosome enzyme deficiency)'
+        ],
+        helper: 'Lysosomes are the "recycling center" and "garbage disposal"',
+        solution: 'Lysosomes digest materials using acidic hydrolytic enzymes; pH 5 is optimal and safe',
+        realWorldContext: 'Lysosomal storage diseases occur when digestive enzymes are defective'
+    });
+
+    // Problem 5: Cytoskeleton - Cell Support
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Cytoskeleton Components and Functions',
+        problem: 'Describe the three types of cytoskeleton fibers and their specific roles',
+        parameters: {
+            specificItems: ['Cytoskeleton'],
+            category: 'structural',
+            limit: 1
+        },
+        type: 'organelles',
+        context: { difficulty: 'intermediate', topic: 'Cell Organelles', focus: 'cytoskeleton' },
+        subparts: [
+            'Three Types of Cytoskeleton Fibers:',
+            '',
+            '1. MICROFILAMENTS (Actin):',
+            '   - Diameter: 7 nm (thinnest)',
+            '   - Protein: Actin',
+            '   - Functions:',
+            '     • Cell shape and support',
+            '     • Muscle contraction (with myosin)',
+            '     • Cell movement (amoeboid)',
+            '     • Cytokinesis (cleavage furrow)',
+            '',
+            '2. INTERMEDIATE FILAMENTS:',
+            '   - Diameter: 8-10 nm (middle)',
+            '   - Proteins: Various (keratin, vimentin)',
+            '   - Functions:',
+            '     • Mechanical strength',
+            '     • Resist tension',
+            '     • Anchor nucleus',
+            '     • Most stable/permanent',
+            '3. MICROTUBULES (Tubulin):',
+            '   - Diameter: 25 nm (thickest)',
+            '   - Protein: α and β tubulin',
+            '   - Functions:',
+            '     • Cell shape maintenance',
+            '     • Chromosome movement (spindle fibers)',
+            '     • Organelle transport (motor proteins)',
+            '     • Cilia and flagella structure',
+            '     • Most dynamic (assemble/disassemble)',
+            '',
+            'Overall Functions:',
+            '  - Structural support ("cell skeleton")',
+            '  - Cell movement',
+            '  - Intracellular transport',
+            '  - Cell division'
+        ],
+        helper: 'Think: Micro (smallest/movement), Intermediate (middle/strength), Micro-tubules (largest/transport)',
+        solution: 'Microfilaments (actin, movement), Intermediate (strength), Microtubules (tubulin, transport/division)',
+        realWorldContext: 'Cytoskeleton gives cells shape and allows movement like muscle contraction'
+    });
+
+    // Problem 6: Peroxisomes
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Peroxisome Function',
+        problem: 'Explain the role of peroxisomes in cellular detoxification and lipid metabolism',
+        parameters: {
+            specificItems: ['Peroxisome'],
+            category: 'breakdown',
+            limit: 1
+        },
+        type: 'organelles',
+        context: { difficulty: 'intermediate', topic: 'Cell Organelles', focus: 'peroxisomes' },
+        subparts: [
+            'Peroxisome Structure:',
+            '  - Single membrane organelle',
+            '  - Contains oxidative enzymes',
+            '  - Self-replicating',
+            '',
+            'Functions:',
+            '  1. LIPID METABOLISM:',
+            '     - Beta-oxidation of fatty acids',
+            '     - Breaks down long fatty acid chains',
+            '     - Common in liver and kidney cells',
+            '',
+            '  2. DETOXIFICATION:',
+            '     - Breaks down toxic substances',
+            '     - Alcohol metabolism in liver',
+            '     - Converts toxins to safer forms',
+            '',
+            '  3. H₂O₂ BREAKDOWN:',
+            '     - Produces H₂O₂ during oxidation',
+            '     - Contains catalase enzyme',
+            '     - 2 H₂O₂ → 2 H₂O + O₂',
+            '     - Prevents oxidative damage',
+            '',
+            'Importance:',
+            '  - Protects cell from reactive oxygen species',
+            '  - Essential for lipid breakdown',
+            '  - Abundant in metabolically active cells'
+        ],
+        helper: 'Peroxisomes handle dangerous chemistry: break down fats and detoxify poisons',
+        solution: 'Peroxisomes oxidize fatty acids, detoxify substances, and break down H₂O₂ with catalase',
+        realWorldContext: 'Liver peroxisomes detoxify alcohol; defects cause serious metabolic diseases'
+    });
+
+    return relatedProblems;
+}
+
+// ============== CELL DIVISION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCellDivision() {
+    const relatedProblems = [];
+
+    // Problem 1: Cell Cycle Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Cell Cycle Stages',
+        problem: 'Describe the stages of the cell cycle and the events that occur in each phase',
+        parameters: {
+            specificItems: ['Cell Cycle'],
+            category: 'Cell Regulation',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'beginner', topic: 'Cell Division', focus: 'cell cycle' },
+        subparts: [
+            'Cell Cycle Stages:',
+            '',
+            'INTERPHASE (90% of cycle):',
+            '  1. G1 Phase (Gap 1):',
+            '     - Cell growth',
+            '     - Normal metabolism',
+            '     - Organelle production',
+            '     - G1 checkpoint: Check size, nutrients, DNA damage',
+            '',
+            '  2. S Phase (Synthesis):',
+            '     - DNA replication',
+            '     - Chromosomes duplicated',
+            '     - Each chromosome → 2 sister chromatids',
+            '     - Histone synthesis',
+            '',
+            '  3. G2 Phase (Gap 2):',
+            '     - Continued growth',
+            '     - Protein synthesis for division',
+            '     - G2 checkpoint: Check DNA replication complete',
+            '',
+            'M PHASE (Mitotic Phase):',
+            '  - Mitosis: Nuclear division',
+            '  - Cytokinesis: Cytoplasm division',
+            '  - M checkpoint: Check chromosome attachment',
+            '',
+            'G0 Phase (Optional):',
+            '  - Non-dividing state',
+            '  - Specialized cells (neurons, muscle)',
+            '  - Can re-enter cycle if needed'
+        ],
+        helper: 'Remember: G1 (grow), S (synthesize DNA), G2 (grow more), M (mitosis)',
+        solution: 'Interphase (G1-S-G2: growth and DNA replication) + M phase (mitosis and cytokinesis)',
+        realWorldContext: 'Cell cycle control prevents cancer; checkpoints stop damaged cells from dividing'
+    });
+
+    // Problem 2: Binary Fission
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Prokaryotic Cell Division',
+        problem: 'Explain how prokaryotic cells divide through binary fission',
+        parameters: {
+            specificItems: ['Binary Fission'],
+            category: 'Prokaryotic Cell Division',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'beginner', topic: 'Cell Division', focus: 'binary fission' },
+        subparts: [
+            'Binary Fission Process:',
+            '',
+            '1. DNA REPLICATION:',
+            '   - Circular DNA replicates',
+            '   - Starts at origin of replication',
+            '   - Produces two identical circular chromosomes',
+            '   - Each attached to cell membrane',
+            '',
+            '2. CELL ELONGATION:',
+            '   - Cell grows and elongates',
+            '   - DNA copies move to opposite poles',
+            '   - Membrane growth separates DNA',
+            '',
+            '3. SEPTUM FORMATION:',
+            '   - New cell wall/membrane forms at midpoint',
+            '   - Septum grows inward',
+            '   - FtsZ protein forms Z-ring',
+            '',
+            '4. CELL SEPARATION:',
+            '   - Septum completes',
+            '   - Two identical daughter cells',
+            '   - Each has complete chromosome',
+            '',
+            'Speed: E. coli can divide every 20 minutes!',
+            '',
+            'Result: Two genetically identical cells'
+        ],
+        helper: 'Binary fission = simple splitting in two (faster than mitosis)',
+        solution: 'Binary fission: DNA replicates → cell elongates → septum forms → two identical cells',
+        realWorldContext: 'Rapid bacterial reproduction explains how infections spread quickly'
+    });
+
+    // Problem 3: Cell Cycle Regulation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Cell Cycle Checkpoints',
+        problem: 'Explain the role of cell cycle checkpoints and what happens when they fail',
+        parameters: {
+            specificItems: ['Cell Cycle'],
+            category: 'regulation',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'intermediate', topic: 'Cell Division', focus: 'regulation' },
+        subparts: [
+            'Cell Cycle Checkpoints:',
+            '',
+            '1. G1 CHECKPOINT (Restriction Point):',
+            '   Checks:',
+            '   - Cell size adequate?',
+            '   - Nutrients available?',
+            '   - DNA damaged?',
+            '   - Growth signals present?',
+            '   Decision: Proceed to S phase or enter G0',
+            '',
+            '2. G2 CHECKPOINT:',
+            '   Checks:',
+            '   - DNA fully replicated?',
+            '   - DNA damaged?',
+            '   - Cell large enough?',
+            '   Decision: Proceed to mitosis or repair',
+            '',
+            '3. M CHECKPOINT (Spindle Checkpoint):',
+            '   Checks:',
+            '   - All chromosomes attached to spindle?',
+            '   - Chromosomes aligned properly?',
+            '   Decision: Proceed to anaphase or wait',
+            '',
+            'Regulation by:',
+            '  - Cyclins (protein levels fluctuate)',
+            '  - CDKs (cyclin-dependent kinases)',
+            '  - p53 (tumor suppressor "guardian of genome")',
+            '',
+            'When Checkpoints Fail:',
+            '  - Damaged DNA passes through',
+            '  - Mutations accumulate',
+            '  - Uncontrolled division',
+            '  - Result: CANCER'
+        ],
+        helper: 'Checkpoints are "quality control" - stop damaged cells from dividing',
+        solution: 'Checkpoints (G1, G2, M) ensure proper conditions before division; failure causes cancer',
+        realWorldContext: 'Many cancer treatments target checkpoint proteins to stop tumor growth'
+    });
+
+    // Problem 4: Cytokinesis Differences
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Cytokinesis in Animal vs Plant Cells',
+        problem: 'Compare and contrast cytokinesis in animal cells versus plant cells',
+        parameters: {
+            specificItems: ['Cytokinesis'],
+            category: 'cell division',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'intermediate', topic: 'Cell Division', focus: 'cytokinesis' },
+        subparts: [
+            'Cytokinesis = Division of cytoplasm after mitosis',
+            '',
+            'ANIMAL CELL CYTOKINESIS:',
+            '  Mechanism: Cleavage furrow',
+            '  Process:',
+            '   1. Contractile ring forms at cell equator',
+            '   2. Ring made of actin and myosin',
+            '   3. Ring contracts (pinches inward)',
+            '   4. Membrane pinches off completely',
+            '   5. Two separate cells',
+            '  Result: Cells pinch apart',
+            '',
+            'PLANT CELL CYTOKINESIS:',
+            '  Mechanism: Cell plate formation',
+            '  Process:',
+            '   1. Vesicles from Golgi gather at center',
+            '   2. Vesicles fuse to form cell plate',
+            '   3. Cell plate grows outward',
+            '   4. Reaches existing cell wall',
+            '   5. New cell wall forms',
+            '  Result: New wall divides cell',
+            '',
+            'Why Different?',
+            '  - Plant cells have rigid cell wall',
+            '  - Cannot pinch in like animal cells',
+            '  - Must build new wall from inside out'
+        ],
+        helper: 'Animals pinch (cleavage furrow); Plants build wall (cell plate)',
+        solution: 'Animal: cleavage furrow pinches cell; Plant: cell plate builds new wall from center',
+        realWorldContext: 'Cell wall presence dictates division mechanism in plants'
+    });
+
+    // Problem 5: Apoptosis
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Programmed Cell Death',
+        problem: 'Explain apoptosis and why programmed cell death is essential for multicellular organisms',
+        parameters: {
+            specificItems: ['Apoptosis'],
+            category: 'Cell Death',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'intermediate', topic: 'Cell Division', focus: 'apoptosis' },
+        subparts: [
+            'Apoptosis = Programmed Cell Death (controlled suicide)',
+            '',
+            'Process:',
+            '  1. SIGNAL RECEPTION:',
+            '     - Death signal received (internal or external)',
+            '     - Examples: DNA damage, developmental cue',
+            '',
+            '  2. CASPASE ACTIVATION:',
+            '     - Caspase enzymes activated (cascade)',
+            '     - "Executioner" proteins',
+            '',
+            '  3. CELL BREAKDOWN:',
+            '     - DNA fragmented',
+            '     - Organelles broken down',
+            '     - Cell shrinks',
+            '     - Membrane blebs form',
+            '',
+            '  4. PHAGOCYTOSIS:',
+            '     - Apoptotic bodies formed',
+            '     - Phagocytes engulf debris',
+            '     - No inflammation',
+            '',
+            'Purposes of Apoptosis:',
+            '  1. DEVELOPMENT:',
+            '     - Removes webbing between fingers/toes',
+            '     - Tadpole tail resorption',
+            '     - Sculpts tissues and organs',
+            '',
+            '  2. MAINTENANCE:',
+            '     - Removes damaged cells',
+            '     - Eliminates infected cells',
+            '     - Controls cell number',
+            '',
+            '  3. IMMUNE SYSTEM:',
+            '     - Removes self-reactive lymphocytes',
+            '     - Prevents autoimmune disease',
+            '',
+            'Apoptosis vs Necrosis:',
+            '  Apoptosis: Controlled, no inflammation, neat',
+            '  Necrosis: Uncontrolled, inflammation, messy'
+        ],
+        helper: 'Apoptosis = controlled cell suicide (good); Necrosis = accidental death (bad)',
+        solution: 'Apoptosis is controlled cell death essential for development, maintenance, and immunity',
+        realWorldContext: 'Cancer cells evade apoptosis; many cancer drugs try to trigger it'
+    });
+
+    return relatedProblems;
+}
+
+
+// ============== MITOSIS AND MEIOSIS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedMitosisMeiosis() {
+    const relatedProblems = [];
+
+    // Problem 1: Mitosis Stages
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Mitosis Phase Identification',
+        problem: 'Describe the events that occur in each phase of mitosis (PMAT)',
+        parameters: {
+            specificItems: ['Mitosis'],
+            category: 'Cell Division',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'beginner', topic: 'Mitosis', focus: 'phases' },
+        subparts: [
+            'MITOSIS - Nuclear Division (PMAT):',
+            '',
+            '1. PROPHASE:',
+            '   - Chromatin condenses into visible chromosomes',
+            '   - Each chromosome = 2 sister chromatids (joined at centromere)',
+            '   - Centrioles move to opposite poles',
+            '   - Spindle fibers begin forming',
+            '   - Nuclear envelope breaks down',
+            '   - Nucleolus disappears',
+            '',
+            '2. METAPHASE:',
+            '   - Chromosomes align at cell equator (metaphase plate)',
+            '   - Spindle fibers attach to centromeres (kinetochores)',
+            '   - Cell checkpoint: All attached?',
+            '   - Easiest phase to identify (chromosomes in line)',
+            '',
+            '3. ANAPHASE:',
+            '   - Sister chromatids separate',
+            '   - Chromatids pulled to opposite poles',
+            '   - Cell elongates',
+            '   - Centromeres lead, arms trail',
+            '   - Shortest phase',
+            '',
+            '4. TELOPHASE:',
+            '   - Chromosomes decondense (back to chromatin)',
+            '   - Nuclear envelopes reform around each set',
+            '   - Spindle fibers disappear',
+            '   - Cleavage furrow begins (cytokinesis)',
+            '',
+            'Result: 2 identical diploid nuclei'
+        ],
+        helper: 'Remember PMAT: Prophase, Metaphase, Anaphase, Telophase',
+        solution: 'Prophase (condense), Metaphase (align), Anaphase (separate), Telophase (reform nuclei)',
+        realWorldContext: 'Mitosis produces identical cells for growth and repair'
+    });
+
+    // Problem 2: Meiosis I vs Meiosis II
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Meiosis Division Stages',
+        problem: 'Compare the events of Meiosis I and Meiosis II, highlighting key differences',
+        parameters: {
+            specificItems: ['Meiosis'],
+            category: 'Cell Division',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'intermediate', topic: 'Meiosis', focus: 'two divisions' },
+        subparts: [
+            'MEIOSIS I (Reductional Division):',
+            '  Purpose: Separate homologous pairs',
+            '',
+            '  Prophase I (LONGEST phase):',
+            '   - Synapsis: Homologous chromosomes pair up',
+            '   - Crossing over occurs (genetic recombination)',
+            '   - Tetrads form (4 chromatids together)',
+            '',
+            '  Metaphase I:',
+            '   - Homologous pairs align at equator',
+            '   - Random orientation (independent assortment)',
+            '',
+            '  Anaphase I:',
+            '   - Homologous chromosomes separate',
+            '   - Sister chromatids STAY together',
+            '',
+            '  Telophase I/Cytokinesis I:',
+            '   - Two haploid cells (n)',
+            '   - Each has duplicated chromosomes',
+            '',
+            'MEIOSIS II (Equational Division):',
+            '  Purpose: Separate sister chromatids',
+            '  (Similar to mitosis but haploid cells)',
+            '',
+            '  Prophase II:',
+            '   - Chromosomes condense',
+            '   - New spindle forms',
+            '',
+            '  Metaphase II:',
+            '   - Chromosomes align at equator',
+            '',
+            '  Anaphase II:',
+            '   - Sister chromatids separate',
+            '',
+            '  Telophase II/Cytokinesis II:',
+            '   - Four haploid cells (n)',
+            '   - Each genetically unique',
+            '',
+            'Key Difference:',
+            '  Meiosis I: Homologs separate (2n → n)',
+            '  Meiosis II: Chromatids separate (like mitosis)'
+        ],
+        helper: 'Meiosis I separates pairs; Meiosis II separates sisters (like mitosis)',
+        solution: 'Meiosis I: homologs separate (reductional); Meiosis II: chromatids separate (equational)',
+        realWorldContext: 'Two divisions produce four unique gametes for sexual reproduction'
+    });
+
+    // Problem 3: Mitosis vs Meiosis
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Mitosis vs Meiosis Comparison',
+        problem: 'Create a comprehensive comparison of mitosis and meiosis',
+        parameters: {
+            specificItems: ['Mitosis', 'Meiosis'],
+            category: 'Cell Division',
+            limit: 2
+        },
+        type: 'cell_division',
+        context: { difficulty: 'intermediate', topic: 'Cell Division', focus: 'comparison' },
+        subparts: [
+            'MITOSIS vs MEIOSIS Comparison:',
+            '',
+            'PURPOSE:',
+            '  Mitosis: Growth, repair, asexual reproduction',
+            '  Meiosis: Sexual reproduction (gamete formation)',
+            '',
+            'LOCATION:',
+            '  Mitosis: Somatic (body) cells',
+            '  Meiosis: Germ cells (testes/ovaries)',
+            '',
+            'DIVISIONS:',
+            '  Mitosis: One division',
+            '  Meiosis: Two divisions (I and II)',
+            '',
+            'DAUGHTER CELLS:',
+            '  Mitosis: 2 cells',
+            '  Meiosis: 4 cells',
+            '',
+            'GENETICS:',
+            '  Mitosis: Genetically identical (clones)',
+            '  Meiosis: Genetically different (variation)',
+            '',
+            'CHROMOSOME NUMBER:',
+            '  Mitosis: Diploid → Diploid (2n → 2n)',
+            '  Meiosis: Diploid → Haploid (2n → n)',
+            '',
+            'HOMOLOGOUS PAIRING:',
+            '  Mitosis: No pairing',
+            '  Meiosis: Synapsis in Prophase I',
+            '',
+            'CROSSING OVER:',
+            '  Mitosis: No crossing over',
+            '  Meiosis: Yes, in Prophase I',
+            '',
+            'OUTCOME:',
+            '  Mitosis: Identical body cells',
+            '  Meiosis: Unique sex cells (sperm/egg)'
+        ],
+        helper: 'Mitosis = same (2 identical); Meiosis = different (4 unique)',
+        solution: 'Mitosis: 1 division → 2 identical diploid cells; Meiosis: 2 divisions → 4 unique haploid gametes',
+        realWorldContext: 'Mitosis maintains; Meiosis creates diversity for evolution'
+    });
+
+    // Problem 4: Genetic Variation in Meiosis
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Sources of Genetic Variation',
+        problem: 'Explain how meiosis generates genetic variation through crossing over and independent assortment',
+        parameters: {
+            specificItems: ['Meiosis', 'crossing over', 'independent assortment'],
+            category: 'genetic variation',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'intermediate', topic: 'Meiosis', focus: 'genetic diversity' },
+        subparts: [
+            'Genetic Variation Sources in Meiosis:',
+            '',
+            '1. CROSSING OVER (Recombination):',
+            '   When: Prophase I',
+            '   What:',
+            '   - Homologous chromosomes pair (synapsis)',
+            '   - Non-sister chromatids exchange segments',
+            '   - Forms chiasmata (crossover points)',
+            '   Result:',
+            '   - New chromosome combinations',
+            '   - Alleles recombined',
+            '   - Increases variation enormously',
+            '   Example: Your chromosomes mix maternal & paternal DNA',
+            '',
+            '2. INDEPENDENT ASSORTMENT:',
+            '   When: Metaphase I',
+            '   What:',
+            '   - Homologous pairs align randomly',
+            '   - Each pair orients independently',
+            '   - Maternal or paternal can face either pole',
+            '   Result:',
+            '   - 2ⁿ possible combinations (n = haploid number)',
+            '   - Humans: 2²³ = 8,388,608 combinations',
+            '   Example: Random mix of mom\'s and dad\'s chromosomes',
+            '',
+            '3. RANDOM FERTILIZATION:',
+            '   When: Conception',
+            '   What:',
+            '   - Any sperm can fertilize any egg',
+            '   - Each already unique from meiosis',
+            '   Result:',
+            '   - (2²³)² = ~70 trillion combinations!',
+            '',
+            'Why Variation Matters:',
+            '  - Evolution through natural selection',
+            '  - Adaptation to changing environments',
+            '  - Survival of species',
+            '  - No two siblings identical (except identical twins)'
+        ],
+        helper: 'Crossing over mixes genes; Independent assortment mixes chromosomes',
+        solution: 'Crossing over (gene swapping) + Independent assortment (chromosome shuffling) = genetic diversity',
+        realWorldContext: 'This is why siblings look different (except identical twins)'
+    });
+
+    // Problem 5: Nondisjunction
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Chromosome Segregation Errors',
+        problem: 'Explain nondisjunction and its consequences for chromosome number in offspring',
+        parameters: {
+            specificItems: ['Meiosis', 'nondisjunction'],
+            category: 'errors',
+            limit: 1
+        },
+        type: 'cellular_processes',
+        context: { difficulty: 'advanced', topic: 'Meiosis', focus: 'errors' },
+        subparts: [
+            'NONDISJUNCTION = Failure of chromosomes to separate properly',
+            '',
+            'Can Occur During:',
+            '  1. Meiosis I: Homologous pairs don\'t separate',
+            '  2. Meiosis II: Sister chromatids don\'t separate',
+            '',
+            'Result:',
+            '  - Some gametes have extra chromosome (n+1)',
+            '  - Some gametes missing chromosome (n-1)',
+            '  - After fertilization: abnormal chromosome number',
+            '',
+            'Aneuploidy Conditions:',
+            '  - Trisomy: 3 copies of chromosome (2n+1)',
+            '  - Monosomy: 1 copy of chromosome (2n-1)',
+            '',
+            'Human Examples:',
+            '',
+            '  Down Syndrome (Trisomy 21):',
+            '   - 3 copies of chromosome 21',
+            '   - Most common viable autosomal trisomy',
+            '   - Causes: developmental delays, characteristic features',
+            '',
+            '  Edwards Syndrome (Trisomy 18):',
+            '   - 3 copies of chromosome 18',
+            '   - Usually lethal in infancy',
+            '',
+            '  Patau Syndrome (Trisomy 13):',
+            '   - 3 copies of chromosome 13',
+            '   - Usually lethal',
+            '',
+            '  Turner Syndrome (Monosomy X):',
+            '   - Only 1 X chromosome (45, X)',
+            '   - Affects females',
+            '   - Short stature, infertility',
+            '',
+            '  Klinefelter Syndrome (XXY):',
+            '   - Extra X chromosome in males (47, XXY)',
+            '   - Tall stature, reduced testosterone',
+            '',
+            'Risk Factors:',
+            '  - Maternal age (especially over 35)',
+            '  - Errors in meiosis more common'
+        ],
+        helper: 'Nondisjunction = chromosomes don\'t separate → wrong number in gametes',
+        solution: 'Nondisjunction causes aneuploidy: trisomy (extra) or monosomy (missing) chromosomes',
+        realWorldContext: 'Down syndrome occurs in ~1/700 births due to nondisjunction'
+    });
+
+    return relatedProblems;
+}
+
+
+// ============== CELL TRANSPORT - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCellTransport() {
+    const relatedProblems = [];
+
+    // Problem 1: Diffusion
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Simple Diffusion Process',
+        problem: 'Explain the process of diffusion and the factors that affect its rate',
+        parameters: {
+            specificItems: ['Diffusion'],
+            category: 'passive',
+            limit: 1
+        },
+        type: 'transport_mechanisms',
+        context: { difficulty: 'beginner', topic: 'Cell Transport', focus: 'diffusion' },
+        subparts: [
+            'DIFFUSION:',
+            '  Definition: Movement of molecules from HIGH to LOW concentration',
+            '  - Down concentration gradient',
+            '  - Until equilibrium reached',
+            '  - NO energy required (passive transport)',
+            '',
+            'Requirements:',
+            '  - Concentration gradient',
+            '  - Small, nonpolar molecules work best',
+            '  - Examples: O₂, CO₂, lipids',
+            '',
+            'Factors Affecting Rate:',
+            '',
+            '  1. CONCENTRATION GRADIENT:',
+            '     - Steeper gradient = Faster rate',
+            '     - More difference = More movement',
+            '',
+            '  2. TEMPERATURE:',
+            '     - Higher temp = Faster rate',
+            '     - More kinetic energy = More collisions',
+            '',
+            '  3. MOLECULE SIZE:',
+            '     - Smaller molecules = Faster rate',
+            '     - Less mass = Move easier',
+            '',
+            '  4. DISTANCE:',
+            '     - Shorter distance = Faster rate',
+            '     - Less space to cover',
+            '',
+            '  5. SURFACE AREA:',
+            '     - Larger area = More diffusion',
+            '     - More "doors" for molecules',
+            '',
+            'At Equilibrium:',
+            '  - Molecules still move',
+            '  - But no NET movement',
+            '  - Equal concentration everywhere'
+        ],
+        helper: 'Diffusion = molecules spread out until evenly distributed (like perfume in room)',
+        solution: 'Diffusion is passive movement down concentration gradient; rate depends on gradient, temperature, size, distance',
+        realWorldContext: 'Lungs use diffusion to exchange O₂ and CO₂ between air and blood'
+    });
+
+    // Problem 2: Osmosis
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Osmosis and Tonicity',
+        problem: 'Explain osmosis and predict cell behavior in hypotonic, isotonic, and hypertonic solutions',
+        parameters: {
+            specificItems: ['Osmosis'],
+            category: 'passive',
+            limit: 1
+        },
+        type: 'transport_mechanisms',
+        context: { difficulty: 'intermediate', topic: 'Cell Transport', focus: 'osmosis' },
+        subparts: [
+            'OSMOSIS:',
+            '  Definition: Diffusion of WATER across selectively permeable membrane',
+            '  - Water moves from HIGH water concentration to LOW water concentration',
+            '  - Or: from LOW solute concentration to HIGH solute concentration',
+            '  - Passive process (no energy)',
+            '',
+            'Tonicity Solutions:',
+            '',
+            '1. HYPOTONIC (Low solute outside):',
+            '   - Water concentration higher outside',
+            '   - Water moves INTO cell',
+            '',
+            '   Animal Cell:',
+            '   - Swells, may burst (lysis)',
+            '   - No cell wall to protect',
+            '',
+            '   Plant Cell:',
+            '   - Swells, becomes turgid',
+            '   - Cell wall prevents bursting',
+            '   - Turgor pressure maintains plant shape',
+            '',
+            '2. ISOTONIC (Equal solute):',
+            '   - Equal water concentration',
+            '   - No NET water movement',
+            '',
+            '   Animal Cell:',
+            '   - Normal shape',
+            '   - Healthy state',
+            '',
+            '   Plant Cell:',
+            '   - Flaccid (limp)',
+            '   - Plant wilts',
+            '',
+            '3. HYPERTONIC (High solute outside):',
+            '   - Water concentration lower outside',
+            '   - Water moves OUT of cell',
+            '',
+            '   Animal Cell:',
+            '   - Shrinks (crenation)',
+            '   - Dehydrated',
+            '',
+            '   Plant Cell:',
+            '   - Plasmolysis',
+            '   - Membrane pulls away from wall',
+            '   - Plant wilts severely'
+            ],
+        helper: 'Remember: Water follows solutes. Hypo = cell swells, Hyper = cell shrinks, Iso = stays same',
+        solution: 'Osmosis moves water across membrane; hypotonic (swell), isotonic (same), hypertonic (shrink)',
+        realWorldContext: 'IV fluids must be isotonic to avoid damaging blood cells'
+    });
+
+    // Problem 3: Facilitated Diffusion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Protein-Assisted Transport',
+        problem: 'Describe facilitated diffusion and how it differs from simple diffusion',
+        parameters: {
+            specificItems: ['Facilitated Diffusion'],
+            category: 'passive',
+            limit: 1
+        },
+        type: 'transport_mechanisms',
+        context: { difficulty: 'intermediate', topic: 'Cell Transport', focus: 'facilitated diffusion' },
+        subparts: [
+            'FACILITATED DIFFUSION:',
+            '  Definition: Passive transport with help of proteins',
+            '  - Still moves DOWN concentration gradient',
+            '  - NO energy (ATP) required',
+            '  - Requires transport proteins',
+            '',
+            'Two Types of Proteins:',
+            '',
+            '1. CHANNEL PROTEINS:',
+            '   - Form hydrophilic pores through membrane',
+            '   - Specific for certain molecules/ions',
+            '   - Can be gated (open/close)',
+            '   Examples:',
+            '   - Ion channels (Na⁺, K⁺, Ca²⁺, Cl⁻)',
+            '   - Aquaporins (water channels)',
+            '',
+            '2. CARRIER PROTEINS:',
+            '   - Bind to specific molecule',
+            '   - Change shape',
+            '   - Release molecule on other side',
+            '   Example:',
+            '   - GLUT transporters (glucose)',
+            '',
+            'Characteristics:',
+            '  - SPECIFIC: Each protein transports specific substance',
+            '  - SATURABLE: Limited number of proteins (max rate)',
+            '  - FASTER than simple diffusion for large/polar molecules',
+            '',
+            'Simple vs Facilitated Diffusion:',
+            '',
+            'Simple:',
+            '  - No proteins needed',
+            '  - Small, nonpolar molecules',
+            '  - Directly through lipid bilayer',
+            '  - Not saturable',
+            '',
+            'Facilitated:',
+            '  - Requires proteins',
+            '  - Large or polar molecules',
+            '  - Through protein channels/carriers',
+            '  - Saturable (limited proteins)',
+            '',
+            'Both are PASSIVE (no energy)'
+        ],
+        helper: 'Facilitated diffusion = diffusion with protein help (still no energy needed)',
+        solution: 'Facilitated diffusion uses proteins (channels/carriers) to move large/polar molecules passively',
+        realWorldContext: 'Glucose enters cells via GLUT proteins using facilitated diffusion'
+    });
+
+    // Problem 4: Active Transport
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Energy-Dependent Transport',
+        problem: 'Explain active transport and describe the sodium-potassium pump as an example',
+        parameters: {
+            specificItems: ['Active Transport'],
+            category: 'active',
+            limit: 1
+        },
+        type: 'transport_mechanisms',
+        context: { difficulty: 'intermediate', topic: 'Cell Transport', focus: 'active transport' },
+        subparts: [
+            'ACTIVE TRANSPORT:',
+            '  Definition: Movement AGAINST concentration gradient',
+            '  - From LOW to HIGH concentration',
+            '  - Requires ENERGY (ATP)',
+            '  - Uses carrier proteins (pumps)',
+            '',
+            'Sodium-Potassium Pump (Na⁺/K⁺-ATPase):',
+            '',
+            'Function:',
+            '  - Maintains concentration gradients',
+            '  - 3 Na⁺ OUT, 2 K⁺ IN per ATP',
+            '  - Creates electrical potential',
+            '  - Uses ~30% of cell\'s ATP!',
+            '',
+            'Mechanism (6 Steps):',
+            '  1. 3 Na⁺ bind to pump (inside cell)',
+            '  2. ATP hydrolyzed → ADP + Pi',
+            '  3. Phosphorylation causes shape change',
+            '  4. 3 Na⁺ released outside',
+            '  5. 2 K⁺ bind to pump (outside cell)',
+            '  6. Phosphate released, pump returns to original shape',
+            '  7. 2 K⁺ released inside, cycle repeats',
+            '',
+            'Importance:',
+            '  - Maintains cell volume (osmotic balance)',
+            '  - Creates membrane potential (nerve/muscle function)',
+            '  - Drives secondary active transport',
+            '  - Essential for nerve impulses',
+            '',
+            'Primary vs Secondary Active Transport:',
+            '  Primary: Directly uses ATP (Na⁺/K⁺ pump)',
+            '  Secondary: Uses gradient from primary transport',
+            '    - Cotransport (symport): Same direction',
+            '    - Countertransport (antiport): Opposite direction',
+            '',
+            'Example: Glucose-sodium cotransporter',
+            '  - Na⁺ moves down gradient (in)',
+            '  - Pulls glucose against gradient (in)',
+            '  - Common in intestines and kidneys'
+        ],
+        helper: 'Active transport = moving uphill (needs energy like Na⁺/K⁺ pump)',
+        solution: 'Active transport uses ATP to move substances against gradient; Na⁺/K⁺ pump moves 3 Na⁺ out, 2 K⁺ in',
+        realWorldContext: 'Nerve and muscle cells depend on Na⁺/K⁺ pump for electrical signals'
+    });
+
+    // Problem 5: Bulk Transport
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Endocytosis and Exocytosis',
+        problem: 'Compare the three types of endocytosis and explain how exocytosis differs from them',
+        parameters: {
+            specificItems: ['Endocytosis', 'Exocytosis'],
+            category: 'bulk',
+            limit: 2
+        },
+        type: 'transport_mechanisms',
+        context: { difficulty: 'intermediate', topic: 'Cell Transport', focus: 'bulk transport' },
+        subparts: [
+            'BULK TRANSPORT = Moving large particles or quantities',
+            '  - Requires energy (ATP)',
+            '  - Uses vesicles',
+            '',
+            'ENDOCYTOSIS (INTO cell):',
+            '',
+            '1. PHAGOCYTOSIS ("Cell Eating"):',
+            '   - Engulfs LARGE PARTICLES',
+            '   - Pseudopodia ("false feet") surround particle',
+            '   - Forms phagosome',
+            '   - Fuses with lysosome for digestion',
+            '   Examples:',
+            '   - White blood cells engulfing bacteria',
+            '   - Amoeba capturing food',
+            '   - Macrophages removing cell debris',
+            '',
+            '2. PINOCYTOSIS ("Cell Drinking"):',
+            '   - Engulfs LIQUIDS and small dissolved solutes',
+            '   - Membrane invaginates (folds inward)',
+            '   - Forms small vesicles',
+            '   - Non-specific (takes in whatever is nearby)',
+            '   Examples:',
+            '   - Cells taking in extracellular fluid',
+            '   - Capillary cells absorbing nutrients',
+            '',
+            '3. RECEPTOR-MEDIATED ENDOCYTOSIS:',
+            '   - SPECIFIC uptake',
+            '   - Receptors bind to specific molecules (ligands)',
+            '   - Coated pits form (with clathrin protein)',
+            '   - Forms coated vesicle',
+            '   - Very efficient and selective',
+            '   Examples:',
+            '   - Cholesterol uptake (LDL receptors)',
+            '   - Hormone uptake (insulin)',
+            '   - Virus entry (exploits this mechanism)',
+            '',
+            'EXOCYTOSIS (OUT of cell):',
+            '  Process:',
+            '   1. Vesicle from Golgi or ER',
+            '   2. Vesicle moves to plasma membrane',
+            '   3. Vesicle fuses with membrane',
+            '   4. Contents released outside',
+            '',
+            '  Two Types:',
+            '   - Constitutive: Continuous (membrane proteins)',
+            '   - Regulated: Triggered by signal (neurotransmitters)',
+            '',
+            '  Examples:',
+            '   - Neurotransmitter release at synapse',
+            '   - Hormone secretion',
+            '   - Digestive enzyme release',
+            '   - Waste removal',
+            '',
+            'Summary:',
+            '  Endocytosis: Material enters cell in vesicles',
+            '  Exocytosis: Material exits cell in vesicles'
+        ],
+        helper: 'Endo = IN (eating/drinking), Exo = OUT (secretion)',
+        solution: 'Endocytosis types: phagocytosis (solids), pinocytosis (liquids), receptor-mediated (specific); Exocytosis releases materials',
+        realWorldContext: 'Neurons use exocytosis to release neurotransmitters; immune cells use phagocytosis to destroy pathogens'
+    });
+
+    return relatedProblems;
+}
+
+// ============== CELLULAR RESPIRATION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCellularRespiration() {
+    const relatedProblems = [];
+
+    // Problem 1: Overview of Cellular Respiration
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Cellular Respiration Overview',
+        problem: 'Describe the overall process of cellular respiration and its purpose',
+        parameters: {
+            specificItems: ['Cellular Respiration'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'beginner', topic: 'Cellular Respiration', focus: 'overview' },
+        subparts: [
+            'CELLULAR RESPIRATION:',
+            '  Definition: Process that breaks down glucose to produce ATP',
+            '',
+            'Overall Equation:',
+            '  C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ~38 ATP',
+            '  (Glucose + Oxygen → Carbon dioxide + Water + Energy)',
+            '',
+            'Purpose:',
+            '  - Extract energy from glucose',
+            '  - Convert to usable form (ATP)',
+            '  - ATP powers all cellular work',
+            '',
+            'Three Main Stages:',
+            '',
+            '1. GLYCOLYSIS:',
+            '   Location: Cytoplasm',
+            '   Input: Glucose (6C)',
+            '   Output: 2 Pyruvate (3C), 2 ATP (net), 2 NADH',
+            '   Oxygen: NOT required (anaerobic)',
+            '',
+            '2. KREBS CYCLE (Citric Acid Cycle):',
+            '   Location: Mitochondrial matrix',
+            '   Input: 2 Acetyl-CoA (from pyruvate)',
+            '   Output: 4 CO₂, 2 ATP, 6 NADH, 2 FADH₂',
+            '   Oxygen: Required (aerobic)',
+            '',
+            '3. ELECTRON TRANSPORT CHAIN (ETC):',
+            '   Location: Inner mitochondrial membrane (cristae)',
+            '   Input: NADH, FADH₂, O₂',
+            '   Output: ~34 ATP, H₂O',
+            '   Oxygen: Final electron acceptor',
+            '',
+            'Total ATP Yield:',
+            '  - Glycolysis: 2 ATP',
+            '  - Krebs Cycle: 2 ATP',
+            '  - ETC: ~34 ATP',
+            '  - TOTAL: ~38 ATP per glucose',
+            '',
+            'Type: Catabolic (breaking down molecules)'
+        ],
+        helper: 'Cellular respiration = glucose → ATP (cell\'s energy currency)',
+        solution: 'Cellular respiration breaks down glucose through glycolysis, Krebs cycle, and ETC to produce ~38 ATP',
+        realWorldContext: 'This is why we breathe O₂ and produce CO₂ - for cellular energy production'
+    });
+
+    // Problem 2: Glycolysis Details
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Glycolysis Pathway',
+        problem: 'Explain the steps of glycolysis and its energy investment and payoff phases',
+        parameters: {
+            specificItems: ['Glycolysis'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'intermediate', topic: 'Cellular Respiration', focus: 'glycolysis' },
+        subparts: [
+            'GLYCOLYSIS ("Sugar Splitting"):',
+            '  Location: Cytoplasm',
+            '  Does NOT require oxygen (anaerobic)',
+            '  Occurs in ALL cells',
+            '',
+            'Two Phases:',
+            '',
+            'PHASE 1: ENERGY INVESTMENT (Steps 1-5):',
+            '  - Glucose (6C) broken into 2 G3P (3C)',
+            '  - Requires 2 ATP input',
+            '  - Priming reactions',
+            '',
+            '  Key Steps:',
+            '   1. Glucose → Glucose-6-phosphate (uses 1 ATP)',
+            '   2. Rearrangement',
+            '   3. Fructose-6-P → Fructose-1,6-bisphosphate (uses 1 ATP)',
+            '   4. Split into 2 G3P molecules',
+            '',
+            'PHASE 2: ENERGY PAYOFF (Steps 6-10):',
+            '  - 2 G3P oxidized',
+            '  - Produces 4 ATP (substrate-level phosphorylation)',
+            '  - Produces 2 NADH',
+            '  - Forms 2 Pyruvate',
+            '',
+            '  Key Steps:',
+            '   5. G3P oxidized (makes NADH)',
+            '   6. High-energy intermediate',
+            '   7. Makes ATP',
+            '   8-9. Rearrangements',
+            '   10. Makes ATP, forms pyruvate',
+            '',
+            'NET PRODUCTS (per glucose):',
+            '  - 2 Pyruvate (3C each)',
+            '  - 2 ATP net (4 produced - 2 invested)',
+            '  - 2 NADH',
+            '',
+            'Fate of Pyruvate:',
+            '  If O₂ present (aerobic):',
+            '   → Enters mitochondria',
+            '   → Converted to Acetyl-CoA',
+            '   → Enters Krebs cycle',
+            '',
+            '  If NO O₂ (anaerobic):',
+            '   → Fermentation',
+            '   → Regenerates NAD⁺ (needed for glycolysis to continue)',
+            '',
+            'Efficiency: Only 2 ATP from glucose (rest of energy still in pyruvate)'
+        ],
+        helper: 'Glycolysis = glucose split into 2 pyruvate, makes 2 ATP net and 2 NADH',
+        solution: 'Glycolysis: glucose → 2 pyruvate + 2 ATP (net) + 2 NADH in cytoplasm (anaerobic)',
+        realWorldContext: 'Glycolysis is ancient pathway - evolved before oxygen in atmosphere'
+    });
+
+    // Problem 3: Krebs Cycle
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Krebs Cycle (Citric Acid Cycle)',
+        problem: 'Describe the Krebs cycle and explain its role in cellular respiration',
+        parameters: {
+            specificItems: ['Krebs Cycle'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'intermediate', topic: 'Cellular Respiration', focus: 'Krebs cycle' },
+        subparts: [
+            'KREBS CYCLE (Citric Acid Cycle / TCA Cycle):',
+            '  Location: Mitochondrial matrix',
+            '  Requires oxygen (aerobic)',
+            '',
+            'Preparation Step (Link Reaction):',
+            '  - Pyruvate (3C) → Acetyl-CoA (2C)',
+            '  - Loses CO₂',
+            '  - Makes NADH',
+            '  - Occurs twice per glucose (2 pyruvate)',
+            '',
+            'The Cycle (8 Steps per Acetyl-CoA):',
+            '',
+            '  1. Acetyl-CoA (2C) + Oxaloacetate (4C) → Citrate (6C)',
+            '     - Enzyme: Citrate synthase',
+            '',
+            '  2-3. Citrate rearranged → Isocitrate',
+            '',
+            '  4. Isocitrate oxidized',
+            '     - Loses CO₂ (6C → 5C)',
+            '     - Makes NADH',
+            '',
+            '  5. α-ketoglutarate oxidized',
+            '     - Loses CO₂ (5C → 4C)',
+            '     - Makes NADH',
+            '     - Makes Succinyl-CoA',
+            '',
+            '  6. Substrate-level phosphorylation',
+            '     - Makes ATP (or GTP)',
+            '     - Forms Succinate',
+            '',
+            '  7. Succinate oxidized',
+            '     - Makes FADH₂',
+            '     - Forms Fumarate',
+            '',
+            '  8. Fumarate → Malate → Oxaloacetate',
+            '     - Makes NADH',
+            '     - Regenerates Oxaloacetate (cycle continues)',
+            '',
+            'PRODUCTS (per Acetyl-CoA):',
+            '  - 2 CO₂',
+            '  - 1 ATP',
+            '  - 3 NADH',
+            '  - 1 FADH₂',
+            '',
+            'Per GLUCOSE (2 Acetyl-CoA):',
+            '  - 4 CO₂ (total 6 counting prep step)',
+            '  - 2 ATP',
+            '  - 6 NADH (8 total counting prep)',
+            '  - 2 FADH₂',
+            '',
+            'Purpose:',
+            '  - Complete oxidation of glucose carbon to CO₂',
+            '  - Generate electron carriers (NADH, FADH₂) for ETC',
+            '  - Small amount of ATP',
+            '',
+            'Note: Most ATP comes later in ETC from NADH and FADH₂'
+        ],
+        helper: 'Krebs cycle = completes glucose breakdown, makes CO₂ and electron carriers',
+        solution: 'Krebs cycle oxidizes acetyl-CoA, producing 2 ATP, 6 NADH, 2 FADH₂, and 4 CO₂ per glucose',
+        realWorldContext: 'The CO₂ you exhale comes from Krebs cycle decarboxylation reactions'
+    });
+
+
+// Problem 4: Electron Transport Chain
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Electron Transport Chain and Chemiosmosis',
+        problem: 'Explain how the electron transport chain generates ATP through chemiosmosis',
+        parameters: {
+            specificItems: ['Electron Transport Chain'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'advanced', topic: 'Cellular Respiration', focus: 'ETC' },
+        subparts: [
+            'ELECTRON TRANSPORT CHAIN (ETC):',
+            '  Location: Inner mitochondrial membrane (cristae)',
+            '  Purpose: Harvest energy from NADH and FADH₂',
+            '',
+            'The Chain (4 Protein Complexes):',
+            '',
+            '  COMPLEX I (NADH Dehydrogenase):',
+            '   - NADH → NAD⁺ + 2e⁻ + H⁺',
+            '   - Electrons pass through',
+            '   - Pumps 4 H⁺ into intermembrane space',
+            '',
+            '  COMPLEX II (Succinate Dehydrogenase):',
+            '   - FADH₂ → FAD + 2e⁻',
+            '   - Electrons enter here (lower energy)',
+            '   - Does NOT pump H⁺',
+            '',
+            '  COMPLEX III (Cytochrome bc₁):',
+            '   - Electrons continue',
+            '   - Pumps 4 H⁺ into intermembrane space',
+            '',
+            '  COMPLEX IV (Cytochrome Oxidase):',
+            '   - Final electron acceptor: O₂',
+            '   - 2e⁻ + 2H⁺ + ½O₂ → H₂O',
+            '   - Pumps 2 H⁺',
+            '',
+            'H⁺ Gradient Created:',
+            '  - Intermembrane space: HIGH H⁺ (low pH)',
+            '  - Matrix: LOW H⁺ (high pH)',
+            '  - Creates electrochemical gradient',
+            '',
+            'CHEMIOSMOSIS (ATP Synthesis):',
+            '',
+            '  ATP Synthase:',
+            '   - Channel protein in inner membrane',
+            '   - H⁺ flows back through (down gradient)',
+            '   - Drives rotation of ATP synthase',
+            '   - ADP + Pi → ATP',
+            '',
+            '  Mechanism:',
+            '   1. H⁺ gradient = potential energy',
+            '   2. H⁺ flows through ATP synthase',
+            '   3. Rotation of enzyme',
+            '   4. Conformational changes',
+            '   5. ATP produced',
+            '',
+            'ATP YIELD:',
+            '  - Each NADH → ~2.5 ATP',
+            '  - Each FADH₂ → ~1.5 ATP',
+            '  - Per glucose:',
+            '    • 10 NADH × 2.5 = 25 ATP',
+            '    • 2 FADH₂ × 1.5 = 3 ATP',
+            '    • Plus 4 ATP from substrate-level',
+            '    • TOTAL: ~32-34 ATP',
+            '',
+            'Why O₂ Required:',
+            '  - Final electron acceptor',
+            '  - Without O₂: ETC stops',
+            '  - NADH/FADH₂ not regenerated',
+            '  - Krebs cycle stops',
+            '  - Only glycolysis continues (2 ATP)'
+        ],
+        helper: 'ETC = electron energy pumps H⁺, gradient drives ATP synthase (like water wheel)',
+        solution: 'ETC uses electron energy to pump H⁺, creating gradient; chemiosmosis uses gradient to make ~34 ATP',
+        realWorldContext: 'Cyanide is deadly because it blocks Complex IV, stopping ATP production'
+    });
+
+    // Problem 5: Aerobic vs Anaerobic Respiration
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Fermentation Pathways',
+        problem: 'Compare aerobic respiration with fermentation, explaining when and why fermentation occurs',
+        parameters: {
+            specificItems: ['Cellular Respiration', 'Fermentation'],
+            category: 'Energy Metabolism',
+            limit: 2
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'intermediate', topic: 'Cellular Respiration', focus: 'fermentation' },
+        subparts: [
+            'AEROBIC vs ANAEROBIC RESPIRATION:',
+            '',
+            'AEROBIC RESPIRATION (with O₂):',
+            '  - Complete oxidation of glucose',
+            '  - Glycolysis → Krebs → ETC',
+            '  - Produces ~38 ATP',
+            '  - Products: CO₂ + H₂O',
+            '  - Most efficient',
+            '',
+            'ANAEROBIC RESPIRATION (without O₂):',
+            '  - Incomplete oxidation',
+            '  - Only glycolysis occurs',
+            '  - Produces 2 ATP',
+            '  - Followed by fermentation',
+            '',
+            'FERMENTATION:',
+            '  Purpose: Regenerate NAD⁺ so glycolysis can continue',
+            '  - NAD⁺ needed to accept electrons in glycolysis',
+            '  - Without NAD⁺, glycolysis stops',
+            '  - Fermentation recycles NADH → NAD⁺',
+            '',
+            'Two Types:',
+            '',
+            '1. LACTIC ACID FERMENTATION:',
+            '   Equation: Pyruvate + NADH → Lactate + NAD⁺',
+            '   Occurs in:',
+            '   - Muscle cells (during intense exercise)',
+            '   - Some bacteria (yogurt, cheese)',
+            '   Result:',
+            '   - Lactic acid buildup',
+            '   - Causes muscle fatigue/burn',
+            '   - Reversible when O₂ available',
+            '',
+            '2. ALCOHOLIC FERMENTATION:',
+            '   Equation: Pyruvate → Ethanol + CO₂ + NAD⁺',
+            '   Occurs in:',
+            '   - Yeast',
+            '   - Some bacteria',
+            '   Products:',
+            '   - Ethanol (alcohol)',
+            '   - CO₂ (bubbles in bread/beer)',
+            '   Used in:',
+            '   - Brewing (beer, wine)',
+            '   - Baking (bread rises from CO₂)',
+            '',
+            'COMPARISON:',
+            '',
+            'Aerobic:',
+            '  - Requires O₂',
+            '  - Complete breakdown',
+            '  - 38 ATP',
+            '  - Very efficient',
+            '',
+            'Fermentation:',
+            '  - No O₂ needed',
+            '  - Incomplete breakdown',
+            '  - 2 ATP',
+            '  - Less efficient',
+            '  - But fast!',
+            '',
+            'When Fermentation Occurs:',
+            '  - O₂ not available',
+            '  - O₂ demand exceeds supply (intense exercise)',
+            '  - Organism lacks mitochondria',
+            '',
+            'Advantage: Can produce ATP without O₂ (survival)'
+        ],
+        helper: 'Fermentation = recycle NAD⁺ when no O₂ (makes lactate or ethanol)',
+        solution: 'Aerobic respiration (38 ATP, needs O₂); Fermentation (2 ATP, no O₂, regenerates NAD⁺)',
+        realWorldContext: 'Sprint = lactic acid fermentation; marathon = aerobic respiration'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PHOTOSYNTHESIS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPhotosynthesis() {
+    const relatedProblems = [];
+
+    // Problem 1: Photosynthesis Overview
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Photosynthesis Overview',
+        problem: 'Describe the overall process of photosynthesis and its importance to life on Earth',
+        parameters: {
+            specificItems: ['Photosynthesis'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'beginner', topic: 'Photosynthesis', focus: 'overview' },
+        subparts: [
+            'PHOTOSYNTHESIS:',
+            '  Definition: Process that converts light energy into chemical energy (glucose)',
+            '',
+            'Overall Equation:',
+            '  6CO₂ + 6H₂O + Light Energy → C₆H₁₂O₆ + 6O₂',
+            '  (Carbon dioxide + Water + Light → Glucose + Oxygen)',
+            '',
+            'Location: Chloroplasts (in plant cells)',
+            '',
+            'Purpose:',
+            '  - Capture light energy',
+            '  - Convert to chemical energy (glucose)',
+            '  - Produce O₂ as byproduct',
+            '  - Foundation of food chains',
+            '',
+            'Two Main Stages:',
+            '',
+            '1. LIGHT REACTIONS (Light-Dependent):',
+            '   Location: Thylakoid membranes',
+            '   Input: Light, H₂O',
+            '   Output: O₂, ATP, NADPH',
+            '   Process:',
+            '   - Capture light energy',
+            '   - Split water (photolysis)',
+            '   - Generate ATP and NADPH',
+            '   - Release O₂',
+            '',
+            '2. CALVIN CYCLE (Light-Independent/Dark Reactions):',
+            '   Location: Stroma',
+            '   Input: CO₂, ATP, NADPH',
+            '   Output: Glucose (C₆H₁₂O₆)',
+            '   Process:',
+            '   - Fix CO₂ into organic molecules',
+            '   - Use ATP and NADPH from light reactions',
+            '   - Produce glucose',
+            '',
+            'Importance to Life:',
+            '  - Produces food for plants',
+            '  - Base of food chain (all organisms depend on it)',
+            '  - Produces O₂ for aerobic organisms',
+            '  - Removes CO₂ from atmosphere',
+            '  - Fossil fuels from ancient photosynthesis',
+            '',
+            'Type: Anabolic (building molecules)',
+            '',
+            'Note: Opposite of cellular respiration!'
+        ],
+        helper: 'Photosynthesis = light energy → glucose + O₂ (plants make food)',
+        solution: 'Photosynthesis uses light to convert CO₂ and H₂O into glucose and O₂ through light reactions and Calvin cycle',
+        realWorldContext: 'All oxygen in atmosphere comes from photosynthesis; we depend on it for survival'
+    });
+
+    // Problem 2: Light Reactions Detail
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Light Reactions Mechanism',
+        problem: 'Explain the light reactions of photosynthesis, including photosystems and electron transport',
+        parameters: {
+            specificItems: ['Photosynthesis', 'Light Reactions'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'intermediate', topic: 'Photosynthesis', focus: 'light reactions' },
+        subparts: [
+            'LIGHT REACTIONS:',
+            '  Location: Thylakoid membranes in chloroplasts',
+            '  Purpose: Convert light energy to chemical energy (ATP, NADPH)',
+            '',
+            'Key Players:',
+            '  - Photosystem II (PSII)',
+            '  - Photosystem I (PSI)',
+            '  - Electron transport chain',
+            '  - ATP synthase',
+            '',
+            'Process (Non-Cyclic Electron Flow):',
+            '',
+            '1. PHOTOSYSTEM II (P680):',
+            '   - Chlorophyll absorbs light (680 nm)',
+            '   - Electrons excited to higher energy level',
+            '   - Electrons leave PSII',
+            '   - Water split to replace electrons (PHOTOLYSIS)',
+            '   - 2H₂O → 4H⁺ + 4e⁻ + O₂',
+            '   - O₂ released as byproduct!',
+            '',
+            '2. ELECTRON TRANSPORT CHAIN:',
+            '   - Electrons pass through chain',
+            '   - Energy used to pump H⁺ into thylakoid space',
+            '   - Creates H⁺ gradient',
+            '   - Electrons reach Photosystem I',
+            '',
+            '3. PHOTOSYSTEM I (P700):',
+            '   - Chlorophyll absorbs light (700 nm)',
+            '   - Re-energizes electrons',
+            '   - Electrons to NADP⁺ reductase',
+            '   - NADP⁺ + 2e⁻ + H⁺ → NADPH',
+            '',
+            '4. CHEMIOSMOSIS (ATP Synthesis):',
+            '   - H⁺ gradient across thylakoid membrane',
+            '   - H⁺ flows through ATP synthase',
+            '   - ADP + Pi → ATP',
+            '   - Similar to mitochondrial ETC!',
+            '',
+            'PRODUCTS:',
+            '  - ATP (for Calvin cycle)',
+            '  - NADPH (for Calvin cycle)',
+            '  - O₂ (released to atmosphere)',
+            '',
+            'Cyclic Electron Flow:',
+            '  - Alternative pathway',
+            '  - Only uses Photosystem I',
+            '  - Produces ATP only (no NADPH, no O₂)',
+            '  - Used when cell needs more ATP than NADPH',
+            '',
+            'Summary:',
+            '  Light Energy → Chemical Energy (ATP + NADPH)',
+            '  Water split → Oxygen released',
+            '  H⁺ gradient → ATP production'
+        ],
+        helper: 'Light reactions: light → split water → make ATP and NADPH + release O₂',
+        solution: 'Light reactions use two photosystems to split water, generate ATP/NADPH via electron transport, release O₂',
+        realWorldContext: 'The oxygen you breathe comes from photolysis of water in photosystem II'
+    });
+
+    // Problem 3: Calvin Cycle
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Calvin Cycle (Light-Independent Reactions)',
+        problem: 'Describe the three phases of the Calvin cycle and how it produces glucose',
+        parameters: {
+            specificItems: ['Calvin Cycle', 'Photosynthesis'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'intermediate', topic: 'Photosynthesis', focus: 'Calvin cycle' },
+        subparts: [
+            'CALVIN CYCLE (Light-Independent Reactions):',
+            '  Location: Stroma of chloroplast',
+            '  Also called: "Dark Reactions" (doesn\'t need light directly)',
+            '  But: Requires products of light reactions (ATP, NADPH)',
+            '',
+            'Purpose: Fix CO₂ into organic molecules (glucose)',
+            '',
+            'Three Phases (for 3 CO₂):',
+            '',
+            '1. CARBON FIXATION:',
+            '   - CO₂ enters cycle',
+            '   - Combines with RuBP (5C sugar)',
+            '   - Enzyme: RuBisCO (most abundant enzyme on Earth!)',
+            '   - Forms unstable 6C intermediate',
+            '   - Immediately splits into 2 molecules of 3-PGA (3C)',
+            '   - 3 CO₂ + 3 RuBP → 6 molecules 3-PGA',
+            '',
+            '2. REDUCTION:',
+            '   - 3-PGA reduced to G3P (glyceraldehyde-3-phosphate)',
+            '   - Uses ATP and NADPH from light reactions',
+            '   - 6 ATP → 6 ADP + Pi',
+            '   - 6 NADPH → 6 NADP⁺',
+            '   - Produces 6 G3P molecules',
+            '   - 1 G3P exits cycle (builds glucose)',
+            '   - 5 G3P continue in cycle',
+            '',
+            '3. REGENERATION:',
+            '   - 5 G3P rearranged to regenerate 3 RuBP',
+            '   - Uses 3 ATP',
+            '   - RuBP ready to fix more CO₂',
+            '   - Cycle continues',
+            '',
+            'FOR ONE GLUCOSE (6C):',
+            '  Must run cycle 6 times:',
+            '   - Fix 6 CO₂',
+            '   - Produce 2 G3P (exit cycle)',
+            '   - 2 G3P combine → 1 Glucose',
+            '',
+            'TOTAL COST (per glucose):',
+            '  - 18 ATP',
+            '  - 12 NADPH',
+            '  - 6 CO₂',
+            '',
+            'Key Enzyme: RuBisCO',
+            '  - Rubisco = Ribulose-1,5-bisphosphate carboxylase/oxygenase',
+            '  - Fixes CO₂ to RuBP',
+            '  - Most abundant protein on Earth',
+            '  - ~50% of protein in chloroplast',
+            '  - Slow enzyme (3 reactions/second)',
+            '  - Can also bind O₂ (photorespiration - wasteful)',
+            '',
+            'Summary:',
+            '  CO₂ + ATP + NADPH → Glucose',
+            '  Carbon fixation → Reduction → Regeneration'
+        ],
+        helper: 'Calvin cycle: CO₂ fixed by RuBisCO, reduced with ATP/NADPH → glucose',
+        solution: 'Calvin cycle: Carbon fixation (RuBisCO), Reduction (uses ATP/NADPH), Regeneration (RuBP) → glucose',
+        realWorldContext: 'All plant biomass (wood, leaves, food) comes from CO₂ fixed in Calvin cycle'
+    });
+
+    // Problem 4: Factors Affecting Photosynthesis
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Environmental Factors in Photosynthesis',
+        problem: 'Analyze how light intensity, CO₂ concentration, and temperature affect photosynthesis rate',
+        parameters: {
+            specificItems: ['Photosynthesis', 'environmental factors'],
+            category: 'Energy Metabolism',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'intermediate', topic: 'Photosynthesis', focus: 'limiting factors' },
+        subparts: [
+            'FACTORS AFFECTING PHOTOSYNTHESIS RATE:',
+            '',
+            '1. LIGHT INTENSITY:',
+            '   Low light:',
+            '   - Rate limited by light',
+            '   - Not enough energy for light reactions',
+            '   - Increasing light increases rate',
+            '',
+            '   Optimal light:',
+            '   - Maximum rate reached',
+            '   - Light saturation point',
+            '',
+            '   Very high light:',
+            '   - Can damage chlorophyll',
+            '   - Rate may decrease (photoinhibition)',
+            '',
+            '   Graph: S-curve (increases then plateaus)',
+            '',
+            '2. CO₂ CONCENTRATION:',
+            '   Low CO₂ (< 0.04%):',
+            '   - Rate limited by CO₂',
+            '   - Calvin cycle slowed',
+            '   - Increasing CO₂ increases rate',
+            '',
+            '   Normal atmospheric (0.04%):',
+            '   - Often limiting factor',
+            '',
+            '   High CO₂ (enrichment):',
+            '   - Rate increases',
+            '   - Used in greenhouses',
+            '   - Eventually plateaus (other factors limit)',
+            '',
+            '   Graph: S-curve (increases then plateaus)',
+            '',
+            '3. TEMPERATURE:',
+            '   Low temperature:',
+            '   - Enzymes work slowly',
+            '   - Low rate',
+            '',
+            '   Optimal temperature (25-35°C):',
+            '   - Enzymes work efficiently',
+            '   - Maximum rate',
+            '',
+            '   High temperature (>40°C):',
+            '   - Enzymes denature',
+            '   - Stomata close (water conservation)',
+            '   - Rate decreases',
+            '',
+            '   Graph: Bell curve (peak then drops)',
+            '',
+            '4. WATER AVAILABILITY:',
+            '   - Essential reactant',
+            '   - Maintains turgor (keeps stomata open)',
+            '   - Water stress closes stomata',
+            '   - Reduces CO₂ uptake',
+            '',
+            '5. CHLOROPHYLL CONTENT:',
+            '   - More chlorophyll = more light capture',
+            '   - Healthy green leaves = more photosynthesis',
+            '',
+            'LIMITING FACTOR PRINCIPLE:',
+            '  - Rate limited by scarcest resource',
+            '  - Increasing abundant factor has no effect',
+            '  - Must increase limiting factor',
+            '',
+            '  Example:',
+            '   - Bright light, low CO₂: CO₂ is limiting',
+            '   - Adding more light won\'t help',
+            '   - Must increase CO₂',
+            '',
+            'Agricultural Applications:',
+            '  - Greenhouses optimize all factors',
+            '  - CO₂ enrichment',
+            '  - Supplemental lighting',
+            '  - Temperature control',
+            '  - Irrigation'
+        ],
+        helper: 'Rate limited by scarcest factor (light, CO₂, or temperature)',
+        solution: 'Light intensity and CO₂ increase rate (S-curve); Temperature shows optimum (bell curve); limiting factor controls rate',
+        realWorldContext: 'Greenhouses optimize light, CO₂, and temperature to maximize crop yields'
+    });
+
+    // Problem 5: C3, C4, and CAM Plants
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Photosynthetic Adaptations',
+        problem: 'Compare C3, C4, and CAM photosynthesis pathways and explain their adaptive advantages',
+        parameters: {
+            specificItems: ['Photosynthesis', 'C3', 'C4', 'CAM'],
+            category: 'adaptations',
+            limit: 1
+        },
+        type: 'energy_metabolism',
+        context: { difficulty: 'advanced', topic: 'Photosynthesis', focus: 'adaptations' },
+        subparts: [
+            'PHOTOSYNTHETIC ADAPTATIONS:',
+            '',
+            'C3 PLANTS (Standard):',
+            '  Process:',
+            '   - CO₂ fixed directly by RuBisCO',
+            '   - First product: 3-PGA (3-carbon)',
+            '   - Calvin cycle in mesophyll cells',
+            '',
+            '  Problem: PHOTORESPIRATION',
+            '   - Hot, dry conditions → stomata close',
+            '   - O₂ builds up in leaf',
+            '   - RuBisCO binds O₂ instead of CO₂',
+            '   - Wasteful process (loses carbon, no ATP)',
+            '   - Reduces efficiency by 50%',
+            '',
+            '  Advantages:',
+            '   - Simple pathway',
+            '   - Works well in cool, moist climates',
+            '',
+            '  Examples: Wheat, rice, soybeans, trees',
+            '  Environment: Temperate climates',
+            '',
+            'C4 PLANTS (Tropical adaptation):',
+            '  Process:',
+            '   - Anatomical adaptation: Kranz anatomy',
+            '   - Two cell types:',
+            '     • Mesophyll cells (outer)',
+            '     • Bundle sheath cells (inner)',
+            '',
+            '   1. Mesophyll cells:',
+            '      - CO₂ fixed by PEP carboxylase (not RuBisCO)',
+            '      - Forms oxaloacetate (4-carbon) → Malate',
+            '      - PEP carboxylase has high CO₂ affinity',
+            '      - Doesn\'t bind O₂',
+            '',
+            '   2. Malate transported to bundle sheath cells',
+            '',
+            '   3. Bundle sheath cells:',
+            '      - CO₂ released from malate',
+            '      - High CO₂ concentration',
+            '      - Calvin cycle occurs here',
+            '      - RuBisCO protected from O₂',
+            '',
+            '  Advantages:',
+            '   - No photorespiration',
+            '   - Very efficient in hot climates',
+            '   - Can close stomata longer (water conservation)',
+            '   - 2-3× more efficient than C3',
+            '',
+            '  Disadvantages:',
+            '   - Requires more energy (ATP)',
+            '   - More complex anatomy',
+            '',
+            '  Examples: Corn, sugarcane, sorghum',
+            '  Environment: Hot, sunny, tropical',
+            '',
+            'CAM PLANTS (Desert adaptation):',
+            '  Process:',
+            '   - CAM = Crassulacean Acid Metabolism',
+            '   - TEMPORAL separation (not spatial)',
+            '',
+            '   Night:',
+            '   - Stomata OPEN (cooler, less water loss)',
+            '   - CO₂ taken in',
+            '   - Fixed by PEP carboxylase → Malate',
+            '   - Malate stored in vacuole',
+            '',
+            '   Day:',
+            '   - Stomata CLOSED (conserve water)',
+            '   - Malate released from vacuole',
+            '   - CO₂ released inside cell',
+            '   - Calvin cycle proceeds',
+            '   - Uses stored CO₂',
+            '',
+            '  Advantages:',
+            '   - Extreme water conservation',
+            '   - Can survive in deserts',
+            '   - Stomata closed during hot day',
+            '',
+            '  Disadvantages:',
+            '   - Very slow growth',
+            '   - Limited CO₂ storage',
+            '   - Low productivity',
+            '',
+            '  Examples: Cacti, pineapple, succulents',
+            '  Environment: Deserts, very dry areas',
+            '',
+            'COMPARISON SUMMARY:',
+            '',
+            '  C3: Standard, temperate, photorespiration problem',
+            '  C4: Spatial separation, tropical, efficient',
+            '  CAM: Temporal separation, desert, water-saving',
+            '',
+            'Climate Change Impact:',
+            '  - Rising CO₂ may favor C3 plants',
+            '  - But rising temperature favors C4',
+            '  - Complex ecological shifts expected'
+        ],
+        helper: 'C3 = standard; C4 = spatial fix (2 cells); CAM = temporal fix (night/day)',
+        solution: 'C3 (basic), C4 (spatial CO₂ concentration in bundle sheath), CAM (temporal CO₂ storage at night)',
+        realWorldContext: 'C4 plants (corn) and CAM plants (cacti) evolved to avoid photorespiration and water loss'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVER FUNCTIONS ==============
+
+function solveCellStructureProblems() {
+    const problems = generateRelatedCellStructure();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Cell Structure Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: problem.subTopic || null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCellMembraneProblems() {
+    const problems = generateRelatedCellMembrane();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Cell Membrane Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: problem.subTopic || null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveOrganellesProblems() {
+    const problems = generateRelatedOrganelles();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Organelles Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCellDivisionProblems() {
+    const problems = generateRelatedCellDivision();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Cell Division Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveMitosisMeiosisProblems() {
+    const problems = generateRelatedMitosisMeiosis();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Mitosis/Meiosis Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCellTransportProblems() {
+    const problems = generateRelatedCellTransport();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Cell Transport Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'biological',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCellularRespirationProblems() {
+    const problems = generateRelatedCellularRespiration();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Cellular Respiration Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePhotosynthesisProblems() {
+    const problems = generateRelatedPhotosynthesis();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Photosynthesis Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedCellBiologyWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleBiologyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveBiologyDocument() {
+    console.log('Generating Comprehensive Cell Biology Workbook with Related Problems...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Cell Biology Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Cell Structure, Organelles, Membrane, Division, Transport, and Metabolism',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Cell Structure
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellStructureProblems = generateRelatedCellStructure();
+    cellStructureProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II: Cell Membrane
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const membraneProblems = generateRelatedCellMembrane();
+    membraneProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 6}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part III: Organelles
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const organellesProblems = generateRelatedOrganelles();
+    organellesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 12}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part IV: Cell Division
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellDivisionProblems = generateRelatedCellDivision();
+    cellDivisionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 18}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part V: Mitosis and Meiosis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const mitosisProblems = generateRelatedMitosisMeiosis();
+    mitosisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 23}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VI: Cell Transport
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const transportProblems = generateRelatedCellTransport();
+    transportProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 28}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VII: Cellular Respiration
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const respirationProblems = generateRelatedCellularRespiration();
+    respirationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 33}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VIII: Photosynthesis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const photosynthesisProblems = generateRelatedPhotosynthesis();
+    photosynthesisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 38}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: CELL STRUCTURE ==============
+    console.log('\nProcessing Part I: Cell Structure and Types...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellStructureSolved = solveCellStructureProblems();
+    cellStructureSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Structure Problem${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: CELL MEMBRANE ==============
+    console.log('\nProcessing Part II: Cell Membrane...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const membraneSolved = solveCellMembraneProblems();
+    membraneSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Membrane Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 6}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: ORGANELLES ==============
+    console.log('\nProcessing Part III: Cell Organelles...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const organellesSolved = solveOrganellesProblems();
+    organellesSolved.forEach((solved, index) => {
+        console.log(`  Adding Organelles Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 12}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: CELL DIVISION ==============
+    console.log('\nProcessing Part IV: Cell Division...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellDivisionSolved = solveCellDivisionProblems();
+    cellDivisionSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Division Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 18}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: MITOSIS AND MEIOSIS ==============
+    console.log('\nProcessing Part V: Mitosis and Meiosis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const mitosisSolved = solveMitosisMeiosisProblems();
+    mitosisSolved.forEach((solved, index) => {
+        console.log(`  Adding Mitosis/Meiosis Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 23}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: CELL TRANSPORT ==============
+    console.log('\nProcessing Part VI: Cell Transport...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const transportSolved = solveCellTransportProblems();
+    transportSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Transport Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 28}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VII: CELLULAR RESPIRATION ==============
+    console.log('\nProcessing Part VII: Cellular Respiration...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const respirationSolved = solveCellularRespirationProblems();
+    respirationSolved.forEach((solved, index) => {
+        console.log(`  Adding Cellular Respiration Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 33}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VIII: PHOTOSYNTHESIS ==============
+    console.log('\nProcessing Part VIII: Photosynthesis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const photosynthesisSolved = solvePhotosynthesisProblems();
+    photosynthesisSolved.forEach((solved, index) => {
+        console.log(`  Adding Photosynthesis Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 38}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_cell_biology_workbook_with_related_problems.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE CELL BIOLOGY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 42');
+        console.log('    - Cell Structure: 5 problems');
+        console.log('    - Cell Membrane: 6 problems');
+        console.log('    - Cell Organelles: 6 problems');
+        console.log('    - Cell Division: 5 problems');
+        console.log('    - Mitosis and Meiosis: 5 problems');
+        console.log('    - Cell Transport: 5 problems');
+        console.log('    - Cellular Respiration: 5 problems');
+        console.log('    - Photosynthesis: 5 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I: Cell Structure and Types (Problems 1-5)');
+        console.log('  • Part II: Cell Membrane (Problems 6-11)');
+        console.log('  • Part III: Cell Organelles (Problems 12-17)');
+        console.log('  • Part IV: Cell Division (Problems 18-22)');
+        console.log('  • Part V: Mitosis and Meiosis (Problems 23-27)');
+        console.log('  • Part VI: Cell Transport (Problems 28-32)');
+        console.log('  • Part VII: Cellular Respiration (Problems 33-37)');
+        console.log('  • Part VIII: Photosynthesis (Problems 38-42)');
+        console.log('\n📄 EXPECTED PAGES: 150+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step explanation');
+        console.log('  • Detailed biological content');
+        console.log('  • Key concepts and definitions');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common misconceptions addressed');
+        console.log('  • Pedagogical notes for teaching');
+        console.log('  • Comparisons and contrasts');
+        console.log('  • Examples from nature');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveBiologyDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
+
+
