@@ -1,0 +1,2347 @@
+Here's the comprehensive, integrated code for thermodynamics and heat problems:
+import { EnhancedThermodynamicsMathematicalWorkbook } from './thermodynamicsworkbook.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a problem
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content
+        if (section.data && Array.isArray(section.data)) {
+            section.data.forEach(row => {
+                if (Array.isArray(row)) {
+                    // Handle table-like data
+                    if (row.length === 2 && row[0] && row[1]) {
+                        // Key-value pair
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `${row[0]}: `,
+                                        bold: true
+                                    }),
+                                    new docx.TextRun({
+                                        text: String(row[1])
+                                    })
+                                ],
+                                spacing: { after: 100 }
+                            })
+                        );
+                    } else if (row[0] === '' && row[1] === '') {
+                        // Spacing row
+                        sections.push(
+                            new docx.Paragraph({
+                                text: '',
+                                spacing: { after: 200 }
+                            })
+                        );
+                    } else if (row.length > 2) {
+                        // Multi-column row (like verification tables)
+                        sections.push(
+                            new docx.Paragraph({
+                                text: row.join(' | '),
+                                spacing: { after: 100 }
+                            })
+                        );
+                    }
+                }
+            });
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+// ============== TEMPERATURE AND HEAT - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedTemperatureHeat() {
+    const relatedProblems = [];
+
+    // Problem 1: Temperature Conversion
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Temperature Conversion',
+        problem: 'Convert 77°F to Celsius and Kelvin',
+        parameters: { T_fahrenheit: 77 },
+        type: 'temperature_conversion',
+        context: { difficulty: 'beginner', topic: 'Temperature Scales' },
+        subparts: [
+            'Given: T = 77°F',
+            'Convert to Celsius:',
+            'C = (F - 32) × 5/9',
+            'C = (77 - 32) × 5/9',
+            'C = 45 × 5/9 = 25°C',
+            'Convert to Kelvin:',
+            'K = C + 273.15',
+            'K = 25 + 273.15 = 298.15 K',
+            'Results: 25°C or 298.15 K'
+        ],
+        helper: 'Always convert to Kelvin for thermodynamic calculations',
+        solution: '25°C or 298.15 K',
+        realWorldContext: 'Converting between temperature scales in daily life and science'
+    });
+
+    // Problem 2: Heat Transfer Basics
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Heat Transfer',
+        problem: 'How much heat is needed to raise 2 kg of water from 20°C to 100°C? (c_water = 4186 J/(kg·K))',
+        parameters: { m: 2, c: 4186, T_initial: 20, T_final: 100 },
+        type: 'calorimetry',
+        context: { difficulty: 'beginner', topic: 'Heat and Temperature' },
+        subparts: [
+            'Given: m = 2 kg, c = 4186 J/(kg·K)',
+            'T_initial = 20°C, T_final = 100°C',
+            'ΔT = 100 - 20 = 80 K',
+            'Formula: Q = mcΔT',
+            'Q = 2 kg × 4186 J/(kg·K) × 80 K',
+            'Q = 669,760 J',
+            'Q ≈ 670 kJ',
+            'Physical meaning: Energy absorbed to heat water'
+        ],
+        helper: 'Use Q = mcΔT for temperature changes without phase change',
+        solution: 'Q ≈ 670 kJ',
+        realWorldContext: 'Calculating energy needed to heat water for cooking or bathing'
+    });
+
+    // Problem 3: Temperature Equilibrium
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Thermal Equilibrium',
+        problem: 'A 0.5 kg block of aluminum at 100°C is placed in 1 kg of water at 20°C. Find the final temperature. (c_Al = 900 J/(kg·K), c_water = 4186 J/(kg·K))',
+        parameters: { 
+            m1: 0.5, c1: 900, T1: 100,
+            m2: 1, c2: 4186, T2: 20
+        },
+        type: 'calorimetry',
+        context: { difficulty: 'intermediate', topic: 'Thermal Equilibrium' },
+        subparts: [
+            'Given: Aluminum: m₁ = 0.5 kg, c₁ = 900 J/(kg·K), T₁ = 100°C',
+            '       Water: m₂ = 1 kg, c₂ = 4186 J/(kg·K), T₂ = 20°C',
+            'At equilibrium: Heat lost by Al = Heat gained by water',
+            'm₁c₁(T₁ - T_f) = m₂c₂(T_f - T₂)',
+            '0.5(900)(100 - T_f) = 1(4186)(T_f - 20)',
+            '45000 - 450T_f = 4186T_f - 83720',
+            '45000 + 83720 = 4186T_f + 450T_f',
+            '128720 = 4636T_f',
+            'T_f = 27.8°C',
+            'Final temperature: 27.8°C'
+        ],
+        helper: 'Heat lost = Heat gained at thermal equilibrium',
+        solution: 'T_f = 27.8°C',
+        realWorldContext: 'Predicting final temperature when mixing substances'
+    });
+
+    // Problem 4: Specific Heat Determination
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Specific Heat Calculation',
+        problem: 'A 0.3 kg metal sample requires 5400 J to raise its temperature from 25°C to 85°C. Find its specific heat.',
+        parameters: { m: 0.3, Q: 5400, T_initial: 25, T_final: 85 },
+        type: 'calorimetry',
+        context: { difficulty: 'intermediate', topic: 'Specific Heat' },
+        subparts: [
+            'Given: m = 0.3 kg, Q = 5400 J',
+            'T_initial = 25°C, T_final = 85°C',
+            'ΔT = 85 - 25 = 60 K',
+            'Formula: Q = mcΔT',
+            'Solve for c: c = Q/(mΔT)',
+            'c = 5400 J / (0.3 kg × 60 K)',
+            'c = 5400 / 18',
+            'c = 300 J/(kg·K)',
+            'This is close to copper\'s specific heat'
+        ],
+        helper: 'Rearrange Q = mcΔT to solve for unknown variable',
+        solution: 'c = 300 J/(kg·K)',
+        realWorldContext: 'Identifying unknown materials by their thermal properties'
+    });
+
+    // Problem 5: Temperature Change Calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Temperature Change',
+        problem: 'If 10,000 J of heat is added to 0.5 kg of iron (c = 450 J/(kg·K)), what is the temperature change?',
+        parameters: { Q: 10000, m: 0.5, c: 450 },
+        type: 'calorimetry',
+        context: { difficulty: 'beginner', topic: 'Temperature Change' },
+        subparts: [
+            'Given: Q = 10,000 J, m = 0.5 kg',
+            'c = 450 J/(kg·K) for iron',
+            'Formula: Q = mcΔT',
+            'Solve for ΔT: ΔT = Q/(mc)',
+            'ΔT = 10000 / (0.5 × 450)',
+            'ΔT = 10000 / 225',
+            'ΔT = 44.4 K or 44.4°C',
+            'Temperature increases by 44.4°C'
+        ],
+        helper: 'ΔT can be expressed in Kelvin or Celsius (same magnitude)',
+        solution: 'ΔT = 44.4 K',
+        realWorldContext: 'Calculating temperature rise when heating objects'
+    });
+
+    // Problem 6: Heat Capacity
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Heat Capacity',
+        problem: 'A calorimeter has a heat capacity of 500 J/K. How much heat is needed to raise its temperature by 15 K?',
+        parameters: { C: 500, deltaT: 15 },
+        type: 'calorimetry',
+        context: { difficulty: 'beginner', topic: 'Heat Capacity' },
+        subparts: [
+            'Given: C = 500 J/K (heat capacity)',
+            'ΔT = 15 K',
+            'Formula: Q = CΔT',
+            'Q = 500 J/K × 15 K',
+            'Q = 7500 J = 7.5 kJ',
+            'Heat capacity is total for entire object',
+            'vs specific heat which is per unit mass'
+        ],
+        helper: 'Heat capacity C = mc for the entire object',
+        solution: 'Q = 7.5 kJ',
+        realWorldContext: 'Understanding calorimeter design and heat storage'
+    });
+
+    // Problem 7: Multi-Step Heating
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Multi-Step Temperature Change',
+        problem: 'Calculate total heat to warm 0.2 kg of copper from -10°C to 110°C. (c_copper = 385 J/(kg·K))',
+        parameters: { m: 0.2, c: 385, T_initial: -10, T_final: 110 },
+        type: 'calorimetry',
+        context: { difficulty: 'intermediate', topic: 'Extended Temperature Range' },
+        subparts: [
+            'Given: m = 0.2 kg, c = 385 J/(kg·K)',
+            'T_initial = -10°C, T_final = 110°C',
+            'ΔT = 110 - (-10) = 120 K',
+            'No phase change for copper in this range',
+            'Formula: Q = mcΔT',
+            'Q = 0.2 kg × 385 J/(kg·K) × 120 K',
+            'Q = 9,240 J',
+            'Q = 9.24 kJ',
+            'Single calculation since no phase transition'
+        ],
+        helper: 'For metals, phase changes occur at much higher temperatures',
+        solution: 'Q = 9.24 kJ',
+        realWorldContext: 'Heating metals through wide temperature ranges'
+    });
+
+    return relatedProblems;
+}
+
+// ============== THERMAL EXPANSION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedThermalExpansion() {
+    const relatedProblems = [];
+
+    // Problem 1: Linear Expansion
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Linear Thermal Expansion',
+        problem: 'A steel rod is 10 m long at 20°C. Find its length at 100°C. (α_steel = 11×10⁻⁶ K⁻¹)',
+        parameters: { 
+            L_initial: 10, 
+            alpha: 11e-6, 
+            T_initial: 20, 
+            T_final: 100,
+            expansionType: 'linear'
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'beginner', topic: 'Linear Expansion' },
+        subparts: [
+            'Given: L₀ = 10 m, α = 11×10⁻⁶ K⁻¹',
+            'T_initial = 20°C, T_final = 100°C',
+            'ΔT = 100 - 20 = 80 K',
+            'Formula: ΔL = αL₀ΔT',
+            'ΔL = 11×10⁻⁶ × 10 × 80',
+            'ΔL = 0.0088 m = 8.8 mm',
+            'Final length: L = L₀ + ΔL',
+            'L = 10 + 0.0088 = 10.0088 m',
+            'Rod expands by 8.8 mm'
+        ],
+        helper: 'Linear expansion: ΔL = αL₀ΔT',
+        solution: 'ΔL = 8.8 mm, L_final = 10.0088 m',
+        realWorldContext: 'Designing expansion joints in bridges and railways'
+    });
+
+    // Problem 2: Volume Expansion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Volume Thermal Expansion',
+        problem: 'A glass container holds 1.000 L at 20°C. What is its volume at 80°C? (β_glass = 27×10⁻⁶ K⁻¹)',
+        parameters: { 
+            V_initial: 1.000, 
+            beta: 27e-6, 
+            T_initial: 20, 
+            T_final: 80,
+            expansionType: 'volume'
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'beginner', topic: 'Volume Expansion' },
+        subparts: [
+            'Given: V₀ = 1.000 L, β = 27×10⁻⁶ K⁻¹',
+            'T_initial = 20°C, T_final = 80°C',
+            'ΔT = 80 - 20 = 60 K',
+            'Formula: ΔV = βV₀ΔT',
+            'ΔV = 27×10⁻⁶ × 1.000 × 60',
+            'ΔV = 0.00162 L = 1.62 mL',
+            'Final volume: V = V₀ + ΔV',
+            'V = 1.000 + 0.00162 = 1.00162 L',
+            'Container expands by 1.62 mL'
+        ],
+        helper: 'Volume expansion: ΔV = βV₀ΔT where β ≈ 3α',
+        solution: 'ΔV = 1.62 mL, V_final = 1.00162 L',
+        realWorldContext: 'Calibrating volumetric glassware for different temperatures'
+    });
+
+    // Problem 3: Thermal Stress
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Thermal Stress in Constrained Rod',
+        problem: 'A steel rod (α = 11×10⁻⁶ K⁻¹, E = 200 GPa) is fixed at both ends. If temperature increases by 50 K, find the thermal stress.',
+        parameters: { 
+            alpha: 11e-6, 
+            E: 200e9, 
+            deltaT: 50
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'advanced', topic: 'Thermal Stress' },
+        subparts: [
+            'Given: α = 11×10⁻⁶ K⁻¹, E = 200 GPa = 200×10⁹ Pa',
+            'ΔT = 50 K, rod is constrained (cannot expand)',
+            'Free expansion would be: ΔL = αL₀ΔT',
+            'Strain: ε = ΔL/L₀ = αΔT',
+            'ε = 11×10⁻⁶ × 50 = 5.5×10⁻⁴',
+            'Stress: σ = Eε (Hooke\'s law)',
+            'σ = 200×10⁹ × 5.5×10⁻⁴',
+            'σ = 110×10⁶ Pa = 110 MPa',
+            'Compressive stress of 110 MPa develops'
+        ],
+        helper: 'Thermal stress: σ = EαΔT when expansion is prevented',
+        solution: 'σ = 110 MPa (compressive)',
+        realWorldContext: 'Understanding stress in constrained structures due to temperature'
+    });
+
+    // Problem 4: Bimetallic Strip
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Bimetallic Strip Bending',
+        problem: 'A bimetallic strip has brass (α = 19×10⁻⁶ K⁻¹) and steel (α = 11×10⁻⁶ K⁻¹). When heated by 40 K, which metal is on the outside of the curve?',
+        parameters: { 
+            alpha1: 19e-6, 
+            alpha2: 11e-6, 
+            deltaT: 40
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'intermediate', topic: 'Bimetallic Strips' },
+        subparts: [
+            'Given: α_brass = 19×10⁻⁶ K⁻¹',
+            '       α_steel = 11×10⁻⁶ K⁻¹',
+            'ΔT = 40 K (heating)',
+            'Brass expands more: ΔL_brass = 19×10⁻⁶ × L × 40',
+            'Steel expands less: ΔL_steel = 11×10⁻⁶ × L × 40',
+            'Difference causes bending',
+            'Metal that expands more (brass) forms outside of curve',
+            'Strip curves with brass on outside, steel on inside',
+            'Used in thermostats and temperature indicators'
+        ],
+        helper: 'Material with higher α forms the outside of the bend when heated',
+        solution: 'Brass is on the outside of the curve',
+        realWorldContext: 'How thermostats work using bimetallic strips'
+    });
+
+    // Problem 5: Railroad Track Expansion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Railroad Track Expansion Gap',
+        problem: 'A 25 m steel rail is laid at 10°C. What gap should be left for expansion to 40°C? (α = 11×10⁻⁶ K⁻¹)',
+        parameters: { 
+            L_initial: 25, 
+            alpha: 11e-6, 
+            T_initial: 10, 
+            T_final: 40,
+            expansionType: 'linear'
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'intermediate', topic: 'Practical Applications' },
+        subparts: [
+            'Given: L₀ = 25 m, α = 11×10⁻⁶ K⁻¹',
+            'T_initial = 10°C, T_max = 40°C',
+            'ΔT = 40 - 10 = 30 K',
+            'Formula: ΔL = αL₀ΔT',
+            'ΔL = 11×10⁻⁶ × 25 × 30',
+            'ΔL = 0.00825 m = 8.25 mm',
+            'Gap needed: at least 8.25 mm',
+            'In practice, larger gap for safety',
+            'Prevents buckling on hot days'
+        ],
+        helper: 'Calculate expansion, then add safety factor',
+        solution: 'Gap needed: 8.25 mm minimum',
+        realWorldContext: 'Designing expansion gaps in rail systems'
+    });
+
+    // Problem 6: Area Expansion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Area Thermal Expansion',
+        problem: 'A circular aluminum plate has diameter 0.5 m at 20°C. Find its area at 120°C. (α = 23×10⁻⁶ K⁻¹)',
+        parameters: { 
+            diameter: 0.5, 
+            alpha: 23e-6, 
+            T_initial: 20, 
+            T_final: 120,
+            expansionType: 'area'
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'intermediate', topic: 'Area Expansion' },
+        subparts: [
+            'Given: d₀ = 0.5 m, α = 23×10⁻⁶ K⁻¹',
+            'T_initial = 20°C, T_final = 120°C',
+            'ΔT = 120 - 20 = 100 K',
+            'Initial area: A₀ = πr² = π(0.25)² = 0.19635 m²',
+            'Area expansion: ΔA = 2αA₀ΔT',
+            'ΔA = 2 × 23×10⁻⁶ × 0.19635 × 100',
+            'ΔA = 0.000903 m² = 903 mm²',
+            'Final area: A = A₀ + ΔA',
+            'A = 0.19635 + 0.000903 = 0.19725 m²'
+        ],
+        helper: 'Area expansion coefficient ≈ 2α for isotropic materials',
+        solution: 'A_final = 0.19725 m²',
+        realWorldContext: 'Accounting for expansion in sheet metal fabrication'
+    });
+
+    // Problem 7: Liquid Expansion Overflow
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Liquid Overflow Due to Expansion',
+        problem: 'A glass beaker (β = 27×10⁻⁶ K⁻¹) is filled with 500 mL of ethanol (β = 1100×10⁻⁶ K⁻¹) at 20°C. How much overflows when heated to 70°C?',
+        parameters: { 
+            V_liquid: 500e-6,
+            beta_container: 27e-6, 
+            beta_liquid: 1100e-6,
+            T_initial: 20, 
+            T_final: 70,
+            expansionType: 'volume'
+        },
+        type: 'thermal_expansion',
+        context: { difficulty: 'advanced', topic: 'Differential Expansion' },
+        subparts: [
+            'Given: V₀ = 500 mL, β_glass = 27×10⁻⁶ K⁻¹',
+            '       β_ethanol = 1100×10⁻⁶ K⁻¹',
+            'ΔT = 70 - 20 = 50 K',
+            'Glass expansion: ΔV_glass = 27×10⁻⁶ × 500 × 50 = 0.675 mL',
+            'Ethanol expansion: ΔV_eth = 1100×10⁻⁶ × 500 × 50 = 27.5 mL',
+            'Net overflow = ΔV_eth - ΔV_glass',
+            'Overflow = 27.5 - 0.675 = 26.825 mL',
+            'Approximately 26.8 mL overflows',
+            'Ethanol expands much more than glass'
+        ],
+        helper: 'Net overflow = liquid expansion - container expansion',
+        solution: 'Overflow = 26.8 mL',
+        realWorldContext: 'Why liquids overflow when heated in containers'
+    });
+
+    return relatedProblems;
+}
+
+// ============== CALORIMETRY - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCalorimetry() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Calorimetry
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Calorimetry',
+        problem: 'Find heat needed to raise 3 kg of water from 25°C to 75°C. (c_water = 4186 J/(kg·K))',
+        parameters: { m: 3, c: 4186, T_initial: 25, T_final: 75 },
+        type: 'calorimetry',
+        context: { difficulty: 'beginner', topic: 'Basic Heat Transfer' },
+        subparts: [
+            'Given: m = 3 kg, c = 4186 J/(kg·K)',
+            'T_initial = 25°C, T_final = 75°C',
+            'ΔT = 75 - 25 = 50 K',
+            'Formula: Q = mcΔT',
+            'Q = 3 × 4186 × 50',
+            'Q = 627,900 J',
+            'Q = 627.9 kJ ≈ 628 kJ',
+            'This is sensible heat (no phase change)'
+        ],
+        helper: 'Q = mcΔT for temperature change without phase change',
+        solution: 'Q = 628 kJ',
+        realWorldContext: 'Energy needed to heat water for household use'
+    });
+
+    // Problem 2: Mixing Different Masses
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Mixing Water at Different Temperatures',
+        problem: '2 kg of water at 80°C is mixed with 3 kg of water at 20°C. Find final temperature. (c_water = 4186 J/(kg·K))',
+        parameters: { 
+            m1: 2, c1: 4186, T1: 80,
+            m2: 3, c2: 4186, T2: 20
+        },
+        type: 'calorimetry',
+        context: { difficulty: 'intermediate', topic: 'Mixing Problems' },
+        subparts: [
+            'Given: Hot water: m₁ = 2 kg, T₁ = 80°C',
+            '       Cold water: m₂ = 3 kg, T₂ = 20°C',
+            'Same substance: c₁ = c₂ = 4186 J/(kg·K)',
+            'Heat lost by hot = Heat gained by cold',
+            'm₁c(T₁ - T_f) = m₂c(T_f - T₂)',
+            'Cancel c: m₁(T₁ - T_f) = m₂(T_f - T₂)',
+            '2(80 - T_f) = 3(T_f - 20)',
+            '160 - 2T_f = 3T_f - 60',
+            '220 = 5T_f',
+            'T_f = 44°C',
+            'Final equilibrium temperature: 44°C'
+        ],
+        helper: 'For same substance, specific heats cancel out',
+        solution: 'T_f = 44°C',
+        realWorldContext: 'Mixing hot and cold water to get desired temperature'
+    });
+
+    // Problem 3: Calorimeter Problem
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Calorimeter with Heat Capacity',
+        problem: 'A 0.2 kg copper block at 95°C is dropped into a calorimeter containing 0.5 kg water at 20°C. The calorimeter has heat capacity 100 J/K. Find final temperature. (c_Cu = 385 J/(kg·K), c_water = 4186 J/(kg·K))',
+        parameters: { 
+            m_metal: 0.2, c_metal: 385, T_metal: 95,
+            m_water: 0.5, c_water: 4186, T_water: 20,
+            C_calorimeter: 100
+        },
+        type: 'calorimetry',
+        context: { difficulty: 'advanced', topic: 'Calorimeter Problems' },
+        subparts: [
+            'Given: Copper: m = 0.2 kg, c = 385 J/(kg·K), T = 95°C',
+            '       Water: m = 0.5 kg, c = 4186 J/(kg·K), T = 20°C',
+            '       Calorimeter: C = 100 J/K',
+            'Heat lost by copper = Heat gained by (water + calorimeter)',
+            'm_Cu × c_Cu × (T_Cu - T_f) = m_w × c_w × (T_f - T_w) + C × (T_f - T_w)',
+            '0.2 × 385 × (95 - T_f) = 0.5 × 4186 × (T_f - 20) + 100 × (T_f - 20)',
+            '77(95 - T_f) = 2093(T_f - 20) + 100(T_f - 20)',
+            '7315 - 77T_f = 2193T_f - 43860',
+            '51175 = 2270T_f',
+            'T_f = 22.5°C',
+            'Final temperature: 22.5°C'
+        ],
+        helper: 'Include calorimeter heat capacity in energy balance',
+        solution: 'T_f = 22.5°C',
+        realWorldContext: 'Real calorimeters absorb heat and must be accounted for'
+    });
+
+    // Problem 4: Determining Specific Heat
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Specific Heat Determination',
+        problem: 'A 0.15 kg unknown metal at 100°C is placed in 0.4 kg water at 20°C. Final temperature is 23.5°C. Find specific heat of metal. (c_water = 4186 J/(kg·K))',
+        parameters: { 
+            m_metal: 0.15, T_metal: 100,
+            m_water: 0.4, c_water: 4186, T_water: 20,
+            T_final: 23.5
+        },
+        type: 'calorimetry',
+        context: { difficulty: 'intermediate', topic: 'Determining Specific Heat' },
+        subparts: [
+            'Given: Metal: m = 0.15 kg, T_initial = 100°C',
+            '       Water: m = 0.4 kg, c = 4186 J/(kg·K), T_initial = 20°C',
+            '       T_final = 23.5°C',
+            'Heat lost by metal = Heat gained by water',
+            'm_metal × c_metal × (100 - 23.5) = m_water × c_water × (23.5 - 20)',
+            '0.15 × c_metal × 76.5 = 0.4 × 4186 × 3.5',
+            '11.475 × c_metal = 5860.4',
+            'c_metal = 5860.4 / 11.475',
+            'c_metal = 510.7 J/(kg·K)',
+            'This is close to iron: ~450 J/(kg·K)',
+            'Metal is likely iron or similar'
+        ],
+        helper: 'Use energy conservation to find unknown specific heat',
+        solution: 'c_metal = 511 J/(kg·K)',
+        realWorldContext: 'Identifying unknown metals by thermal properties'
+    });
+
+    // Problem 5: Bomb Calorimetry
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Bomb Calorimetry',
+        problem: 'A 2 g food sample releases energy in a bomb calorimeter. Water (1.5 kg) temperature rises from 20°C to 25.3°C. Calorimeter heat capacity is 800 J/K. Find energy per gram of food.',
+        parameters: { 
+            m_food: 0.002,
+            m_water: 1.5, c_water: 4186,
+            T_initial: 20, T_final: 25.3,
+            C_calorimeter: 800
+        },
+        type: 'calorimetry',
+        context: { difficulty: 'advanced', topic: 'Bomb Calorimetry' },
+        subparts: [
+            'Given: Food mass = 2 g = 0.002 kg',
+            '       Water: 1.5 kg, c = 4186 J/(kg·K)',
+            '       ΔT = 25.3 - 20 = 5.3 K',
+            '       C_calorimeter = 800 J/K',
+            'Total heat released by food:',
+            'Q = Q_water + Q_calorimeter',
+            'Q = m_w × c_w × ΔT + C × ΔT',
+            'Q = 1.5 × 4186 × 5.3 + 800 × 5.3',
+            'Q = 33279.9 + 4240 = 37519.9 J',
+            'Energy per gram: 37519.9 J / 2 g',
+            '= 18760 J/g ≈ 18.8 kJ/g',
+            'Or 18.8 MJ/kg (energy density)'
+        ],
+        helper: 'Total heat = heat to water + heat to calorimeter',
+        solution: 'Energy density = 18.8 kJ/g',
+        realWorldContext: 'Measuring caloric content of foods'
+    });
+
+    // Problem 6: Ice Calorimetry
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Melting Ice Calorimetry',
+        problem: 'How much ice at 0°C will melt if 0.3 kg of copper at 150°C is dropped into it? (L_fusion = 334 kJ/kg, c_Cu = 385 J/(kg·K))',
+        parameters: { 
+            m_copper: 0.3, c_copper: 385, T_copper: 150,
+            L_fusion: 334000, T_ice: 0
+        },
+        type: 'phase_change',
+        context: { difficulty: 'advanced', topic: 'Ice Melting Problems' },
+        subparts: [
+            'Given: Copper: m = 0.3 kg, c = 385 J/(kg·K), T = 150°C',
+            '       Ice at 0°C, L_fusion = 334,000 J/kg',
+            'Heat available from copper cooling to 0°C:',
+            'Q = m × c × ΔT',
+            'Q = 0.3 × 385 × (150 - 0)',
+            'Q = 17,325 J',
+            'Heat needed to melt ice: Q = m_ice × L',
+            'm_ice = Q / L',
+            'm_ice = 17,325 / 334,000',
+            'm_ice = 0.0519 kg ≈ 52 g',
+            'Approximately 52 g of ice melts',
+            'Final mixture at 0°C: water + remaining ice'
+        ],
+        helper: 'All heat from copper goes to melting ice at 0°C',
+        solution: 'm_ice = 52 g melts',
+        realWorldContext: 'Cooling hot objects with ice'
+    });
+
+    // Problem 7: Multi-Substance Mixing
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Three-Substance Mixing',
+        problem: '0.2 kg aluminum (c = 900 J/(kg·K)) at 100°C, 0.5 kg water at 20°C, and 0.1 kg copper (c = 385 J/(kg·K)) at 80°C are mixed. Find final temperature.',
+        parameters: { 
+            m1: 0.2, c1: 900, T1: 100,
+            m2: 0.5, c2: 4186, T2: 20,
+            m3: 0.1, c3: 385, T3: 80
+        },
+        type: 'calorimetry',
+        context: { difficulty: 'advanced', topic: 'Multiple Substances' },
+        subparts: [
+            'Given: Al: m₁ = 0.2 kg, c₁ = 900 J/(kg·K), T₁ = 100°C',
+            '       Water: m₂ = 0.5 kg, c₂ = 4186 J/(kg·K), T₂ = 20°C',
+            '       Cu: m₃ = 0.1 kg, c₃ = 385 J/(kg·K), T₃ = 80°C',
+            'Total heat lost = Total heat gained',
+            'Let T_f be final temperature',
+            'Heat from Al: Q₁ = 0.2 × 900 × (100 - T_f) = 180(100 - T_f)',
+            'Heat from Cu: Q₃ = 0.1 × 385 × (80 - T_f) = 38.5(80 - T_f)',
+            'Heat to water: Q₂ = 0.5 × 4186 × (T_f - 20) = 2093(T_f - 20)',
+            'Q₁ + Q₃ = Q₂',
+            '18000 - 180T_f + 3080 - 38.5T_f = 2093T_f - 41860',
+            '21080 + 41860 = 2093T_f + 180T_f + 38.5T_f',
+            '62940 = 2311.5T_f',
+            'T_f = 27.2°C',
+            'Final temperature: 27.2°C'
+        ],
+        helper: 'Sum all heat losses = sum all heat gains',
+        solution: 'T_f = 27.2°C',
+        realWorldContext: 'Complex thermal equilibrium with multiple materials'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HEAT TRANSFER - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedHeatTransfer() {
+    const relatedProblems = [];
+
+    // Problem 1: Conduction Through Wall
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Heat Conduction Through Wall',
+        problem: 'A brick wall (k = 0.6 W/(m·K)) is 0.2 m thick with area 20 m². Inside is 25°C, outside is 5°C. Find heat transfer rate.',
+        parameters: { 
+            k: 0.6, A: 20, L: 0.2,
+            T_hot: 25, T_cold: 5
+        },
+        type: 'heat_conduction',
+        context: { difficulty: 'beginner', topic: 'Fourier\'s Law' },
+        subparts: [
+            'Given: k = 0.6 W/(m·K), A = 20 m², L = 0.2 m',
+            'T_inside = 25°C, T_outside = 5°C',
+            'ΔT = 25 - 5 = 20 K',
+            'Fourier\'s Law: q = kA(ΔT)/L',
+            'q = 0.6 × 20 × 20 / 0.2',
+            'q = 240 / 0.2',
+            'q = 1200 W = 1.2 kW',
+            'Heat flows from warm to cold',
+            '1.2 kW lost through wall'
+        ],
+        helper: 'Heat transfer rate: q = kA(ΔT)/L',
+        solution: 'q = 1.2 kW',
+        realWorldContext: 'Calculating heat loss through building walls'
+    });
+
+    // Problem 2: Convection Heat Transfer
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Convective Heat Transfer',
+        problem: 'A hot plate (area 0.5 m²) at 150°C cools by convection to air at 25°C. Convection coefficient h = 15 W/(m²·K). Find heat transfer rate.',
+        parameters: { 
+            h: 15, A: 0.5,
+            T_surface: 150, T_infinity: 25
+        },
+        type: 'heat_convection',
+        context: { difficulty: 'beginner', topic: 'Newton\'s Law of Cooling' },
+        subparts: [
+            'Given: h = 15 W/(m²·K), A = 0.5 m²',
+            'T_surface = 150°C, T_air = 25°C',
+            'ΔT = 150 - 25 = 125 K',
+            'Newton\'s Law: q = hA(ΔT)',
+            'q = 15 × 0.5 × 125',
+            'q = 937.5 W ≈ 938 W',
+            'Heat convects to surrounding air',
+            'Cooling rate depends on h and ΔT'
+        ],
+        helper: 'Convection: q = hA(T_surface - T_fluid)',
+        solution: 'q = 938 W',
+        realWorldContext: 'Cooling of hot surfaces by air flow'
+    });
+
+    // Problem 3: Thermal Radiation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Thermal Radiation',
+        problem: 'A black body (ε = 1, A = 0.1 m²) at 400 K radiates to surroundings at 300 K. Find net radiation. (σ = 5.67×10⁻⁸ W/(m²·K⁴))',
+        parameters: { 
+            epsilon: 1, sigma: 5.67e-8, A: 0.1,
+            T_surface: 400, T_surrounding: 300
+        },
+        type: 'heat_radiation',
+        context: { difficulty: 'intermediate', topic: 'Stefan-Boltzmann Law' },
+        subparts: [
+            'Given: ε = 1, σ = 5.67×10⁻⁸ W/(m²·K⁴), A = 0.1 m²',
+            'T_surface = 400 K, T_surr = 300 K',
+            'Stefan-Boltzmann Law: q = εσA(T_s⁴ - T_surr⁴)',
+            'T_s⁴ = (400)⁴ = 2.56×10¹⁰ K⁴',
+            'T_surr⁴ = (300)⁴ = 8.1×10⁹ K⁴',
+            'q = 1 × 5.67×10⁻⁸ × 0.1 × (2.56×10¹⁰ - 8.1×10⁹)',
+            'q = 5.67×10⁻⁹ × 1.75×10¹⁰',
+            'q = 99.2 W',
+            'Net radiation from hot to cold surface'
+        ],
+        helper: 'Radiation depends on T⁴ - very sensitive to temperature',
+        solution: 'q = 99.2 W',
+        realWorldContext: 'Heat loss by radiation from hot objects'
+    });
+
+    // Problem 4: Composite Wall
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Heat Through Composite Wall',
+        problem: 'A wall has two layers: 0.1 m brick (k = 0.6 W/(m·K)) and 0.05 m insulation (k = 0.04 W/(m·K)). Area = 10 m², ΔT = 30 K across wall. Find heat transfer rate.',
+        parameters: { 
+            layers: [
+                { L: 0.1, k: 0.6, A: 10 },
+                { L: 0.05, k: 0.04, A: 10 }
+            ],
+            deltaT_total: 30
+        },
+        type: 'thermal_resistance',
+        context: { difficulty: 'advanced', topic: 'Thermal Resistance Networks' },
+        subparts: [
+            'Given: Layer 1 (brick): L₁ = 0.1 m, k₁ = 0.6 W/(m·K)',
+            '       Layer 2 (insulation): L₂ = 0.05 m, k₂ = 0.04 W/(m·K)',
+            '       A = 10 m² (same for both), ΔT_total = 30 K',
+            'Thermal resistances in series:',
+            'R₁ = L₁/(k₁A) = 0.1/(0.6 × 10) = 0.01667 K/W',
+            'R₂ = L₂/(k₂A) = 0.05/(0.04 × 10) = 0.125 K/W',
+            'R_total = R₁ + R₂ = 0.01667 + 0.125 = 0.14167 K/W',
+            'Heat transfer rate: q = ΔT/R_total',
+            'q = 30 / 0.14167 = 211.8 W',
+            'Insulation provides most resistance'
+        ],
+        helper: 'Add thermal resistances in series like electrical resistors',
+        solution: 'q = 212 W',
+        realWorldContext: 'Designing insulated walls for energy efficiency'
+    });
+
+    // Problem 5: Conduction with Variable Area
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Conduction Through Tapered Rod',
+        problem: 'A copper rod (k = 400 W/(m·K)) tapers from 0.02 m² to 0.01 m² over 0.5 m length. Ends at 100°C and 20°C. Estimate average heat transfer rate.',
+        parameters: { 
+            k: 400, L: 0.5,
+            A1: 0.02, A2: 0.01,
+            T1: 100, T2: 20
+        },
+        type: 'heat_conduction',
+        context: { difficulty: 'advanced', topic: 'Variable Cross-Section' },
+        subparts: [
+            'Given: k = 400 W/(m·K), L = 0.5 m',
+            '       A₁ = 0.02 m², A₂ = 0.01 m²',
+            '       T₁ = 100°C, T₂ = 20°C',
+            'For tapered section, use average area:',
+            'A_avg = (A₁ + A₂)/2 = (0.02 + 0.01)/2 = 0.015 m²',
+            'ΔT = 100 - 20 = 80 K',
+            'q = kA_avg(ΔT)/L',
+            'q = 400 × 0.015 × 80 / 0.5',
+            'q = 480 / 0.5 = 960 W',
+            'Approximate solution using average area'
+        ],
+        helper: 'For tapered sections, average area gives good approximation',
+        solution: 'q ≈ 960 W',
+        realWorldContext: 'Heat transfer in non-uniform geometries'
+    });
+
+    // Problem 6: Combined Convection and Conduction
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Combined Heat Transfer Modes',
+        problem: 'A 0.1 m thick wall (k = 1.0 W/(m·K), A = 5 m²) has inside air at 25°C (h_in = 10 W/(m²·K)) and outside air at -5°C (h_out = 20 W/(m²·K)). Find heat loss.',
+        parameters: { 
+            k: 1.0, L: 0.1, A: 5,
+            T_inside: 25, T_outside: -5,
+            h_inside: 10, h_outside: 20
+        },
+        type: 'thermal_resistance',
+        context: { difficulty: 'advanced', topic: 'Combined Heat Transfer' },
+        subparts: [
+            'Given: Wall: k = 1.0 W/(m·K), L = 0.1 m, A = 5 m²',
+            '       Inside: T = 25°C, h = 10 W/(m²·K)',
+            '       Outside: T = -5°C, h = 20 W/(m²·K)',
+            'Three resistances in series:',
+            'R_conv,in = 1/(h_in × A) = 1/(10 × 5) = 0.02 K/W',
+            'R_cond = L/(k × A) = 0.1/(1.0 × 5) = 0.02 K/W',
+            'R_conv,out = 1/(h_out × A) = 1/(20 × 5) = 0.01 K/W',
+            'R_total = 0.02 + 0.02 + 0.01 = 0.05 K/W',
+            'ΔT_total = 25 - (-5) = 30 K',
+            'q = ΔT/R_total = 30/0.05 = 600 W',
+            'Heat loss through wall: 600 W'
+        ],
+        helper: 'Add convection and conduction resistances in series',
+        solution: 'q = 600 W',
+        realWorldContext: 'Real building heat loss includes all transfer modes'
+    });
+
+    // Problem 7: Critical Insulation Radius
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Insulating a Pipe',
+        problem: 'A steam pipe (radius 0.05 m, T = 200°C) needs insulation (k = 0.05 W/(m·K)). Outside h = 15 W/(m²·K), T_air = 25°C. Should we insulate? Find heat loss per meter with and without 0.02 m insulation.',
+        parameters: { 
+            r_pipe: 0.05, T_pipe: 200,
+            k_insulation: 0.05, r_insulation: 0.02,
+            h_outside: 15, T_air: 25,
+            length: 1
+        },
+        type: 'thermal_resistance',
+        context: { difficulty: 'advanced', topic: 'Cylindrical Insulation' },
+        subparts: [
+            'Given: Pipe radius = 0.05 m, T = 200°C',
+            '       Insulation: k = 0.05 W/(m·K), thickness = 0.02 m',
+            '       Outside: h = 15 W/(m²·K), T = 25°C, L = 1 m',
+            'Without insulation:',
+            'A = 2πrL = 2π(0.05)(1) = 0.314 m²',
+            'R_conv = 1/(hA) = 1/(15 × 0.314) = 0.212 K/W',
+            'q = ΔT/R = (200-25)/0.212 = 825 W',
+            'With insulation (r_out = 0.05 + 0.02 = 0.07 m):',
+            'R_cond = ln(r_out/r_in)/(2πkL) = ln(0.07/0.05)/(2π × 0.05 × 1) = 0.112 K/W',
+            'A_out = 2π(0.07)(1) = 0.440 m²',
+            'R_conv,out = 1/(15 × 0.440) = 0.152 K/W',
+            'R_total = 0.112 + 0.152 = 0.264 K/W',
+            'q = 175/0.264 = 663 W',
+            'Insulation reduces heat loss from 825 W to 663 W'
+        ],
+        helper: 'For cylinders, insulation can sometimes increase heat loss if too thin',
+        solution: 'Without: 825 W, With: 663 W',
+        realWorldContext: 'Determining optimal insulation thickness for pipes'
+    });
+
+    return relatedProblems;
+}
+
+// ============== GAS LAWS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedGasLawsPhysics() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic Ideal Gas Law
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Ideal Gas Law',
+        problem: 'Find pressure of 2 moles of gas at 300 K in a 0.05 m³ container. (R = 8.314 J/(mol·K))',
+        parameters: { n: 2, T: 300, V: 0.05, R: 8.314 },
+        type: 'ideal_gas_law',
+        context: { difficulty: 'beginner', topic: 'Ideal Gas Law' },
+        subparts: [
+            'Given: n = 2 mol, T = 300 K, V = 0.05 m³',
+            'R = 8.314 J/(mol·K)',
+            'Ideal Gas Law: PV = nRT',
+            'Solve for P: P = nRT/V',
+            'P = (2 × 8.314 × 300) / 0.05',
+            'P = 4988.4 / 0.05',
+            'P = 99,768 Pa ≈ 99.8 kPa',
+            'Pressure is about 1 atmosphere'
+        ],
+        helper: 'Always use Kelvin for temperature in gas law',
+        solution: 'P = 99.8 kPa',
+        realWorldContext: 'Calculating gas pressure in containers'
+    });
+
+    // Problem 2: Temperature Change at Constant Volume
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Isochoric Process',
+        problem: 'A gas at 100 kPa and 300 K is heated at constant volume to 450 K. Find final pressure.',
+        parameters: { 
+            P_initial: 100000, T_initial: 300,
+            T_final: 450, V_constant: true
+        },
+        type: 'isochoric_process',
+        context: { difficulty: 'beginner', topic: 'Gay-Lussac\'s Law' },
+        subparts: [
+            'Given: P₁ = 100 kPa, T₁ = 300 K, T₂ = 450 K',
+            'Volume constant (isochoric process)',
+            'Gay-Lussac\'s Law: P₁/T₁ = P₂/T₂',
+            'Solve for P₂: P₂ = P₁ × (T₂/T₁)',
+            'P₂ = 100 × (450/300)',
+            'P₂ = 100 × 1.5',
+            'P₂ = 150 kPa',
+            'Pressure increases proportionally with temperature',
+            'At constant volume, P ∝ T'
+        ],
+        helper: 'At constant volume: P/T = constant',
+        solution: 'P₂ = 150 kPa',
+        realWorldContext: 'Heating gas in rigid container increases pressure'
+    });
+
+    // Problem 3: Isothermal Expansion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Isothermal Expansion',
+        problem: 'A gas at 200 kPa occupies 0.02 m³ at constant temperature. If volume doubles, find final pressure.',
+        parameters: { 
+            P_initial: 200000, V_initial: 0.02,
+            V_final: 0.04, T_constant: true
+        },
+        type: 'isothermal_process',
+        context: { difficulty: 'intermediate', topic: 'Boyle\'s Law' },
+        subparts: [
+            'Given: P₁ = 200 kPa, V₁ = 0.02 m³',
+            'V₂ = 0.04 m³ (doubled)',
+            'Temperature constant (isothermal)',
+            'Boyle\'s Law: P₁V₁ = P₂V₂',
+            'Solve for P₂: P₂ = P₁V₁/V₂',
+            'P₂ = 200 × 0.02 / 0.04',
+            'P₂ = 4 / 0.04 = 100 kPa',
+            'Pressure halves when volume doubles',
+            'Inverse relationship: P ∝ 1/V'
+        ],
+        helper: 'At constant temperature: PV = constant',
+        solution: 'P₂ = 100 kPa',
+        realWorldContext: 'Expanding gas at constant temperature'
+    });
+
+    // Problem 4: Isobaric Expansion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Isobaric Process',
+        problem: 'A gas at 300 K occupies 0.03 m³ at constant pressure 150 kPa. Heated to 450 K, find final volume.',
+        parameters: { 
+            V_initial: 0.03, T_initial: 300,
+            T_final: 450, P_constant: 150000
+        },
+        type: 'isobaric_process',
+        context: { difficulty: 'beginner', topic: 'Charles\'s Law' },
+        subparts: [
+            'Given: V₁ = 0.03 m³, T₁ = 300 K, T₂ = 450 K',
+            'Pressure constant (isobaric process)',
+            'Charles\'s Law: V₁/T₁ = V₂/T₂',
+            'Solve for V₂: V₂ = V₁ × (T₂/T₁)',
+            'V₂ = 0.03 × (450/300)',
+            'V₂ = 0.03 × 1.5',
+            'V₂ = 0.045 m³',
+            'Volume increases proportionally with temperature',
+            'At constant pressure, V ∝ T'
+        ],
+        helper: 'At constant pressure: V/T = constant',
+        solution: 'V₂ = 0.045 m³',
+        realWorldContext: 'Gas expansion in cylinder with movable piston'
+    });
+
+    // Problem 5: Adiabatic Process
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Adiabatic Compression',
+        problem: 'Air (γ = 1.4) at 100 kPa and 300 K is compressed adiabatically to half its volume. Find final pressure and temperature.',
+        parameters: { 
+            P_initial: 100000, T_initial: 300, V_initial: 1,
+            V_final: 0.5, gamma: 1.4
+        },
+        type: 'adiabatic_process',
+        context: { difficulty: 'advanced', topic: 'Adiabatic Processes' },
+        subparts: [
+            'Given: P₁ = 100 kPa, T₁ = 300 K, V₁/V₂ = 2',
+            'γ = 1.4 for air (diatomic)',
+            'Adiabatic process (Q = 0): PV^γ = constant',
+            'P₂ = P₁(V₁/V₂)^γ',
+            'P₂ = 100 × (2)^1.4',
+            'P₂ = 100 × 2.639 = 263.9 kPa',
+            'For temperature: T₁V₁^(γ-1) = T₂V₂^(γ-1)',
+            'T₂ = T₁(V₁/V₂)^(γ-1)',
+            'T₂ = 300 × (2)^0.4',
+            'T₂ = 300 × 1.320 = 396 K',
+            'Temperature rises during compression'
+        ],
+        helper: 'Adiabatic: PV^γ = constant, TV^(γ-1) = constant',
+        solution: 'P₂ = 264 kPa, T₂ = 396 K',
+        realWorldContext: 'Diesel engine compression stroke'
+    });
+
+    // Problem 6: RMS Speed Calculation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Molecular Speed',
+        problem: 'Find RMS speed of nitrogen molecules (M = 0.028 kg/mol) at 300 K. (R = 8.314 J/(mol·K))',
+        parameters: { M: 0.028, T: 300, R: 8.314 },
+        type: 'rms_speed',
+        context: { difficulty: 'intermediate', topic: 'Kinetic Theory' },
+        subparts: [
+            'Given: M = 0.028 kg/mol (nitrogen, N₂)',
+            'T = 300 K, R = 8.314 J/(mol·K)',
+            'RMS speed formula: v_rms = √(3RT/M)',
+            'v_rms = √(3 × 8.314 × 300 / 0.028)',
+            'v_rms = √(7482.6 / 0.028)',
+            'v_rms = √267,235.7',
+            'v_rms = 517 m/s',
+            'Nitrogen molecules move at ~517 m/s at room temp',
+            'Higher temperature → higher speed',
+            'Lighter molecules → higher speed'
+        ],
+        helper: 'RMS speed increases with √T and decreases with √M',
+        solution: 'v_rms = 517 m/s',
+        realWorldContext: 'Understanding molecular motion in gases'
+    });
+
+    // Problem 7: Combined Gas Law
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Combined Gas Law',
+        problem: 'A gas at 100 kPa, 0.05 m³, and 300 K changes to 150 kPa and 400 K. Find final volume.',
+        parameters: { 
+            P1: 100000, V1: 0.05, T1: 300,
+            P2: 150000, T2: 400
+        },
+        type: 'ideal_gas_law',
+        context: { difficulty: 'intermediate', topic: 'Combined Gas Law' },
+        subparts: [
+            'Given: P₁ = 100 kPa, V₁ = 0.05 m³, T₁ = 300 K',
+            '       P₂ = 150 kPa, T₂ = 400 K',
+            'Combined Gas Law: (P₁V₁)/T₁ = (P₂V₂)/T₂',
+            'Solve for V₂: V₂ = V₁ × (P₁/P₂) × (T₂/T₁)',
+            'V₂ = 0.05 × (100/150) × (400/300)',
+            'V₂ = 0.05 × (2/3) × (4/3)',
+            'V₂ = 0.05 × 8/9',
+            'V₂ = 0.0444 m³',
+            'Volume decreases due to pressure increase',
+            'but partially offset by temperature increase'
+        ],
+        helper: 'Combined law: (P₁V₁)/T₁ = (P₂V₂)/T₂',
+        solution: 'V₂ = 0.0444 m³',
+        realWorldContext: 'Gas behavior when multiple variables change'
+    });
+
+    return relatedProblems;
+}
+
+// ============== THERMODYNAMIC PROCESSES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedThermodynamicProcesses() {
+    const relatedProblems = [];
+
+    // Problem 1: First Law Application
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'First Law of Thermodynamics',
+        problem: 'A system absorbs 500 J of heat and does 300 J of work. Find change in internal energy.',
+        parameters: { Q: 500, W: 300 },
+        type: 'first_law',
+        context: { difficulty: 'beginner', topic: 'First Law' },
+        subparts: [
+            'Given: Q = 500 J (heat absorbed)',
+            '       W = 300 J (work done by system)',
+            'First Law: ΔU = Q - W',
+            'Sign convention: Q > 0 (heat in), W > 0 (work out)',
+            'ΔU = 500 - 300',
+            'ΔU = 200 J',
+            'Internal energy increases by 200 J',
+            'Energy is conserved: heat in minus work out'
+        ],
+        helper: 'First Law: ΔU = Q - W (energy conservation)',
+        solution: 'ΔU = 200 J',
+        realWorldContext: 'Energy accounting in thermodynamic systems'
+    });
+
+    // Problem 2: Isothermal Work
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Isothermal Work Calculation',
+        problem: '3 moles of ideal gas expand isothermally at 400 K from 0.01 m³ to 0.03 m³. Find work done. (R = 8.314 J/(mol·K))',
+        parameters: { 
+            n: 3, T: 400, 
+            V_initial: 0.01, V_final: 0.03,
+            R: 8.314
+        },
+        type: 'isothermal_process',
+        context: { difficulty: 'intermediate', topic: 'Isothermal Processes' },
+        subparts: [
+            'Given: n = 3 mol, T = 400 K (constant)',
+            '       V₁ = 0.01 m³, V₂ = 0.03 m³',
+            'For isothermal process: ΔU = 0',
+            'From First Law: Q = W',
+            'Work formula: W = nRT ln(V₂/V₁)',
+            'W = 3 × 8.314 × 400 × ln(0.03/0.01)',
+            'W = 9976.8 × ln(3)',
+            'W = 9976.8 × 1.099',
+            'W = 10,963 J ≈ 11.0 kJ',
+            'Gas does 11 kJ of work expanding'
+        ],
+        helper: 'Isothermal: ΔU = 0, so Q = W = nRT ln(V_f/V_i)',
+        solution: 'W = 11.0 kJ',
+        realWorldContext: 'Work extraction from slowly expanding gas'
+    });
+
+    // Problem 3: Adiabatic Work
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Adiabatic Work',
+        problem: '2 moles of ideal gas (C_v = 20.8 J/(mol·K)) expand adiabatically. Temperature drops from 400 K to 300 K. Find work done.',
+        parameters: { 
+            n: 2, C_v: 20.8,
+            T_initial: 400, T_final: 300
+        },
+        type: 'adiabatic_process',
+        context: { difficulty: 'intermediate', topic: 'Adiabatic Processes' },
+        subparts: [
+            'Given: n = 2 mol, C_v = 20.8 J/(mol·K)',
+            '       T₁ = 400 K, T₂ = 300 K',
+            'Adiabatic process: Q = 0',
+            'From First Law: ΔU = Q - W = -W',
+            'W = -ΔU = -nC_v(T₂ - T₁)',
+            'W = -2 × 20.8 × (300 - 400)',
+            'W = -41.6 × (-100)',
+            'W = 4160 J = 4.16 kJ',
+            'Gas does 4.16 kJ work',
+            'Internal energy decreases, temperature drops'
+        ],
+        helper: 'Adiabatic: Q = 0, so W = -ΔU = -nC_vΔT',
+        solution: 'W = 4.16 kJ',
+        realWorldContext: 'Rapid expansion without heat exchange'
+    });
+
+    // Problem 4: Isobaric Process
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Isobaric Heating',
+        problem: 'A gas at constant pressure 200 kPa expands from 0.02 m³ to 0.05 m³. Find work done.',
+        parameters: { 
+            P: 200000,
+            V_initial: 0.02, V_final: 0.05
+        },
+        type: 'isobaric_process',
+        context: { difficulty: 'beginner', topic: 'Isobaric Processes' },
+        subparts: [
+            'Given: P = 200 kPa = 200,000 Pa (constant)',
+            '       V₁ = 0.02 m³, V₂ = 0.05 m³',
+            'Isobaric work: W = PΔV',
+            'ΔV = V₂ - V₁ = 0.05 - 0.02 = 0.03 m³',
+            'W = 200,000 × 0.03',
+            'W = 6000 J = 6.0 kJ',
+            'Gas does 6 kJ of work at constant pressure',
+            'Work = area under P-V curve (rectangle)'
+        ],
+        helper: 'Isobaric: W = PΔV (constant pressure)',
+        solution: 'W = 6.0 kJ',
+        realWorldContext: 'Gas expansion against constant external pressure'
+    });
+
+    // Problem 5: Isochoric Process
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Isochoric Heating',
+        problem: '1.5 moles of gas (C_v = 12.5 J/(mol·K)) in rigid container heated from 300 K to 400 K. Find heat added and ΔU.',
+        parameters: { 
+            n: 1.5, C_v: 12.5,
+            T_initial: 300, T_final: 400,
+            V_constant: true
+        },
+        type: 'isochoric_process',
+        context: { difficulty: 'beginner', topic: 'Isochoric Processes' },
+        subparts: [
+            'Given: n = 1.5 mol, C_v = 12.5 J/(mol·K)',
+            '       T₁ = 300 K, T₂ = 400 K',
+            '       Volume constant (rigid container)',
+            'Isochoric process: W = 0 (no volume change)',
+            'From First Law: ΔU = Q - W = Q',
+            'ΔU = Q = nC_vΔT',
+            'ΔU = 1.5 × 12.5 × (400 - 300)',
+            'ΔU = 18.75 × 100',
+            'ΔU = 1875 J = 1.875 kJ',
+            'All heat goes to internal energy'
+        ],
+        helper: 'Isochoric: W = 0, so Q = ΔU = nC_vΔT',
+        solution: 'Q = ΔU = 1.875 kJ',
+        realWorldContext: 'Heating gas in rigid container'
+    });
+
+    // Problem 6: Cyclic Process
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Cyclic Process',
+        problem: 'A gas undergoes a cycle: absorbs 1000 J in step 1, releases 600 J in step 2, does 300 J work in step 1. Find work in step 2.',
+        parameters: { 
+            Q1: 1000, Q2: -600, W1: 300
+        },
+        type: 'first_law',
+        context: { difficulty: 'intermediate', topic: 'Cyclic Processes' },
+        subparts: [
+            'Given: Step 1: Q₁ = 1000 J, W₁ = 300 J',
+            '       Step 2: Q₂ = -600 J (released)',
+            'For complete cycle: ΔU_cycle = 0',
+            'First Law for step 1: ΔU₁ = Q₁ - W₁',
+            'ΔU₁ = 1000 - 300 = 700 J',
+            'For cycle: ΔU₁ + ΔU₂ = 0',
+            'ΔU₂ = -700 J',
+            'First Law for step 2: ΔU₂ = Q₂ - W₂',
+            '-700 = -600 - W₂',
+            'W₂ = -600 + 700 = 100 J',
+            'Step 2: gas does 100 J work'
+        ],
+        helper: 'For complete cycle: ΔU_total = 0',
+        solution: 'W₂ = 100 J',
+        realWorldContext: 'Analyzing heat engine cycles'
+    });
+
+    // Problem 7: Entropy Change
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Entropy Change',
+        problem: 'A system absorbs 800 J of heat reversibly at constant temperature 400 K. Find entropy change.',
+        parameters: { 
+            Q: 800, T: 400
+        },
+        type: 'entropy',
+        context: { difficulty: 'intermediate', topic: 'Entropy' },
+        subparts: [
+            'Given: Q = 800 J (reversible heat transfer)',
+            '       T = 400 K (constant)',
+            'For reversible process at constant T:',
+            'ΔS = Q_rev/T',
+            'ΔS = 800 / 400',
+            'ΔS = 2.0 J/K',
+            'Entropy increases by 2 J/K',
+            'Positive ΔS: heat absorbed',
+            'Entropy measures energy dispersal'
+        ],
+        helper: 'Entropy change: ΔS = Q_rev/T for isothermal process',
+        solution: 'ΔS = 2.0 J/K',
+        realWorldContext: 'Quantifying disorder increase in systems'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HEAT ENGINES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedHeatEngines() {
+    const relatedProblems = [];
+
+    // Problem 1: Heat Engine Efficiency
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Heat Engine Efficiency',
+        problem: 'A heat engine absorbs 1000 J from hot reservoir and exhausts 600 J to cold reservoir. Find efficiency.',
+        parameters: { 
+            Q_hot: 1000, Q_cold: 600
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'beginner', topic: 'Heat Engine Basics' },
+        subparts: [
+            'Given: Q_h = 1000 J (heat input)',
+            '       Q_c = 600 J (heat output)',
+            'Work done: W = Q_h - Q_c',
+            'W = 1000 - 600 = 400 J',
+            'Efficiency: η = W/Q_h',
+            'η = 400/1000 = 0.40',
+            'η = 40%',
+            'Engine converts 40% of heat to work',
+            '60% wasted to cold reservoir'
+        ],
+        helper: 'Efficiency: η = W/Q_hot = 1 - Q_cold/Q_hot',
+        solution: 'η = 40%',
+        realWorldContext: 'Measuring heat engine performance'
+    });
+
+    // Problem 2: Carnot Efficiency
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Carnot Engine Efficiency',
+        problem: 'Find maximum theoretical efficiency of engine between reservoirs at 600 K and 300 K.',
+        parameters: { 
+            T_hot: 600, T_cold: 300,
+            engineType: 'carnot'
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'beginner', topic: 'Carnot Efficiency' },
+        subparts: [
+            'Given: T_h = 600 K, T_c = 300 K',
+            'Carnot efficiency (maximum possible):',
+            'η_Carnot = 1 - T_c/T_h',
+            'η = 1 - 300/600',
+            'η = 1 - 0.5',
+            'η = 0.50 = 50%',
+            'No real engine can exceed this',
+            'Second law limits efficiency',
+            'Higher T_h or lower T_c improves efficiency'
+        ],
+        helper: 'Carnot efficiency: η_max = 1 - T_cold/T_hot',
+        solution: 'η_max = 50%',
+        realWorldContext: 'Theoretical limit on engine efficiency'
+    });
+
+    // Problem 3: Power Output
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Heat Engine Power',
+        problem: 'A 30% efficient engine absorbs heat at rate of 1000 W. Find power output.',
+        parameters: { 
+            efficiency: 0.30, Q_hot_rate: 1000
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'beginner', topic: 'Power Calculations' },
+        subparts: [
+            'Given: η = 30% = 0.30',
+            '       Q̇_h = 1000 W (heat input rate)',
+            'Efficiency: η = Ẇ/Q̇_h',
+            'Power output: Ẇ = η × Q̇_h',
+            'Ẇ = 0.30 × 1000',
+            'Ẇ = 300 W',
+            'Engine produces 300 W of power',
+            'Waste heat: Q̇_c = 1000 - 300 = 700 W',
+            '700 W rejected to cold reservoir'
+        ],
+        helper: 'Power = efficiency × heat input rate',
+        solution: 'Power = 300 W',
+        realWorldContext: 'Calculating useful power from heat engines'
+    });
+
+    // Problem 4: Refrigerator COP
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Refrigerator Performance',
+        problem: 'A refrigerator removes 800 J from cold space using 200 J of work. Find coefficient of performance (COP).',
+        parameters: { 
+            Q_cold: 800, W: 200
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'intermediate', topic: 'Refrigerators' },
+        subparts: [
+            'Given: Q_c = 800 J (heat removed)',
+            '       W = 200 J (work input)',
+            'For refrigerator: COP = Q_c/W',
+            'COP = 800/200',
+            'COP = 4.0',
+            'For every 1 J of work, removes 4 J of heat',
+            'Heat to hot reservoir: Q_h = Q_c + W',
+            'Q_h = 800 + 200 = 1000 J',
+            'Higher COP = better refrigerator'
+        ],
+        helper: 'Refrigerator COP = Q_cold/W (higher is better)',
+        solution: 'COP = 4.0',
+        realWorldContext: 'Measuring refrigerator efficiency'
+    });
+
+    // Problem 5: Heat Pump COP
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Heat Pump Performance',
+        problem: 'A heat pump delivers 1200 J to warm space using 300 J of work. Find COP.',
+        parameters: { 
+            Q_hot: 1200, W: 300
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'intermediate', topic: 'Heat Pumps' },
+        subparts: [
+            'Given: Q_h = 1200 J (heat delivered)',
+            '       W = 300 J (work input)',
+            'For heat pump: COP = Q_h/W',
+            'COP = 1200/300',
+            'COP = 4.0',
+            'For every 1 J of work, delivers 4 J of heat',
+            'Heat from cold: Q_c = Q_h - W',
+            'Q_c = 1200 - 300 = 900 J',
+            'COP_heat_pump = COP_refrigerator + 1'
+        ],
+        helper: 'Heat pump COP = Q_hot/W = 1 + COP_refrigerator',
+        solution: 'COP = 4.0',
+        realWorldContext: 'Efficiency of heat pump heating systems'
+    });
+
+    // Problem 6: Carnot Refrigerator
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Carnot Refrigerator COP',
+        problem: 'Find maximum COP for refrigerator between -20°C and 25°C reservoirs.',
+        parameters: { 
+            T_cold: 253.15, T_hot: 298.15,
+            engineType: 'carnot'
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'intermediate', topic: 'Carnot Refrigerator' },
+        subparts: [
+            'Given: T_c = -20°C = 253.15 K',
+            '       T_h = 25°C = 298.15 K',
+            'Carnot refrigerator COP (maximum):',
+            'COP_max = T_c/(T_h - T_c)',
+            'COP_max = 253.15/(298.15 - 253.15)',
+            'COP_max = 253.15/45',
+            'COP_max = 5.63',
+            'No real refrigerator can exceed this',
+            'Smaller temperature difference → higher COP',
+            'Real refrigerators have lower COP'
+        ],
+        helper: 'Carnot refrigerator: COP_max = T_cold/(T_hot - T_cold)',
+        solution: 'COP_max = 5.63',
+        realWorldContext: 'Theoretical limit on refrigerator performance'
+    });
+
+    // Problem 7: Comparing Engines
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Engine Comparison',
+        problem: 'Engine A: 35% efficient between 600 K and 300 K. Engine B: 40% efficient between 800 K and 300 K. Which is closer to Carnot limit?',
+        parameters: { 
+            engineA: { efficiency: 0.35, T_hot: 600, T_cold: 300 },
+            engineB: { efficiency: 0.40, T_hot: 800, T_cold: 300 }
+        },
+        type: 'heat_engine',
+        context: { difficulty: 'advanced', topic: 'Engine Analysis' },
+        subparts: [
+            'Given: Engine A: η = 35%, T_h = 600 K, T_c = 300 K',
+            '       Engine B: η = 40%, T_h = 800 K, T_c = 300 K',
+            'Engine A Carnot efficiency:',
+            'η_Carnot,A = 1 - 300/600 = 0.50 = 50%',
+            'Engine A: 35%/50% = 70% of Carnot',
+            'Engine B Carnot efficiency:',
+            'η_Carnot,B = 1 - 300/800 = 0.625 = 62.5%',
+            'Engine B: 40%/62.5% = 64% of Carnot',
+            'Engine A is closer to its Carnot limit',
+            'Engine A is better designed for its temperatures'
+        ],
+        helper: 'Compare actual efficiency to Carnot efficiency',
+        solution: 'Engine A closer to Carnot limit (70% vs 64%)',
+        realWorldContext: 'Evaluating relative engine performance'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVE RELATED PROBLEMS USING WORKBOOKS ==============
+
+function solveTemperatureHeatRelatedProblems() {
+    const problems = generateRelatedTemperatureHeat();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Temperature/Heat Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveThermalExpansionRelatedProblems() {
+    const problems = generateRelatedThermalExpansion();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Thermal Expansion Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCalorimetryRelatedProblems() {
+    const problems = generateRelatedCalorimetry();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Calorimetry Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveHeatTransferRelatedProblems() {
+    const problems = generateRelatedHeatTransfer();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Heat Transfer Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveGasLawsRelatedProblems() {
+    const problems = generateRelatedGasLawsPhysics();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Gas Laws Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveThermodynamicProcessesRelatedProblems() {
+    const problems = generateRelatedThermodynamicProcesses();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Thermodynamic Processes Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveHeatEnginesRelatedProblems() {
+    const problems = generateRelatedHeatEngines();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Heat Engines Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedThermodynamicsMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveThermodynamicsProblem({
+            equation: problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveThermodynamicsDocument() {
+    console.log('Generating Comprehensive Thermodynamics & Heat Workbook with Related Problems...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Thermodynamics & Heat Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Temperature, Heat Transfer, Gas Laws, and Thermodynamic Processes',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Temperature and Heat
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Temperature and Heat (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const temperatureProblems = generateRelatedTemperatureHeat();
+    temperatureProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part II: Thermal Expansion
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Thermal Expansion (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const thermalExpansionProblems = generateRelatedThermalExpansion();
+    thermalExpansionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 8}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part III: Calorimetry
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Calorimetry (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const calorimetryProblems = generateRelatedCalorimetry();
+    calorimetryProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 15}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IV: Heat Transfer
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Heat Transfer (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const heatTransferProblems = generateRelatedHeatTransfer();
+    heatTransferProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 22}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part V: Gas Laws
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Gas Laws and Kinetic Theory (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const gasLawsProblems = generateRelatedGasLawsPhysics();
+    gasLawsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 29}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VI: Thermodynamic Processes
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Thermodynamic Processes (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const thermodynamicProcessesProblems = generateRelatedThermodynamicProcesses();
+    thermodynamicProcessesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 36}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VII: Heat Engines
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Heat Engines and Refrigerators (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const heatEnginesProblems = generateRelatedHeatEngines();
+    heatEnginesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 43}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: TEMPERATURE AND HEAT ==============
+    console.log('\nProcessing Part I: Temperature and Heat...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Temperature and Heat',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const temperatureSolved = solveTemperatureHeatRelatedProblems();
+    temperatureSolved.forEach((solved, index) => {
+        console.log(`  Adding Temperature/Heat Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: THERMAL EXPANSION ==============
+    console.log('\nProcessing Part II: Thermal Expansion...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Thermal Expansion',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const thermalExpansionSolved = solveThermalExpansionRelatedProblems();
+    thermalExpansionSolved.forEach((solved, index) => {
+        console.log(`  Adding Thermal Expansion Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 8}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: CALORIMETRY ==============
+    console.log('\nProcessing Part III: Calorimetry...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Calorimetry',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const calorimetrySolved = solveCalorimetryRelatedProblems();
+    calorimetrySolved.forEach((solved, index) => {
+        console.log(`  Adding Calorimetry Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 15}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: HEAT TRANSFER ==============
+    console.log('\nProcessing Part IV: Heat Transfer...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Heat Transfer',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const heatTransferSolved = solveHeatTransferRelatedProblems();
+    heatTransferSolved.forEach((solved, index) => {
+        console.log(`  Adding Heat Transfer Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 22}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: GAS LAWS ==============
+    console.log('\nProcessing Part V: Gas Laws and Kinetic Theory...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Gas Laws and Kinetic Theory',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const gasLawsSolved = solveGasLawsRelatedProblems();
+    gasLawsSolved.forEach((solved, index) => {
+        console.log(`  Adding Gas Laws Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 29}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: THERMODYNAMIC PROCESSES ==============
+    console.log('\nProcessing Part VI: Thermodynamic Processes...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Thermodynamic Processes',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const thermodynamicProcessesSolved = solveThermodynamicProcessesRelatedProblems();
+    thermodynamicProcessesSolved.forEach((solved, index) => {
+        console.log(`  Adding Thermodynamic Processes Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 36}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VII: HEAT ENGINES ==============
+    console.log('\nProcessing Part VII: Heat Engines and Refrigerators...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Heat Engines and Refrigerators',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const heatEnginesSolved = solveHeatEnginesRelatedProblems();
+    heatEnginesSolved.forEach((solved, index) => {
+        console.log(`  Adding Heat Engines Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 43}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_thermodynamics_heat_workbook.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE THERMODYNAMICS DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 49');
+        console.log('    - Temperature and Heat: 7 problems');
+        console.log('    - Thermal Expansion: 7 problems');
+        console.log('    - Calorimetry: 7 problems');
+        console.log('    - Heat Transfer: 7 problems');
+        console.log('    - Gas Laws and Kinetic Theory: 7 problems');
+        console.log('    - Thermodynamic Processes: 7 problems');
+        console.log('    - Heat Engines and Refrigerators: 7 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I: Temperature and Heat (Problems 1-7)');
+        console.log('  • Part II: Thermal Expansion (Problems 8-14)');
+        console.log('  • Part III: Calorimetry (Problems 15-21)');
+        console.log('  • Part IV: Heat Transfer (Problems 22-28)');
+        console.log('  • Part V: Gas Laws and Kinetic Theory (Problems 29-35)');
+        console.log('  • Part VI: Thermodynamic Processes (Problems 36-42)');
+        console.log('  • Part VII: Heat Engines and Refrigerators (Problems 43-49)');
+        console.log('\n📄 EXPECTED PAGES: 150+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step solution');
+        console.log('  • Enhanced explanations and verification');
+        console.log('  • Key thermodynamic concepts');
+        console.log('  • Physical meanings and interpretations');
+        console.log('  • Pedagogical notes and teaching tips');
+        console.log('  • Alternative solution methods');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common mistakes and error prevention');
+        console.log('  • Units and dimensional analysis');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveThermodynamicsDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});

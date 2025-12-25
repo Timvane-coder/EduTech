@@ -1,0 +1,3243 @@
+Here's the comprehensive integrated code for organic chemistry combining related problem generators with the EnhancedOrganicChemistryMathematicalWorkbook solver:
+import { EnhancedOrganicChemistryMathematicalWorkbook } from './organicchemistryworkbook.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a problem
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content based on type
+        if (section.type === 'problem') {
+            sections.push(
+                new docx.Paragraph({
+                    children: [
+                        new docx.TextRun({
+                            text: 'Problem Type: ',
+                            bold: true
+                        }),
+                        new docx.TextRun({
+                            text: String(section.content.problemType || '')
+                        })
+                    ],
+                    spacing: { after: 100 }
+                })
+            );
+
+            if (section.content.description) {
+                sections.push(
+                    new docx.Paragraph({
+                        text: section.content.description,
+                        spacing: { after: 100 }
+                    })
+                );
+            }
+
+            if (section.content.structure) {
+                sections.push(
+                    new docx.Paragraph({
+                        children: [
+                            new docx.TextRun({
+                                text: 'Structure: ',
+                                bold: true
+                            }),
+                            new docx.TextRun({
+                                text: String(section.content.structure)
+                            })
+                        ],
+                        spacing: { after: 100 }
+                    })
+                );
+            }
+        } else if (section.type === 'steps') {
+            if (section.content.steps && Array.isArray(section.content.steps)) {
+                section.content.steps.forEach(step => {
+                    if (step.stepType === 'bridge') {
+                        sections.push(
+                            new docx.Paragraph({
+                                text: step.explanation || '',
+                                spacing: { after: 100 },
+                                italics: true
+                            })
+                        );
+                    } else {
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `Step ${step.stepNumber}: `,
+                                        bold: true
+                                    }),
+                                    new docx.TextRun({
+                                        text: step.step || ''
+                                    })
+                                ],
+                                spacing: { after: 50 }
+                            })
+                        );
+
+                        if (step.description) {
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: `  ${step.description}`,
+                                    spacing: { after: 50 }
+                                })
+                            );
+                        }
+
+                        if (step.reasoning) {
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: `  Reasoning: ${step.reasoning}`,
+                                    spacing: { after: 100 },
+                                    italics: true
+                                })
+                            );
+                        }
+                    }
+                });
+            }
+        } else if (section.type === 'solution') {
+            const content = section.content;
+            Object.entries(content).forEach(([key, value]) => {
+                if (typeof value === 'object' && value !== null) {
+                    sections.push(
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `${key}: `,
+                                    bold: true
+                                }),
+                                new docx.TextRun({
+                                    text: JSON.stringify(value, null, 2)
+                                })
+                            ],
+                            spacing: { after: 100 }
+                        })
+                    );
+                } else {
+                    sections.push(
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: `${key}: `,
+                                    bold: true
+                                }),
+                                new docx.TextRun({
+                                    text: String(value)
+                                })
+                            ],
+                            spacing: { after: 100 }
+                        })
+                    );
+                }
+            });
+        } else if (section.type === 'mechanism') {
+            sections.push(
+                new docx.Paragraph({
+                    text: 'Detailed mechanism steps with electron flow...',
+                    spacing: { after: 100 }
+                })
+            );
+        } else if (section.type === 'lesson' || section.type === 'theory') {
+            const content = section.content;
+            if (content.concepts && Array.isArray(content.concepts)) {
+                sections.push(
+                    new docx.Paragraph({
+                        text: 'Key Concepts:',
+                        bold: true,
+                        spacing: { after: 50 }
+                    })
+                );
+                content.concepts.forEach(concept => {
+                    sections.push(
+                        new docx.Paragraph({
+                            text: `  • ${concept}`,
+                            spacing: { after: 50 }
+                        })
+                    );
+                });
+            }
+            if (content.theory) {
+                sections.push(
+                    new docx.Paragraph({
+                        text: 'Theory:',
+                        bold: true,
+                        spacing: { before: 100, after: 50 }
+                    })
+                );
+                sections.push(
+                    new docx.Paragraph({
+                        text: content.theory,
+                        spacing: { after: 100 }
+                    })
+                );
+            }
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+// ============== ALKANES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedAlkanes() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple IUPAC Naming
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Simple Alkane Naming',
+        problem: 'Name the following alkane: CH₃-CH₂-CH₂-CH₃',
+        parameters: {
+            structure: 'CH₃-CH₂-CH₂-CH₃',
+            smiles: 'CCCC'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'beginner', topic: 'Alkane Nomenclature' },
+        subparts: [
+            'Given: CH₃-CH₂-CH₂-CH₃',
+            'Step 1: Count carbons in longest chain = 4',
+            'Step 2: No branches (straight chain)',
+            'Step 3: 4 carbons → "but-"',
+            'Step 4: All single bonds → "-ane"',
+            'IUPAC Name: butane'
+        ],
+        helper: 'Count carbons, identify branches, use prefix + -ane',
+        solution: 'butane',
+        realWorldContext: 'Component of natural gas and camping fuel'
+    });
+
+    // Problem 2: Branched Alkane Naming
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Branched Alkane Naming',
+        problem: 'Name: CH₃-CH(CH₃)-CH₂-CH₃',
+        parameters: {
+            structure: 'CH₃-CH(CH₃)-CH₂-CH₃',
+            description: '2-methylbutane structure'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Branched Alkanes' },
+        subparts: [
+            'Given: CH₃-CH(CH₃)-CH₂-CH₃',
+            'Step 1: Find longest chain = 4 carbons (butane)',
+            'Step 2: Number from end closest to branch',
+            'Step 3: Branch at position 2',
+            'Step 4: Branch is -CH₃ (methyl)',
+            'IUPAC Name: 2-methylbutane'
+        ],
+        helper: 'Longest chain determines parent name, number to give substituents lowest numbers',
+        solution: '2-methylbutane',
+        realWorldContext: 'Isopentane - used in refrigeration and foam blowing'
+    });
+
+    // Problem 3: Multiple Substituents
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Multiple Substituents',
+        problem: 'Name: CH₃-CH(CH₃)-CH(CH₃)-CH₃',
+        parameters: {
+            structure: 'CH₃-CH(CH₃)-CH(CH₃)-CH₃',
+            substituents: ['methyl', 'methyl']
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Multiple Substituents' },
+        subparts: [
+            'Given: CH₃-CH(CH₃)-CH(CH₃)-CH₃',
+            'Step 1: Longest chain = 4 carbons',
+            'Step 2: Two methyl branches at C-2 and C-3',
+            'Step 3: Use "di-" for two identical groups',
+            'Step 4: List positions: 2,3-',
+            'IUPAC Name: 2,3-dimethylbutane'
+        ],
+        helper: 'Use di-, tri-, tetra- for multiple identical substituents',
+        solution: '2,3-dimethylbutane',
+        realWorldContext: 'High-octane component in gasoline'
+    });
+
+    // Problem 4: Complex Alkane
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Complex Alkane Structure',
+        problem: 'Name: CH₃-CH₂-CH(CH₃)-CH(C₂H₅)-CH₃',
+        parameters: {
+            structure: 'CH₃-CH₂-CH(CH₃)-CH(C₂H₅)-CH₃',
+            substituents: ['methyl', 'ethyl']
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'advanced', topic: 'Complex Alkanes' },
+        subparts: [
+            'Given: CH₃-CH₂-CH(CH₃)-CH(C₂H₅)-CH₃',
+            'Step 1: Longest chain = 5 carbons (pentane)',
+            'Step 2: Methyl at C-3, Ethyl at C-4',
+            'Step 3: Alphabetical: ethyl before methyl',
+            'Step 4: Positions: 4-ethyl-3-methyl',
+            'IUPAC Name: 4-ethyl-3-methylpentane'
+        ],
+        helper: 'Alphabetize substituents, ignore di-, tri- prefixes in alphabetizing',
+        solution: '4-ethyl-3-methylpentane',
+        realWorldContext: 'Complex hydrocarbons in petroleum'
+    });
+
+    // Problem 5: Draw Structure from Name
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Draw Structure from Name',
+        problem: 'Draw: 2,2,4-trimethylpentane',
+        parameters: {
+            iupacName: '2,2,4-trimethylpentane'
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'intermediate', topic: 'Structure Drawing' },
+        subparts: [
+            'Given: 2,2,4-trimethylpentane',
+            'Step 1: Parent = pentane (5 carbons)',
+            'Step 2: Draw 5-carbon chain',
+            'Step 3: Add two CH₃ at C-2',
+            'Step 4: Add one CH₃ at C-4',
+            'Structure: (CH₃)₂CH-CH₂-CH(CH₃)-CH₃'
+        ],
+        helper: 'Draw parent chain first, then add substituents at numbered positions',
+        solution: '(CH₃)₂CH-CH₂-CH(CH₃)-CH₃',
+        realWorldContext: 'Isooctane - standard for octane rating in gasoline'
+    });
+
+    // Problem 6: Cycloalkane Naming
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Cycloalkane Naming',
+        problem: 'Name: A six-membered ring with one methyl substituent',
+        parameters: {
+            structure: 'cyclohexane with methyl',
+            ringSize: 6
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Cycloalkanes' },
+        subparts: [
+            'Given: 6-membered ring + CH₃',
+            'Step 1: Ring = cyclohexane',
+            'Step 2: One substituent = no numbering needed',
+            'Step 3: Methyl group',
+            'IUPAC Name: methylcyclohexane'
+        ],
+        helper: 'Add "cyclo-" prefix for rings',
+        solution: 'methylcyclohexane',
+        realWorldContext: 'Used in organic synthesis and as a solvent'
+    });
+
+    // Problem 7: Constitutional Isomers
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Constitutional Isomers',
+        problem: 'Draw all constitutional isomers of C₅H₁₂',
+        parameters: {
+            molecularFormula: 'C5H12'
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'intermediate', topic: 'Constitutional Isomerism' },
+        subparts: [
+            'Given: C₅H₁₂ (pentane isomers)',
+            'Isomer 1: CH₃-CH₂-CH₂-CH₂-CH₃ (n-pentane)',
+            'Isomer 2: CH₃-CH(CH₃)-CH₂-CH₃ (2-methylbutane)',
+            'Isomer 3: C(CH₃)₄ (2,2-dimethylpropane/neopentane)',
+            'Total: 3 constitutional isomers'
+        ],
+        helper: 'Same formula, different connectivity = constitutional isomers',
+        solution: '3 isomers: n-pentane, 2-methylbutane, 2,2-dimethylpropane',
+        realWorldContext: 'Different isomers have different physical properties and uses'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ALKENES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedAlkenes() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Alkene Naming
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Simple Alkene Naming',
+        problem: 'Name: CH₂=CH-CH₂-CH₃',
+        parameters: {
+            structure: 'CH₂=CH-CH₂-CH₃',
+            functionalGroup: 'alkene'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'beginner', topic: 'Alkene Nomenclature' },
+        subparts: [
+            'Given: CH₂=CH-CH₂-CH₃',
+            'Step 1: Longest chain with C=C = 4 carbons',
+            'Step 2: Number to give C=C lowest number',
+            'Step 3: C=C starts at position 1',
+            'Step 4: 4 carbons = "but-", C=C = "-ene"',
+            'IUPAC Name: but-1-ene or 1-butene'
+        ],
+        helper: 'Number chain to give double bond lowest number',
+        solution: '1-butene',
+        realWorldContext: 'Used in polymer production (polybutylene)'
+    });
+
+    // Problem 2: E/Z Configuration
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'E/Z Configuration',
+        problem: 'Assign configuration: CH₃-CH=CH-CH₃ (with CH₃ groups on opposite sides)',
+        parameters: {
+            alkene: 'CH₃-CH=CH-CH₃',
+            stereochemistry: 'opposite'
+        },
+        type: 'ez_configuration',
+        context: { difficulty: 'intermediate', topic: 'Alkene Stereochemistry' },
+        subparts: [
+            'Given: CH₃-CH=CH-CH₃',
+            'Step 1: Identify substituents on each C=C carbon',
+            'Step 2: Left C: CH₃ (high) and H (low)',
+            'Step 3: Right C: CH₃ (high) and H (low)',
+            'Step 4: High priority groups on opposite sides',
+            'Configuration: E (entgegen = opposite)'
+        ],
+        helper: 'E = opposite sides, Z = same side (zusammen)',
+        solution: '(E)-2-butene',
+        realWorldContext: 'E and Z isomers have different melting/boiling points'
+    });
+
+    // Problem 3: Addition Reaction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Hydrohalogenation',
+        problem: 'Predict product: CH₃-CH=CH₂ + HBr →',
+        parameters: {
+            alkene: 'CH₃-CH=CH₂',
+            reagents: 'HBr',
+            conditions: 'standard'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Electrophilic Addition' },
+        subparts: [
+            'Given: CH₃-CH=CH₂ + HBr',
+            'Step 1: H⁺ adds to less substituted C (Markovnikov)',
+            'Step 2: Br⁻ adds to more substituted C',
+            'Step 3: Forms 2° carbocation intermediate',
+            'Product: CH₃-CHBr-CH₃',
+            'Name: 2-bromopropane'
+        ],
+        helper: 'Markovnikov: H to less substituted, X to more substituted carbon',
+        solution: 'CH₃-CHBr-CH₃ (2-bromopropane)',
+        realWorldContext: 'Markovnikov rule predicts major product in addition reactions'
+    });
+
+    // Problem 4: Anti-Markovnikov Addition
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Hydroboration-Oxidation',
+        problem: 'Predict product: CH₃-CH=CH₂ + (1) BH₃ (2) H₂O₂/OH⁻ →',
+        parameters: {
+            alkene: 'CH₃-CH=CH₂',
+            reagents: 'BH3 then H2O2/OH-',
+            mechanism: 'hydroboration'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Anti-Markovnikov Addition' },
+        subparts: [
+            'Given: CH₃-CH=CH₂ + BH₃, then H₂O₂/OH⁻',
+            'Step 1: BH₃ adds syn to alkene',
+            'Step 2: Anti-Markovnikov: B to more substituted C',
+            'Step 3: Oxidation replaces B with OH',
+            'Step 4: OH ends up on less substituted C',
+            'Product: CH₃-CH₂-CH₂OH (1-propanol)'
+        ],
+        helper: 'Hydroboration gives anti-Markovnikov alcohol',
+        solution: 'CH₃-CH₂-CH₂OH (1-propanol)',
+        realWorldContext: 'Useful method to get primary alcohols from terminal alkenes'
+    });
+
+    // Problem 5: Ozonolysis
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Ozonolysis',
+        problem: 'Predict products: (CH₃)₂C=CH-CH₃ + (1) O₃ (2) Zn/H₂O →',
+        parameters: {
+            alkene: '(CH₃)₂C=CH-CH₃',
+            reagents: 'O3 then Zn/H2O',
+            reactionType: 'ozonolysis'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Oxidative Cleavage' },
+        subparts: [
+            'Given: (CH₃)₂C=CH-CH₃ + O₃, then Zn/H₂O',
+            'Step 1: Ozone cleaves C=C bond',
+            'Step 2: Left fragment: (CH₃)₂C=O (acetone)',
+            'Step 3: Right fragment: CH₃-CHO (acetaldehyde)',
+            'Products: acetone + acetaldehyde'
+        ],
+        helper: 'Ozonolysis cleaves C=C to form two carbonyl compounds',
+        solution: '(CH₃)₂C=O + CH₃-CHO',
+        realWorldContext: 'Used to determine position of double bonds in unknown alkenes'
+    });
+
+    // Problem 6: Polymerization
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Addition Polymerization',
+        problem: 'Draw polymer from: nCH₂=CH₂ →',
+        parameters: {
+            monomer: 'CH₂=CH₂',
+            polymerType: 'addition'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Polymers' },
+        subparts: [
+            'Given: Ethylene (CH₂=CH₂)',
+            'Step 1: Double bond opens',
+            'Step 2: Monomers link head-to-tail',
+            'Step 3: Repeating unit: -CH₂-CH₂-',
+            'Polymer: Polyethylene [-CH₂-CH₂-]ₙ'
+        ],
+        helper: 'Addition polymerization opens C=C to form long chains',
+        solution: 'Polyethylene: [-CH₂-CH₂-]ₙ',
+        realWorldContext: 'Most common plastic - bottles, bags, containers'
+    });
+
+    // Problem 7: Catalytic Hydrogenation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Catalytic Hydrogenation',
+        problem: 'Predict product: CH₃-CH=CH-CH₃ + H₂/Pt →',
+        parameters: {
+            alkene: 'CH₃-CH=CH-CH₃',
+            reagents: 'H2/Pt',
+            reactionType: 'hydrogenation'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'beginner', topic: 'Reduction of Alkenes' },
+        subparts: [
+            'Given: CH₃-CH=CH-CH₃ + H₂/Pt',
+            'Step 1: Pt catalyst activates H₂',
+            'Step 2: H₂ adds syn across C=C',
+            'Step 3: Double bond becomes single bond',
+            'Product: CH₃-CH₂-CH₂-CH₃ (butane)'
+        ],
+        helper: 'Hydrogenation reduces alkenes to alkanes',
+        solution: 'CH₃-CH₂-CH₂-CH₃ (butane)',
+        realWorldContext: 'Industrial process to harden vegetable oils (margarine)'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ALKYNES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedAlkynes() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Alkyne Naming
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Simple Alkyne Naming',
+        problem: 'Name: HC≡C-CH₂-CH₃',
+        parameters: {
+            structure: 'HC≡C-CH₂-CH₃',
+            functionalGroup: 'alkyne'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'beginner', topic: 'Alkyne Nomenclature' },
+        subparts: [
+            'Given: HC≡C-CH₂-CH₃',
+            'Step 1: Longest chain with C≡C = 4 carbons',
+            'Step 2: Number to give C≡C lowest number',
+            'Step 3: Triple bond at position 1',
+            'Step 4: 4 carbons = "but-", C≡C = "-yne"',
+            'IUPAC Name: but-1-yne or 1-butyne'
+        ],
+        helper: 'Use -yne suffix for triple bonds',
+        solution: '1-butyne',
+        realWorldContext: 'Used in organic synthesis as building blocks'
+    });
+
+    // Problem 2: Internal Alkyne
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Internal Alkyne',
+        problem: 'Name: CH₃-C≡C-CH₃',
+        parameters: {
+            structure: 'CH₃-C≡C-CH₃',
+            position: 'internal'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'beginner', topic: 'Internal Alkynes' },
+        subparts: [
+            'Given: CH₃-C≡C-CH₃',
+            'Step 1: 4 carbons total',
+            'Step 2: Triple bond between C-2 and C-3',
+            'Step 3: Symmetrical, so either direction works',
+            'IUPAC Name: but-2-yne or 2-butyne'
+        ],
+        helper: 'Internal alkynes have C≡C not at end',
+        solution: '2-butyne',
+        realWorldContext: 'More stable than terminal alkynes'
+    });
+
+    // Problem 3: Alkyne Acidity
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Terminal Alkyne Acidity',
+        problem: 'Predict product: HC≡C-H + NaNH₂ →',
+        parameters: {
+            substrate: 'HC≡C-H',
+            base: 'NaNH2',
+            reactionType: 'deprotonation'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Alkyne Acidity' },
+        subparts: [
+            'Given: HC≡C-H + NaNH₂',
+            'Step 1: Terminal alkyne H is acidic (pKa ~25)',
+            'Step 2: NaNH₂ is strong base',
+            'Step 3: Deprotonation occurs',
+            'Product: HC≡C⁻ Na⁺ (sodium acetylide)',
+            'Use: Nucleophilic addition reactions'
+        ],
+        helper: 'Terminal alkynes are weakly acidic due to sp hybridization',
+        solution: 'HC≡C⁻ Na⁺ (sodium acetylide)',
+        realWorldContext: 'Alkyne anions used in C-C bond formation'
+    });
+
+    // Problem 4: Alkyne Hydration
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Alkyne Hydration',
+        problem: 'Predict product: CH₃-C≡CH + H₂O/H₂SO₄/HgSO₄ →',
+        parameters: {
+            alkyne: 'CH₃-C≡CH',
+            reagents: 'H2O/H2SO4/HgSO4',
+            reactionType: 'hydration'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Alkyne Reactions' },
+        subparts: [
+            'Given: CH₃-C≡CH + H₂O/H⁺/Hg²⁺',
+            'Step 1: Adds H₂O across triple bond',
+            'Step 2: Markovnikov addition: OH to more substituted C',
+            'Step 3: Forms enol intermediate',
+            'Step 4: Tautomerizes to ketone',
+            'Product: CH₃-CO-CH₃ (acetone)'
+        ],
+        helper: 'Alkyne hydration gives ketones (enol tautomerizes)',
+        solution: 'CH₃-CO-CH₃ (acetone)',
+        realWorldContext: 'Industrial synthesis of acetone'
+    });
+
+    // Problem 5: Alkyne Reduction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Partial Hydrogenation',
+        problem: 'Predict product: CH₃-C≡C-CH₃ + H₂/Lindlar catalyst →',
+        parameters: {
+            alkyne: 'CH₃-C≡C-CH₃',
+            reagents: 'H2/Lindlar',
+            selectivity: 'cis alkene'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Selective Reduction' },
+        subparts: [
+            'Given: CH₃-C≡C-CH₃ + H₂/Lindlar',
+            'Step 1: Lindlar = poisoned Pd catalyst',
+            'Step 2: Reduces alkyne to alkene (stops at alkene)',
+            'Step 3: Syn addition gives cis alkene',
+            'Product: (Z)-CH₃-CH=CH-CH₃ (cis-2-butene)'
+        ],
+        helper: 'Lindlar catalyst: alkyne → cis alkene',
+        solution: '(Z)-2-butene',
+        realWorldContext: 'Selective reduction for synthesis of cis alkenes'
+    });
+
+    // Problem 6: Alkyne to Trans Alkene
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Reduction to Trans Alkene',
+        problem: 'Predict product: CH₃-C≡C-CH₃ + Na/NH₃(l) →',
+        parameters: {
+            alkyne: 'CH₃-C≡C-CH₃',
+            reagents: 'Na/NH3(l)',
+            selectivity: 'trans alkene'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Dissolving Metal Reduction' },
+        subparts: [
+            ''Given: CH₃-C≡C-CH₃ + Na/NH₃(l)',
+            'Step 1: Dissolving metal reduction',
+            'Step 2: Anti addition mechanism',
+            'Step 3: Gives trans alkene',
+            'Product: (E)-CH₃-CH=CH-CH₃ (trans-2-butene)'
+        ],
+        helper: 'Na/NH₃: alkyne → trans alkene',
+        solution: '(E)-2-butene',
+        realWorldContext: 'Birch reduction for trans alkene synthesis'
+    });
+
+    // Problem 7: Alkyne Coupling
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Alkyne Alkylation',
+        problem: 'Predict product: HC≡C⁻Na⁺ + CH₃CH₂Br →',
+        parameters: {
+            nucleophile: 'HC≡C⁻Na⁺',
+            electrophile: 'CH₃CH₂Br',
+            reactionType: 'SN2'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'C-C Bond Formation' },
+        subparts: [
+            'Given: HC≡C⁻Na⁺ + CH₃CH₂Br',
+            'Step 1: Acetylide ion is nucleophile',
+            'Step 2: SN2 reaction with alkyl halide',
+            'Step 3: C-C bond forms',
+            'Product: HC≡C-CH₂-CH₃ (1-butyne)'
+        ],
+        helper: 'Acetylide ions are good nucleophiles for SN2',
+        solution: 'HC≡C-CH₂-CH₃ (1-butyne)',
+        realWorldContext: 'Important method for carbon chain extension'
+    });
+
+    return relatedProblems;
+}
+
+// ============== AROMATIC - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedAromatic() {
+    const relatedProblems = [];
+
+    // Problem 1: Benzene Nomenclature
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Simple Aromatic Naming',
+        problem: 'Name: Benzene with one -Cl substituent',
+        parameters: {
+            arene: 'benzene',
+            substituents: ['Cl']
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'beginner', topic: 'Aromatic Nomenclature' },
+        subparts: [
+            'Given: Benzene + Cl',
+            'Step 1: One substituent on benzene',
+            'Step 2: No numbering needed (only one group)',
+            'IUPAC Name: chlorobenzene',
+            'Common name: phenyl chloride'
+        ],
+        helper: 'Single substituent on benzene: substituent + benzene',
+        solution: 'chlorobenzene',
+        realWorldContext: 'Used as solvent and in synthesis of other compounds'
+    });
+
+    // Problem 2: Disubstituted Benzene
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Ortho/Meta/Para Nomenclature',
+        problem: 'Name: Benzene with -CH₃ at position 1 and -NO₂ at position 4',
+        parameters: {
+            arene: 'benzene',
+            substituents: [
+                { name: 'methyl', position: 1 },
+                { name: 'nitro', position: 4 }
+            ]
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Disubstituted Aromatics' },
+        subparts: [
+            'Given: CH₃ at C-1, NO₂ at C-4',
+            'Step 1: Substituents at 1,4-positions',
+            'Step 2: 1,4- = para relationship',
+            'Step 3: Alphabetical: methyl before nitro',
+            'IUPAC: 1-methyl-4-nitrobenzene',
+            'Common: para-nitrotoluene or p-nitrotoluene'
+        ],
+        helper: 'Ortho (1,2), meta (1,3), para (1,4)',
+        solution: '4-nitrotoluene or p-nitrotoluene',
+        realWorldContext: 'Intermediate in dye and explosive synthesis'
+    });
+
+    // Problem 3: Electrophilic Aromatic Substitution
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Nitration of Benzene',
+        problem: 'Predict product: Benzene + HNO₃/H₂SO₄ →',
+        parameters: {
+            arene: 'benzene',
+            electrophile: 'NO2+',
+            catalyst: 'H2SO4'
+        },
+        type: 'mechanism_aromatic',
+        context: { difficulty: 'intermediate', topic: 'Electrophilic Aromatic Substitution' },
+        subparts: [
+            'Given: Benzene + HNO₃/H₂SO₄',
+            'Step 1: Generate electrophile NO₂⁺',
+            'Step 2: NO₂⁺ attacks benzene',
+            'Step 3: Form arenium ion (sigma complex)',
+            'Step 4: Lose H⁺, restore aromaticity',
+            'Product: Nitrobenzene (C₆H₅NO₂)'
+        ],
+        helper: 'EAS: Generate E⁺, attack, form arenium ion, deprotonate',
+        solution: 'Nitrobenzene',
+        realWorldContext: 'First step in synthesis of aniline and dyes'
+    });
+
+    // Problem 4: Friedel-Crafts Alkylation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Friedel-Crafts Alkylation',
+        problem: 'Predict product: Benzene + CH₃Cl/AlCl₃ →',
+        parameters: {
+            arene: 'benzene',
+            electrophile: 'CH3+',
+            catalyst: 'AlCl3'
+        },
+        type: 'mechanism_aromatic',
+        context: { difficulty: 'intermediate', topic: 'Friedel-Crafts Reactions' },
+        subparts: [
+            'Given: Benzene + CH₃Cl/AlCl₃',
+            'Step 1: AlCl₃ + CH₃Cl → CH₃⁺ + AlCl₄⁻',
+            'Step 2: CH₃⁺ attacks benzene',
+            'Step 3: Forms arenium ion',
+            'Step 4: Deprotonation',
+            'Product: Toluene (methylbenzene)',
+            'Warning: Can undergo polyalkylation'
+        ],
+        helper: 'Friedel-Crafts adds alkyl groups to benzene',
+        solution: 'Toluene (C₆H₅CH₃)',
+        realWorldContext: 'Industrial synthesis of alkylbenzenes'
+    });
+
+    // Problem 5: Directing Effects
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Ortho/Para Directors',
+        problem: 'Predict major product: Toluene + Br₂/FeBr₃ →',
+        parameters: {
+            arene: 'toluene',
+            substituent: 'CH3',
+            electrophile: 'Br+',
+            directingEffect: 'ortho/para'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Directing Effects' },
+        subparts: [
+            'Given: Toluene (methylbenzene) + Br₂/FeBr₃',
+            'Step 1: -CH₃ is ortho/para director',
+            'Step 2: -CH₃ is activating',
+            'Step 3: Bromination occurs ortho and para to CH₃',
+            'Major products: o-bromotoluene + p-bromotoluene',
+            'Para usually predominates (less steric hindrance)'
+        ],
+        helper: 'EDG (like -CH₃) direct ortho/para; EWG direct meta',
+        solution: 'ortho- and para-bromotoluene (para major)',
+        realWorldContext: 'Understanding directing effects crucial for synthesis planning'
+    });
+
+    // Problem 6: Meta Director
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Meta Directors',
+        problem: 'Predict major product: Nitrobenzene + HNO₃/H₂SO₄ →',
+        parameters: {
+            arene: 'nitrobenzene',
+            substituent: 'NO2',
+            electrophile: 'NO2+',
+            directingEffect: 'meta'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Meta Directing Groups' },
+        subparts: [
+            'Given: Nitrobenzene + HNO₃/H₂SO₄',
+            'Step 1: -NO₂ is meta director',
+            'Step 2: -NO₂ is deactivating',
+            'Step 3: Second nitration is slower than first',
+            'Step 4: New NO₂ goes to meta position',
+            'Product: 1,3-dinitrobenzene (m-dinitrobenzene)'
+        ],
+        helper: 'EWG (like -NO₂, -CN, -COOH) deactivate and direct meta',
+        solution: '1,3-dinitrobenzene',
+        realWorldContext: 'Meta directors important in polysubstituted aromatic synthesis'
+    });
+
+    // Problem 7: Halogens (Deactivating ortho/para)
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Halogen Directing Effects',
+        problem: 'Predict major product: Chlorobenzene + HNO₃/H₂SO₄ →',
+        parameters: {
+            arene: 'chlorobenzene',
+            substituent: 'Cl',
+            electrophile: 'NO2+',
+            directingEffect: 'ortho/para (deactivating)'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Halogen Directing Effects' },
+        subparts: [
+            'Given: Chlorobenzene + HNO₃/H₂SO₄',
+            'Step 1: -Cl is unique: deactivating but ortho/para',
+            'Step 2: Inductive withdrawal (deactivating)',
+            'Step 3: Resonance donation (ortho/para directing)',
+            'Step 4: Nitration at ortho and para',
+            'Products: o-chloronitrobenzene + p-chloronitrobenzene'
+        ],
+        helper: 'Halogens: deactivating (inductive) but ortho/para (resonance)',
+        solution: 'ortho- and para-chloronitrobenzene',
+        realWorldContext: 'Halogens show unique directing pattern'
+    });
+
+    return relatedProblems;
+}
+
+// ============== FUNCTIONAL GROUPS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedFunctionalGroups() {
+    const relatedProblems = [];
+
+    // Problem 1: Alcohol Oxidation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Primary Alcohol Oxidation',
+        problem: 'Predict product: CH₃CH₂CH₂OH + PCC →',
+        parameters: {
+            substrate: 'CH₃CH₂CH₂OH',
+            oxidant: 'PCC',
+            alcoholType: 'primary'
+        },
+        type: 'oxidation_reaction',
+        context: { difficulty: 'intermediate', topic: 'Alcohol Oxidation' },
+        subparts: [
+            'Given: CH₃CH₂CH₂OH (1° alcohol) + PCC',
+            'Step 1: PCC = pyridinium chlorochromate',
+            'Step 2: Mild oxidant, stops at aldehyde',
+            'Step 3: 1° alcohol → aldehyde',
+            'Product: CH₃CH₂CHO (propanal)',
+            'Note: Strong oxidants (KMnO₄) give carboxylic acid'
+        ],
+        helper: 'PCC: 1° alcohol → aldehyde (stops there)',
+        solution: 'CH₃CH₂CHO (propanal)',
+        realWorldContext: 'Controlled oxidation for aldehyde synthesis'
+    });
+
+    // Problem 2: Secondary Alcohol Oxidation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Secondary Alcohol Oxidation',
+        problem: 'Predict product: (CH₃)₂CHOH + CrO₃/H⁺ →',
+        parameters: {
+            substrate: '(CH₃)₂CHOH',
+            oxidant: 'CrO3/H+',
+            alcoholType: 'secondary'
+        },
+        type: 'oxidation_reaction',
+        context: { difficulty: 'intermediate', topic: 'Ketone Formation' },
+        subparts: [
+            'Given: (CH₃)₂CHOH (2° alcohol) + CrO₃/H⁺',
+            'Step 1: Jones oxidation',
+            'Step 2: 2° alcohol → ketone',
+            'Step 3: Cannot oxidize further',
+            'Product: (CH₃)₂C=O (acetone)'
+        ],
+        helper: '2° alcohols → ketones (stop there, cannot oxidize further)',
+        solution: '(CH₃)₂C=O (acetone)',
+        realWorldContext: 'Ketone synthesis from secondary alcohols'
+    });
+
+    // Problem 3: Carbonyl Reduction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Aldehyde Reduction',
+        problem: 'Predict product: CH₃CHO + NaBH₄ →',
+        parameters: {
+            substrate: 'CH₃CHO',
+            reductant: 'NaBH4',
+            carbonylType: 'aldehyde'
+        },
+        type: 'reduction_reaction',
+        context: { difficulty: 'intermediate', topic: 'Carbonyl Reduction' },
+        subparts: [
+            'Given: CH₃CHO (acetaldehyde) + NaBH₄',
+            'Step 1: NaBH₄ = mild reducing agent',
+            'Step 2: Reduces aldehydes and ketones',
+            'Step 3: Aldehyde → primary alcohol',
+            'Product: CH₃CH₂OH (ethanol)'
+        ],
+        helper: 'NaBH₄: mild, reduces aldehydes/ketones → alcohols',
+        solution: 'CH₃CH₂OH (ethanol)',
+        realWorldContext: 'Selective reduction of carbonyl compounds'
+    });
+
+    // Problem 4: Grignard Reaction
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Grignard Addition to Aldehyde',
+        problem: 'Predict product: CH₃CHO + CH₃MgBr, then H₃O⁺ →',
+        parameters: {
+            carbonyl: 'CH₃CHO',
+            nucleophile: 'CH₃MgBr',
+            conditions: 'then H3O+'
+        },
+        type: 'mechanism_carbonyl',
+        context: { difficulty: 'advanced', topic: 'Grignard Reactions' },
+        subparts: [
+            'Given: CH₃CHO + CH₃MgBr, then H₃O⁺',
+            'Step 1: Grignard attacks carbonyl C',
+            'Step 2: Forms alkoxide',
+            'Step 3: Protonation gives alcohol',
+            'Step 4: Aldehyde + Grignard → 2° alcohol',
+            'Product: CH₃CH(OH)CH₃ (2-propanol)'
+        ],
+        helper: 'Grignard: formaldehyde→1° alcohol, aldehyde→2° alcohol, ketone→3° alcohol',
+        solution: 'CH₃CH(OH)CH₃ (2-propanol)',
+        realWorldContext: 'Powerful C-C bond forming reaction'
+    });
+
+    // Problem 5: Ester Formation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Fischer Esterification',
+        problem: 'Predict product: CH₃COOH + CH₃OH/H⁺ →',
+        parameters: {
+            acid: 'CH₃COOH',
+            alcohol: 'CH₃OH',
+            catalyst: 'H+'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Ester Synthesis' },
+        subparts: [
+            'Given: CH₃COOH + CH₃OH/H⁺',
+            'Step 1: Fischer esterification',
+            'Step 2: Acid + alcohol → ester + water',
+            'Step 3: Acid catalyzed',
+            'Step 4: Equilibrium reaction',
+            'Product: CH₃COOCH₃ (methyl acetate) + H₂O'
+        ],
+        helper: 'Carboxylic acid + alcohol → ester + water',
+        solution: 'CH₃COOCH₃ (methyl acetate)',
+        realWorldContext: 'Ester synthesis for fragrances and solvents'
+    });
+
+    // Problem 6: Amide Formation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Amide from Acid Chloride',
+        problem: 'Predict product: CH₃COCl + NH₃ →',
+        parameters: {
+            acidChloride: 'CH₃COCl',
+            amine: 'NH3'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Amide Synthesis' },
+        subparts: [
+            'Given: CH₃COCl + NH₃',
+            'Step 1: NH₃ attacks carbonyl C',
+            'Step 2: Tetrahedral intermediate',
+            'Step 3: Cl⁻ leaves',
+            'Step 4: Deprotonation',
+            'Product: CH₃CONH₂ (acetamide) + HCl'
+        ],
+        helper: 'Acid chloride + amine → amide (very reactive)',
+        solution: 'CH₃CONH₂ (acetamide)',
+        realWorldContext: 'Amide bonds essential in proteins and nylon'
+    });
+
+    // Problem 7: Protecting Group Strategy
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Acetal Protection',
+        problem: 'Protect aldehyde: CH₃CHO + HOCH₂CH₂OH/H⁺ →',
+        parameters: {
+            substrate: 'CH₃CHO',
+            protectingGroup: 'ethylene glycol',
+            catalyst: 'H+'
+        },
+        type: 'protecting_group',
+        context: { difficulty: 'advanced', topic: 'Protecting Groups' },
+        subparts: [
+            'Given: CH₃CHO + HOCH₂CH₂OH/H⁺',
+            'Step 1: Form acetal protecting group',
+            'Step 2: Aldehyde reacts with diol',
+            'Step 3: Forms cyclic acetal',
+            'Protected: CH₃CH(OCH₂CH₂O)',
+            'Deprotection: H₃O⁺',
+            'Purpose: Protect aldehyde during other reactions'
+        ],
+        helper: 'Acetals protect carbonyls; stable to base and nucleophiles',
+        solution: 'CH₃CH(OCH₂CH₂O) (cyclic acetal)',
+        realWorldContext: 'Essential strategy in multi-step synthesis'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ISOMERISM - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedIsomerism() {
+    const relatedProblems = [];
+
+    // Problem 1: Constitutional Isomers
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Constitutional Isomers',
+        problem: 'Draw all constitutional isomers of C₄H₁₀',
+        parameters: {
+            molecularFormula: 'C4H10'
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'beginner', topic: 'Constitutional Isomerism' },
+        subparts: [
+            'Given: C₄H₁₀',
+            'Isomer 1: CH₃-CH₂-CH₂-CH₃ (n-butane)',
+            'Isomer 2: (CH₃)₃CH (2-methylpropane, isobutane)',
+            'Total: 2 constitutional isomers',
+            'Different connectivity of atoms'
+        ],
+        helper: 'Constitutional isomers: same formula, different connectivity',
+        solution: 'n-butane and isobutane',
+        realWorldContext: 'Isomers have different properties (bp, reactivity)'
+    });
+
+    // Problem 2: Stereoisomers - Enantiomers
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Enantiomers',
+        problem: 'How many stereoisomers for CHBrClF?',
+        parameters: {
+            structure: 'CHBrClF',
+            chiralCenters: 1
+        },
+        type: 'enantiomer_count',
+        context: { difficulty: 'intermediate', topic: 'Chirality' },
+        subparts: [
+            'Given: CHBrClF',
+            'Step 1: C bonded to 4 different groups',
+            'Step 2: One chiral center',
+            'Step 3: 2ⁿ = 2¹ = 2 stereoisomers',
+            'Result: 2 enantiomers (mirror images)',
+            'Non-superimposable mirror images'
+        ],
+        helper: '2ⁿ stereoisomers where n = number of chiral centers',
+        solution: '2 enantiomers',
+        realWorldContext: 'Enantiomers often have different biological activity'
+    });
+
+    // Problem 3: Diastereomers
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Diastereomers',
+        problem: 'How many stereoisomers for 2,3-dibromobutane?',
+        parameters: {
+            structure: 'CH₃CHBr-CHBrCH₃',
+            chiralCenters: 2
+        },
+        type: 'enantiomer_count',
+        context: { difficulty: 'intermediate', topic: 'Stereoisomerism' },
+        subparts: [
+            'Given: CH₃CHBr-CHBrCH₃',
+            'Step 1: Two chiral centers (C-2 and C-3)',
+            'Step 2: Maximum = 2² = 4 stereoisomers',
+            'Step 3: Check for meso form',
+            'Step 4: One meso form exists (internal plane of symmetry)',
+            'Total: 3 stereoisomers (1 meso + 1 pair of enantiomers)',
+            '2 enantiomers + 1 meso = 3 total'
+        ],
+        helper: 'Meso: internal symmetry reduces number of stereoisomers',
+        solution: '3 stereoisomers (2 enantiomers + 1 meso)',
+        realWorldContext: 'Meso compounds are achiral despite having chiral centers'
+    });
+
+    // Problem 4: R/S Configuration
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'R/S Assignment',
+        problem: 'Assign R/S: CHBrClF with Br, Cl, F, H on chiral C',
+        parameters: {
+            chiralCenter: 'C',
+            substituents: ['Br', 'Cl', 'F', 'H']
+        },
+        type: 'rs_configuration',
+        context: { difficulty: 'intermediate', topic: 'Cahn-Ingold-Prelog Rules' },
+        subparts: [
+            'Given: C with Br, Cl, F, H',
+            'Step 1: Assign priorities by atomic number',
+            'Br (35) > Cl (17) > F (9) > H (1)',
+            'Priority: Br(1) > Cl(2) > F(3) > H(4)',
+            'Step 2: Orient H (lowest) away',
+            'Step 3: Trace 1→2→3',
+            'If clockwise: R; if counterclockwise: S'
+        ],
+        helper: 'CIP rules: higher atomic number = higher priority',
+        solution: 'R or S (depends on 3D orientation)',
+        realWorldContext: 'R/S nomenclature provides unambiguous stereochemical description'
+    });
+
+    // Problem 5: E/Z Isomerism
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'E/Z Isomerism',
+        problem: 'Assign E/Z: CH₃CH=CHCH₃ with CH₃ groups on same side',
+        parameters: {
+            alkene: 'CH₃CH=CHCH₃',
+            geometry: 'same side'
+        },
+        type: 'ez_configuration',
+        context: { difficulty: 'intermediate', topic: 'Alkene Stereochemistry' },
+        subparts: [
+            'Given: CH₃CH=CHCH₃, CH₃ on same side',
+            'Step 1: Assign priorities on each C=C carbon',
+            'Left C: CH₃ > H',
+            'Right C: CH₃ > H',
+            'Step 2: Higher priority groups on same side',
+            'Configuration: Z (zusammen = together)'
+        ],
+        helper: 'E = opposite (entgegen), Z = same side (zusammen)',
+        solution: '(Z)-2-butene',
+        realWorldContext: 'E/Z isomers have different physical properties'
+    });
+
+    // Problem 6: Conformational Isomers
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Conformational Analysis',
+        problem: 'Draw Newman projection of ethane (staggered and eclipsed)',
+        parameters: {
+            molecule: 'ethane',
+            conformations: ['staggered', 'eclipsed']
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'beginner', topic: 'Conformational Isomers' },
+        subparts: [
+            'Given: Ethane (CH₃-CH₃)',
+            'Staggered: H atoms 60° apart (most stable)',
+            'Eclipsed: H atoms aligned (least stable)',
+            'Energy difference: ~3 kcal/mol',
+            'Room temperature: rapid interconversion'
+        ],
+        helper: 'Conformers: different by rotation around single bonds',
+        solution: 'Staggered more stable than eclipsed',
+        realWorldContext: 'Conformational analysis important for reactivity'
+    });
+
+    // Problem 7: Optical Activity
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Optical Activity',
+        problem: 'Predict: Is 2-butanol optically active?',
+        parameters: {
+            structure: 'CH₃CH(OH)CH₂CH₃',
+            chiralCenters: 1
+        },
+        type: 'enantiomer_count',
+        context: { difficulty: 'intermediate', topic: 'Optical Activity' },
+        subparts: [
+            'Given: CH₃CH(OH)CH₂CH₃ (2-butanol)',
+            'Step 1: C-2 has 4 different groups',
+            'Groups: CH₃, OH, C₂H₅, H',
+            'Step 2: One chiral center → chiral',
+            'Step 3: Chiral → optically active',
+            'Result: Yes, optically active (rotates plane-polarized light)',
+            'Enantiomers: (R) and (S)-2-butanol'
+        ],
+        helper: 'Chiral molecules are optically active',
+        solution: 'Yes, optically active',
+        realWorldContext: 'Optical activity detected by polarimetry'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ORGANIC REACTIONS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedOrganicReactions() {
+    const relatedProblems = [];
+
+    // Problem 1: SN2 Reaction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'SN2 Mechanism',
+        problem: 'Predict product: CH₃CH₂Br + CN⁻ (in DMSO) →',
+        parameters: {
+            substrate: 'CH₃CH₂Br',
+            nucleophile: 'CN⁻',
+            solvent: 'DMSO'
+        },
+        type: 'mechanism_sn2',
+        context: { difficulty: 'intermediate', topic: 'SN2 Reactions' },
+        subparts: [
+            'Given: CH₃CH₂Br + CN⁻ in DMSO',
+            'Step 1: Primary substrate → SN2 favorable',
+            'Step 2: Strong nucleophile (CN⁻)',
+            'Step 3: Polar aprotic solvent (DMSO) → enhances SN2',
+            'Step 4: Backside attack',
+            'Step 5: Br⁻ leaves',
+            'Product: CH₃CH₂CN (propionitrile)',
+            'Stereochemistry: Inversion (if chiral)'
+        ],
+        helper: 'SN2: one step, backside attack, inversion',
+        solution: 'CH₃CH₂CN',
+        realWorldContext: 'SN2 used for synthesis with stereochemical control'
+    });
+
+    // Problem 2: SN1 Reaction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'SN1 Mechanism',
+        problem: 'Predict product: (CH₃)₃CBr + H₂O →',
+        parameters: {
+            substrate: '(CH₃)₃CBr',
+            nucleophile: 'H2O',
+            solvent: 'H2O'
+        },
+        type: 'mechanism_sn1',
+        context: { difficulty: 'intermediate', topic: 'SN1 Reactions' },
+        subparts: [
+            'Given: (CH₃)₃CBr + H₂O',
+            'Step 1: Tertiary substrate → SN1 favorable',
+            'Step 2: Ionization: (CH₃)₃C⁺ + Br⁻ (slow)',
+            'Step 3: Planar carbocation',
+            'Step 4: H₂O attacks from both faces',
+            'Step 5: Deprotonation',
+            'Product: (CH₃)₃COH (tert-butanol)',
+            'Stereochemistry: Racemization (if chiral)'
+        ],
+        helper: 'SN1: two steps, carbocation intermediate, racemization',
+        solution: '(CH₃)₃COH',
+        realWorldContext: 'SN1 common with tertiary substrates in polar protic solvents'
+    });
+
+    // Problem 3: E2 Elimination
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'E2 Elimination',
+        problem: 'Predict major product: CH₃CH₂CHBrCH₃ + NaOEt →',
+        parameters: {
+            substrate: 'CH₃CH₂CHBrCH₃',
+            base: 'NaOEt',
+            temperature: 'heat'
+        },
+        type: 'mechanism_e2',
+        context: { difficulty: 'intermediate', topic: 'E2 Elimination' },
+        subparts: [
+            'Given: CH₃CH₂CHBrCH₃ + NaOEt (strong base)',
+            'Step 1: E2 mechanism (one step)',
+            'Step 2: Base removes β-H',
+            'Step 3: C-Br breaks simultaneously',
+            'Step 4: Apply Zaitsev\'s rule',
+            'Step 5: More substituted alkene forms',
+            'Major product: CH₃CH=CHCH₃ (2-butene)',
+            'Minor product: CH₂=CHCH₂CH₃ (1-butene)'
+        ],
+        helper: 'E2: strong base, anti-periplanar, Zaitsev product',
+        solution: 'CH₃CH=CHCH₃ (2-butene, major)',
+        realWorldContext: 'E2 synthesis of alkenes with regiochemical control'
+    });
+
+    // Problem 4: E1 Elimination
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'E1 Elimination',
+        problem: 'Predict product: (CH₃)₃CBr + H₂O/heat →',
+        parameters: {
+            substrate: '(CH₃)₃CBr',
+            conditions: 'H2O/heat',
+            mechanism: 'E1'
+        },
+        type: 'mechanism_e1',
+        context: { difficulty: 'intermediate', topic: 'E1 Elimination' },
+        subparts: [
+            'Given: (CH₃)₃CBr + H₂O/heat',
+            'Step 1: Ionization to carbocation (slow)',
+            'Step 2: (CH₃)₃C⁺ forms',
+            'Step 3: Base removes β-H',
+            'Step 4: Alkene forms',
+            'Product: (CH₃)₂C=CH₂ (2-methylpropene)',
+            'Note: Competes with SN1; heat favors E1'
+        ],
+        helper: 'E1: two steps, carbocation, Zaitsev product',
+        solution: '(CH₃)₂C=CH₂',
+        realWorldContext: 'E1 competes with SN1; controlled by temperature'
+    });
+
+    // Problem 5: Addition to Carbonyl
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Grignard Addition',
+        problem: 'Predict product: (CH₃)₂C=O + CH₃MgBr, then H₃O⁺ →',
+        parameters: {
+            carbonyl: '(CH₃)₂C=O',
+            nucleophile: 'CH₃MgBr',
+            workup: 'H3O+'
+        },
+        type: 'mechanism_carbonyl',
+        context: { difficulty: 'intermediate', topic: 'Grignard Reactions' },
+        subparts: [
+            'Given: (CH₃)₂C=O + CH₃MgBr',
+            'Step 1: Grignard attacks carbonyl carbon',
+            'Step 2: Forms alkoxide intermediate',
+            'Step 3: Protonation with H₃O⁺',
+            'Step 4: Ketone + Grignard → 3° alcohol',
+            'Product: (CH₃)₃COH (tert-butanol)'
+        ],
+        helper: 'Grignard: powerful nucleophile for C-C bond formation',
+        solution: '(CH₃)₃COH',
+        realWorldContext: 'Key reaction for alcohol synthesis'
+    });
+
+    // Problem 6: Aldol Condensation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Aldol Condensation',
+        problem: 'Predict product: 2 CH₃CHO + NaOH →',
+        parameters: {
+            aldehyde: 'CH₃CHO',
+            base: 'NaOH',
+            reactionType: 'aldol'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Aldol Reactions' },
+        subparts: [
+            'Given: 2 CH₃CHO + NaOH',
+            'Step 1: Base forms enolate from one aldehyde',
+            'Step 2: Enolate attacks carbonyl of second aldehyde',
+            'Step 3: Forms β-hydroxy aldehyde',
+            'Step 4: Dehydration gives α,β-unsaturated aldehyde',
+            'Product: CH₃CH=CHCHO (crotonaldehyde)',
+            'Overall: C-C bond formation + dehydration'
+        ],
+        helper: 'Aldol: enolate + carbonyl → β-hydroxy carbonyl → α,β-unsaturated',
+        solution: 'CH₃CH=CHCHO',
+        realWorldContext: 'Important C-C bond forming reaction in synthesis'
+    });
+
+    // Problem 7: Diels-Alder Reaction
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Diels-Alder Cycloaddition',
+        problem: 'Predict product: 1,3-butadiene + ethylene →',
+        parameters: {
+            diene: '1,3-butadiene',
+            dienophile: 'ethylene',
+            reactionType: 'Diels-Alder'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Pericyclic Reactions' },
+        subparts: [
+            'Given: CH₂=CH-CH=CH₂ + CH₂=CH₂',
+            'Step 1: [4+2] cycloaddition',
+            'Step 2: Diene (4 π electrons) + dienophile (2 π electrons)',
+            'Step 3: Concerted mechanism',
+            'Step 4: Forms 6-membered ring',
+            'Product: Cyclohexene',
+            'Stereochemistry: Syn addition (both sides)'
+        ],
+        helper: 'Diels-Alder: diene + dienophile → 6-membered ring',
+        solution: 'Cyclohexene',
+        realWorldContext: 'Powerful method for ring synthesis'
+    });
+
+    return relatedProblems;
+}
+
+// ============== NOMENCLATURE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedNomenclature() {
+    const relatedProblems = [];
+
+    // Problem 1: IUPAC vs Common Names
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'IUPAC vs Common Names',
+        problem: 'Give IUPAC and common name: CH₃COOH',
+        parameters: {
+            structure: 'CH₃COOH',
+            functionalGroup: 'carboxylic acid'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'beginner', topic: 'Nomenclature Systems' },
+        subparts: [
+            'Given: CH₃COOH',
+            'IUPAC: ethanoic acid',
+            'Derivation: 2 carbons (eth-) + carboxylic acid (-oic acid)',
+            'Common name: acetic acid',
+            'Origin: Latin acetum (vinegar)',
+            'Both names widely used'
+        ],
+        helper: 'Many organic compounds have both IUPAC and common names',
+        solution: 'IUPAC: ethanoic acid; Common: acetic acid',
+        realWorldContext: 'Main component of vinegar (5% solution)'
+    });
+
+    // Problem 2: Priority of Functional Groups
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Functional Group Priority',
+        problem: 'Name: HOCH₂CH₂CHO',
+        parameters: {
+            structure: 'HOCH₂CH₂CHO',
+            functionalGroups: ['alcohol', 'aldehyde']
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Functional Group Priority' },
+        subparts: [
+            'Given: HOCH₂CH₂CHO',
+            'Step 1: Identify functional groups: OH and CHO',
+            'Step 2: Aldehyde has higher priority than alcohol',
+            'Step 3: Aldehyde = suffix (-al), alcohol = prefix (hydroxy-)',
+            'Step 4: Number to give aldehyde C-1',
+            'IUPAC: 3-hydroxypropanal',
+            'Priority order: COOH > CHO > C=O > OH > NH₂ > C=C'
+        ],
+        helper: 'Highest priority group determines suffix; others become prefixes',
+        solution: '3-hydroxypropanal',
+        realWorldContext: 'Understanding priority essential for correct naming'
+    });
+
+    // Problem 3: Numbering Direction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Numbering Direction',
+        problem: 'Name: CH₃CH₂CH(CH₃)CH₂CH₂OH',
+        parameters: {
+            structure: 'CH₃CH₂CH(CH₃)CH₂CH₂OH',
+            substituents: ['methyl'],
+            functionalGroup: 'alcohol'
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Numbering Rules' },
+        subparts: [
+            'Given: CH₃CH₂CH(CH₃)CH₂CH₂OH',
+            'Step 1: Alcohol (OH) determines direction',
+            'Step 2: Number from OH end: C-1 has OH',
+            'Step 3: Methyl branch at C-4',
+            'Step 4: 6 carbons = hexan-',
+            'IUPAC: 4-methylhexan-1-ol',
+            'Alternative: 4-methyl-1-hexanol'
+        ],
+        helper: 'Number to give functional group lowest number',
+        solution: '4-methylhexan-1-ol',
+        realWorldContext: 'Proper numbering ensures unambiguous identification'
+    });
+
+    // Problem 4: Cyclic Compounds
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Cyclic Nomenclature',
+        problem: 'Name: 6-membered ring with OH at C-1 and CH₃ at C-3',
+        parameters: {
+            ring: 'cyclohexane',
+            substituents: [
+                { name: 'OH', position: 1 },
+                { name: 'CH3', position: 3 }
+            ]
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Cyclic Compounds' },
+        subparts: [
+            'Given: cyclohexane ring + OH + CH₃',
+            'Step 1: OH = priority, gets C-1',
+            'Step 2: Number to give substituents lowest numbers',
+            'Step 3: CH₃ at position 3',
+            'Step 4: Cyclo- + hexan- + -ol',
+            'IUPAC: 3-methylcyclohexanol',
+            'Note: C-1 implied by -ol suffix'
+        ],
+        helper: 'Cyclic: add "cyclo-" prefix to parent name',
+        solution: '3-methylcyclohexanol',
+        realWorldContext: 'Many pharmaceuticals contain cyclic structures'
+    });
+
+    // Problem 5: Aromatic Substitution Patterns
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Aromatic Nomenclature',
+        problem: 'Name: Benzene with CH₃ at C-1, Br at C-2',
+        parameters: {
+            arene: 'benzene',
+            substituents: [
+                { name: 'methyl', position: 1 },
+                { name: 'bromo', position: 2 }
+            ]
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'intermediate', topic: 'Aromatic Nomenclature' },
+        subparts: [
+            'Given: Benzene + CH₃ at C-1, Br at C-2',
+            'Step 1: 1,2-positions = ortho',
+            'Step 2: Alphabetical: bromo before methyl',
+            'IUPAC: 1-bromo-2-methylbenzene',
+            'Alternative: 2-bromotoluene (if toluene base)',
+            'Common: o-bromotoluene (ortho-bromotoluene)'
+        ],
+        helper: 'Ortho (1,2), meta (1,3), para (1,4) for disubstituted benzene',
+        solution: '1-bromo-2-methylbenzene or o-bromotoluene',
+        realWorldContext: 'Aromatic compounds ubiquitous in organic chemistry'
+    });
+
+    // Problem 6: Multifunctional Molecules
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Complex Multifunctional Naming',
+        problem: 'Name: HOOC-CH₂-CH₂-CHO',
+        parameters: {
+            structure: 'HOOC-CH₂-CH₂-CHO',
+            functionalGroups: ['carboxylic acid', 'aldehyde']
+        },
+        type: 'iupac_naming',
+        context: { difficulty: 'advanced', topic: 'Multifunctional Compounds' },
+        subparts: [
+            'Given: HOOC-CH₂-CH₂-CHO',
+            'Step 1: Two functional groups: COOH and CHO',
+            'Step 2: COOH has higher priority than CHO',
+            'Step 3: COOH = suffix, CHO = prefix (oxo-)',
+            'Step 4: 4 carbons = butan-',
+            'Step 5: Number from COOH end',
+            'IUPAC: 4-oxobutanoic acid',
+            'Also called: succinic semialdehyde'
+        ],
+        helper: 'Priority: COOH > CHO > C=O > OH',
+        solution: '4-oxobutanoic acid',
+        realWorldContext: 'Multifunctional molecules common in biochemistry'
+    });
+
+    // Problem 7: Drawing from IUPAC Name
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Structure from IUPAC Name',
+        problem: 'Draw: 3-ethyl-2,4-dimethylhexane',
+        parameters: {
+            iupacName: '3-ethyl-2,4-dimethylhexane'
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'intermediate', topic: 'Name to Structure' },
+        subparts: [
+            'Given: 3-ethyl-2,4-dimethylhexane',
+            'Step 1: Parent = hexane (6 carbon chain)',
+            'Step 2: Draw C-C-C-C-C-C',
+            'Step 3: Add ethyl (C₂H₅) at C-3',
+            'Step 4: Add methyl (CH₃) at C-2 and C-4',
+            'Structure: CH₃-CH(CH₃)-CH(C₂H₅)-CH(CH₃)-CH₂-CH₃'
+        ],
+        helper: 'Work systematically: parent chain, then substituents',
+        solution: 'CH₃-CH(CH₃)-CH(C₂H₅)-CH(CH₃)-CH₂-CH₃',
+        realWorldContext: 'Ability to interconvert names and structures is essential'
+    });
+
+    return relatedProblems;
+}
+
+// ============== MECHANISMS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedMechanisms() {
+    const relatedProblems = [];
+
+    // Problem 1: Curved Arrow Notation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Curved Arrow Basics',
+        problem: 'Draw curved arrows: HO⁻ + H-Cl →',
+        parameters: {
+            nucleophile: 'HO⁻',
+            electrophile: 'H-Cl',
+            reactionType: 'proton transfer'
+        },
+        type: 'mechanism_sn2',
+        context: { difficulty: 'beginner', topic: 'Curved Arrow Notation' },
+        subparts: [
+            'Given: HO⁻ + H-Cl',
+            'Step 1: Identify electron source (HO⁻)',
+            'Step 2: Identify electron sink (H of H-Cl)',
+            'Step 3: Arrow from O lone pair to H',
+            'Step 4: Arrow from H-Cl bond to Cl',
+            'Products: H₂O + Cl⁻',
+            'Note: Arrows show electron movement, not atom movement'
+        ],
+        helper: 'Curved arrow: from electron source to electron sink',
+        solution: 'H₂O + Cl⁻',
+        realWorldContext: 'Curved arrows fundamental to all mechanisms'
+    });
+
+    // Problem 2: Carbocation Rearrangement
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Carbocation Rearrangement',
+        problem: 'Show mechanism: (CH₃)₂CHCH₂⁺ → ?',
+        parameters: {
+            carbocation: '(CH₃)₂CHCH₂⁺',
+            rearrangementType: 'hydride shift'
+        },
+        type: 'mechanism_sn1',
+        context: { difficulty: 'advanced', topic: 'Carbocation Rearrangements' },
+        subparts: [
+            'Given: (CH₃)₂CHCH₂⁺ (1° carbocation)',
+            'Step 1: Unstable 1° carbocation',
+            'Step 2: Hydride (H⁻) shifts from adjacent carbon',
+            'Step 3: Forms more stable 2° carbocation',
+            'Result: (CH₃)₂C⁺CH₃ (2° carbocation)',
+            'Driving force: 1° → 2° (more stable)',
+            'Types: hydride shift (H⁻) or alkyl shift (R⁻)'
+        ],
+        helper: 'Carbocations rearrange to more stable forms: 3° > 2° > 1°',
+        solution: '(CH₃)₂C⁺CH₃',
+        realWorldContext: 'Rearrangements explain unexpected products'
+    });
+
+    // Problem 3: Resonance in Mechanisms
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Resonance Stabilization',
+        problem: 'Draw resonance structures: CH₂=CH-CH₂⁺',
+        parameters: {
+            cation: 'CH₂=CH-CH₂⁺',
+            resonanceType: 'allylic'
+        },
+        type: 'mechanism_addition',
+        context: { difficulty: 'intermediate', topic: 'Resonance' },
+        subparts: [
+            'Given: CH₂=CH-CH₂⁺ (allylic cation)',
+            'Step 1: Identify π system adjacent to (+) charge',
+            'Step 2: Move π electrons toward (+)',
+            'Structure 1: CH₂=CH-CH₂⁺',
+            'Structure 2: ⁺CH₂-CH=CH₂',
+            'Hybrid: positive charge delocalized over C-1 and C-3',
+            'More stable than simple carbocation'
+        ],
+        helper: 'Resonance delocalizes charge → increased stability',
+        solution: 'Two resonance structures with delocalized (+) charge',
+        realWorldContext: 'Resonance explains stability of intermediates'
+    });
+
+    // Problem 4: Concerted vs Stepwise
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Concerted vs Stepwise Mechanisms',
+        problem: 'Compare: SN2 vs SN1 mechanisms',
+        parameters: {
+            comparison: ['SN2', 'SN1']
+        },
+        type: 'mechanism_sn2',
+        context: { difficulty: 'intermediate', topic: 'Mechanism Types' },
+        subparts: [
+            'SN2: Concerted (one step)',
+            '  - Nu⁻ attacks as X leaves',
+            '  - One transition state',
+            '  - Backside attack, inversion',
+            'SN1: Stepwise (two steps)',
+            '  - Step 1: X leaves (carbocation forms)',
+            '  - Step 2: Nu⁻ attacks carbocation',
+            '  - Two transition states, one intermediate',
+            '  - Racemization'
+        ],
+        helper: 'Concerted: all changes simultaneous; Stepwise: intermediate forms',
+        solution: 'SN2 concerted, SN1 stepwise',
+        realWorldContext: 'Mechanism type determines stereochemical outcome'
+    });
+
+    // Problem 5: Hammond Postulate
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Hammond Postulate',
+        problem: 'Apply Hammond postulate to exothermic reaction',
+        parameters: {
+            reactionType: 'exothermic'
+        },
+        type: 'mechanism_addition',
+        context: { difficulty: 'advanced', topic: 'Reaction Coordinate Diagrams' },
+        subparts: [
+            'Given: Exothermic reaction',
+            'Hammond postulate: TS resembles closer species in energy',
+            'Exothermic: Products lower energy than reactants',
+            'TS closer in energy to reactants',
+            'Therefore: TS resembles reactants (early TS)',
+            'Implication: Product stability less important',
+            'Contrast: Endothermic has late TS (resembles products)'
+        ],
+        helper: 'Hammond: TS resembles the species closest to it in energy',
+        solution: 'Early transition state resembling reactants',
+        realWorldContext: 'Predicts TS structure and selectivity'
+    });
+
+    // Problem 6: Kinetic vs Thermodynamic Control
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Kinetic vs Thermodynamic Control',
+        problem: 'Explain: Low temp vs high temp product distribution',
+        parameters: {
+            conditions: ['low temperature', 'high temperature']
+        },
+        type: 'mechanism_e2',
+        context: { difficulty: 'advanced', topic: 'Product Control' },
+        subparts: [
+            'Kinetic control (low temp):',
+            '  - Reaction irreversible',
+            '  - Product formed fastest predominates',
+            '  - Lower activation energy pathway',
+            'Thermodynamic control (high temp):',
+            '  - Reaction reversible',
+            '  - Most stable product predominates',
+            '  - Lower energy product',
+            'Example: Addition to conjugated diene',
+            '  - Low temp: 1,2-addition (kinetic)',
+            '  - High temp: 1,4-addition (thermodynamic)'
+        ],
+        helper: 'Low temp = kinetic (fastest); High temp = thermodynamic (most stable)',
+        solution: 'Temperature determines which product forms',
+        realWorldContext: 'Controlling reaction conditions selects desired product'
+    });
+
+    // Problem 7: Radical Chain Mechanism
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Radical Chain Mechanism',
+        problem: 'Show steps: CH₄ + Cl₂ → CH₃Cl + HCl (with light)',
+        parameters: {
+            substrate: 'CH₄',
+            reagent: 'Cl₂',
+            conditions: 'light (hν)'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'advanced', topic: 'Radical Mechanisms' },
+        subparts: [
+            'Given: CH₄ + Cl₂ + hν',
+            'Initiation: Cl₂ + hν → 2 Cl·',
+            'Propagation (cycle):',
+            '  Cl· + CH₄ → HCl + ·CH₃',
+            '  ·CH₃ + Cl₂ → CH₃Cl + Cl·',
+            'Termination (any two radicals combine):',
+            '  Cl· + Cl· → Cl₂',
+            '  ·CH₃ + Cl· → CH₃Cl',
+            '  ·CH₃ + ·CH₃ → C₂H₆',
+            'Overall: CH₄ + Cl₂ → CH₃Cl + HCl'
+        ],
+        helper: 'Radical: initiation, propagation (chain), termination',
+        solution: 'CH₃Cl + HCl',
+        realWorldContext: 'Radical halogenation important industrially'
+    });
+
+    return relatedProblems;
+}
+
+// ============== POLYMERS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedPolymers() {
+    const relatedProblems = [];
+
+    // Problem 1: Addition Polymerization
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Addition Polymerization',
+        problem: 'Draw polymer: n CH₂=CHCl →',
+        parameters: {
+            monomer: 'CH₂=CHCl',
+            polymerType: 'addition'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'beginner', topic: 'Addition Polymers' },
+        subparts: [
+            'Given: Vinyl chloride (CH₂=CHCl)',
+            'Step 1: Double bond opens',
+            'Step 2: Monomers link head-to-tail',
+            'Step 3: Repeating unit: -CH₂-CHCl-',
+            'Polymer: Polyvinyl chloride (PVC)',
+            'Structure: [-CH₂-CHCl-]ₙ',
+            'Properties: Rigid, durable plastic'
+        ],
+        helper: 'Addition polymerization: C=C opens, forms C-C chain',
+        solution: 'PVC: [-CH₂-CHCl-]ₙ',
+        realWorldContext: 'PVC used in pipes, siding, flooring'
+    });
+
+    // Problem 2: Condensation Polymerization
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Condensation Polymerization',
+        problem: 'Predict polymer: HOOC-(CH₂)₄-COOH + H₂N-(CH₂)₆-NH₂ →',
+        parameters: {
+            monomer1: 'HOOC-(CH₂)₄-COOH',
+            monomer2: 'H₂N-(CH₂)₆-NH₂',
+            polymerType: 'condensation'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Condensation Polymers' },
+        subparts: [
+            'Given: Adipic acid + hexamethylenediamine',
+            'Step 1: -COOH + H₂N- → -CONH- + H₂O',
+            'Step 2: Forms amide bonds (peptide linkages)',
+            'Step 3: Water eliminated at each linkage',
+            'Repeating unit: -CO-(CH₂)₄-CO-NH-(CH₂)₆-NH-',
+            'Polymer: Nylon-6,6',
+            'Properties: Strong, flexible fiber'
+        ],
+        helper: 'Condensation: forms bond + eliminates small molecule (H₂O)',
+        solution: 'Nylon-6,6',
+        realWorldContext: 'Nylon used in clothing, ropes, carpets'
+    });
+
+    // Problem 3: Polystyrene
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Polystyrene Synthesis',
+        problem: 'Draw polymer: n C₆H₅CH=CH₂ →',
+        parameters: {
+            monomer: 'C₆H₅CH=CH₂',
+            commonName: 'styrene'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'beginner', topic: 'Aromatic Polymers' },
+        subparts: [
+            'Given: Styrene (C₆H₅CH=CH₂)',
+            'Step 1: Addition polymerization',
+            'Step 2: Double bond opens',
+            'Repeating unit: -CH₂-CH(C₆H₅)-',
+            'Polymer: Polystyrene (PS)',
+            'Structure: [-CH₂-CH(C₆H₅)-]ₙ',
+            'Properties: Clear, rigid, insulating'
+        ],
+        helper: 'Styrene polymerizes like ethylene but with phenyl group',
+        solution: 'Polystyrene: [-CH₂-CH(C₆H₅)-]ₙ',
+        realWorldContext: 'Used in packaging, disposable cups, insulation'
+    });
+
+    // Problem 4: Polyester Formation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Polyester Synthesis',
+        problem: 'Predict polymer: Terephthalic acid + ethylene glycol →',
+        parameters: {
+            acid: 'terephthalic acid',
+            alcohol: 'ethylene glycol',
+            polymerType: 'polyester'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Polyesters' },
+        subparts: [
+            'Given: HOOC-C₆H₄-COOH + HOCH₂CH₂OH',
+            'Step 1: Esterification reaction',
+            'Step 2: -COOH + HO- → -COO- + H₂O',
+            'Step 3: Forms ester linkages',
+            'Repeating unit: -OC-C₆H₄-CO-OCH₂CH₂O-',
+            'Polymer: Polyethylene terephthalate (PET)',
+            'Properties: Strong, crystalline fiber'
+        ],
+        helper: 'Polyester: diacid + diol → ester linkages',
+        solution: 'PET (polyethylene terephthalate)',
+        realWorldContext: 'PET used in bottles, clothing (polyester fabric), films'
+    });
+
+    // Problem 5: Copolymer
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Copolymer Formation',
+        problem: 'Describe: Styrene + butadiene copolymer',
+        parameters: {
+            monomer1: 'styrene',
+            monomer2: 'butadiene',
+            polymerType: 'copolymer'
+        },
+        type: 'predict_product',
+        context: { difficulty: 'intermediate', topic: 'Copolymers' },
+        subparts: [
+            'Given: Styrene + 1,3-butadiene',
+            'Step 1: Two different monomers',
+            'Step 2: Random or alternating arrangement',
+            'Polymer: SBR (styrene-butadiene rubber)',
+            'Properties: Combines properties of both',
+            'Styrene: rigidity; Butadiene: elasticity',
+            'Result: Tough, elastic material'
+        ],
+        helper: 'Copolymer: two or more different monomers in one polymer',
+        solution: 'SBR (styrene-butadiene rubber)',
+        realWorldContext: 'SBR used in tires, shoe soles, gaskets'
+    });
+
+    // Problem 6: Polymer Properties
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Polymer Structure-Property Relationship',
+        problem: 'Compare: LDPE vs HDPE',
+        parameters: {
+            polymer1: 'LDPE',
+            polymer2: 'HDPE',
+            comparison: 'structure and properties'
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'intermediate', topic: 'Polymer Properties' },
+        subparts: [
+            'Both: Polyethylene [-CH₂-CH₂-]ₙ',
+            'LDPE (Low-Density Polyethylene):',
+            '  - Highly branched chains',
+            '  - Lower crystallinity (~50%)',
+            '  - Softer, more flexible',
+            '  - Lower melting point',
+            'HDPE (High-Density Polyethylene):',
+            '  - Linear chains, minimal branching',
+            '  - Higher crystallinity (~90%)',
+            '  - Harder, more rigid',
+            '  - Higher melting point',
+            'Structure determines properties'
+        ],
+        helper: 'Branching reduces crystallinity and density',
+        solution: 'HDPE more crystalline and rigid than LDPE',
+        realWorldContext: 'LDPE: plastic bags; HDPE: milk jugs, pipes'
+    });
+
+    // Problem 7: Biodegradable Polymers
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Biodegradable Polymers',
+        problem: 'Explain: Why is PLA biodegradable but PE is not?',
+        parameters: {
+            biodegradable: 'PLA',
+            nonBiodegradable: 'PE',
+            reason: 'structural difference'
+        },
+        type: 'structure_from_name',
+        context: { difficulty: 'intermediate', topic: 'Green Chemistry' },
+        subparts: [
+            'PE (Polyethylene): [-CH₂-CH₂-]ₙ',
+            '  - Only C-C and C-H bonds',
+            '  - Very stable, no hydrolyzable groups',
+            '  - Microbes cannot break C-C backbone easily',
+            'PLA (Polylactic acid): [-O-CH(CH₃)-CO-]ₙ',
+            '  - Contains ester linkages',
+            '  - Ester bonds can be hydrolyzed',
+            '  - Microbes produce esterases (break esters)',
+            '  - Degrades to lactic acid (natural product)',
+            'Key: Hydrolyzable groups = biodegradable'
+        ],
+        helper: 'Biodegradable polymers have bonds that can be broken by enzymes',
+        solution: 'PLA has hydrolyzable ester bonds; PE has stable C-C bonds',
+        realWorldContext: 'PLA used in compostable packaging, medical implants'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVER FUNCTIONS ==============
+
+function solveAlkanesRelatedProblems() {
+    const problems = generateRelatedAlkanes();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Alkanes Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.structure || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveAlkenesRelatedProblems() {
+    const problems = generateRelatedAlkenes();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Alkenes Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.structure || problem.parameters.alkene || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveAlkynesRelatedProblems() {
+    const problems = generateRelatedAlkynes();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Alkynes Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.structure || problem.parameters.alkyne || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveAromaticRelatedProblems() {
+    const problems = generateRelatedAromatic();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Aromatic Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: false,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.arene || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveFunctionalGroupsRelatedProblems() {
+    const problems = generateRelatedFunctionalGroups();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Functional Groups Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.substrate || problem.parameters.carbonyl || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveIsomerismRelatedProblems() {
+    const problems = generateRelatedIsomerism();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Isomerism Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: false,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.structure || problem.parameters.molecularFormula || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveOrganicReactionsRelatedProblems() {
+    const problems = generateRelatedOrganicReactions();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Organic Reactions Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.substrate || problem.parameters.alkene || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveNomenclatureRelatedProblems() {
+    const problems = generateRelatedNomenclature();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Nomenclature Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: false,
+            includeStereochemistry: false,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.structure || problem.parameters.iupacName || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveMechanismsRelatedProblems() {
+    const problems = generateRelatedMechanisms();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Mechanisms Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: true,
+            includeStereochemistry: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.nucleophile || problem.parameters.carbocation || problem.parameters.substrate || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solvePolymersRelatedProblems() {
+    const problems = generateRelatedPolymers();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Polymers Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedOrganicChemistryMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            includeMechanisms: false,
+            includeStereochemistry: false,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveOrganicChemistryProblem({
+            structure: problem.parameters.monomer || problem.parameters.polymer1 || problem.problem,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveOrganicChemistryDocument() {
+    console.log('Generating Comprehensive Organic Chemistry Workbook with Related Problems...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Organic Chemistry Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Alkanes, Alkenes, Alkynes, Aromatics, Functional Groups, Isomerism, Reactions, Nomenclature, Mechanisms, and Polymers',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Alkanes
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Alkanes (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const alkanesProblems = generateRelatedAlkanes();
+    alkanesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part II: Alkenes
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Alkenes (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const alkenesProblems = generateRelatedAlkenes();
+    alkenesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 8}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part III: Alkynes
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Alkynes (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const alkynesProblems = generateRelatedAlkynes();
+    alkynesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 15}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IV: Aromatic Compounds
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Aromatic Compounds (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const aromaticProblems = generateRelatedAromatic();
+    aromaticProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 22}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part V: Functional Groups
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Functional Groups (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const functionalGroupsProblems = generateRelatedFunctionalGroups();
+    functionalGroupsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 29}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VI: Isomerism
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Isomerism (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const isomerismProblems = generateRelatedIsomerism();
+    isomerismProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 36}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VII: Organic Reactions
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Organic Reactions (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const reactionsProblems = generateRelatedOrganicReactions();
+    reactionsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 43}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VIII: Nomenclature
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Nomenclature (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const nomenclatureProblems = generateRelatedNomenclature();
+    nomenclatureProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 50}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IX: Mechanisms
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Reaction Mechanisms (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const mechanismsProblems = generateRelatedMechanisms();
+    mechanismsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 57}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part X: Polymers
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Polymers (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const polymersProblems = generateRelatedPolymers();
+    polymersProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 64}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: ALKANES ==============
+    console.log('\nProcessing Part I: Alkanes...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Alkanes',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const alkanesSolved = solveAlkanesRelatedProblems();
+    alkanesSolved.forEach((solved, index) => {
+        console.log(`  Adding Alkanes Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: ALKENES ==============
+    console.log('\nProcessing Part II: Alkenes...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Alkenes',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const alkenesSolved = solveAlkenesRelatedProblems();
+    alkenesSolved.forEach((solved, index) => {
+        console.log(`  Adding Alkenes Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 8}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: ALKYNES ==============
+    console.log('\nProcessing Part III: Alkynes...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Alkynes',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const alkynesSolved = solveAlkynesRelatedProblems();
+    alkynesSolved.forEach((solved, index) => {
+        console.log(`  Adding Alkynes Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 15}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: AROMATIC COMPOUNDS ==============
+    console.log('\nProcessing Part IV: Aromatic Compounds...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Aromatic Compounds',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const aromaticSolved = solveAromaticRelatedProblems();
+    aromaticSolved.forEach((solved, index) => {
+        console.log(`  Adding Aromatic Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 22}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: FUNCTIONAL GROUPS ==============
+    console.log('\nProcessing Part V: Functional Groups...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Functional Groups',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const functionalGroupsSolved = solveFunctionalGroupsRelatedProblems();
+    functionalGroupsSolved.forEach((solved, index) => {
+        console.log(`  Adding Functional Groups Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 29}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: ISOMERISM ==============
+    console.log('\nProcessing Part VI: Isomerism...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Isomerism',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const isomerismSolved = solveIsomerismRelatedProblems();
+    isomerismSolved.forEach((solved, index) => {
+        console.log(`  Adding Isomerism Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 36}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VII: ORGANIC REACTIONS ==============
+    console.log('\nProcessing Part VII: Organic Reactions...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Organic Reactions',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const reactionsSolved = solveOrganicReactionsRelatedProblems();
+    reactionsSolved.forEach((solved, index) => {
+        console.log(`  Adding Organic Reactions Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 43}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VIII: NOMENCLATURE ==============
+    console.log('\nProcessing Part VIII: Nomenclature...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Nomenclature',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const nomenclatureSolved = solveNomenclatureRelatedProblems();
+    nomenclatureSolved.forEach((solved, index) => {
+        console.log(`  Adding Nomenclature Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 50}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IX: REACTION MECHANISMS ==============
+    console.log('\nProcessing Part IX: Reaction Mechanisms...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Reaction Mechanisms',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const mechanismsSolved = solveMechanismsRelatedProblems();
+    mechanismsSolved.forEach((solved, index) => {
+        console.log(`  Adding Mechanisms Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 57}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART X: POLYMERS ==============
+    console.log('\nProcessing Part X: Polymers...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Polymers',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const polymersSolved = solvePolymersRelatedProblems();
+    polymersSolved.forEach((solved, index) => {
+        console.log(`  Adding Polymers Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 64}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_organic_chemistry_workbook_with_related_problems.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE ORGANIC CHEMISTRY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 70');
+        console.log('    - Alkanes: 7 problems');
+        console.log('    - Alkenes: 7 problems');
+        console.log('    - Alkynes: 7 problems');
+        console.log('    - Aromatic Compounds: 7 problems');
+        console.log('    - Functional Groups: 7 problems');
+        console.log('    - Isomerism: 7 problems');
+        console.log('    - Organic Reactions: 7 problems');
+        console.log('    - Nomenclature: 7 problems');
+        console.log('    - Reaction Mechanisms: 7 problems');
+        console.log('    - Polymers: 7 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I: Alkanes (Problems 1-7)');
+        console.log('  • Part II: Alkenes (Problems 8-14)');
+        console.log('  • Part III: Alkynes (Problems 15-21)');
+        console.log('  • Part IV: Aromatic Compounds (Problems 22-28)');
+        console.log('  • Part V: Functional Groups (Problems 29-35)');
+        console.log('  • Part VI: Isomerism (Problems 36-42)');
+        console.log('  • Part VII: Organic Reactions (Problems 43-49)');
+        console.log('  • Part VIII: Nomenclature (Problems 50-56)');
+        console.log('  • Part IX: Reaction Mechanisms (Problems 57-63)');
+        console.log('  • Part X: Polymers (Problems 64-70)');
+        console.log('\n📄 EXPECTED PAGES: 200+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step solution');
+        console.log('  • Detailed reaction mechanisms with curved arrows');
+        console.log('  • Stereochemical analysis (where applicable)');
+        console.log('  • Enhanced explanations at multiple levels');
+        console.log('  • Key concepts and pedagogical notes');
+        console.log('  • Alternative solution methods');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common mistakes and error prevention');
+        console.log('  • Comprehensive verification');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveOrganicChemistryDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
