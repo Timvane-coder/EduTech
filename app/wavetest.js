@@ -1,0 +1,1979 @@
+
+import { EnhancedWaveSoundPhysicsWorkbook } from './wavesworkbook.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a problem
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content
+        if (section.data && Array.isArray(section.data)) {
+            section.data.forEach(row => {
+                if (Array.isArray(row)) {
+                    // Handle table-like data
+                    if (row.length === 2 && row[0] && row[1]) {
+                        // Key-value pair
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `${row[0]}: `,
+                                        bold: true
+                                    }),
+                                    new docx.TextRun({
+                                        text: String(row[1])
+                                    })
+                                ],
+                                spacing: { after: 100 }
+                            })
+                        );
+                    } else if (row[0] === '' && row[1] === '') {
+                        // Spacing row
+                        sections.push(
+                            new docx.Paragraph({
+                                text: '',
+                                spacing: { after: 200 }
+                            })
+                        );
+                    } else if (row.length > 2) {
+                        // Multi-column row (like verification tables)
+                        sections.push(
+                            new docx.Paragraph({
+                                text: row.join(' | '),
+                                spacing: { after: 100 }
+                            })
+                        );
+                    }
+                }
+            });
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+// ============== WAVE PROPERTIES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedWaveProperties() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic Wave Speed
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Wave Speed Calculation',
+        problem: 'A wave has a frequency of 50 Hz and a wavelength of 6 m. Calculate the wave speed.',
+        parameters: { 
+            frequency: 50,
+            wavelength: 6
+        },
+        type: 'wave_speed',
+        context: { difficulty: 'beginner', topic: 'Wave Properties' },
+        subparts: [
+            'Given: f = 50 Hz, λ = 6 m',
+            'Formula: v = fλ',
+            'Substitute: v = 50 × 6',
+            'Calculate: v = 300 m/s',
+            'Check units: Hz × m = (1/s) × m = m/s ✓'
+        ],
+        helper: 'Wave speed equals frequency times wavelength',
+        solution: 'v = 300 m/s',
+        realWorldContext: 'Understanding how waves propagate through different media'
+    });
+
+    // Problem 2: Finding Frequency
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Calculate Frequency from Speed and Wavelength',
+        problem: 'A sound wave travels at 343 m/s and has a wavelength of 0.5 m. Find its frequency.',
+        parameters: { 
+            speed: 343,
+            wavelength: 0.5
+        },
+        type: 'wave_speed',
+        context: { difficulty: 'beginner', topic: 'Wave Properties' },
+        subparts: [
+            'Given: v = 343 m/s, λ = 0.5 m',
+            'Formula: v = fλ',
+            'Rearrange: f = v/λ',
+            'Substitute: f = 343/0.5',
+            'Calculate: f = 686 Hz',
+            'This is in the audible range for humans'
+        ],
+        helper: 'Divide wave speed by wavelength to get frequency',
+        solution: 'f = 686 Hz',
+        realWorldContext: 'Determining pitch of sound waves'
+    });
+
+    // Problem 3: Finding Wavelength
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Calculate Wavelength',
+        problem: 'A radio wave has frequency 100 MHz and travels at the speed of light (3×10⁸ m/s). Find its wavelength.',
+        parameters: { 
+            frequency: 100e6,
+            speed: 3e8
+        },
+        type: 'wave_speed',
+        context: { difficulty: 'intermediate', topic: 'Wave Properties' },
+        subparts: [
+            'Given: f = 100 MHz = 100 × 10⁶ Hz, v = 3 × 10⁸ m/s',
+            'Formula: v = fλ',
+            'Rearrange: λ = v/f',
+            'Substitute: λ = (3 × 10⁸)/(100 × 10⁶)',
+            'Calculate: λ = 3 m',
+            'This is in the radio wave range of EM spectrum'
+        ],
+        helper: 'Divide wave speed by frequency to get wavelength',
+        solution: 'λ = 3 m',
+        realWorldContext: 'Understanding electromagnetic wave properties'
+    });
+
+    // Problem 4: Period and Frequency
+   /** relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Period-Frequency Relationship',
+        problem: 'A wave has a period of 0.02 seconds. What is its frequency?',
+        parameters: { 
+            period: 0.02
+        },
+        type: 'frequency_period',
+        context: { difficulty: 'beginner', topic: 'Wave Properties' },
+        subparts: [
+            'Given: T = 0.02 s',
+            'Formula: f = 1/T',
+            'Substitute: f = 1/0.02',
+            'Calculate: f = 50 Hz',
+            'Verify: T × f = 0.02 × 50 = 1 ✓',
+            'Also: ω = 2πf = 314.16 rad/s'
+        ],
+        helper: 'Frequency is the reciprocal of period',
+        solution: 'f = 50 Hz',
+        realWorldContext: 'Converting between time measurements'
+    });
+    */
+
+    // Problem 5: Sound Speed with Temperature
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Sound Speed at Different Temperatures',
+        problem: 'Calculate the speed of sound in air at 25°C.',
+        parameters: { 
+            temperature: 25,
+            medium: 'air'
+        },
+        type: 'sound_speed_temp',
+        context: { difficulty: 'intermediate', topic: 'Sound Wave Properties' },
+        subparts: [
+            'Given: T = 25°C',
+            'Formula: v = 331 + 0.6T (for air)',
+            'Substitute: v = 331 + 0.6(25)',
+            'Calculate: v = 331 + 15',
+            'Result: v = 346 m/s',
+            'Compare with v at 0°C: 331 m/s',
+            'Compare with v at 20°C: 343 m/s'
+        ],
+        helper: 'Sound speed increases 0.6 m/s per degree Celsius',
+        solution: 'v = 346 m/s',
+        realWorldContext: 'Temperature affects sound propagation'
+    });
+
+    // Problem 6: Wave Function Parameters
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Wave Function Analysis',
+        problem: 'A wave is described by y = 0.1 sin(2πx - 100πt). Find amplitude, wavelength, frequency, and wave speed.',
+        parameters: { 
+            amplitude: 0.1,
+            wavelength: 1,
+            frequency: 50
+        },
+        type: 'wave_function',
+        context: { difficulty: 'intermediate', topic: 'Wave Functions' },
+        subparts: [
+            'Given: y = 0.1 sin(2πx - 100πt)',
+            'General form: y = A sin(kx - ωt)',
+            'Amplitude: A = 0.1 m',
+            'Wave number: k = 2π, so λ = 2π/k = 1 m',
+            'Angular frequency: ω = 100π, so f = ω/(2π) = 50 Hz',
+            'Wave speed: v = fλ = 50 × 1 = 50 m/s',
+            'Direction: positive x (since kx - ωt)'
+        ],
+        helper: 'Extract parameters from wave equation coefficients',
+        solution: 'A = 0.1 m, λ = 1 m, f = 50 Hz, v = 50 m/s',
+        realWorldContext: 'Mathematical description of wave motion'
+    });
+
+    // Problem 7: Multiple Wave Properties
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Complete Wave Analysis',
+        problem: 'A wave has speed 20 m/s and period 0.25 s. Find frequency, wavelength, and angular frequency.',
+        parameters: { 
+            speed: 20,
+            period: 0.25
+        },
+        type: 'wave_speed',
+        context: { difficulty: 'intermediate', topic: 'Wave Properties' },
+        subparts: [
+            'Given: v = 20 m/s, T = 0.25 s',
+            'Step 1: Find frequency',
+            'f = 1/T = 1/0.25 = 4 Hz',
+            'Step 2: Find wavelength',
+            'λ = v/f = 20/4 = 5 m',
+            'Step 3: Find angular frequency',
+            'ω = 2πf = 2π(4) = 25.13 rad/s',
+            'Verify: v = fλ = 4 × 5 = 20 m/s ✓'
+        ],
+        helper: 'Use period to find frequency, then apply wave equation',
+        solution: 'f = 4 Hz, λ = 5 m, ω = 25.13 rad/s',
+        realWorldContext: 'Comprehensive wave characterization'
+    });
+
+    return relatedProblems;
+}
+
+// ============== WAVE INTERFERENCE - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedWaveInterference() {
+    const relatedProblems = [];
+
+    // Problem 1: Constructive Interference
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Constructive Interference',
+        problem: 'Two speakers emit sound waves with wavelength 2 m. What path differences result in constructive interference?',
+        parameters: { 
+            wavelength: 2,
+            pathDifference: 0
+        },
+        type: 'interference',
+        context: { difficulty: 'beginner', topic: 'Wave Interference' },
+        subparts: [
+            'Given: λ = 2 m',
+            'Constructive interference: Δx = nλ (n = 0, 1, 2, ...)',
+            'For n = 0: Δx = 0 m',
+            'For n = 1: Δx = 2 m',
+            'For n = 2: Δx = 4 m',
+            'For n = 3: Δx = 6 m',
+            'Pattern: waves arrive in phase'
+        ],
+        helper: 'Constructive interference when path difference is whole wavelengths',
+        solution: 'Δx = 0, 2, 4, 6, ... meters',
+        realWorldContext: 'Locations of loud sound in speaker interference'
+    });
+
+    // Problem 2: Destructive Interference
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Destructive Interference',
+        problem: 'For waves with wavelength 3 m, find the first three path differences that cause destructive interference.',
+        parameters: { 
+            wavelength: 3,
+            pathDifference: 1.5
+        },
+        type: 'interference',
+        context: { difficulty: 'beginner', topic: 'Wave Interference' },
+        subparts: [
+            'Given: λ = 3 m',
+            'Destructive interference: Δx = (n + 1/2)λ',
+            'For n = 0: Δx = 0.5λ = 1.5 m',
+            'For n = 1: Δx = 1.5λ = 4.5 m',
+            'For n = 2: Δx = 2.5λ = 7.5 m',
+            'Pattern: waves arrive 180° out of phase'
+        ],
+        helper: 'Destructive interference when path difference is half wavelengths',
+        solution: 'Δx = 1.5, 4.5, 7.5 meters',
+        realWorldContext: 'Locations of quiet zones in interference patterns'
+    });
+
+    // Problem 3: Phase Difference Calculation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Phase Difference from Path Difference',
+        problem: 'Two waves with wavelength 0.5 m have a path difference of 0.75 m. Find the phase difference and type of interference.',
+        parameters: { 
+            wavelength: 0.5,
+            pathDifference: 0.75
+        },
+        type: 'interference',
+        context: { difficulty: 'intermediate', topic: 'Wave Interference' },
+        subparts: [
+            'Given: λ = 0.5 m, Δx = 0.75 m',
+            'Phase difference: Δφ = 2π(Δx/λ)',
+            'Substitute: Δφ = 2π(0.75/0.5)',
+            'Calculate: Δφ = 2π(1.5) = 3π rad',
+            'In degrees: 3π × (180°/π) = 540°',
+            'Equivalent to: 540° - 360° = 180°',
+            'This is destructive interference (odd multiple of π)'
+        ],
+        helper: 'Phase difference relates to path difference through wavelength',
+        solution: 'Δφ = 3π rad = 540° (destructive)',
+        realWorldContext: 'Determining interference type from measurements'
+    });
+
+    // Problem 4: Beat Frequency
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Beat Frequency Calculation',
+        problem: 'Two tuning forks vibrate at 256 Hz and 260 Hz. What beat frequency is heard?',
+        parameters: { 
+            frequency1: 256,
+            frequency2: 260
+        },
+        type: 'beat_frequency',
+        context: { difficulty: 'beginner', topic: 'Wave Interference (Beats)' },
+        subparts: [
+            'Given: f₁ = 256 Hz, f₂ = 260 Hz',
+            'Formula: f_beat = |f₁ - f₂|',
+            'Calculate: f_beat = |256 - 260|',
+            'Result: f_beat = 4 Hz',
+            'Meaning: 4 beats per second',
+            'Beat period: T_beat = 1/4 = 0.25 s'
+        ],
+        helper: 'Beat frequency is the difference between two frequencies',
+        solution: 'f_beat = 4 Hz',
+        realWorldContext: 'Tuning musical instruments by listening to beats'
+    });
+
+    // Problem 5: Finding Unknown Frequency from Beats
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Unknown Frequency from Beats',
+        problem: 'A tuning fork of 440 Hz produces 5 beats per second with an unknown fork. What are the possible frequencies?',
+        parameters: { 
+            frequency1: 440,
+            beatFrequency: 5
+        },
+        type: 'beat_frequency',
+        context: { difficulty: 'intermediate', topic: 'Wave Interference (Beats)' },
+        subparts: [
+            'Given: f₁ = 440 Hz, f_beat = 5 Hz',
+            'Formula: f_beat = |f₁ - f₂|',
+            'So: 5 = |440 - f₂|',
+            'Two possibilities:',
+            'Case 1: f₂ = 440 + 5 = 445 Hz',
+            'Case 2: f₂ = 440 - 5 = 435 Hz',
+            'Cannot determine which without additional info'
+        ],
+        helper: 'Two possible frequencies due to absolute value',
+        solution: 'f₂ = 445 Hz or 435 Hz',
+        realWorldContext: 'Determining unknown frequencies using beats'
+    });
+
+    // Problem 6: Interference Pattern Analysis
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Complete Interference Pattern',
+        problem: 'Two sources emit waves with λ = 4 m. At a point 10 m from one source and 14 m from the other, determine the interference type.',
+        parameters: { 
+            wavelength: 4,
+            pathDifference: 4
+        },
+        type: 'interference',
+        context: { difficulty: 'intermediate', topic: 'Wave Interference' },
+        subparts: [
+            'Given: λ = 4 m, d₁ = 10 m, d₂ = 14 m',
+            'Path difference: Δx = d₂ - d₁ = 14 - 10 = 4 m',
+            'Ratio: Δx/λ = 4/4 = 1',
+            'Since Δx = 1λ (whole number of wavelengths)',
+            'This is constructive interference',
+            'Phase difference: Δφ = 2π(1) = 2π rad = 360°',
+            'Waves arrive in phase'
+        ],
+        helper: 'Compare path difference to wavelength',
+        solution: 'Constructive interference',
+        realWorldContext: 'Predicting sound intensity at different locations'
+    });
+
+    // Problem 7: Noise Cancellation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Active Noise Cancellation',
+        problem: 'To cancel a 500 Hz sound wave, what phase shift must be applied to create destructive interference?',
+        parameters: { 
+            wavelength: 0.686,
+            pathDifference: 0.343
+        },
+        type: 'interference',
+        context: { difficulty: 'intermediate', topic: 'Wave Interference Applications' },
+        subparts: [
+            'Given: f = 500 Hz (in air at 343 m/s)',
+            'Wavelength: λ = v/f = 343/500 = 0.686 m',
+            'For destructive interference: Δφ = π rad (180°)',
+            'Or equivalently: path difference = λ/2 = 0.343 m',
+            'Noise cancellation systems apply 180° phase shift',
+            'This creates waves that are exactly opposite',
+            'Result: waves cancel each other'
+        ],
+        helper: '180° phase shift creates destructive interference',
+        solution: 'Phase shift = π rad = 180°',
+        realWorldContext: 'Technology behind noise-cancelling headphones'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOUND WAVES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedSoundWaves() {
+    const relatedProblems = [];
+
+    // Problem 1: Sound Intensity
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Sound Intensity Calculation',
+        problem: 'A speaker emits 10 W of power uniformly. Find the intensity at 5 m distance.',
+        parameters: { 
+            power: 10,
+            distance: 5
+        },
+        type: 'intensity_power',
+        context: { difficulty: 'beginner', topic: 'Sound Intensity' },
+        subparts: [
+            'Given: P = 10 W, r = 5 m',
+            'Formula: I = P/(4πr²)',
+            'Area of sphere: A = 4πr² = 4π(5)² = 314.16 m²',
+            'Substitute: I = 10/314.16',
+            'Calculate: I = 0.0318 W/m²',
+            'Or: I = 3.18 × 10⁻² W/m²'
+        ],
+        helper: 'Intensity decreases with square of distance',
+        solution: 'I = 0.0318 W/m²',
+        realWorldContext: 'Understanding how sound weakens with distance'
+    });
+
+    // Problem 2: Decibel Level Calculation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Convert Intensity to Decibels',
+        problem: 'A sound has intensity 10⁻⁴ W/m². What is its decibel level?',
+        parameters: { 
+            intensity: 1e-4
+        },
+        type: 'decibel_level',
+        context: { difficulty: 'intermediate', topic: 'Decibel Scale' },
+        subparts: [
+            'Given: I = 10⁻⁴ W/m²',
+            'Reference: I₀ = 10⁻¹² W/m²',
+            'Formula: β = 10 log₁₀(I/I₀)',
+            'Ratio: I/I₀ = 10⁻⁴/10⁻¹² = 10⁸',
+            'Calculate: β = 10 log₁₀(10⁸)',
+            'β = 10 × 8 = 80 dB',
+            'This is about as loud as heavy traffic'
+        ],
+        helper: 'Use log₁₀ and multiply by 10',
+        solution: 'β = 80 dB',
+        realWorldContext: 'Measuring sound loudness on human-perceivable scale'
+    });
+
+    // Problem 3: Intensity from Decibels
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Convert Decibels to Intensity',
+        problem: 'A sound measures 60 dB. What is its intensity in W/m²?',
+        parameters: { 
+            decibelLevel: 60
+        },
+        type: 'decibel_level',
+        context: { difficulty: 'intermediate', topic: 'Decibel Scale' },
+        subparts: [
+            'Given: β = 60 dB',
+            'Reference: I₀ = 10⁻¹² W/m²',
+            'Formula: β = 10 log₁₀(I/I₀)',
+            'Rearrange: I = I₀ × 10^(β/10)',
+            'Substitute: I = 10⁻¹² × 10^(60/10)',
+            'Calculate: I = 10⁻¹² × 10⁶',
+            'Result: I = 10⁻⁶ W/m² = 1 μW/m²',
+            'This is normal conversation level'
+        ],
+        helper: 'Use exponential to reverse logarithm',
+        solution: 'I = 10⁻⁶ W/m²',
+        realWorldContext: 'Converting sound measurements to physical intensity'
+    });
+
+    // Problem 4: Inverse Square Law
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Sound Intensity at Different Distances',
+        problem: 'If intensity is 0.02 W/m² at 10 m, what is it at 20 m?',
+        parameters: { 
+            intensity1: 0.02,
+            distance1: 10,
+            distance2: 20
+        },
+        type: 'inverse_square',
+        context: { difficulty: 'intermediate', topic: 'Inverse Square Law' },
+        subparts: [
+            'Given: I₁ = 0.02 W/m², r₁ = 10 m, r₂ = 20 m',
+            'Formula: I₂/I₁ = (r₁/r₂)²',
+            'Substitute: I₂/0.02 = (10/20)²',
+            'Calculate: I₂/0.02 = (0.5)² = 0.25',
+            'Solve: I₂ = 0.02 × 0.25',
+            'Result: I₂ = 0.005 W/m²',
+            'Check: doubling distance → 1/4 intensity ✓'
+        ],
+        helper: 'Intensity is inversely proportional to distance squared',
+        solution: 'I₂ = 0.005 W/m²',
+        realWorldContext: 'Predicting sound levels at various distances'
+    });
+
+    // Problem 5: Decibel Addition
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Combining Sound Levels',
+        problem: 'Two identical 70 dB sources are combined. What is the resulting sound level?',
+        parameters: { 
+            intensity: 1e-5
+        },
+        type: 'decibel_level',
+        context: { difficulty: 'intermediate', topic: 'Decibel Combination' },
+        subparts: [
+            'Given: β₁ = β₂ = 70 dB',
+            'Find intensity from each source:',
+            'I = 10⁻¹² × 10^(70/10) = 10⁻⁵ W/m²',
+            'Total intensity: I_total = I₁ + I₂ = 2 × 10⁻⁵',
+            'Convert back to decibels:',
+            'β = 10 log₁₀(2 × 10⁻⁵/10⁻¹²)',
+            'β = 10 log₁₀(2 × 10⁷)',
+            'β = 10(log 2 + 7) = 10(0.301 + 7) = 73 dB',
+            'Adding equal sources: increases by ~3 dB'
+        ],
+        helper: 'Add intensities, then convert to decibels',
+        solution: 'β = 73 dB',
+        realWorldContext: 'Understanding why multiple sources increase sound level'
+    });
+
+    // Problem 6: Distance Change in Decibels
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Decibel Change with Distance',
+        problem: 'A sound is 90 dB at 1 m. What is the level at 10 m?',
+        parameters: { 
+            intensity1: 1e-3,
+            distance1: 1,
+            distance2: 10
+        },
+        type: 'inverse_square',
+        context: { difficulty: 'intermediate', topic: 'Sound Propagation' },
+        subparts: [
+            'Given: β₁ = 90 dB at r₁ = 1 m, find β₂ at r₂ = 10 m',
+            'Intensity ratio: I₂/I₁ = (r₁/r₂)² = (1/10)² = 0.01',
+            'Decibel change: Δβ = 10 log₁₀(I₂/I₁)',
+            'Δβ = 10 log₁₀(0.01) = 10 × (-2) = -20 dB',
+            'New level: β₂ = 90 - 20 = 70 dB',
+            'Rule: 10× distance → -20 dB'
+        ],
+        helper: 'Each factor of 10 in distance changes level by 20 dB',
+        solution: 'β₂ = 70 dB',
+        realWorldContext: 'Safety distance calculations for loud sounds'
+    });
+
+    // Problem 7: Sound in Different Media
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Sound Speed in Different Media',
+        problem: 'Compare the wavelength of a 1000 Hz sound in air (343 m/s) and water (1482 m/s).',
+        parameters: { 
+            frequency: 1000,
+            speed: 343
+        },
+        type: 'wave_speed',
+        context: { difficulty: 'beginner', topic: 'Sound in Different Media' },
+        subparts: [
+            'Given: f = 1000 Hz, v_air = 343 m/s, v_water = 1482 m/s',
+            'In air: λ_air = v/f = 343/1000 = 0.343 m',
+            'In water: λ_water = v/f = 1482/1000 = 1.482 m',
+            'Ratio: λ_water/λ_air = 1.482/0.343 = 4.32',
+            'Wavelength is 4.32 times longer in water',
+            'Frequency remains constant, speed changes',
+            'This affects underwater communication'
+        ],
+        helper: 'Same frequency, different media → different wavelengths',
+        solution: 'λ_air = 0.343 m, λ_water = 1.482 m',
+        realWorldContext: 'Understanding sonar and underwater acoustics'
+    });
+
+    return relatedProblems;
+}
+
+// ============== DOPPLER EFFECT - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedDopplerEffect() {
+    const relatedProblems = [];
+
+    // Problem 1: Moving Source Approaching
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Source Moving Toward Observer',
+        problem: 'A car horn (500 Hz) moves toward you at 30 m/s. What frequency do you hear? (v_sound = 343 m/s)',
+        parameters: { 
+            sourceFrequency: 500,
+            sourceVelocity: 30,
+            observerVelocity: 0,
+            mediumSpeed: 343,
+            sourceMovingToward: true,
+            observerMovingToward: false
+        },
+        type: 'doppler_effect',
+        context: { difficulty: 'beginner', topic: 'Doppler Effect' },
+        subparts: [
+            'Given: f = 500 Hz, v_s = 30 m/s (toward), v = 343 m/s',
+            'Formula: f\' = f × v/(v - v_s)',
+            'Source approaching: use minus in denominator',
+            'Substitute: f\' = 500 × 343/(343 - 30)',
+            'Calculate: f\' = 500 × 343/313',
+            'Result: f\' = 547.8 Hz',
+            'Frequency shift: Δf = 547.8 - 500 = 47.8 Hz higher',
+'Pitch sounds higher as source approaches'
+],
+helper: 'Source approaching: frequency increases',
+solution: 'f = 547.8 Hz',
+realWorldContext: 'Why ambulance sirens sound higher pitched approaching'
+});
+
+// Problem 2: Moving Source Receding
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Source Moving Away from Observer',
+    problem: 'The same car horn (500 Hz) moves away at 30 m/s. What frequency do you hear?',
+    parameters: { 
+        sourceFrequency: 500,
+        sourceVelocity: 30,
+        observerVelocity: 0,
+        mediumSpeed: 343,
+        sourceMovingToward: false,
+        observerMovingToward: false
+    },
+    type: 'doppler_effect',
+    context: { difficulty: 'beginner', topic: 'Doppler Effect' },
+    subparts: [
+        'Given: f = 500 Hz, v_s = 30 m/s (away), v = 343 m/s',
+        'Formula: f\' = f × v/(v + v_s)',
+        'Source receding: use plus in denominator',
+        'Substitute: f\' = 500 × 343/(343 + 30)',
+        'Calculate: f\' = 500 × 343/373',
+        'Result: f\' = 459.8 Hz',
+        'Frequency shift: Δf = 459.8 - 500 = -40.2 Hz lower',
+        'Pitch sounds lower as source recedes'
+    ],
+    helper: 'Source receding: frequency decreases',
+    solution: 'f\' = 459.8 Hz',
+    realWorldContext: 'Why pitch drops as vehicle passes by'
+});
+
+// Problem 3: Moving Observer Approaching
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Observer Moving Toward Source',
+    problem: 'You move toward a stationary 440 Hz siren at 20 m/s. What frequency do you hear?',
+    parameters: { 
+        sourceFrequency: 440,
+        sourceVelocity: 0,
+        observerVelocity: 20,
+        mediumSpeed: 343,
+        sourceMovingToward: false,
+        observerMovingToward: true
+    },
+    type: 'doppler_effect',
+    context: { difficulty: 'intermediate', topic: 'Doppler Effect' },
+    subparts: [
+        'Given: f = 440 Hz, v_o = 20 m/s (toward), v = 343 m/s',
+        'Formula: f\' = f × (v + v_o)/v',
+        'Observer approaching: use plus in numerator',
+        'Substitute: f\' = 440 × (343 + 20)/343',
+        'Calculate: f\' = 440 × 363/343',
+        'Result: f\' = 465.6 Hz',
+        'Frequency shift: Δf = 465.6 - 440 = 25.6 Hz higher'
+    ],
+    helper: 'Observer approaching: frequency increases',
+    solution: 'f\' = 465.6 Hz',
+    realWorldContext: 'Running toward a sound source changes pitch'
+});
+
+// Problem 4: Both Moving
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Both Source and Observer Moving',
+    problem: 'A 600 Hz source moves at 25 m/s toward an observer moving at 15 m/s toward the source. Find observed frequency.',
+    parameters: { 
+        sourceFrequency: 600,
+        sourceVelocity: 25,
+        observerVelocity: 15,
+        mediumSpeed: 343,
+        sourceMovingToward: true,
+        observerMovingToward: true
+    },
+    type: 'doppler_effect',
+    context: { difficulty: 'intermediate', topic: 'Doppler Effect' },
+    subparts: [
+        'Given: f = 600 Hz, v_s = 25 m/s, v_o = 15 m/s (both toward)',
+        'Formula: f\' = f(v + v_o)/(v - v_s)',
+        'Both approaching: + in numerator, - in denominator',
+        'Substitute: f\' = 600(343 + 15)/(343 - 25)',
+        'Calculate: f\' = 600 × 358/318',
+        'Result: f\' = 675.5 Hz',
+        'Total shift: 675.5 - 600 = 75.5 Hz',
+        'Larger shift than either motion alone'
+    ],
+    helper: 'General formula handles all motion combinations',
+    solution: 'f\' = 675.5 Hz',
+    realWorldContext: 'Two vehicles approaching each other'
+});
+
+// Problem 5: Radar Speed Detection
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Radar Speed Detection',
+    problem: 'A police radar (10 GHz) reflects off a car. The return frequency is 10.0003 GHz. Find the car speed.',
+    parameters: { 
+        sourceFrequency: 10e9,
+        observedFrequency: 10.0003e9,
+        mediumSpeed: 3e8
+    },
+    type: 'doppler_effect',
+    context: { difficulty: 'advanced', topic: 'Doppler Applications' },
+    subparts: [
+        'Given: f = 10 GHz, f\' = 10.0003 GHz, c = 3×10⁸ m/s',
+        'Double Doppler shift (to car and back)',
+        'Frequency shift: Δf = 0.0003 GHz = 300 kHz',
+        'For radar: Δf/f = 2v/c',
+        'Solve: v = (Δf/f) × c/2',
+        'v = (300×10³/10×10⁹) × (3×10⁸)/2',
+        'v = 0.00003 × 1.5×10⁸',
+        'Result: v = 4500 m/s = 4.5 km/s',
+        'Note: This example uses EM waves at high speed'
+    ],
+    helper: 'Radar involves double Doppler shift',
+    solution: 'v = 4.5 km/s',
+    realWorldContext: 'How police radar guns measure speed'
+});
+
+// Problem 6: Wavelength Shift
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Doppler Wavelength Shift',
+    problem: 'A source with λ = 0.5 m moves at 20 m/s away from observer. Find the observed wavelength.',
+    parameters: { 
+        sourceFrequency: 686,
+        sourceVelocity: 20,
+        observerVelocity: 0,
+        mediumSpeed: 343,
+        sourceMovingToward: false,
+        observerMovingToward: false
+    },
+    type: 'doppler_effect',
+    context: { difficulty: 'intermediate', topic: 'Doppler Effect' },
+    subparts: [
+        'Given: λ = 0.5 m, v_s = 20 m/s (away), v = 343 m/s',
+        'Original frequency: f = v/λ = 343/0.5 = 686 Hz',
+        'Observed frequency: f\' = f × v/(v + v_s)',
+        'f\' = 686 × 343/(343 + 20) = 648.4 Hz',
+        'Observed wavelength: λ\' = v/f\'',
+        'λ\' = 343/648.4 = 0.529 m',
+        'Wavelength increases as source recedes',
+        'Shift: Δλ = 0.529 - 0.5 = 0.029 m'
+    ],
+    helper: 'Can analyze Doppler using wavelength instead of frequency',
+    solution: 'λ\' = 0.529 m',
+    realWorldContext: 'Astronomical redshift and blueshift'
+});
+
+// Problem 7: Finding Source Velocity
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Determining Source Velocity',
+    problem: 'A stationary observer hears 520 Hz from a 500 Hz source moving toward them. Find the source velocity.',
+    parameters: { 
+        sourceFrequency: 500,
+        observedFrequency: 520,
+        observerVelocity: 0,
+        mediumSpeed: 343,
+        sourceMovingToward: true
+    },
+    type: 'doppler_effect',
+    context: { difficulty: 'intermediate', topic: 'Doppler Effect' },
+    subparts: [
+        'Given: f = 500 Hz, f\' = 520 Hz, v = 343 m/s',
+        'Formula: f\' = f × v/(v - v_s)',
+        'Rearrange: v - v_s = f × v/f\'',
+        'v_s = v - f × v/f\'',
+        'v_s = v(1 - f/f\')',
+        'Substitute: v_s = 343(1 - 500/520)',
+        'Calculate: v_s = 343(1 - 0.9615)',
+        'Result: v_s = 343 × 0.0385 = 13.2 m/s',
+        'Source approaching at 13.2 m/s'
+    ],
+    helper: 'Rearrange Doppler formula to solve for velocity',
+    solution: 'v_s = 13.2 m/s',
+    realWorldContext: 'Determining vehicle speed from sound measurements'
+});
+
+return relatedProblems;
+}
+// ============== STANDING WAVES - RELATED PROBLEMS GENERATOR ==============
+function generateRelatedStandingWaves() {
+const relatedProblems = [];
+// Problem 1: String Fundamental Frequency
+relatedProblems.push({
+    difficulty: 'easier',
+    scenario: 'Fundamental Frequency of String',
+    problem: 'A 2 m string has wave speed 100 m/s. Find the fundamental frequency.',
+    parameters: { 
+        length: 2,
+        waveSpeed: 100,
+        harmonic: 1
+    },
+    type: 'standing_wave_string',
+    context: { difficulty: 'beginner', topic: 'Standing Waves on Strings' },
+    subparts: [
+        'Given: L = 2 m, v = 100 m/s, n = 1 (fundamental)',
+        'Formula: f_n = n × v/(2L)',
+        'Substitute: f_1 = 1 × 100/(2 × 2)',
+        'Calculate: f_1 = 100/4 = 25 Hz',
+        'Wavelength: λ_1 = 2L = 4 m',
+        'Pattern: 1 antinode, 2 nodes',
+        'This is the lowest possible frequency'
+    ],
+    helper: 'Fundamental has one antinode between fixed ends',
+    solution: 'f_1 = 25 Hz',
+    realWorldContext: 'Lowest note a guitar string can produce'
+});
+
+// Problem 2: String Harmonics
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Higher Harmonics of String',
+    problem: 'For the string above, find the 2nd and 3rd harmonic frequencies.',
+    parameters: { 
+        length: 2,
+        waveSpeed: 100,
+        harmonic: 2
+    },
+    type: 'standing_wave_string',
+    context: { difficulty: 'beginner', topic: 'Standing Waves on Strings' },
+    subparts: [
+        'Given: L = 2 m, v = 100 m/s',
+        '2nd harmonic (n = 2):',
+        'f_2 = 2 × 100/(2 × 2) = 50 Hz',
+        'λ_2 = 2L/2 = 2 m',
+        'Pattern: 2 antinodes, 3 nodes',
+        '3rd harmonic (n = 3):',
+        'f_3 = 3 × 100/(2 × 2) = 75 Hz',
+        'λ_3 = 2L/3 = 1.33 m',
+        'Pattern: 3 antinodes, 4 nodes',
+        'Harmonics are integer multiples: 25, 50, 75 Hz'
+    ],
+    helper: 'Each harmonic adds one more antinode',
+    solution: 'f_2 = 50 Hz, f_3 = 75 Hz',
+    realWorldContext: 'Overtones that give instruments their unique sound'
+});
+
+// Problem 3: Open Pipe Harmonics
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Open Pipe Standing Waves',
+    problem: 'An open pipe is 0.5 m long. Find the first three resonant frequencies (v_sound = 343 m/s).',
+    parameters: { 
+        length: 0.5,
+        waveSpeed: 343,
+        harmonic: 1
+    },
+    type: 'standing_wave_pipe_open',
+    context: { difficulty: 'intermediate', topic: 'Standing Waves in Pipes' },
+    subparts: [
+        'Given: L = 0.5 m, v = 343 m/s',
+        'Open pipe: all harmonics present',
+        'Formula: f_n = n × v/(2L)',
+        'f_1 = 1 × 343/(2 × 0.5) = 343 Hz',
+        'f_2 = 2 × 343/1 = 686 Hz',
+        'f_3 = 3 × 343/1 = 1029 Hz',
+        'Pattern: antinodes at both open ends',
+        'λ_1 = 1 m, λ_2 = 0.5 m, λ_3 = 0.33 m'
+    ],
+    helper: 'Open pipe formula same as string',
+    solution: 'f_1 = 343 Hz, f_2 = 686 Hz, f_3 = 1029 Hz',
+    realWorldContext: 'Flute or organ pipe open at both ends'
+});
+
+// Problem 4: Closed Pipe Harmonics
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Closed Pipe Standing Waves',
+    problem: 'A pipe closed at one end is 0.5 m long. Find the first three resonant frequencies.',
+    parameters: { 
+        length: 0.5,
+        waveSpeed: 343,
+        harmonic: 1
+    },
+    type: 'standing_wave_pipe_closed',
+    context: { difficulty: 'intermediate', topic: 'Standing Waves in Pipes' },
+    subparts: [
+        'Given: L = 0.5 m, v = 343 m/s',
+        'Closed pipe: only odd harmonics (n = 1, 3, 5, ...)',
+        'Formula: f_n = n × v/(4L)',
+        'f_1 = 1 × 343/(4 × 0.5) = 171.5 Hz',
+        'f_3 = 3 × 343/2 = 514.5 Hz',
+        'f_5 = 5 × 343/2 = 857.5 Hz',
+        'No even harmonics (f_2, f_4 not allowed)',
+        'Pattern: node at closed end, antinode at open end',
+        'λ_1 = 2 m, λ_3 = 0.67 m, λ_5 = 0.4 m'
+    ],
+    helper: 'Closed pipe: only odd harmonics exist',
+    solution: 'f_1 = 171.5 Hz, f_3 = 514.5 Hz, f_5 = 857.5 Hz',
+    realWorldContext: 'Clarinet or bottle resonance'
+});
+
+// Problem 5: Comparing Open and Closed Pipes
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Open vs Closed Pipe Comparison',
+    problem: 'Compare fundamental frequencies of 1 m open and closed pipes.',
+    parameters: { 
+        length: 1,
+        waveSpeed: 343
+    },
+    type: 'standing_wave_pipe_open',
+    context: { difficulty: 'intermediate', topic: 'Standing Waves Comparison' },
+    subparts: [
+        'Given: L = 1 m, v = 343 m/s',
+        'Open pipe fundamental: f_open = v/(2L)',
+        'f_open = 343/(2 × 1) = 171.5 Hz',
+        'Closed pipe fundamental: f_closed = v/(4L)',
+        'f_closed = 343/(4 × 1) = 85.75 Hz',
+        'Ratio: f_open/f_closed = 2',
+        'Open pipe fundamental is twice closed pipe',
+        'Closed pipe: λ = 4L (quarter wavelength)',
+        'Open pipe: λ = 2L (half wavelength)'
+    ],
+    helper: 'Same length: open pipe has twice the fundamental frequency',
+    solution: 'f_open = 171.5 Hz, f_closed = 85.75 Hz',
+    realWorldContext: 'Understanding different instrument designs'
+});
+
+// Problem 6: Finding String Length
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Determine String Length',
+    problem: 'A guitar string vibrates at 440 Hz (A note) with v = 400 m/s. Find the string length.',
+    parameters: { 
+        frequency: 440,
+        waveSpeed: 400,
+        harmonic: 1
+    },
+    type: 'standing_wave_string',
+    context: { difficulty: 'intermediate', topic: 'Standing Waves on Strings' },
+    subparts: [
+        'Given: f_1 = 440 Hz, v = 400 m/s, n = 1',
+        'Formula: f_1 = v/(2L)',
+        'Rearrange: L = v/(2f_1)',
+        'Substitute: L = 400/(2 × 440)',
+        'Calculate: L = 400/880',
+        'Result: L = 0.455 m = 45.5 cm',
+        'Wavelength: λ = 2L = 0.909 m',
+        'This is typical guitar string length'
+    ],
+    helper: 'Rearrange standing wave formula to find length',
+    solution: 'L = 0.455 m',
+    realWorldContext: 'Designing string instruments for specific pitches'
+});
+
+// Problem 7: Node and Antinode Positions
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Locate Nodes and Antinodes',
+    problem: 'For the 3rd harmonic on a 1.2 m string, find positions of all nodes and antinodes.',
+    parameters: { 
+        length: 1.2,
+        waveSpeed: 100,
+        harmonic: 3
+    },
+    type: 'standing_wave_string',
+    context: { difficulty: 'intermediate', topic: 'Standing Wave Patterns' },
+    subparts: [
+        'Given: L = 1.2 m, n = 3',
+        'Wavelength: λ = 2L/n = 2.4/3 = 0.8 m',
+        'Nodes (zero displacement):',
+        'Always at ends: x = 0, x = 1.2 m',
+        'Internal nodes: x = L/3 = 0.4 m, x = 2L/3 = 0.8 m',
+        'Total nodes: 4 (including ends)',
+        'Antinodes (max displacement):',
+        'x = L/6 = 0.2 m',
+        'x = L/2 = 0.6 m',
+        'x = 5L/6 = 1.0 m',
+        'Total antinodes: 3',
+        'Pattern: N-A-N-A-N-A-N'
+    ],
+    helper: 'Harmonic n has (n+1) nodes and n antinodes',
+    solution: 'Nodes: 0, 0.4, 0.8, 1.2 m; Antinodes: 0.2, 0.6, 1.0 m',
+    realWorldContext: 'Understanding vibration patterns on strings'
+});
+
+return relatedProblems;
+}
+// ============== RESONANCE - RELATED PROBLEMS GENERATOR ==============
+function generateRelatedResonance() {
+const relatedProblems = [];
+// Problem 1: Quality Factor
+relatedProblems.push({
+    difficulty: 'easier',
+    scenario: 'Calculate Quality Factor',
+    problem: 'A resonant system has natural frequency 100 Hz and bandwidth 10 Hz. Find the quality factor.',
+    parameters: { 
+        naturalFrequency: 100,
+        bandwidth: 10
+    },
+    type: 'resonance',
+    context: { difficulty: 'beginner', topic: 'Resonance and Quality Factor' },
+    subparts: [
+        'Given: f₀ = 100 Hz, Δf = 10 Hz',
+        'Formula: Q = f₀/Δf',
+        'Substitute: Q = 100/10',
+        'Result: Q = 10',
+        'This indicates moderate damping',
+        'Higher Q = sharper resonance',
+        'Lower Q = broader resonance'
+    ],
+    helper: 'Q measures sharpness of resonance peak',
+    solution: 'Q = 10',
+    realWorldContext: 'Characterizing tuning forks and oscillators'
+});
+
+// Problem 2: Finding Bandwidth
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Determine Resonance Bandwidth',
+    problem: 'A circuit resonates at 1000 Hz with Q = 50. Find the bandwidth.',
+    parameters: { 
+        naturalFrequency: 1000,
+        quality: 50
+    },
+    type: 'resonance',
+    context: { difficulty: 'beginner', topic: 'Resonance and Quality Factor' },
+    subparts: [
+        'Given: f₀ = 1000 Hz, Q = 50',
+        'Formula: Q = f₀/Δf',
+        'Rearrange: Δf = f₀/Q',
+        'Substitute: Δf = 1000/50',
+        'Result: Δf = 20 Hz',
+        'Half-power points: f₁ = 990 Hz, f₂ = 1010 Hz',
+        'Sharp resonance due to high Q'
+    ],
+    helper: 'Bandwidth inversely proportional to Q',
+    solution: 'Δf = 20 Hz',
+    realWorldContext: 'Radio tuner selectivity'
+});
+
+// Problem 3: Resonance in Room Acoustics
+relatedProblems.push({
+    difficulty: 'similar',
+    scenario: 'Room Resonance Frequencies',
+    problem: 'A 10 m long room acts as a closed-open resonator. Find the first resonance frequency.',
+    parameters: { 
+        length: 10,
+        waveSpeed: 343,
+        harmonic: 1
+    },
+    type: 'standing_wave_pipe_closed',
+    context: { difficulty: 'intermediate', topic: 'Acoustic Resonance' },
+    subparts: [
+        'Given: L = 10 m, v = 343 m/s',
+        'Room modeled as closed-open pipe',
+        'Formula: f₁ = v/(4L)',
+        'Substitute: f₁ = 343/(4 × 10)',
+        'Calculate: f₁ = 343/40 = 8.58 Hz',
+        'This is below human hearing range',
+        'Next resonances: 25.7 Hz, 42.9 Hz, etc.',
+        'These affect room acoustics and bass response'
+    ],
+    helper: 'Room dimensions determine resonant frequencies',
+    solution: 'f₁ = 8.58 Hz',
+    realWorldContext: 'Acoustic design of concert halls'
+});
+
+// Problem 4: Tuning Fork Resonance
+relatedProblems.push({
+    difficulty: 'easier',
+    scenario: 'Tuning Fork and Air Column',
+    problem: 'A 512 Hz tuning fork causes resonance in a tube at 16.8 cm. Find the speed of sound.',
+    parameters: { 
+        frequency: 512,
+        length: 0.168,
+        harmonic: 1
+    },
+    type: 'standing_wave_pipe_closed',
+    context: { difficulty: 'intermediate', topic: 'Resonance Experiments' },
+    subparts: [
+        'Given: f = 512 Hz, L = 16.8 cm = 0.168 m',
+        'Assuming first resonance (closed pipe)',
+        'Formula: f = v/(4L)',
+        'Rearrange: v = 4Lf',
+        'Substitute: v = 4 × 0.168 × 512',
+        'Calculate: v = 344.1 m/s',
+        'Close to standard 343 m/s',
+        'This method measures sound speed'
+    ],
+    helper: 'Resonance method to measure wave speed',
+    solution: 'v = 344.1 m/s',
+    realWorldContext: 'Laboratory measurement of sound speed'
+});
+
+// Problem 5: Helmholtz Resonator
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Bottle Resonance',
+    problem: 'A bottle resonates at 200 Hz. If you add water and the resonant frequency becomes 250 Hz, how much did the effective length change?',
+    parameters: { 
+        frequency1: 200,
+        frequency2: 250,
+        waveSpeed: 343
+    },
+    type: 'standing_wave_pipe_closed',
+    context: { difficulty: 'intermediate', topic: 'Resonance Applications' },
+    subparts: [
+        'Given: f₁ = 200 Hz, f₂ = 250 Hz, v = 343 m/s',
+        'For closed pipe: f = v/(4L)',
+        'Initial: L₁ = v/(4f₁) = 343/(4 × 200) = 0.429 m',
+        'Final: L₂ = v/(4f₂) = 343/(4 × 250) = 0.343 m',
+        'Change: ΔL = L₂ - L₁ = 0.343 - 0.429',
+        'Result: ΔL = -0.086 m = -8.6 cm',
+        'Shorter column → higher frequency',
+        'Water reduced effective length by 8.6 cm'
+    ],
+    helper: 'Higher frequency means shorter resonating column',
+    solution: 'ΔL = -8.6 cm (shortened)',
+    realWorldContext: 'Musical instruments with variable length'
+});
+
+// Problem 6: Bridge Resonance
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Structural Resonance',
+    problem: 'A bridge has natural frequency 2 Hz with damping ratio ζ = 0.05. Is there danger from soldiers marching at 2 steps/second?',
+    parameters: { 
+        naturalFrequency: 2,
+        quality: 10
+    },
+    type: 'resonance',
+    context: { difficulty: 'advanced', topic: 'Forced Oscillations' },
+    subparts: [
+        'Given: f₀ = 2 Hz, marching rate = 2 steps/s',
+        'Marching frequency matches natural frequency!',
+        'Q = 1/(2ζ) = 1/(2 × 0.05) = 10',
+        'Amplitude magnification at resonance ≈ Q = 10',
+        'This is dangerous! Resonance can build up',
+        'Solution: "Break step" - don\'t march in unison',
+        'Historical: Tacoma Narrows Bridge collapse',
+        'Wind vortices matched bridge natural frequency'
+    ],
+    helper: 'Resonance can cause catastrophic structural failure',
+    solution: 'Yes, dangerous - must break step',
+    realWorldContext: 'Why soldiers break step on bridges'
+});
+
+// Problem 7: Coupled Resonators
+relatedProblems.push({
+    difficulty: 'harder',
+    scenario: 'Energy Transfer Between Resonators',
+    problem: 'Two identical 440 Hz tuning forks are coupled. One is struck. Describe the energy transfer.',
+    parameters: { 
+        naturalFrequency: 440,
+        quality: 100
+    },
+    type: 'resonance',
+    context: { difficulty: 'advanced', topic: 'Coupled Resonators' },
+    subparts: [
+        'Given: Both forks at f₀ = 440 Hz (resonant)',
+        'When one fork vibrates, it creates sound waves',
+        'These waves hit the second fork',
+        'Second fork resonates at its natural frequency',
+        'Energy transfers from fork 1 to fork 2',
+        'Eventually fork 1 stops, fork 2 vibrates',
+        'Then energy transfers back: periodic exchange',
+        'Beat frequency = coupling strength',
+        'This is sympathetic resonance',
+        'Used in musical instruments and structures'
+    ],
+    helper: 'Resonant coupling enables energy transfer',
+    solution: 'Periodic energy exchange between forks',
+    realWorldContext: 'Sympathetic vibrations in piano strings'
+});
+
+return relatedProblems;
+}
+// ============== SOLVER FUNCTIONS ==============
+function solveWavePropertiesRelatedProblems() {
+const problems = generateRelatedWaveProperties();
+const solvedProblems = [];
+problems.forEach((problem, index) => {
+    console.log(`  Solving Wave Properties Problem ${index + 1}: ${problem.scenario}`);
+
+    const workbook = new EnhancedWaveSoundPhysicsWorkbook({
+        theme: 'scientific',
+        explanationLevel: 'detailed',
+        includeVerificationInSteps: true,
+        includeConceptualConnections: true,
+        includeAlternativeMethods: true,
+        includeErrorPrevention: true,
+        includeCommonMistakes: true,
+        includePedagogicalNotes: true,
+        verificationDetail: 'detailed'
+    });
+
+    workbook.solveWaveSoundProblem({
+        problemType: problem.type,
+        parameters: problem.parameters,
+        scenario: problem.problem,
+        context: problem.context
+    });
+
+    solvedProblems.push({
+        problem: problem,
+        workbook: workbook
+    });
+});
+
+return solvedProblems;
+}
+function solveWaveInterferenceRelatedProblems() {
+const problems = generateRelatedWaveInterference();
+const solvedProblems = [];
+problems.forEach((problem, index) => {
+    console.log(`  Solving Wave Interference Problem ${index + 1}: ${problem.scenario}`);
+
+    const workbook = new EnhancedWaveSoundPhysicsWorkbook({
+        theme:'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveWaveSoundProblem({
+            problemType: problem.type,
+            parameters: problem.parameters,
+            scenario: problem.problem,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveSoundWavesRelatedProblems() {
+    const problems = generateRelatedSoundWaves();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Sound Waves Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedWaveSoundPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveWaveSoundProblem({
+            problemType: problem.type,
+            parameters: problem.parameters,
+            scenario: problem.problem,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveDopplerEffectRelatedProblems() {
+    const problems = generateRelatedDopplerEffect();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Doppler Effect Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedWaveSoundPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveWaveSoundProblem({
+            problemType: problem.type,
+            parameters: problem.parameters,
+            scenario: problem.problem,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveStandingWavesRelatedProblems() {
+    const problems = generateRelatedStandingWaves();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Standing Waves Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedWaveSoundPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveWaveSoundProblem({
+            problemType: problem.type,
+            parameters: problem.parameters,
+            scenario: problem.problem,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveResonanceRelatedProblems() {
+    const problems = generateRelatedResonance();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Resonance Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedWaveSoundPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveWaveSoundProblem({
+            problemType: problem.type,
+            parameters: problem.parameters,
+            scenario: problem.problem,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveWavesDocument() {
+    console.log('Generating Comprehensive Waves and Sound Physics Workbook...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Waves and Sound Physics Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Wave Properties, Interference, Sound, Doppler Effect, Standing Waves, and Resonance',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Wave Properties
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Wave Properties (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const wavePropertiesProblems = generateRelatedWaveProperties();
+    wavePropertiesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part II: Wave Interference
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Wave Interference (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const waveInterferenceProblems = generateRelatedWaveInterference();
+    waveInterferenceProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 8}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part III: Sound Waves
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Sound Waves (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const soundWavesProblems = generateRelatedSoundWaves();
+    soundWavesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 15}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IV: Doppler Effect
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Doppler Effect (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const dopplerProblems = generateRelatedDopplerEffect();
+    dopplerProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 22}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part V: Standing Waves
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Standing Waves (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const standingWavesProblems = generateRelatedStandingWaves();
+    standingWavesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 29}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VI: Resonance
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Resonance (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const resonanceProblems = generateRelatedResonance();
+    resonanceProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 36}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: WAVE PROPERTIES ==============
+    console.log('\nProcessing Part I: Wave Properties...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Wave Properties',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const wavePropertiesSolved = solveWavePropertiesRelatedProblems();
+    wavePropertiesSolved.forEach((solved, index) => {
+        console.log(`  Adding Wave Properties Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: WAVE INTERFERENCE ==============
+    console.log('\nProcessing Part II: Wave Interference...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Wave Interference',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const waveInterferenceSolved = solveWaveInterferenceRelatedProblems();
+    waveInterferenceSolved.forEach((solved, index) => {
+        console.log(`  Adding Wave Interference Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 8}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: SOUND WAVES ==============
+    console.log('\nProcessing Part III: Sound Waves...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Sound Waves',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const soundWavesSolved = solveSoundWavesRelatedProblems();
+    soundWavesSolved.forEach((solved, index) => {
+        console.log(`  Adding Sound Waves Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 15}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: DOPPLER EFFECT ==============
+    console.log('\nProcessing Part IV: Doppler Effect...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Doppler Effect',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const dopplerSolved = solveDopplerEffectRelatedProblems();
+    dopplerSolved.forEach((solved, index) => {
+        console.log(`  Adding Doppler Effect Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 22}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: STANDING WAVES ==============
+    console.log('\nProcessing Part V: Standing Waves...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Standing Waves',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const standingWavesSolved = solveStandingWavesRelatedProblems();
+    standingWavesSolved.forEach((solved, index) => {
+        console.log(`  Adding Standing Waves Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 29}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: RESONANCE ==============
+    console.log('\nProcessing Part VI: Resonance...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Resonance',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const resonanceSolved = solveResonanceRelatedProblems();
+    resonanceSolved.forEach((solved, index) => {
+        console.log(`  Adding Resonance Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 36}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_waves_sound_physics_workbook.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE WAVES & SOUND DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 42');
+        console.log('    - Wave Properties: 7 problems');
+        console.log('    - Wave Interference: 7 problems');
+        console.log('    - Sound Waves: 7 problems');
+        console.log('    - Doppler Effect: 7 problems');
+        console.log('    - Standing Waves: 7 problems');
+        console.log('    - Resonance: 7 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I: Wave Properties (Problems 1-7)');
+        console.log('  • Part II: Wave Interference (Problems 8-14)');
+        console.log('  • Part III: Sound Waves (Problems 15-21)');
+        console.log('  • Part IV: Doppler Effect (Problems 22-28)');
+        console.log('  • Part V: Standing Waves (Problems 29-35)');
+        console.log('  • Part VI: Resonance (Problems 36-42)');
+        console.log('\n📄 EXPECTED PAGES: 120+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step solution');
+        console.log('  • Enhanced explanations and verification');
+        console.log('  • Key concepts and pedagogical notes');
+        console.log('  • Alternative solution methods');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common mistakes and error prevention');
+        console.log('  • Physical interpretations and visualizations');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveWavesDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});

@@ -1,0 +1,2836 @@
+
+import { EnhancedMechanicsPhysicsWorkbook } from './mechanicsworkbook.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a problem
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content
+        if (section.data && Array.isArray(section.data)) {
+            section.data.forEach(row => {
+                if (Array.isArray(row)) {
+                    // Handle table-like data
+                    if (row.length === 2 && row[0] && row[1]) {
+                        // Key-value pair
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `${row[0]}: `,
+                                        bold: true
+                                    }),
+                                    new docx.TextRun({
+                                        text: String(row[1])
+                                    })
+                                ],
+                                spacing: { after: 100 }
+                            })
+                        );
+                    } else if (row[0] === '' && row[1] === '') {
+                        // Spacing row
+                        sections.push(
+                            new docx.Paragraph({
+                                text: '',
+                                spacing: { after: 200 }
+                            })
+                        );
+                    } else if (row.length > 2) {
+                        // Multi-column row (like verification tables)
+                        sections.push(
+                            new docx.Paragraph({
+                                text: row.join(' | '),
+                                spacing: { after: 100 }
+                            })
+                        );
+                    }
+                }
+            });
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+// ============== KINEMATICS 1D - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedKinematics1D() {
+    const relatedProblems = [];
+
+    // Problem 1: Basic velocity calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Constant Velocity Motion',
+        problem: 'A car travels at a constant velocity of 20 m/s for 5 seconds. How far does it travel?',
+        parameters: { v0: 20, a: 0, t: 5, x0: 0 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'beginner', topic: 'Constant Velocity' },
+        subparts: [
+            'Given: v₀ = 20 m/s, a = 0 m/s², t = 5 s',
+            'Find: displacement (x)',
+            'Since acceleration is zero, use: x = v₀t',
+            'x = 20 × 5 = 100 m',
+            'The car travels 100 meters'
+        ],
+        helper: 'With zero acceleration, distance = velocity × time',
+        solution: 'x = 100 m',
+        realWorldContext: 'Cruise control on highway driving'
+    });
+
+    // Problem 2: Uniformly accelerated motion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Uniformly Accelerated Motion',
+        problem: 'A car accelerates from rest at 2 m/s² for 6 seconds. What is its final velocity?',
+        parameters: { v0: 0, a: 2, t: 6 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'beginner', topic: 'Constant Acceleration' },
+        subparts: [
+            'Given: v₀ = 0 m/s (from rest), a = 2 m/s², t = 6 s',
+            'Find: final velocity (v)',
+            'Use: v = v₀ + at',
+            'v = 0 + 2(6)',
+            'v = 12 m/s',
+            'Check: Starting from rest and accelerating makes sense'
+        ],
+        helper: 'Use v = v₀ + at for velocity with constant acceleration',
+        solution: 'v = 12 m/s',
+        realWorldContext: 'Vehicle acceleration from stoplight'
+    });
+
+    // Problem 3: Free fall motion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Free Fall Motion',
+        problem: 'An object is dropped from rest and falls for 3 seconds. How far does it fall? (g = 9.81 m/s²)',
+        parameters: { v0: 0, a: 9.81, t: 3, x0: 0 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Free Fall' },
+        subparts: [
+            'Given: v₀ = 0 m/s (dropped from rest), a = g = 9.81 m/s², t = 3 s',
+            'Find: distance fallen (x)',
+            'Use: x = x₀ + v₀t + ½at²',
+            'x = 0 + 0(3) + ½(9.81)(3)²',
+            'x = ½(9.81)(9)',
+            'x = 44.145 m',
+            'The object falls approximately 44.1 meters'
+        ],
+        helper: 'Free fall is constant acceleration with a = g downward',
+        solution: 'x ≈ 44.1 m',
+        realWorldContext: 'Dropping objects from buildings or bridges'
+    });
+
+    // Problem 4: Braking distance
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Braking Distance',
+        problem: 'A car traveling at 25 m/s brakes with acceleration -5 m/s². How far does it travel before stopping?',
+        parameters: { v0: 25, v: 0, a: -5 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Stopping Distance' },
+        subparts: [
+            'Given: v₀ = 25 m/s, v = 0 m/s (stops), a = -5 m/s²',
+            'Find: stopping distance (x)',
+            'Use: v² = v₀² + 2ax',
+            '0² = 25² + 2(-5)x',
+            '0 = 625 - 10x',
+            '10x = 625',
+            'x = 62.5 m',
+            'The car travels 62.5 meters before stopping'
+        ],
+        helper: 'Use v² = v₀² + 2ax when time is not given',
+        solution: 'x = 62.5 m',
+        realWorldContext: 'Emergency braking scenarios and safe following distances'
+    });
+
+    // Problem 5: Two-stage motion
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Two-Stage Motion',
+        problem: 'A train accelerates at 1.5 m/s² for 10 seconds, then maintains constant velocity. What is its velocity after acceleration?',
+        parameters: { v0: 0, a: 1.5, t: 10 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Multi-Stage Motion' },
+        subparts: [
+            'Stage 1 - Acceleration phase:',
+            'Given: v₀ = 0 m/s, a = 1.5 m/s², t = 10 s',
+            'Find: velocity after acceleration',
+            'Use: v = v₀ + at',
+            'v = 0 + 1.5(10)',
+            'v = 15 m/s',
+            'Stage 2 - Constant velocity phase:',
+            'The train continues at v = 15 m/s'
+        ],
+        helper: 'Analyze each stage of motion separately',
+        solution: 'v = 15 m/s',
+        realWorldContext: 'Train or subway acceleration patterns'
+    });
+
+    // Problem 6: Meeting point problem
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Average Velocity',
+        problem: 'A runner covers 100 m in 12 seconds. What is the average velocity?',
+        parameters: { x0: 0, x: 100, t: 12 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'beginner', topic: 'Average Velocity' },
+        subparts: [
+            'Given: displacement = 100 m, time = 12 s',
+            'Find: average velocity',
+            'Use: v_avg = Δx/Δt',
+            'v_avg = 100/12',
+            'v_avg = 8.33 m/s',
+            'Note: This is average velocity, not instantaneous'
+        ],
+        helper: 'Average velocity = total displacement / total time',
+        solution: 'v_avg = 8.33 m/s',
+        realWorldContext: 'Athletic performance measurement'
+    });
+
+    // Problem 7: Vertical throw upward
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Vertical Throw Upward',
+        problem: 'A ball is thrown upward at 20 m/s. How high does it go? (g = 9.81 m/s²)',
+        parameters: { v0: 20, v: 0, a: -9.81 },
+        type: 'kinematics_constant_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Projectile Motion (Vertical)' },
+        subparts: [
+            'Given: v₀ = 20 m/s (upward), v = 0 m/s (at peak), a = -9.81 m/s²',
+            'Find: maximum height (h)',
+            'Use: v² = v₀² + 2ah',
+            '0² = 20² + 2(-9.81)h',
+            '0 = 400 - 19.62h',
+            '19.62h = 400',
+            'h = 20.39 m',
+            'The ball reaches approximately 20.4 meters'
+        ],
+        helper: 'At maximum height, velocity = 0',
+        solution: 'h ≈ 20.4 m',
+        realWorldContext: 'Ball sports and projectile analysis'
+    });
+
+    return relatedProblems;
+}
+
+// ============== KINEMATICS 2D - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedKinematics2D() {
+    const relatedProblems = [];
+
+    // Problem 1: Horizontal projectile
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Horizontal Projectile',
+        problem: 'A ball is thrown horizontally at 15 m/s from a height of 20 m. How far does it travel horizontally?',
+        parameters: { v0: 15, angle: 0, h0: 20, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Horizontal Launch' },
+        subparts: [
+            'Given: v₀ = 15 m/s (horizontal), h₀ = 20 m, g = 9.81 m/s²',
+            'Step 1: Find time of flight from vertical motion',
+            'h = h₀ - ½gt²',
+            '0 = 20 - ½(9.81)t²',
+            't² = 40/9.81 = 4.08',
+            't = 2.02 s',
+            'Step 2: Find horizontal range',
+            'R = v₀t = 15(2.02) = 30.3 m',
+            'The ball travels 30.3 meters horizontally'
+        ],
+        helper: 'Horizontal and vertical motions are independent',
+        solution: 'R ≈ 30.3 m',
+        realWorldContext: 'Objects dropped from moving vehicles or aircraft'
+    });
+
+    // Problem 2: Projectile at angle
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Projectile at Angle',
+        problem: 'A projectile is launched at 30 m/s at 45°. Find the maximum height and range.',
+        parameters: { v0: 30, angle: 45, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Angled Projectile' },
+        subparts: [
+            'Given: v₀ = 30 m/s, θ = 45°, g = 9.81 m/s²',
+            'Step 1: Resolve velocity components',
+            'v₀ₓ = 30 cos(45°) = 21.21 m/s',
+            'v₀ᵧ = 30 sin(45°) = 21.21 m/s',
+            'Step 2: Maximum height',
+            'h_max = v₀ᵧ²/(2g) = (21.21)²/(2×9.81) = 22.96 m',
+            'Step 3: Time of flight',
+            't = 2v₀ᵧ/g = 2(21.21)/9.81 = 4.32 s',
+            'Step 4: Range',
+            'R = v₀ₓ × t = 21.21 × 4.32 = 91.6 m'
+        ],
+        helper: 'Break into x and y components, solve separately',
+        solution: 'h_max ≈ 23.0 m, R ≈ 91.6 m',
+        realWorldContext: 'Sports like basketball, soccer, golf'
+    });
+
+    // Problem 3: Maximum range angle
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Maximum Range',
+        problem: 'At what angle should a projectile be launched at 25 m/s to achieve maximum range?',
+        parameters: { v0: 25, optimizationType: 'range', g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Optimal Launch Angle' },
+        subparts: [
+            'Given: v₀ = 25 m/s, goal: maximize range',
+            'Range formula: R = v₀²sin(2θ)/g',
+            'To maximize R, need to maximize sin(2θ)',
+            'Maximum value of sin(2θ) = 1',
+            'This occurs when 2θ = 90°',
+            'Therefore: θ = 45°',
+            'Maximum range: R = (25)²/9.81 = 63.7 m',
+            'Launch at 45° for maximum range'
+        ],
+        helper: '45° gives maximum range for projectiles',
+        solution: 'θ = 45°, R_max ≈ 63.7 m',
+        realWorldContext: 'Optimizing throw distance in athletics'
+    });
+
+    // Problem 4: Projectile on incline
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Landing at Different Height',
+        problem: 'A ball is thrown at 20 m/s at 60° from ground level. Find time to reach maximum height.',
+        parameters: { v0: 20, angle: 60, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Time to Peak' },
+        subparts: [
+            'Given: v₀ = 20 m/s, θ = 60°, g = 9.81 m/s²',
+            'Vertical component: v₀ᵧ = 20 sin(60°) = 17.32 m/s',
+            'At maximum height, vᵧ = 0',
+            'Use: vᵧ = v₀ᵧ - gt',
+            '0 = 17.32 - 9.81t',
+            't = 17.32/9.81',
+            't = 1.77 s',
+            'Time to reach maximum height is 1.77 seconds'
+        ],
+        helper: 'At peak, vertical velocity = 0',
+        solution: 't ≈ 1.77 s',
+        realWorldContext: 'Analyzing ball trajectories in sports'
+    });
+
+    // Problem 5: Projectile velocity at point
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Velocity at Specific Point',
+        problem: 'A projectile launched at 25 m/s at 30° is at its peak. What is its velocity?',
+        parameters: { v0: 25, angle: 30 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Velocity Components' },
+        subparts: [
+            'Given: v₀ = 25 m/s, θ = 30°',
+            'At peak height:',
+            'Horizontal component: vₓ = v₀ cos(30°) = 21.65 m/s (constant)',
+            'Vertical component: vᵧ = 0 m/s (at peak)',
+            'Total velocity at peak:',
+            'v = √(vₓ² + vᵧ²) = √(21.65² + 0²)',
+            'v = 21.65 m/s (horizontal only)',
+            'Direction: purely horizontal'
+        ],
+        helper: 'Horizontal velocity stays constant, vertical becomes zero at peak',
+        solution: 'v = 21.65 m/s (horizontal)',
+        realWorldContext: 'Understanding projectile motion at different points'
+    });
+
+    return relatedProblems;
+}
+
+// ============== PROJECTILE MOTION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedProjectileMotion() {
+    const relatedProblems = [];
+
+    // Problem 1: Ball thrown from building
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Throw from Height',
+        problem: 'A ball is thrown at 15 m/s at 40° from a 25 m tall building. Find the range.',
+        parameters: { v0: 15, angle: 40, h0: 25, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Elevated Launch' },
+        subparts: [
+            'Given: v₀ = 15 m/s, θ = 40°, h₀ = 25 m',
+            'Components: v₀ₓ = 15cos(40°) = 11.49 m/s',
+            '           v₀ᵧ = 15sin(40°) = 9.64 m/s',
+            'Vertical motion: y = h₀ + v₀ᵧt - ½gt²',
+            '0 = 25 + 9.64t - 4.905t²',
+            'Solve quadratic: t = 3.13 s',
+            'Range: R = v₀ₓt = 11.49 × 3.13 = 36.0 m'
+        ],
+        helper: 'Include initial height in vertical motion equation',
+        solution: 'R ≈ 36.0 m',
+        realWorldContext: 'Throwing objects from elevated positions'
+    });
+
+    // Problem 2: Baseball trajectory
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Baseball Hit',
+        problem: 'A baseball is hit at 40 m/s at 35°. How long is it in the air?',
+        parameters: { v0: 40, angle: 35, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Time of Flight' },
+        subparts: [
+            'Given: v₀ = 40 m/s, θ = 35°',
+            'Vertical component: v₀ᵧ = 40sin(35°) = 22.94 m/s',
+            'Time of flight: t = 2v₀ᵧ/g',
+            't = 2(22.94)/9.81',
+            't = 4.68 s',
+            'The baseball is in the air for 4.68 seconds'
+        ],
+        helper: 'Time of flight = 2 × time to reach peak',
+        solution: 't ≈ 4.68 s',
+        realWorldContext: 'Baseball, cricket, and other ball sports'
+    });
+
+    // Problem 3: Cannon projectile
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Cannon Fire',
+        problem: 'A cannon fires at 50 m/s at 55°. Find maximum height and total distance.',
+        parameters: { v0: 50, angle: 55, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'advanced', topic: 'Complete Trajectory Analysis' },
+        subparts: [
+            'Given: v₀ = 50 m/s, θ = 55°',
+            'Components: v₀ₓ = 50cos(55°) = 28.68 m/s',
+            '           v₀ᵧ = 50sin(55°) = 40.96 m/s',
+            'Maximum height: h = v₀ᵧ²/(2g)',
+            'h = (40.96)²/(2×9.81) = 85.5 m',
+            'Time of flight: t = 2v₀ᵧ/g = 8.35 s',
+            'Range: R = v₀ₓt = 28.68 × 8.35 = 239.5 m'
+        ],
+        helper: 'Calculate height and range separately using components',
+        solution: 'h ≈ 85.5 m, R ≈ 239.5 m',
+        realWorldContext: 'Artillery, historical cannons, and ballistics'
+    });
+
+    // Problem 4: Soccer goal kick
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Soccer Goal Kick',
+        problem: 'A soccer ball is kicked at 22 m/s at 28°. Does it clear a 2.5 m wall 15 m away?',
+        parameters: { v0: 22, angle: 28, targetDistance: 15, wallHeight: 2.5, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'intermediate', topic: 'Clearing Obstacles' },
+        subparts: [
+            'Given: v₀ = 22 m/s, θ = 28°, wall at x = 15 m, h_wall = 2.5 m',
+            'Components: v₀ₓ = 22cos(28°) = 19.43 m/s',
+            '           v₀ᵧ = 22sin(28°) = 10.33 m/s',
+            'Time to reach wall: t = x/v₀ₓ = 15/19.43 = 0.77 s',
+            'Height at wall: y = v₀ᵧt - ½gt²',
+            'y = 10.33(0.77) - 4.905(0.77)²',
+            'y = 7.95 - 2.91 = 5.04 m',
+            'Yes, ball is at 5.04 m > 2.5 m wall height'
+        ],
+        helper: 'Find height at specific horizontal distance',
+        solution: 'Yes, clears wall (5.04 m > 2.5 m)',
+        realWorldContext: 'Free kicks in soccer, clearing walls'
+    });
+
+    // Problem 5: Water fountain
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Water Fountain',
+        problem: 'Water shoots from a fountain at 8 m/s at 70°. How high does it go?',
+        parameters: { v0: 8, angle: 70, g: 9.81 },
+        type: 'projectile_motion',
+        context: { difficulty: 'beginner', topic: 'Maximum Height' },
+        subparts: [
+            'Given: v₀ = 8 m/s, θ = 70°',
+            'Vertical component: v₀ᵧ = 8sin(70°) = 7.52 m/s',
+            'Maximum height: h = v₀ᵧ²/(2g)',
+            'h = (7.52)²/(2 × 9.81)',
+            'h = 56.55/19.62',
+            'h = 2.88 m',
+            'Water reaches 2.88 meters high'
+        ],
+        helper: 'Use vertical component for max height',
+        solution: 'h ≈ 2.88 m',
+        realWorldContext: 'Fountain design and water features'
+    });
+
+    return relatedProblems;
+}
+
+// ============== NEWTON'S LAWS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedNewtonsLaws() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple F=ma
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Basic Force and Acceleration',
+        problem: 'A 10 kg object is pushed with a force of 50 N. What is its acceleration?',
+        parameters: { F: 50, m: 10 },
+        type: 'force_acceleration',
+        context: { difficulty: 'beginner', topic: 'Newton\'s Second Law' },
+        subparts: [
+            'Given: F = 50 N, m = 10 kg',
+            'Find: acceleration (a)',
+            'Use Newton\'s Second Law: F = ma',
+            '50 = 10a',
+            'a = 50/10',
+            'a = 5 m/s²',
+            'The object accelerates at 5 m/s²'
+        ],
+        helper: 'F = ma, solve for unknown quantity',
+        solution: 'a = 5 m/s²',
+        realWorldContext: 'Pushing objects, basic force analysis'
+    });
+
+    // Problem 2: Finding force
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Finding Applied Force',
+        problem: 'What force is needed to accelerate a 25 kg box at 3 m/s²?',
+        parameters: { m: 25, a: 3 },
+        type: 'force_acceleration',
+        context: { difficulty: 'beginner', topic: 'Calculating Force' },
+        subparts: [
+            'Given: m = 25 kg, a = 3 m/s²',
+            'Find: force (F)',
+            'Use: F = ma',
+            'F = 25 × 3',
+            'F = 75 N',
+            'A force of 75 Newtons is needed'
+        ],
+        helper: 'Multiply mass by acceleration to find force',
+        solution: 'F = 75 N',
+        realWorldContext: 'Determining required push/pull force'
+    });
+
+    // Problem 3: Weight calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Weight Calculation',
+        problem: 'What is the weight of a 60 kg person on Earth? (g = 9.81 m/s²)',
+        parameters: { m: 60, g: 9.81 },
+        type: 'force_acceleration',
+        context: { difficulty: 'beginner', topic: 'Weight and Gravity' },
+        subparts: [
+            'Given: m = 60 kg, g = 9.81 m/s²',
+            'Find: weight (W)',
+            'Weight is gravitational force: W = mg',
+            'W = 60 × 9.81',
+            'W = 588.6 N',
+            'The person weighs 588.6 Newtons'
+        ],
+        helper: 'Weight = mass × gravitational acceleration',
+        solution: 'W = 588.6 N',
+        realWorldContext: 'Understanding weight vs mass'
+    });
+
+    // Problem 4: Net force with multiple forces
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Net Force Calculation',
+        problem: 'Two forces act on a 15 kg object: 40 N east and 30 N west. Find acceleration.',
+        parameters: { m: 15, F1: 40, F2: -30 },
+        type: 'force_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Net Force' },
+        subparts: [
+            'Given: m = 15 kg, F₁ = 40 N (east), F₂ = 30 N (west)',
+            'Choose east as positive direction',
+            'Net force: F_net = 40 + (-30) = 10 N (east)',
+            'Use F = ma:',
+            '10 = 15a',
+            'a = 10/15 = 0.67 m/s² (east)',
+            'The object accelerates east at 0.67 m/s²'
+        ],
+        helper: 'Find net force first, then apply F=ma',
+        solution: 'a = 0.67 m/s² east',
+        realWorldContext: 'Multiple forces acting on objects'
+    });
+
+    // Problem 5: Tension in vertical rope
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Tension Force',
+        problem: 'A 20 kg object hangs from a rope at rest. What is the tension in the rope?',
+        parameters: { m: 20, g: 9.81, a: 0 },
+        type: 'force_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Tension Forces' },
+        subparts: [
+            'Given: m = 20 kg, object at rest (a = 0)',
+            'Forces: Tension (T) upward, Weight (W) downward',
+            'Weight: W = mg = 20 × 9.81 = 196.2 N',
+            'At equilibrium: ΣF = 0',
+            'T - W = 0',
+            'T = W = 196.2 N',
+            'Tension in rope is 196.2 N'
+        ],
+        helper: 'At rest, tension equals weight',
+        solution: 'T = 196.2 N',
+        realWorldContext: 'Hanging objects, rope strength requirements'
+    });
+
+    // Problem 6: Connected objects
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Connected Objects',
+        problem: 'Two blocks (5 kg and 10 kg) are connected by a rope. A 45 N force pulls the 10 kg block. Find acceleration.',
+        parameters: { m1: 5, m2: 10, F: 45 },
+        type: 'force_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Connected Systems' },
+        subparts: [
+            'Given: m₁ = 5 kg, m₂ = 10 kg, F = 45 N',
+            'System moves together with same acceleration',
+            'Total mass: M = m₁ + m₂ = 15 kg',
+            'Apply F = ma to entire system:',
+            '45 = 15a',
+            'a = 45/15 = 3 m/s²',
+            'Both blocks accelerate at 3 m/s²'
+        ],
+        helper: 'Treat connected objects as single system',
+        solution: 'a = 3 m/s²',
+        realWorldContext: 'Towing vehicles, pulling carts'
+    });
+
+    // Problem 7: Elevator acceleration
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Elevator Problem',
+        problem: 'A 70 kg person stands in an elevator accelerating upward at 2 m/s². Find normal force.',
+        parameters: { m: 70, g: 9.81, a: 2 },
+        type: 'force_acceleration',
+        context: { difficulty: 'intermediate', topic: 'Non-Inertial Frames' },
+        subparts: [
+            'Given: m = 70 kg, a = 2 m/s² (upward), g = 9.81 m/s²',
+            'Forces: Normal force (N) up, Weight (W) down',
+            'Weight: W = mg = 70 × 9.81 = 686.7 N',
+            'Apply F = ma (upward positive):',
+            'N - W = ma',
+            'N - 686.7 = 70 × 2',
+            'N = 686.7 + 140',
+            'N = 826.7 N',
+            'Normal force is 826.7 N (feels heavier)'
+        ],
+        helper: 'Account for both weight and acceleration',
+        solution: 'N = 826.7 N',
+        realWorldContext: 'Feeling heavier/lighter in elevators'
+    });
+
+    return relatedProblems;
+}
+
+// ============== FRICTION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedFriction() {
+    const relatedProblems = [];
+
+    // Problem 1: Static friction
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Static Friction',
+        problem: 'A 30 kg box rests on a floor with μ_s = 0.5. What is the maximum static friction force?',
+        parameters: { m: 30, mu: 0.5, g: 9.81 },
+        type: 'friction_problems',
+        context: { difficulty: 'beginner', topic: 'Static Friction' },
+        subparts: [
+            'Given: m = 30 kg, μ_s = 0.5, g = 9.81 m/s²',
+            'Find: maximum static friction (f_s,max)',
+            'Normal force: N = mg = 30 × 9.81 = 294.3 N',
+            'Maximum static friction: f_s,max = μ_s × N',
+            'f_s,max = 0.5 × 294.3',
+            'f_s,max = 147.15 N',
+            'Maximum static friction is 147.15 N'
+        ],
+        helper: 'f_s,max = μ_s × N where N = mg on horizontal surface',
+        solution: 'f_s,max = 147.15 N',
+        realWorldContext: 'Force needed to start moving heavy objects'
+    });
+
+    // Problem 2: Kinetic friction
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Kinetic Friction',
+        problem: 'A 20 kg object slides on a surface with μ_k = 0.3. Find the friction force.',
+        parameters: { m: 20, mu: 0.3, g: 9.81 },
+        type: 'friction_problems',
+        context: { difficulty: 'beginner', topic: 'Kinetic Friction' },
+        subparts: [
+            'Given: m = 20 kg, μ_k = 0.3, g = 9.81 m/s²',
+            'Find: kinetic friction force (f_k)',
+            'Normal force: N = mg = 20 × 9.81 = 196.2 N',
+            'Kinetic friction: f_k = μ_k × N',
+            'f_k = 0.3 × 196.2',
+            'f_k = 58.86 N',
+            'Kinetic friction is 58.86 N opposing motion'
+        ],
+        helper: 'f_k = μ_k × N (acts opposite to motion)',
+        solution: 'f_k = 58.86 N',
+        realWorldContext: 'Sliding objects, braking systems'
+    });
+
+    // Problem 3: Sliding with friction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Sliding with Friction',
+        problem: 'A 15 kg box is pushed with 80 N on a surface with μ_k = 0.4. Find acceleration.',
+        parameters: { m: 15, F: 80, mu: 0.4, g: 9.81 },
+        type: 'friction_problems',
+        context: { difficulty: 'intermediate', topic: 'Motion with Friction' },
+        subparts: [
+            'Given: m = 15 kg, F_applied = 80 N, μ_k = 0.4',
+            'Normal force: N = mg = 15 × 9.81 = 147.15 N',
+            'Friction: f_k = μ_k × N = 0.4 × 147.15 = 58.86 N',
+            'Net force: F_net = F_applied - f_k',
+            'F_net = 80 - 58.86 = 21.14 N',
+            'Acceleration: a = F_net/m = 21.14/15',
+            'a = 1.41 m/s²'
+        ],
+        helper: 'Net force = applied force - friction force',
+        solution: 'a = 1.41 m/s²',
+        realWorldContext: 'Pushing objects across surfaces'
+    });
+
+    // Problem 4: Stopping distance with friction
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Stopping with Friction',
+        problem: 'A 1200 kg car traveling at 20 m/s brakes on dry road (μ_k = 0.7). Find stopping distance.',
+        parameters: { m: 1200, v0: 20, mu: 0.7, g: 9.81 },
+        type: 'friction_problems',
+        context: { difficulty: 'intermediate', topic: 'Braking Distance' },
+        subparts: [
+            'Given: m = 1200 kg, v₀ = 20 m/s, μ_k = 0.7',
+            'Friction provides deceleration:',
+            'f_k = μ_k × mg = 0.7 × 1200 × 9.81 = 8236.8 N',
+            'Deceleration: a = -f_k/m = -8236.8/1200 = -6.86 m/s²',
+            'Use v² = v₀² + 2ax with v = 0:',
+            '0 = 20² + 2(-6.86)x',
+            '13.72x = 400',
+            'x = 29.15 m',
+            'Stopping distance is 29.15 meters'
+        ],
+        helper: 'Friction causes deceleration, use kinematics',
+        solution: 'x = 29.15 m',
+        realWorldContext: 'Vehicle braking analysis, road safety'
+    });
+
+    // Problem 5: Pulling at an angle
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Pulling at Angle',
+        problem: 'A 25 kg box is pulled at 30° above horizontal with 100 N. μ_k = 0.35. Find acceleration.',
+        parameters: { m: 25, F: 100, angle: 30, mu: 0.35, g: 9.81 },
+        type: 'friction_problems',
+        context: { difficulty: 'advanced', topic: 'Angled Forces with Friction' },
+        subparts: [
+            'Given: m = 25 kg, F = 100 N at 30°, μ_k = 0.35',
+            'Force components:',
+            'F_horizontal = 100cos(30°) = 86.6 N',
+            'F_vertical = 100sin(30°) = 50 N (upward)',
+            'Normal force: N = mg - F_vertical',
+            'N = 25(9.81) - 50 = 245.25 - 50 = 195.25 N',
+            'Friction: f_k = 0.35 × 195.25 = 68.34 N',
+            'Net horizontal force: F_net = 86.6 - 68.34 = 18.26 N',
+            'Acceleration: a = 18.26/25 = 0.73 m/s²'
+        ],
+        helper: 'Resolve force into components, adjust normal force',
+        solution: 'a = 0.73 m/s²',
+        realWorldContext: 'Pulling suitcases, ropes at angles'
+    });
+
+    // Problem 6: Inclined plane with friction
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Friction on Incline',
+        problem: 'A 10 kg block slides down a 25° incline with μ_k = 0.2. Find acceleration.',
+        parameters: { m: 10, theta: 25, mu: 0.2, g: 9.81 },
+        type: 'inclined_plane',
+        context: { difficulty: 'advanced', topic: 'Inclined Plane with Friction' },
+        subparts: [
+            'Given: m = 10 kg, θ = 25°, μ_k = 0.2',
+            'Component parallel to incline:',
+            'F_parallel = mg sin(25°) = 10(9.81)(0.4226) = 41.44 N',
+            'Normal force: N = mg cos(25°) = 10(9.81)(0.9063) = 88.91 N',
+            'Friction: f_k = μ_k N = 0.2(88.91) = 17.78 N',
+            'Net force down incline: F_net = 41.44 - 17.78 = 23.66 N',
+            'Acceleration: a = 23.66/10 = 2.37 m/s²'
+        ],
+        helper: 'Resolve gravity, include friction opposing motion',
+        solution: 'a = 2.37 m/s² down incline',
+        realWorldContext: 'Objects sliding on ramps, skiing'
+    });
+
+    return relatedProblems;
+}
+
+// ============== CIRCULAR MOTION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedCircularMotion() {
+    const relatedProblems = [];
+
+    // Problem 1: Centripetal acceleration
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Centripetal Acceleration',
+        problem: 'A car moves in a circle of radius 50 m at 20 m/s. Find centripetal acceleration.',
+        parameters: { v: 20, r: 50 },
+        type: 'centripetal_acceleration',
+        context: { difficulty: 'beginner', topic: 'Centripetal Acceleration' },
+        subparts: [
+            'Given: v = 20 m/s, r = 50 m',
+            'Find: centripetal acceleration (a_c)',
+            'Use: a_c = v²/r',
+            'a_c = (20)²/50',
+            'a_c = 400/50',
+            'a_c = 8 m/s²',
+            'Centripetal acceleration is 8 m/s² toward center'
+        ],
+        helper: 'a_c = v²/r always points toward center',
+        solution: 'a_c = 8 m/s²',
+        realWorldContext: 'Turning vehicles, circular tracks'
+    });
+
+    // Problem 2: Centripetal force
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Centripetal Force',
+        problem: 'A 1000 kg car takes a turn of radius 80 m at 25 m/s. Find required centripetal force.',
+        parameters: { m: 1000, v: 25, r: 80 },
+        type: 'centripetal_force',
+        context: { difficulty: 'beginner', topic: 'Centripetal Force' },
+        subparts: [
+            'Given: m = 1000 kg, v = 25 m/s, r = 80 m',
+            'Find: centripetal force (F_c)',
+            'Centripetal acceleration: a_c = v²/r = 625/80 = 7.81 m/s²',
+            'Centripetal force: F_c = ma_c',
+            'F_c = 1000 × 7.81',
+            'F_c = 7812.5 N',
+            'Required centripetal force is 7812.5 N'
+        ],
+        helper: 'F_c = mv²/r',
+        solution: 'F_c = 7812.5 N',
+        realWorldContext: 'Banking curves, tire friction in turns'
+    });
+
+    // Problem 3: Circular orbit
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Circular Orbit',
+        problem: 'A satellite orbits Earth at radius 7000 km with speed 7.5 km/s. Find orbital period.',
+        parameters: { r: 7000000, v: 7500 },
+        type: 'orbital_motion',
+        context: { difficulty: 'intermediate', topic: 'Orbital Mechanics' },
+        subparts: [
+            'Given: r = 7000 km = 7×10⁶ m, v = 7.5 km/s = 7500 m/s',
+            'Find: orbital period (T)',
+            'Circumference: C = 2πr = 2π(7×10⁶) = 4.398×10⁷ m',
+            'Period: T = C/v',
+            'T = 4.398×10⁷/7500',
+            'T = 5864 s = 97.7 minutes',
+            'Orbital period is approximately 98 minutes'
+        ],
+        helper: 'T = 2πr/v (distance/speed)',
+        solution: 'T ≈ 98 minutes',
+        realWorldContext: 'Satellite orbits, space stations'
+    });
+
+    // Problem 4: Conical pendulum
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Conical Pendulum',
+        problem: 'A 2 kg ball on a 1.5 m string swings in horizontal circle at 30° from vertical. Find tension.',
+        parameters: { m: 2, L: 1.5, theta: 30, g: 9.81 },
+        type: 'centripetal_force',
+        context: { difficulty: 'advanced', topic: 'Conical Pendulum' },
+        subparts: [
+            'Given: m = 2 kg, L = 1.5 m, θ = 30°, g = 9.81 m/s²',
+            'Vertical component: T cos(30°) = mg',
+            'T(0.866) = 2(9.81) = 19.62',
+            'T = 19.62/0.866 = 22.65 N',
+            'Radius: r = L sin(30°) = 1.5(0.5) = 0.75 m',
+            'Horizontal component: T sin(30°) = mv²/r',
+            '22.65(0.5) = 2v²/0.75',
+            'v = 2.06 m/s'
+        ],
+        helper: 'Resolve tension into vertical and horizontal components',
+        solution: 'T = 22.65 N',
+        realWorldContext: 'Amusement park rides, swinging motions'
+    });
+
+    // Problem 5: Banked curve
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Banked Curve',
+        problem: 'A curve has radius 100 m and is banked at 15°. What is the ideal speed (no friction)?',
+        parameters: { r: 100, theta: 15, g: 9.81 },
+        type: 'centripetal_force',
+        context: { difficulty: 'advanced', topic: 'Banked Curves' },
+        subparts: [
+            'Given: r = 100 m, θ = 15°, g = 9.81 m/s²',
+            'For ideal banked curve: tan(θ) = v²/(rg)',
+            'tan(15°) = v²/(100 × 9.81)',
+            '0.2679 = v²/981',
+            'v² = 262.8',
+            'v = 16.21 m/s',
+            'Ideal speed is 16.21 m/s (about 58 km/h)'
+        ],
+        helper: 'tan(θ) = v²/(rg) for frictionless banked curve',
+        solution: 'v = 16.21 m/s',
+        realWorldContext: 'Highway curve design, race tracks'
+    });
+
+    // Problem 6: Vertical circle
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Vertical Circle - Top',
+        problem: 'A 0.5 kg ball on 1.2 m string swings in vertical circle. Find minimum speed at top.',
+        parameters: { m: 0.5, r: 1.2, g: 9.81 },
+        type: 'centripetal_force',
+        context: { difficulty: 'advanced', topic: 'Vertical Circular Motion' },
+        subparts: [
+            'Given: m = 0.5 kg, r = 1.2 m, g = 9.81 m/s²',
+            'At top, minimum speed when tension = 0',
+            'Centripetal force provided by weight only:',
+            'mv²/r = mg',
+            'v² = rg',
+            'v² = 1.2 × 9.81 = 11.77',
+            'v = 3.43 m/s',
+            'Minimum speed at top is 3.43 m/s'
+        ],
+        helper: 'At minimum top speed, tension = 0',
+        solution: 'v_min = 3.43 m/s',
+        realWorldContext: 'Loop-the-loop, roller coasters'
+    });
+
+    return relatedProblems;
+}
+
+// ============== WORK AND ENERGY - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedWorkEnergy() {
+    const relatedProblems = [];
+
+    // Problem 1: Work calculation
+    /**relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Work by Constant Force',
+        problem: 'A force of 30 N pushes a box 5 meters. How much work is done?',
+        parameters: { F: 30, d: 5, theta: 0 },
+        type: 'work_calculation',
+        context: { difficulty: 'beginner', topic: 'Work Calculation' },
+        subparts: [
+            'Given: F = 30 N, d = 5 m, θ = 0° (force parallel to displacement)',
+            'Find: work done (W)',
+            'Use: W = F·d·cos(θ)',
+            'W = 30 × 5 × cos(0°)',
+            'W = 30 × 5 × 1',
+            'W = 150 J',
+            '150 Joules of work is done'
+        ],
+        helper: 'W = F·d when force is parallel to displacement',
+        solution: 'W = 150 J',
+        realWorldContext: 'Pushing furniture, moving objects'
+    });
+    
+
+
+    // Problem 2: Work at angle
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Work at Angle',
+        problem: 'A 50 N force at 30° to horizontal moves a box 8 m. Find work done.',
+        parameters: { F: 50, d: 8, theta: 30 },
+        type: 'work_calculation',
+        context: { difficulty: 'intermediate', topic: 'Work with Angle' },
+        subparts: [
+            'Given: F = 50 N, d = 8 m, θ = 30°',
+            'Find: work done (W)',
+            'Use: W = F·d·cos(θ)',
+            'W = 50 × 8 × cos(30°)',
+            'W = 50 × 8 × 0.866',
+            'W = 346.4 J',
+            'About 346 Joules of work is done'
+        ],
+        helper: 'Only force component parallel to motion does work',
+        solution: 'W = 346.4 J',
+        realWorldContext: 'Pulling suitcases, ropes at angles'
+    });
+
+    // Problem 3: Kinetic energy
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Kinetic Energy',
+        problem: 'A 500 kg car travels at 15 m/s. What is its kinetic energy?',
+        parameters: { m: 500, v: 15 },
+        type: 'kinetic_energy',
+        context: { difficulty: 'beginner', topic: 'Kinetic Energy' },
+        subparts: [
+            'Given: m = 500 kg, v = 15 m/s',
+            'Find: kinetic energy (KE)',
+            'Use: KE = ½mv²',
+            'KE = ½ × 500 × (15)²',
+            'KE = 250 × 225',
+            'KE = 56,250 J = 56.25 kJ',
+            'Kinetic energy is 56.25 kilojoules'
+        ],
+        helper: 'KE = ½mv² (energy of motion)',
+        solution: 'KE = 56.25 kJ',
+        realWorldContext: 'Vehicle energy, collision analysis'
+    });
+
+    // Problem 4: Gravitational potential energy
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Gravitational Potential Energy',
+        problem: 'A 2 kg book is on a shelf 1.8 m high. What is its potential energy?',
+        parameters: { m: 2, h: 1.8, g: 9.81 },
+        type: 'potential_energy',
+        context: { difficulty: 'beginner', topic: 'Gravitational PE' },
+        subparts: [
+            'Given: m = 2 kg, h = 1.8 m, g = 9.81 m/s²',
+            'Find: gravitational potential energy (PE)',
+            'Use: PE = mgh',
+            'PE = 2 × 9.81 × 1.8',
+            'PE = 35.32 J',
+            'Potential energy is 35.32 Joules'
+        ],
+        helper: 'PE = mgh (energy due to height)',
+        solution: 'PE = 35.32 J',
+        realWorldContext: 'Objects at height, stored energy'
+    });
+
+    // Problem 5: Work-energy theorem
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Work-Energy Theorem',
+        problem: 'A 10 kg object accelerates from 5 m/s to 15 m/s. How much work was done?',
+        parameters: { m: 10, v_i: 5, v_f: 15 },
+        type: 'work_calculation',
+        context: { difficulty: 'intermediate', topic: 'Work-Energy Theorem' },
+        subparts: [
+            'Given: m = 10 kg, v_i = 5 m/s, v_f = 15 m/s',
+            'Find: work done (W)',
+            'Initial KE: KE_i = ½(10)(5)² = 125 J',
+            'Final KE: KE_f = ½(10)(15)² = 1125 J',
+            'Work-energy theorem: W = ΔKE',
+            'W = KE_f - KE_i = 1125 - 125',
+            'W = 1000 J',
+            '1000 Joules of work was done'
+        ],
+        helper: 'W = ΔKE = KE_final - KE_initial',
+        solution: 'W = 1000 J',
+        realWorldContext: 'Accelerating objects, energy transfer'
+    });
+
+    // Problem 6: Conservation of energy - free fall
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Conservation of Energy - Free Fall',
+        problem: 'A 3 kg ball is dropped from 10 m. What is its speed just before hitting ground?',
+        parameters: { m: 3, h_i: 10, h_f: 0, v_i: 0, g: 9.81 },
+        type: 'conservation_energy',
+        context: { difficulty: 'intermediate', topic: 'Energy Conservation' },
+        subparts: [
+            'Given: m = 3 kg, h_i = 10 m, v_i = 0 m/s',
+            'Initial energy: E_i = PE_i + KE_i',
+            'E_i = mgh_i + 0 = 3(9.81)(10) = 294.3 J',
+            'Final energy: E_f = PE_f + KE_f',
+            'E_f = 0 + ½mv_f²',
+            'Conservation: E_i = E_f',
+            '294.3 = ½(3)v_f²',
+            'v_f² = 196.2, v_f = 14.0 m/s'
+        ],
+        helper: 'PE converts to KE during fall',
+        solution: 'v_f = 14.0 m/s',
+        realWorldContext: 'Falling objects, gravitational conversion'
+    });
+
+    // Problem 7: Spring potential energy
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Spring Potential Energy',
+        problem: 'A spring with k = 200 N/m is compressed 0.3 m. How much energy is stored?',
+        parameters: { k: 200, x: 0.3 },
+        type: 'potential_energy',
+        context: { difficulty: 'intermediate', topic: 'Elastic PE' },
+        subparts: [
+            'Given: k = 200 N/m, x = 0.3 m',
+            'Find: elastic potential energy (PE_spring)',
+            'Use: PE_spring = ½kx²',
+            'PE_spring = ½ × 200 × (0.3)²',
+            'PE_spring = 100 × 0.09',
+            'PE_spring = 9 J',
+            'Spring stores 9 Joules of energy'
+        ],
+        helper: 'PE_spring = ½kx² (elastic energy)',
+        solution: 'PE_spring = 9 J',
+        realWorldContext: 'Spring-loaded mechanisms, shock absorbers'
+    });
+
+    // Problem 8: Power calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Power Calculation',
+        problem: 'An engine does 5000 J of work in 10 seconds. What is its power output?',
+        parameters: { W: 5000, t: 10 },
+        type: 'power_problems',
+        context: { difficulty: 'beginner', topic: 'Power' },
+        subparts: [
+            'Given: W = 5000 J, t = 10 s',
+            'Find: power (P)',
+            'Use: P = W/t',
+            'P = 5000/10',
+            'P = 500 W',
+            'Power output is 500 Watts'
+        ],
+        helper: 'Power = work/time (rate of energy transfer)',
+        solution: 'P = 500 W',
+        realWorldContext: 'Engine output, electrical power'
+    });
+
+    // Problem 9: Roller coaster energy
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Roller Coaster Energy',
+        problem: 'A 500 kg roller coaster car at top of 40 m hill with v = 5 m/s. Find speed at bottom.',
+        parameters: { m: 500, h_i: 40, v_i: 5, h_f: 0, g: 9.81 },
+        type: 'conservation_energy',
+        context: { difficulty: 'intermediate', topic: 'Energy Conservation Application' },
+        subparts: [
+            'Given: m = 500 kg, h_i = 40 m, v_i = 5 m/s, h_f = 0',
+            'Initial energy:',
+            'PE_i = mgh_i = 500(9.81)(40) = 196,200 J',
+            'KE_i = ½mv_i² = ½(500)(5)² = 6,250 J',
+            'E_i = 196,200 + 6,250 = 202,450 J',
+            'Final energy: E_f = ½mv_f² (all kinetic)',
+            'Conservation: 202,450 = ½(500)v_f²',
+            'v_f² = 809.8, v_f = 28.5 m/s'
+        ],
+        helper: 'Total mechanical energy is conserved',
+        solution: 'v_f = 28.5 m/s',
+        realWorldContext: 'Roller coasters, ski slopes'
+    });
+    */
+
+
+
+    return relatedProblems;
+}
+
+// ============== MOMENTUM AND COLLISIONS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedMomentumCollisions() {
+    const relatedProblems = [];
+
+    // Problem 1: Momentum calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Linear Momentum',
+        problem: 'A 1500 kg car travels at 20 m/s. What is its momentum?',
+        parameters: { m: 1500, v: 20 },
+        type: 'momentum_calculation',
+        context: { difficulty: 'beginner', topic: 'Momentum Calculation' },
+        subparts: [
+            'Given: m = 1500 kg, v = 20 m/s','Find: momentum (p)',
+            'Use: p = mv',
+            'p = 1500 × 20',
+            'p = 30,000 kg·m/s',
+            'Momentum is 30,000 kg·m/s'
+        ],
+        helper: 'Momentum = mass × velocity',
+        solution: 'p = 30,000 kg·m/s',
+        realWorldContext: 'Vehicle collisions, sports impacts'
+    });
+
+    // Problem 2: Impulse calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Impulse',
+        problem: 'A 40 N force acts on an object for 3 seconds. What is the impulse?',
+        parameters: { F: 40, t: 3 },
+        type: 'impulse',
+        context: { difficulty: 'beginner', topic: 'Impulse Calculation' },
+        subparts: [
+            'Given: F = 40 N, t = 3 s',
+            'Find: impulse (J)',
+            'Use: J = F·Δt',
+            'J = 40 × 3',
+            'J = 120 N·s',
+            'Impulse is 120 N·s (or 120 kg·m/s)',
+            'This equals the change in momentum'
+        ],
+        helper: 'Impulse = Force × time = change in momentum',
+        solution: 'J = 120 N·s',
+        realWorldContext: 'Impact forces, airbags, cushioning'
+    });
+
+    // Problem 3: Change in momentum
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Change in Momentum',
+        problem: 'A 0.5 kg ball changes velocity from 10 m/s to -5 m/s. Find impulse.',
+        parameters: { m: 0.5, v_i: 10, v_f: -5 },
+        type: 'impulse',
+        context: { difficulty: 'intermediate', topic: 'Impulse-Momentum Theorem' },
+        subparts: [
+            'Given: m = 0.5 kg, v_i = 10 m/s, v_f = -5 m/s',
+            'Find: impulse (J)',
+            'Initial momentum: p_i = 0.5 × 10 = 5 kg·m/s',
+            'Final momentum: p_f = 0.5 × (-5) = -2.5 kg·m/s',
+            'Impulse: J = Δp = p_f - p_i',
+            'J = -2.5 - 5 = -7.5 kg·m/s',
+            'Impulse is -7.5 kg·m/s (negative = opposite direction)'
+        ],
+        helper: 'J = Δp = m(v_f - v_i)',
+        solution: 'J = -7.5 kg·m/s',
+        realWorldContext: 'Ball bouncing, direction changes'
+    });
+
+    // Problem 4: Elastic collision
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Elastic Collision',
+        problem: 'Two balls: 2 kg at 4 m/s hits 3 kg at rest. Find final velocities (elastic collision).',
+        parameters: { m1: 2, m2: 3, v1_i: 4, v2_i: 0 },
+        type: 'collision_elastic',
+        context: { difficulty: 'intermediate', topic: 'Elastic Collisions' },
+        subparts: [
+            'Given: m₁ = 2 kg, v₁ᵢ = 4 m/s, m₂ = 3 kg, v₂ᵢ = 0 m/s',
+            'For elastic collision:',
+            'v₁f = [(m₁-m₂)v₁ᵢ + 2m₂v₂ᵢ]/(m₁+m₂)',
+            'v₁f = [(2-3)4 + 0]/5 = -4/5 = -0.8 m/s',
+            'v₂f = [(m₂-m₁)v₂ᵢ + 2m₁v₁ᵢ]/(m₁+m₂)',
+            'v₂f = [0 + 2(2)(4)]/5 = 16/5 = 3.2 m/s',
+            'First ball: -0.8 m/s (backwards)',
+            'Second ball: 3.2 m/s (forward)'
+        ],
+        helper: 'Elastic: both momentum and KE conserved',
+        solution: 'v₁f = -0.8 m/s, v₂f = 3.2 m/s',
+        realWorldContext: 'Billiard balls, atomic collisions'
+    });
+
+    // Problem 5: Inelastic collision
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Perfectly Inelastic Collision',
+        problem: 'A 1200 kg car at 15 m/s hits 800 kg car at 10 m/s (same direction). They stick. Find final velocity.',
+        parameters: { m1: 1200, m2: 800, v1_i: 15, v2_i: 10 },
+        type: 'collision_inelastic',
+        context: { difficulty: 'intermediate', topic: 'Inelastic Collisions' },
+        subparts: [
+            'Given: m₁ = 1200 kg, v₁ᵢ = 15 m/s, m₂ = 800 kg, v₂ᵢ = 10 m/s',
+            'Objects stick together (perfectly inelastic)',
+            'Conservation of momentum: p_before = p_after',
+            'm₁v₁ᵢ + m₂v₂ᵢ = (m₁+m₂)v_f',
+            '1200(15) + 800(10) = (1200+800)v_f',
+            '18000 + 8000 = 2000v_f',
+            '26000 = 2000v_f',
+            'v_f = 13 m/s'
+        ],
+        helper: 'Inelastic: momentum conserved, objects stick',
+        solution: 'v_f = 13 m/s',
+        realWorldContext: 'Car crashes, clay collisions'
+    });
+
+    // Problem 6: Explosion problem
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Explosion Problem',
+        problem: 'A 10 kg object at rest explodes into 6 kg (20 m/s east) and 4 kg pieces. Find velocity of 4 kg piece.',
+        parameters: { m_total: 10, m1: 6, v1: 20, m2: 4 },
+        type: 'momentum_calculation',
+        context: { difficulty: 'intermediate', topic: 'Explosions and Recoil' },
+        subparts: [
+            'Given: Initially at rest (p_i = 0), m₁ = 6 kg at 20 m/s east',
+            'Find: velocity of m₂ = 4 kg piece',
+            'Conservation of momentum: p_before = p_after',
+            '0 = m₁v₁ + m₂v₂',
+            '0 = 6(20) + 4v₂',
+            '0 = 120 + 4v₂',
+            '4v₂ = -120',
+            'v₂ = -30 m/s',
+            '4 kg piece moves at 30 m/s west'
+        ],
+        helper: 'Total momentum before = after (zero initially)',
+        solution: 'v₂ = 30 m/s west',
+        realWorldContext: 'Explosions, rocket propulsion, recoil'
+    });
+
+    // Problem 7: 2D collision
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: '2D Momentum',
+        problem: 'A 3 kg object moving east at 5 m/s collides with 2 kg object moving north at 4 m/s. They stick. Find final velocity.',
+        parameters: { m1: 3, v1x: 5, v1y: 0, m2: 2, v2x: 0, v2y: 4 },
+        type: 'collision_inelastic',
+        context: { difficulty: 'advanced', topic: '2D Momentum Conservation' },
+        subparts: [
+            'Given: m₁ = 3 kg at (5, 0) m/s, m₂ = 2 kg at (0, 4) m/s',
+            'X-direction momentum: p_x = 3(5) + 2(0) = 15 kg·m/s',
+            'Y-direction momentum: p_y = 3(0) + 2(4) = 8 kg·m/s',
+            'Total mass: M = 3 + 2 = 5 kg',
+            'Final velocity components:',
+            'v_fx = p_x/M = 15/5 = 3 m/s',
+            'v_fy = p_y/M = 8/5 = 1.6 m/s',
+            'Magnitude: v_f = √(3² + 1.6²) = 3.4 m/s',
+            'Direction: θ = tan⁻¹(1.6/3) = 28° north of east'
+        ],
+        helper: 'Conserve momentum in each direction separately',
+        solution: 'v_f = 3.4 m/s at 28° N of E',
+        realWorldContext: 'Car crashes at intersections, 2D collisions'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ROTATIONAL MOTION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedRotationalMotion() {
+    const relatedProblems = [];
+
+    // Problem 1: Angular velocity
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Angular Velocity',
+        problem: 'A wheel rotates 10 revolutions in 5 seconds. Find angular velocity.',
+        parameters: { revolutions: 10, t: 5 },
+        type: 'rotational_kinematics',
+        context: { difficulty: 'beginner', topic: 'Angular Velocity' },
+        subparts: [
+            'Given: 10 revolutions in 5 seconds',
+            'Find: angular velocity (ω)',
+            'Convert revolutions to radians:',
+            'θ = 10 rev × 2π rad/rev = 20π rad',
+            'Angular velocity: ω = θ/t',
+            'ω = 20π/5 = 4π rad/s',
+            'ω ≈ 12.57 rad/s'
+        ],
+        helper: 'ω = Δθ/Δt, remember to convert to radians',
+        solution: 'ω = 4π rad/s ≈ 12.57 rad/s',
+        realWorldContext: 'Spinning wheels, motors, fan blades'
+    });
+
+    // Problem 2: Tangential velocity
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Tangential Velocity',
+        problem: 'A point on a wheel of radius 0.4 m rotates at 8 rad/s. Find its tangential speed.',
+        parameters: { r: 0.4, omega: 8 },
+        type: 'rotational_kinematics',
+        context: { difficulty: 'beginner', topic: 'Tangential Speed' },
+        subparts: [
+            'Given: r = 0.4 m, ω = 8 rad/s',
+            'Find: tangential velocity (v)',
+            'Use: v = rω',
+            'v = 0.4 × 8',
+            'v = 3.2 m/s',
+            'Tangential speed is 3.2 m/s'
+        ],
+        helper: 'v = rω (linear speed at radius r)',
+        solution: 'v = 3.2 m/s',
+        realWorldContext: 'Points on rotating objects, gears'
+    });
+
+    // Problem 3: Torque calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Torque',
+        problem: 'A force of 20 N is applied perpendicular to a wrench 0.3 m from the bolt. Find torque.',
+        parameters: { r: 0.3, F: 20, theta: 90 },
+        type: 'torque',
+        context: { difficulty: 'beginner', topic: 'Torque Calculation' },
+        subparts: [
+            'Given: r = 0.3 m, F = 20 N, θ = 90° (perpendicular)',
+            'Find: torque (τ)',
+            'Use: τ = rF sin(θ)',
+            'τ = 0.3 × 20 × sin(90°)',
+            'τ = 0.3 × 20 × 1',
+            'τ = 6 N·m',
+            'Torque is 6 Newton-meters'
+        ],
+        helper: 'τ = rF sin(θ), maximum when perpendicular',
+        solution: 'τ = 6 N·m',
+        realWorldContext: 'Wrenches, door handles, lever arms'
+    });
+
+    // Problem 4: Moment of inertia - disk
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Moment of Inertia - Disk',
+        problem: 'Find moment of inertia of a solid disk: mass 5 kg, radius 0.2 m.',
+        parameters: { shape: 'solid_cylinder', m: 5, r: 0.2 },
+        type: 'moment_of_inertia',
+        context: { difficulty: 'intermediate', topic: 'Moment of Inertia' },
+        subparts: [
+            'Given: solid disk, m = 5 kg, r = 0.2 m',
+            'Find: moment of inertia (I)',
+            'For solid disk/cylinder: I = ½mr²',
+            'I = ½ × 5 × (0.2)²',
+            'I = 2.5 × 0.04',
+            'I = 0.1 kg·m²',
+            'Moment of inertia is 0.1 kg·m²'
+        ],
+        helper: 'Different shapes have different I formulas',
+        solution: 'I = 0.1 kg·m²',
+        realWorldContext: 'Rotational inertia of wheels, disks'
+    });
+
+    // Problem 5: Rotational kinetic energy
+    /**relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Rotational Kinetic Energy',
+        problem: 'A wheel with I = 0.5 kg·m² rotates at 10 rad/s. Find rotational KE.',
+        parameters: { I: 0.5, omega: 10 },
+        type: 'rotational_dynamics',
+        context: { difficulty: 'intermediate', topic: 'Rotational Kinetic Energy' },
+        subparts: [
+            'Given: I = 0.5 kg·m², ω = 10 rad/s',
+            'Find: rotational kinetic energy (KE_rot)',
+            'Use: KE_rot = ½Iω²',
+            'KE_rot = ½ × 0.5 × (10)²',
+            'KE_rot = 0.25 × 100',
+            'KE_rot = 25 J',
+            'Rotational kinetic energy is 25 Joules'
+        ],
+        helper: 'KE_rot = ½Iω² (rotational analog of ½mv²)',
+        solution: 'KE_rot = 25 J',
+        realWorldContext: 'Energy stored in flywheels, rotating machinery'
+    });
+
+    // Problem 6: Angular momentum
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Angular Momentum',
+        problem: 'A disk with I = 2 kg·m² spins at 15 rad/s. Find angular momentum.',
+        parameters: { I: 2, omega: 15 },
+        type: 'angular_momentum',
+        context: { difficulty: 'intermediate', topic: 'Angular Momentum' },
+        subparts: [
+            'Given: I = 2 kg·m², ω = 15 rad/s',
+            'Find: angular momentum (L)',
+            'Use: L = Iω',
+            'L = 2 × 15',
+            'L = 30 kg·m²/s',
+            'Angular momentum is 30 kg·m²/s'
+        ],
+        helper: 'L = Iω (rotational analog of p = mv)',
+        solution: 'L = 30 kg·m²/s',
+        realWorldContext: 'Spinning objects, gyroscopes'
+    });
+
+    // Problem 7: Conservation of angular momentum
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Conservation of Angular Momentum',
+        problem: 'A skater with I = 3 kg·m² spins at 5 rad/s. Arms in: I = 1 kg·m². Find new ω.',
+        parameters: { I_initial: 3, omega_initial: 5, I_final: 1 },
+        type: 'angular_momentum',
+        context: { difficulty: 'intermediate', topic: 'Angular Momentum Conservation' },
+        subparts: [
+            'Given: I₁ = 3 kg·m², ω₁ = 5 rad/s, I₂ = 1 kg·m²',
+            'Find: final angular velocity (ω₂)',
+            'Conservation: L_initial = L_final',
+            'I₁ω₁ = I₂ω₂',
+            '3 × 5 = 1 × ω₂',
+            '15 = ω₂',
+            'ω₂ = 15 rad/s',
+            'Skater spins faster (15 rad/s) with arms in'
+        ],
+        helper: 'L conserved when no external torque',
+        solution: 'ω₂ = 15 rad/s',
+        realWorldContext: 'Figure skating spins, divers tucking'
+    });
+
+    // Problem 8: Rotational dynamics
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Rotational Dynamics',
+        problem: 'A torque of 8 N·m acts on a wheel (I = 4 kg·m²). Find angular acceleration.',
+        parameters: { tau: 8, I: 4 },
+        type: 'rotational_kinematics',
+        context: { difficulty: 'intermediate', topic: 'Rotational Dynamics' },
+        subparts: [
+            'Given: τ = 8 N·m, I = 4 kg·m²',
+            'Find: angular acceleration (α)',
+            'Use: τ = Iα (rotational analog of F = ma)',
+            '8 = 4α',
+            'α = 8/4',
+            'α = 2 rad/s²',
+            'Angular acceleration is 2 rad/s²'
+        ],
+        helper: 'τ = Iα (Newton\'s second law for rotation)',
+        solution: 'α = 2 rad/s²',
+        realWorldContext: 'Starting/stopping rotating machinery'
+    });
+    */
+
+    return relatedProblems;
+}
+
+// ============== GRAVITATION - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedGravitation() {
+    const relatedProblems = [];
+
+    // Problem 1: Gravitational force between masses
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Gravitational Force',
+        problem: 'Two 1000 kg masses are 10 m apart. Find gravitational force between them. (G = 6.674×10⁻¹¹)',
+        parameters: { m1: 1000, m2: 1000, r: 10, G: 6.674e-11 },
+        type: 'gravitational_force',
+        context: { difficulty: 'intermediate', topic: 'Newton\'s Law of Gravitation' },
+        subparts: [
+            'Given: m₁ = 1000 kg, m₂ = 1000 kg, r = 10 m',
+            'G = 6.674×10⁻¹¹ N·m²/kg²',
+            'Find: gravitational force (F)',
+            'Use: F = Gm₁m₂/r²',
+            'F = (6.674×10⁻¹¹)(1000)(1000)/(10)²',
+            'F = (6.674×10⁻⁸)/(100)',
+            'F = 6.674×10⁻¹⁰ N',
+            'Very weak force: 6.674×10⁻¹⁰ Newtons'
+        ],
+        helper: 'F = Gm₁m₂/r² (inverse square law)',
+        solution: 'F = 6.674×10⁻¹⁰ N',
+        realWorldContext: 'Universal gravitation between any masses'
+    });
+
+    // Problem 2: Weight on different planets
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Weight on Moon',
+        problem: 'A 60 kg person on Earth (g=9.81 m/s²). What is their weight on Moon (g=1.62 m/s²)?',
+        parameters: { m: 60, g_earth: 9.81, g_moon: 1.62 },
+        type: 'gravitational_field',
+        context: { difficulty: 'beginner', topic: 'Gravitational Field Strength' },
+        subparts: [
+            'Given: m = 60 kg, g_moon = 1.62 m/s²',
+            'Find: weight on Moon',
+            'Note: mass stays the same (60 kg)',
+            'Weight on Moon: W = mg',
+            'W = 60 × 1.62',
+            'W = 97.2 N',
+            'On Earth: W = 60 × 9.81 = 588.6 N',
+            'Moon weight is about 1/6 of Earth weight'
+        ],
+        helper: 'Weight = mg, mass stays constant',
+        solution: 'W_moon = 97.2 N',
+        realWorldContext: 'Space exploration, planetary physics'
+    });
+
+    // Problem 3: Orbital velocity
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Orbital Velocity',
+        problem: 'Find orbital speed of satellite at altitude 400 km above Earth. (M_earth = 5.97×10²⁴ kg, R_earth = 6.37×10⁶ m)',
+        parameters: { M: 5.97e24, r: 6.77e6, G: 6.674e-11 },
+        type: 'orbital_motion',
+        context: { difficulty: 'intermediate', topic: 'Orbital Mechanics' },
+        subparts: [
+            'Given: M = 5.97×10²⁴ kg, altitude = 400 km',
+            'Orbital radius: r = R_earth + h',
+            'r = 6.37×10⁶ + 4×10⁵ = 6.77×10⁶ m',
+            'Orbital velocity: v = √(GM/r)',
+            'v = √[(6.674×10⁻¹¹)(5.97×10²⁴)/(6.77×10⁶)]',
+            'v = √(5.88×10⁷)',
+            'v = 7,670 m/s = 7.67 km/s',
+            'Orbital speed is about 7.67 km/s'
+        ],
+        helper: 'v = √(GM/r) for circular orbits',
+        solution: 'v ≈ 7.67 km/s',
+        realWorldContext: 'Satellites, ISS orbital speed'
+    });
+
+    // Problem 4: Escape velocity
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Escape Velocity',
+        problem: 'Find escape velocity from Earth surface. (M = 5.97×10²⁴ kg, R = 6.37×10⁶ m)',
+        parameters: { M: 5.97e24, r: 6.37e6, G: 6.674e-11 },
+        type: 'escape_velocity',
+        context: { difficulty: 'intermediate', topic: 'Escape Velocity' },
+        subparts: [
+            'Given: M = 5.97×10²⁴ kg, R = 6.37×10⁶ m',
+            'Find: escape velocity (v_esc)',
+            'Use: v_esc = √(2GM/R)',
+            'v_esc = √[2(6.674×10⁻¹¹)(5.97×10²⁴)/(6.37×10⁶)]',
+            'v_esc = √(1.25×10⁸)',
+            'v_esc = 11,180 m/s = 11.18 km/s',
+            'Escape velocity from Earth is 11.18 km/s'
+        ],
+        helper: 'v_esc = √(2GM/R) (minimum to escape)',
+        solution: 'v_esc ≈ 11.18 km/s',
+        realWorldContext: 'Space launches, rocket science'
+    });
+
+    // Problem 5: Kepler's third law
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Kepler\'s Third Law',
+        problem: 'Earth orbits Sun at r = 1.5×10¹¹ m in 365 days. Find Mars orbital period at r = 2.28×10¹¹ m.',
+        parameters: { r_earth: 1.5e11, T_earth: 365, r_mars: 2.28e11 },
+        type: 'orbital_motion',
+        context: { difficulty: 'advanced', topic: 'Kepler\'s Laws' },
+        subparts: [
+            'Given: r_E = 1.5×10¹¹ m, T_E = 365 days',
+            'r_M = 2.28×10¹¹ m, find T_M',
+            'Kepler\'s 3rd law: T² ∝ r³',
+            'T_M²/T_E² = r_M³/r_E³',
+            'T_M²/(365)² = (2.28×10¹¹)³/(1.5×10¹¹)³',
+            'T_M²/133225 = (2.28/1.5)³ = 3.51',
+            'T_M² = 467,700',
+            'T_M = 684 days',
+            'Mars orbital period is about 684 days (1.87 years)'
+        ],
+        helper: 'T² ∝ r³ for planets orbiting same star',
+        solution: 'T_mars ≈ 684 days',
+        realWorldContext: 'Planetary motion, astronomical predictions'
+    });
+
+    // Problem 6: Gravitational potential energy
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Gravitational Potential Energy',
+        problem: 'A 500 kg satellite at Earth surface is lifted to 300 km altitude. Find PE change.',
+        parameters: { m: 500, R: 6.37e6, h: 3e5, M: 5.97e24, G: 6.674e-11 },
+        type: 'gravitational_field',
+        context: { difficulty: 'advanced', topic: 'Gravitational PE' },
+        subparts: [
+            'Given: m = 500 kg, h = 300 km = 3×10⁵ m',
+            'R = 6.37×10⁶ m, M = 5.97×10²⁴ kg',
+            'PE at surface: U₁ = -GMm/R',
+            'PE at altitude: U₂ = -GMm/(R+h)',
+            'Change: ΔU = U₂ - U₁',
+            'ΔU = GMm[1/R - 1/(R+h)]',
+            'ΔU = (6.674×10⁻¹¹)(5.97×10²⁴)(500)',
+            '    × [1/(6.37×10⁶) - 1/(6.67×10⁶)]',
+            'ΔU ≈ 1.41×10⁹ J = 1.41 GJ'
+        ],
+        helper: 'U = -GMm/r (negative, reference at infinity)',
+        solution: 'ΔU ≈ 1.41 GJ',
+        realWorldContext: 'Energy to launch satellites'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVER FUNCTIONS ==============
+
+// ============== SOLVER FUNCTIONS (ALL 10 WITH FIXES) ==============
+
+function solveKinematics1DProblems() {
+    const problems = generateRelatedKinematics1D();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Kinematics 1D Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveKinematics2DProblems() {
+    const problems = generateRelatedKinematics2D();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Kinematics 2D Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveProjectileMotionProblems() {
+    const problems = generateRelatedProjectileMotion();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Projectile Motion Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveNewtonsLawsProblems() {
+    const problems = generateRelatedNewtonsLaws();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Newton's Laws Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveFrictionProblems() {
+    const problems = generateRelatedFriction();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Friction Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveCircularMotionProblems() {
+    const problems = generateRelatedCircularMotion();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Circular Motion Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveWorkEnergyProblems() {
+    const problems = generateRelatedWorkEnergy();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Work-Energy Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveMomentumCollisionsProblems() {
+    const problems = generateRelatedMomentumCollisions();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Momentum/Collisions Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveRotationalMotionProblems() {
+    const problems = generateRelatedRotationalMotion();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Rotational Motion Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveGravitationProblems() {
+    const problems = generateRelatedGravitation();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Gravitation Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedMechanicsPhysicsWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveMechanicsProblem({
+            equation: problem.problem,
+            scenario: problem.scenario,
+            problemType: problem.type,
+            parameters: problem.parameters,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE MECHANICS DOCUMENT GENERATION ==============
+
+async function generateComprehensiveMechanicsDocument() {
+    console.log('Generating Comprehensive Mechanics Physics Workbook...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Mechanics Physics Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide to Classical Mechanics',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Kinematics, Dynamics, Energy, Momentum, Rotation, and Gravitation',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Kinematics 1D
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: One-Dimensional Kinematics (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const kinematics1DProblems = generateRelatedKinematics1D();
+    kinematics1DProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part II: Kinematics 2D
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Two-Dimensional Kinematics (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const kinematics2DProblems = generateRelatedKinematics2D();
+    kinematics2DProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 8}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part III: Projectile Motion
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Projectile Motion (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const projectileProblems = generateRelatedProjectileMotion();
+    projectileProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 13}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IV: Newton's Laws
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Newton\'s Laws of Motion (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const newtonsLawsProblems = generateRelatedNewtonsLaws();
+    newtonsLawsProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 18}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part V: Friction
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Friction and Surface Forces (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const frictionProblems = generateRelatedFriction();
+    frictionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 25}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VI: Circular Motion
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Circular Motion and Centripetal Force (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const circularMotionProblems = generateRelatedCircularMotion();
+    circularMotionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 31}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VII: Work and Energy
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Work and Energy (9 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const workEnergyProblems = generateRelatedWorkEnergy();
+    workEnergyProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 37}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VIII: Momentum and Collisions
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Momentum and Collisions (7 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const momentumProblems = generateRelatedMomentumCollisions();
+    momentumProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 46}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IX: Rotational Motion
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Rotational Motion and Dynamics (8 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const rotationalProblems = generateRelatedRotationalMotion();
+    rotationalProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 53}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part X: Gravitation
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Universal Gravitation (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const gravitationProblems = generateRelatedGravitation();
+    gravitationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 61}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: KINEMATICS 1D ==============
+    console.log('\nProcessing Part I: One-Dimensional Kinematics...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: One-Dimensional Kinematics',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const kinematics1DSolved = solveKinematics1DProblems();
+    kinematics1DSolved.forEach((solved, index) => {
+        console.log(`  Adding Kinematics 1D Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: KINEMATICS 2D ==============
+    console.log('\nProcessing Part II: Two-Dimensional Kinematics...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Two-Dimensional Kinematics',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const kinematics2DSolved = solveKinematics2DProblems();
+    kinematics2DSolved.forEach((solved, index) => {
+        console.log(`  Adding Kinematics 2D Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 8}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: PROJECTILE MOTION ==============
+    console.log('\nProcessing Part III: Projectile Motion...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Projectile Motion',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const projectileSolved = solveProjectileMotionProblems();
+    projectileSolved.forEach((solved, index) => {
+        console.log(`  Adding Projectile Motion Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 13}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: NEWTON'S LAWS ==============
+    console.log('\nProcessing Part IV: Newton\'s Laws of Motion...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Newton\'s Laws of Motion',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const newtonsLawsSolved = solveNewtonsLawsProblems();
+    newtonsLawsSolved.forEach((solved, index) => {
+        console.log(`  Adding Newton's Laws Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 18}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: FRICTION ==============
+    console.log('\nProcessing Part V: Friction and Surface Forces...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Friction and Surface Forces',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const frictionSolved = solveFrictionProblems();
+    frictionSolved.forEach((solved, index) => {
+        console.log(`  Adding Friction Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 25}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: CIRCULAR MOTION ==============
+    console.log('\nProcessing Part VI: Circular Motion and Centripetal Force...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Circular Motion and Centripetal Force',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const circularMotionSolved = solveCircularMotionProblems();
+    circularMotionSolved.forEach((solved, index) => {
+        console.log(`  Adding Circular Motion Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 31}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VII: WORK AND ENERGY ==============
+    console.log('\nProcessing Part VII: Work and Energy...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Work and Energy',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const workEnergySolved = solveWorkEnergyProblems();
+    workEnergySolved.forEach((solved, index) => {
+        console.log(`  Adding Work-Energy Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 37}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VIII: MOMENTUM AND COLLISIONS ==============
+    console.log('\nProcessing Part VIII: Momentum and Collisions...');
+    documentChildren.push(
+
+
+        new docx.Paragraph({
+            text: 'Part VIII: Momentum and Collisions',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const momentumSolved = solveMomentumCollisionsProblems();
+    momentumSolved.forEach((solved, index) => {
+        console.log(`  Adding Momentum/Collisions Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 46}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IX: ROTATIONAL MOTION ==============
+    console.log('\nProcessing Part IX: Rotational Motion and Dynamics...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Rotational Motion and Dynamics',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const rotationalSolved = solveRotationalMotionProblems();
+    rotationalSolved.forEach((solved, index) => {
+        console.log(`  Adding Rotational Motion Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 53}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART X: GRAVITATION ==============
+    console.log('\nProcessing Part X: Universal Gravitation...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Universal Gravitation',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const gravitationSolved = solveGravitationProblems();
+    gravitationSolved.forEach((solved, index) => {
+        console.log(`  Adding Gravitation Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 61}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_mechanics_physics_workbook.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE MECHANICS DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 66');
+        console.log('    - Kinematics 1D: 7 problems');
+        console.log('    - Kinematics 2D: 5 problems');
+        console.log('    - Projectile Motion: 5 problems');
+        console.log('    - Newton\'s Laws: 7 problems');
+        console.log('    - Friction: 6 problems');
+        console.log('    - Circular Motion: 6 problems');
+        console.log('    - Work and Energy: 9 problems');
+        console.log('    - Momentum and Collisions: 7 problems');
+        console.log('    - Rotational Motion: 8 problems');
+        console.log('    - Gravitation: 6 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I: Kinematics 1D (Problems 1-7)');
+        console.log('  • Part II: Kinematics 2D (Problems 8-12)');
+        console.log('  • Part III: Projectile Motion (Problems 13-17)');
+        console.log('  • Part IV: Newton\'s Laws (Problems 18-24)');
+        console.log('  • Part V: Friction (Problems 25-30)');
+        console.log('  • Part VI: Circular Motion (Problems 31-36)');
+        console.log('  • Part VII: Work and Energy (Problems 37-45)');
+        console.log('  • Part VIII: Momentum and Collisions (Problems 46-52)');
+        console.log('  • Part IX: Rotational Motion (Problems 53-60)');
+        console.log('  • Part X: Gravitation (Problems 61-66)');
+        console.log('\n📄 EXPECTED PAGES: 150+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step solution');
+        console.log('  • Enhanced physics explanations');
+        console.log('  • Physical intuition and real-world context');
+        console.log('  • Key concepts and pedagogical notes');
+        console.log('  • Alternative solution methods');
+        console.log('  • Common mistakes and error prevention');
+        console.log('  • Verification of results');
+        console.log('  • SI units and dimensional analysis');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE MECHANICS DOCUMENT GENERATION ==============
+
+generateComprehensiveMechanicsDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});

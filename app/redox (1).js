@@ -1,0 +1,1717 @@
+
+import { EnhancedRedoxMathematicalWorkbook } from './reductionchemistry.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a problem
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content based on type
+        if (section.content) {
+            // Handle different content structures
+            if (typeof section.content === 'object') {
+                // For structured content
+                Object.entries(section.content).forEach(([key, value]) => {
+                    if (typeof value === 'string' || typeof value === 'number') {
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `${key}: `,
+                                        bold: true
+                                    }),
+                                    new docx.TextRun({
+                                        text: String(value)
+                                    })
+                                ],
+                                spacing: { after: 100 }
+                            })
+                        );
+                    } else if (Array.isArray(value)) {
+                        sections.push(
+                            new docx.Paragraph({
+                                text: `${key}:`,
+                                bold: true,
+                                spacing: { after: 100 }
+                            })
+                        );
+                        value.forEach(item => {
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: `  • ${String(item)}`,
+                                    spacing: { after: 50 }
+                                })
+                            );
+                        });
+                    }
+                });
+            }
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+// ============== REDOX STOICHIOMETRY - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedRedoxStoichiometry() {
+    const relatedProblems = [];
+
+    // All stoichiometry problems use 'oxidation_state' as fallback
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Moles from Mass',
+        problem: 'Calculate moles in 50.0 g of KMnO₄',
+        parameters: {
+            mass: 50.0,
+            formula: 'KMnO4'
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'beginner', topic: 'Mole Calculations' },
+        subparts: [
+            'Given: 50.0 g of KMnO₄',
+            'Find molar mass of KMnO₄:',
+            'K: 39.1 g/mol',
+            'Mn: 54.9 g/mol',
+            'O: 4 × 16.0 = 64.0 g/mol',
+            'M = 39.1 + 54.9 + 64.0 = 158.0 g/mol',
+            'n = m / M = 50.0 / 158.0 = 0.316 mol'
+        ],
+        helper: 'Use n = m / M where M is molar mass',
+        solution: '0.316 mol',
+        realWorldContext: 'Preparing solutions for redox titrations'
+    });
+
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Mass-Mass Redox Stoichiometry',
+        problem: 'If 10.0 g Zn reacts with excess CuSO₄, find mass of Cu produced',
+        parameters: {
+            equation: 'Zn + CuSO4 → ZnSO4 + Cu'
+        },
+        type: 'identify_redox',
+        context: { difficulty: 'intermediate', topic: 'Redox Stoichiometry' },
+        subparts: [
+            'Given: 10.0 g Zn',
+            'Equation: Zn + CuSO₄ → ZnSO₄ + Cu',
+            'Molar mass Zn = 65.4 g/mol',
+            'Moles Zn = 10.0 / 65.4 = 0.153 mol',
+            'Mole ratio Zn:Cu = 1:1',
+            'Moles Cu = 0.153 mol',
+            'Mass Cu = 0.153 × 63.5 = 9.72 g'
+        ],
+        helper: 'Use stoichiometry with redox equation',
+        solution: '9.72 g Cu',
+        realWorldContext: 'Metal displacement reactions'
+    });
+
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Limiting Reagent in Redox',
+        problem: 'Which is limiting: 5.0 g Al + 15.0 g Br₂ in 2Al + 3Br₂ → 2AlBr₃?',
+        parameters: {
+            equation: '2Al + 3Br2 → 2AlBr3'
+        },
+        type: 'identify_redox',
+        context: { difficulty: 'intermediate', topic: 'Limiting Reagent' },
+        subparts: [
+            'Calculate moles of each reactant',
+            'Compare moles/coefficient ratio',
+            'Smallest ratio is limiting',
+            'Calculate product from limiting reagent'
+        ],
+        helper: 'Compare (moles/coefficient) ratios',
+        solution: 'Br₂ is limiting',
+        realWorldContext: 'Reaction optimization'
+    });
+
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Redox Titration Calculation',
+        problem: 'Calculate concentration of Fe²⁺ if 25.0 mL requires 18.5 mL of 0.020 M KMnO₄',
+        parameters: {
+            equation: '5Fe2+ + MnO4- + 8H+ → 5Fe3+ + Mn2+ + 4H2O'
+        },
+        type: 'redox_titration',
+        context: { difficulty: 'intermediate', topic: 'Redox Titrations' },
+        subparts: [
+            'Use balanced redox equation',
+            'Calculate moles of KMnO₄',
+            'Apply mole ratio 5:1',
+            'Calculate molarity of Fe²⁺'
+        ],
+        helper: 'Use stoichiometry with titration data',
+        solution: 'Calculate using mole ratios',
+        realWorldContext: 'Quantitative analysis'
+    });
+
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Solution Preparation',
+        problem: 'How to prepare 500 mL of 0.100 M K₂Cr₂O₇?',
+        parameters: {
+            formula: 'K2Cr2O7',
+            overallCharge: 0
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'beginner', topic: 'Solution Preparation' },
+        subparts: [
+            'Calculate molar mass',
+            'Calculate moles needed',
+            'Calculate mass needed',
+            'Dissolve and dilute to volume'
+        ],
+        helper: 'Use M = n/V to find moles needed',
+        solution: 'Calculate mass needed',
+        realWorldContext: 'Laboratory solution preparation'
+    });
+
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Dilution Calculation',
+        problem: 'Dilute 25.0 mL of 2.00 M HCl to 100.0 mL',
+        parameters: {
+            formula: 'HCl',
+            overallCharge: 0
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'intermediate', topic: 'Dilution' },
+        subparts: [
+            'Use M₁V₁ = M₂V₂',
+            '2.00 × 25.0 = M₂ × 100.0',
+            'M₂ = 0.500 M'
+        ],
+        helper: 'M₁V₁ = M₂V₂',
+        solution: '0.500 M',
+        realWorldContext: 'Preparing working solutions'
+    });
+
+    return relatedProblems;
+}
+
+// ============== OXIDATION STATES - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedOxidationStates() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Oxidation State
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Oxidation State in Simple Ion',
+        problem: 'Find oxidation state of S in SO₄²⁻',
+        parameters: {
+            formula: 'SO4',
+            overallCharge: -2
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'beginner', topic: 'Oxidation States' },
+        subparts: [
+            'Given: SO₄²⁻ (overall charge = -2)',
+            'O is usually -2',
+            '4 oxygen atoms: 4 × (-2) = -8',
+            'Let S = x',
+            'Sum: x + (-8) = -2',
+            'x = +6',
+            'Oxidation state of S = +6'
+        ],
+        helper: 'Sum of oxidation states = overall charge',
+        solution: 'S = +6',
+        realWorldContext: 'Understanding sulfate chemistry'
+    });
+
+    // Problem 2: Oxidation State in Compound
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Oxidation State in Neutral Compound',
+        problem: 'Find oxidation state of Cr in Cr₂O₇²⁻',
+        parameters: {
+            formula: 'Cr2O7',
+            overallCharge: -2
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'intermediate', topic: 'Oxidation States' },
+        subparts: [
+            'Given: Cr₂O₇²⁻ (charge = -2)',
+            'O is -2 each',
+            '7 oxygen: 7 × (-2) = -14',
+            'Let each Cr = x',
+            '2x + (-14) = -2',
+            '2x = +12',
+            'x = +6',
+            'Each Cr has oxidation state +6'
+        ],
+        helper: 'Account for subscripts when summing',
+        solution: 'Cr = +6',
+        realWorldContext: 'Dichromate ion in redox titrations'
+    });
+
+    // Problem 3: Oxidation State with Exception
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Oxidation State in Peroxide',
+        problem: 'Find oxidation state of O in H₂O₂',
+        parameters: {
+            formula: 'H2O2',
+            overallCharge: 0
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'intermediate', topic: 'Oxidation States with Exceptions' },
+        subparts: [
+            'Given: H₂O₂ (neutral, charge = 0)',
+            'H is +1 each',
+            '2 hydrogen: 2 × (+1) = +2',
+            'Let each O = x',
+            '2x + 2 = 0',
+            '2x = -2',
+            'x = -1',
+            'In peroxides, O = -1 (exception to usual -2)'
+        ],
+        helper: 'Peroxides have O = -1, not -2',
+        solution: 'O = -1',
+        realWorldContext: 'Understanding hydrogen peroxide as oxidizing agent'
+    });
+
+    // Problem 4: Metal Hydride
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Oxidation State in Metal Hydride',
+        problem: 'Find oxidation state of H in NaH',
+        parameters: {
+            formula: 'NaH',
+            overallCharge: 0
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'intermediate', topic: 'Metal Hydrides' },
+        subparts: [
+            'Given: NaH (neutral)',
+            'Na is Group 1: +1',
+            'Let H = x',
+            '(+1) + x = 0',
+            'x = -1',
+            'In metal hydrides, H = -1 (not +1)'
+        ],
+        helper: 'In metal hydrides, H has -1 oxidation state',
+        solution: 'H = -1',
+        realWorldContext: 'Metal hydrides as reducing agents'
+    });
+
+    // Problem 5: Manganese in Permanganate
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Oxidation State in Permanganate',
+        problem: 'Find oxidation state of Mn in MnO₄⁻',
+        parameters: {
+            formula: 'MnO4',
+            overallCharge: -1
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'beginner', topic: 'Oxidation States' },
+        subparts: [
+            'Given: MnO₄⁻ (charge = -1)',
+            'O is -2 each',
+            '4 oxygen: 4 × (-2) = -8',
+            'Let Mn = x',
+            'x + (-8) = -1',
+            'x = +7',
+            'Mn has oxidation state +7'
+        ],
+        helper: 'Permanganate is a strong oxidizing agent',
+        solution: 'Mn = +7',
+        realWorldContext: 'KMnO₄ in redox titrations'
+    });
+
+    // Problem 6: Multiple Elements
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Multiple Unknowns',
+        problem: 'Find oxidation states in K₂Cr₂O₇',
+        parameters: {
+            formula: 'K2Cr2O7',
+            overallCharge: 0
+        },
+        type: 'oxidation_state',
+        context: { difficulty: 'intermediate', topic: 'Complex Oxidation States' },
+        subparts: [
+            'Given: K₂Cr₂O₇ (neutral)',
+            'K is Group 1: +1 each',
+            '2 K: 2 × (+1) = +2',
+            'O is -2 each',
+            '7 O: 7 × (-2) = -14',
+            'Let each Cr = x',
+            '(+2) + 2x + (-14) = 0',
+            '2x = +12',
+            'x = +6',
+            'K = +1, Cr = +6, O = -2'
+        ],
+        helper: 'Apply rules systematically',
+        solution: 'K = +1, Cr = +6, O = -2',
+        realWorldContext: 'Potassium dichromate as oxidizing agent'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HALF-REACTIONS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedHalfReactions() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Oxidation Half-Reaction
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Balance Oxidation Half-Reaction',
+        problem: 'Balance in acidic solution: Fe²⁺ → Fe³⁺',
+        parameters: {
+            oxidationHalf: 'Fe2+ → Fe3+',
+            reductionHalf: ''
+        },
+        type: 'balance_redox_acidic',
+        context: { difficulty: 'beginner', topic: 'Half-Reactions' },
+        subparts: [
+            'Given: Fe²⁺ → Fe³⁺',
+            'Step 1: Fe is already balanced',
+            'Step 2: No O, so no H₂O needed',
+            'Step 3: No H, so no H⁺ needed',
+            'Step 4: Balance charge',
+            'Left: +2, Right: +3',
+            'Add 1e⁻ to right',
+            'Fe²⁺ → Fe³⁺ + e⁻'
+        ],
+        helper: 'Add electrons to balance charge',
+        solution: 'Fe²⁺ → Fe³⁺ + e⁻',
+        realWorldContext: 'Iron oxidation in corrosion'
+    });
+
+    // Problem 2: Reduction with Oxygen
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Balance Reduction Half-Reaction',
+        problem: 'Balance in acidic solution: MnO₄⁻ → Mn²⁺',
+        parameters: {
+            oxidationHalf: '',
+            reductionHalf: 'MnO4- → Mn2+'
+        },
+        type: 'balance_redox_acidic',
+        context: { difficulty: 'intermediate', topic: 'Half-Reactions with Oxygen' },
+        subparts: [
+            'Given: MnO₄⁻ → Mn²⁺ (acidic)',
+            'Step 1: Mn is balanced',
+            'Step 2: Balance O with H₂O',
+            '4 O on left, add 4H₂O to right',
+            'MnO₄⁻ → Mn²⁺ + 4H₂O',
+            'Step 3: Balance H with H⁺',
+            '8 H on right, add 8H⁺ to left',
+            'MnO₄⁻ + 8H⁺ → Mn²⁺ + 4H₂O',
+            'Step 4: Balance charge',
+            'Left: -1 + 8 = +7; Right: +2',
+            'Add 5e⁻ to left',
+            'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O'
+        ],
+        helper: 'Balance: atoms, O, H, then charge',
+        solution: 'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O',
+        realWorldContext: 'Permanganate reduction in titrations'
+    });
+
+    // Problem 3: Complete Redox in Acidic
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Balance Complete Redox (Acidic)',
+        problem: 'Balance: Fe²⁺ + MnO₄⁻ → Fe³⁺ + Mn²⁺ (acidic)',
+        parameters: {
+            equation: 'Fe2+ + MnO4- → Fe3+ + Mn2+',
+            oxidationHalf: 'Fe2+ → Fe3+',
+            reductionHalf: 'MnO4- → Mn2+'
+        },
+        type: 'balance_redox_acidic',
+        context: { difficulty: 'intermediate', topic: 'Complete Redox Balancing' },
+        subparts: [
+            'Oxidation: Fe²⁺ → Fe³⁺ + e⁻',
+            'Reduction: MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O',
+            'Multiply oxidation by 5:',
+            '5Fe²⁺ → 5Fe³⁺ + 5e⁻',
+            'Add half-reactions:',
+            '5Fe²⁺ + MnO₄⁻ + 8H⁺ → 5Fe³⁺ + Mn²⁺ + 4H₂O'
+        ],
+        helper: 'Equalize electrons, then add',
+        solution: '5Fe²⁺ + MnO₄⁻ + 8H⁺ → 5Fe³⁺ + Mn²⁺ + 4H₂O',
+        realWorldContext: 'Classic redox titration'
+    });
+
+    // Problem 4: Balance in Basic Solution
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Balance Redox (Basic)',
+        problem: 'Balance: Cl₂ → Cl⁻ + ClO⁻ (basic)',
+        parameters: {
+            equation: 'Cl2 → Cl- + ClO-'
+        },
+        type: 'balance_redox_basic',
+        context: { difficulty: 'advanced', topic: 'Balancing in Basic Solution' },
+        subparts: [
+            'Given: Cl₂ → Cl⁻ + ClO⁻ (basic)',
+            'First balance as if acidic:',
+            'Reduction: Cl₂ + 2e⁻ → 2Cl⁻',
+            'Oxidation: Cl₂ + 2H₂O → 2ClO⁻ + 4H⁺ + 2e⁻',
+            'Add: 2Cl₂ + 2H₂O → 2Cl⁻ + 2ClO⁻ + 4H⁺',
+            'Simplify: Cl₂ + H₂O → Cl⁻ + ClO⁻ + 2H⁺',
+            'Convert to basic: add 2OH⁻ to both sides',
+            'Cl₂ + H₂O + 2OH⁻ → Cl⁻ + ClO⁻ + 2H₂O',
+            'Simplify: Cl₂ + 2OH⁻ → Cl⁻ + ClO⁻ + H₂O'
+        ],
+        helper: 'Balance in acidic first, then convert',
+        solution: 'Cl₂ + 2OH⁻ → Cl⁻ + ClO⁻ + H₂O',
+        realWorldContext: 'Disproportionation of chlorine in base'
+    });
+
+    // Problem 5: Dichromate Reduction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Dichromate Reduction',
+        problem: 'Balance: Cr₂O₇²⁻ → Cr³⁺ (acidic)',
+        parameters: {
+            reductionHalf: 'Cr2O7 2- → Cr3+'
+        },
+        type: 'balance_redox_acidic',
+        context: { difficulty: 'intermediate', topic: 'Dichromate Half-Reaction' },
+        subparts: [
+            'Given: Cr₂O₇²⁻ → Cr³⁺',
+            'Balance Cr: Cr₂O₇²⁻ → 2Cr³⁺',
+            'Balance O: add 7H₂O to right',
+            'Cr₂O₇²⁻ → 2Cr³⁺ + 7H₂O',
+            'Balance H: add 14H⁺ to left',
+            'Cr₂O₇²⁻ + 14H⁺ → 2Cr³⁺ + 7H₂O',
+            'Balance charge: left = +12, right = +6',
+            'Add 6e⁻ to left',
+            'Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O'
+        ],
+        helper: 'Follow systematic balancing sequence',
+        solution: 'Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O',
+        realWorldContext: 'Dichromate as oxidizing agent'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ELECTROCHEMISTRY - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedElectrochemistry() {
+    const relatedProblems = [];
+
+    // Problem 1: Cell Potential Calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Standard Cell Potential',
+        problem: 'Calculate E°cell for: Zn|Zn²⁺||Cu²⁺|Cu. E°(Cu²⁺/Cu) = +0.34 V, E°(Zn²⁺/Zn) = -0.76 V',
+        parameters: {
+            cathode: 'Cu2+/Cu',
+            anode: 'Zn2+/Zn'
+        },
+        type: 'cell_potential',
+        context: { difficulty: 'beginner', topic: 'Cell Potentials' },
+        subparts: [
+            'Given: E°(Cu²⁺/Cu) = +0.34 V',
+            '       E°(Zn²⁺/Zn) = -0.76 V',
+            'Cu has higher E°, so cathode (reduction)',
+            'Zn has lower E°, so anode (oxidation)',
+            'E°cell = E°cathode - E°anode',
+            'E°cell = 0.34 - (-0.76)',
+            'E°cell = 1.10 V'
+        ],
+        helper: 'E°cell = E°cathode - E°anode',
+        solution: 'E°cell = 1.10 V (spontaneous)',
+        realWorldContext: 'Zinc-copper battery'
+    });
+
+    // Problem 2: Spontaneity Prediction
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Predict Spontaneity',
+        problem: 'Is Ag⁺ + Fe²⁺ → Ag + Fe³⁺ spontaneous? E°(Ag⁺/Ag) = +0.80 V, E°(Fe³⁺/Fe²⁺) = +0.77 V',
+        parameters: {
+            cathode: 'Ag+/Ag',
+            anode: 'Fe3+/Fe2+'
+        },
+        type: 'cell_potential',
+        context: { difficulty: 'intermediate', topic: 'Spontaneity Prediction' },
+        subparts: [
+            'Given: E°(Ag⁺/Ag) = +0.80 V',
+            '       E°(Fe³⁺/Fe²⁺) = +0.77 V',
+            'Ag⁺ has higher E°, gets reduced (cathode)',
+            'Fe²⁺ gets oxidized to Fe³⁺ (anode)',
+            'E°cell = 0.80 - 0.77 = +0.03 V',
+            'E°cell > 0, reaction is spontaneous'
+        ],
+        helper: 'Positive E°cell means spontaneous',
+        solution: 'Yes, spontaneous (E° = +0.03 V)',
+        realWorldContext: 'Predicting reaction direction'
+    });
+
+    // Problem 3: Free Energy from E°
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Free Energy Calculation',
+        problem: 'Calculate ΔG° for Zn + Cu²⁺ → Zn²⁺ + Cu. E°cell = 1.10 V, n = 2',
+        parameters: {
+            E_cell: 1.10,
+            electrons: 2
+        },
+        type: 'free_energy_cell',
+        context: { difficulty: 'intermediate', topic: 'Free Energy from E°' },
+        subparts: [
+            'Given: E°cell = 1.10 V, n = 2',
+            'ΔG° = -nFE°',
+            'F = 96,485 C/mol',
+            'ΔG° = -2 × 96,485 × 1.10',
+            'ΔG° = -212,267 J/mol',
+            'ΔG° = -212 kJ/mol'
+        ],
+        helper: 'ΔG° = -nFE° (F = 96,485 C/mol)',
+        solution: 'ΔG° = -212 kJ/mol',
+        realWorldContext: 'Energy available from battery'
+    });
+
+    // Problem 4: Equilibrium Constant
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Equilibrium Constant from E°',
+        problem: 'Calculate K for reaction with E°cell = 0.46 V, n = 2 at 25°C',
+        parameters: {
+            E_cell: 0.46,
+            electrons: 2,
+            temperature: 298
+        },
+        type: 'equilibrium_constant_cell',
+        context: { difficulty: 'advanced', topic: 'Equilibrium Constants' },
+        subparts: [
+            'Given: E°cell = 0.46 V, n = 2, T = 25°C',
+            'At 25°C: E° = (0.0592/n)log(K)',
+            '0.46 = (0.0592/2)log(K)',
+            '0.46 = 0.0296 log(K)',
+            'log(K) = 0.46/0.0296 = 15.54',
+            'K = 10^15.54',
+            'K = 3.5 × 10^15'
+        ],
+        helper: 'Use E° = (0.0592/n)log(K) at 25°C',
+        solution: 'K = 3.5 × 10^15',
+        realWorldContext: 'Highly product-favored reaction'
+    });
+
+    // Problem 5: Nernst Equation
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Nernst Equation Application',
+        problem: 'For Zn|Zn²⁺||Cu²⁺|Cu, E° = 1.10 V. Find E if [Zn²⁺] = 1.0 M and [Cu²⁺] = 0.01 M at 25°C',
+        parameters: {
+            E_standard: 1.10,
+            temperature: 298,
+            electrons: 2,
+            concentrations: {
+                products: [1.0],
+                reactants: [0.01]
+            }
+        },
+        type: 'nernst_equation',
+        context: { difficulty: 'advanced', topic: 'Nernst Equation' },
+        subparts: [
+            'Given: E° = 1.10 V, [Zn²⁺] = 1.0 M, [Cu²⁺] = 0.01 M',
+            'Reaction: Zn + Cu²⁺ → Zn²⁺ + Cu, n = 2',
+            'Q = [Zn²⁺]/[Cu²⁺] = 1.0/0.01 = 100',
+            'E = E° - (0.0592/n)log(Q)',
+            'E = 1.10 - (0.0592/2)log(100)',
+            'E = 1.10 - 0.0296(2)',
+            'E = 1.10 - 0.059',
+            'E = 1.04 V'
+        ],
+        helper: 'E = E° - (0.0592/n)log(Q) at 25°C',
+        solution: 'E = 1.04 V',
+        realWorldContext: 'Cell potential changes as reaction proceeds'
+    });
+
+    return relatedProblems;
+}
+
+// ============== GALVANIC CELLS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedGalvanicCells() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Galvanic Cell
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Identify Anode and Cathode',
+        problem: 'In cell: Mg|Mg²⁺||Ag⁺|Ag, identify anode, cathode. E°(Mg²⁺/Mg) = -2.37 V, E°(Ag⁺/Ag) = +0.80 V',
+        parameters: {
+            anode: 'Mg2+/Mg',
+            cathode: 'Ag+/Ag',
+            oxidationHalf: 'Mg → Mg2+ + 2e-',
+            reductionHalf: 'Ag+ + e- → Ag'
+        },
+        type: 'galvanic_cell',
+        context: { difficulty: 'beginner', topic: 'Galvanic Cell Components' },
+        subparts: [
+            'Given: E°(Mg²⁺/Mg) = -2.37 V',
+            '       E°(Ag⁺/Ag) = +0.80 V',
+            'Higher E° (Ag) is cathode (reduction)',
+            'Lower E° (Mg) is anode (oxidation)',
+            'Anode: Mg → Mg²⁺ + 2e⁻',
+            'Cathode: Ag⁺ + e⁻ → Ag',
+            'E°cell = 0.80 - (-2.37) = 3.17 V',
+            'Electrons flow: Mg (anode) → Ag (cathode)'
+        ],
+        helper: 'Higher E° = cathode; lower E° = anode',
+        solution: 'Anode: Mg; Cathode: Ag; E°cell = 3.17 V',
+        realWorldContext: 'Understanding battery polarity'
+    });
+
+    // Problem 2: Cell Notation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Write Cell Notation',
+        problem: 'Write cell notation for: Ni(s) + Cu²⁺(aq) → Ni²⁺(aq) + Cu(s)',
+        parameters: {
+            anode: 'Ni/Ni2+',
+            cathode: 'Cu2+/Cu'
+        },
+        type: 'galvanic_cell',
+        context: { difficulty: 'intermediate', topic: 'Cell Notation' },
+        subparts: [
+            'Given reaction: Ni + Cu²⁺ → Ni²⁺ + Cu',
+            'Ni is oxidized (anode)',
+            'Cu²⁺ is reduced (cathode)',
+            'Cell notation: Anode | Anode solution || Cathode solution | Cathode',
+            'Ni(s) | Ni²⁺(aq) || Cu²⁺(aq) | Cu(s)',
+            'Single line: phase boundary',
+            'Double line: salt bridge'
+        ],
+        helper: 'Format: Anode|Anode solution||Cathode solution|Cathode',
+        solution: 'Ni(s) | Ni²⁺(aq) || Cu²⁺(aq) | Cu(s)',
+        realWorldContext: 'Standard notation for electrochemical cells'
+    });
+
+    // Problem 3: Maximum Work
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Calculate Maximum Work',
+        problem: 'Calculate max work from cell with E°cell = 1.10 V, n = 2',
+        parameters: {
+            E_cell: 1.10,
+            electrons: 2
+        },
+        type: 'galvanic_cell',
+        context: { difficulty: 'intermediate', topic: 'Electrical Work' },
+        subparts: [
+            'Given: E°cell = 1.10 V, n = 2',
+            'Maximum work = -ΔG°',
+            'ΔG° = -nFE°',
+            'W_max = -ΔG° = nFE°',
+            'W_max = 2 × 96,485 × 1.10',
+            'W_max = 212,267 J',
+            'W_max = 212 kJ per mole of reaction'
+        ],
+        helper: 'Max work = nFE° (from -ΔG°)',
+        solution: 'W_max = 212 kJ/mol',
+        realWorldContext: 'Energy extractable from battery'
+    });
+
+    // Problem 4: Concentration Cell
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Concentration Cell',
+        problem: 'For Cu|Cu²⁺(0.01 M)||Cu²⁺(1.0 M)|Cu, find E at 25°C',
+        parameters: {
+            E_standard: 0,
+            temperature: 298,
+            electrons: 2,
+            concentrations: {
+                cathode: 1.0,
+                anode: 0.01
+            }
+        },
+        type: 'nernst_equation',
+        context: { difficulty: 'advanced', topic: 'Concentration Cells' },
+        subparts: [
+            'Concentration cell: same electrode, different concentrations',
+            'E° = 0 (identical half-reactions)',
+            'Higher concentration (1.0 M) is cathode',
+            'Lower concentration (0.01 M) is anode',
+            'Q = [Cu²⁺]anode / [Cu²⁺]cathode = 0.01/1.0 = 0.01',
+            'E = E° - (0.0592/n)log(Q)',
+            'E = 0 - (0.0592/2)log(0.01)',
+            'E = -0.0296(-2) = 0.059 V'
+        ],
+        helper: 'E° = 0 for concentration cells',
+        solution: 'E = 0.059 V',
+        realWorldContext: 'Cells driven by concentration differences'
+    });
+
+    // Problem 5: Cell with Salt Bridge
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Salt Bridge Function',
+        problem: 'Explain salt bridge role in Zn|Zn²⁺||Cu²⁺|Cu cell',
+        parameters: {
+            anode: 'Zn/Zn2+',
+            cathode: 'Cu2+/Cu'
+        },
+        type: 'galvanic_cell',
+        context: { difficulty: 'beginner', topic: 'Salt Bridge Function' },
+        subparts: [
+            'Salt bridge contains electrolyte (e.g., KNO₃)',
+            'Functions:',
+            '1. Maintains electrical neutrality',
+            '2. Completes circuit',
+            '3. Allows ion flow',
+            'Anode: Zn²⁺ builds up → anions from bridge flow in',
+            'Cathode: Cu²⁺ depletes → cations from bridge flow in',
+            'Without it: charge imbalance stops reaction'
+        ],
+        helper: 'Salt bridge maintains charge balance',
+        solution: 'Maintains electrical neutrality and completes circuit',
+        realWorldContext: 'Essential component of all galvanic cells'
+    });
+
+    return relatedProblems;
+}
+
+// ============== ELECTROLYSIS - RELATED PROBLEMS GENERATOR ==============
+
+function generateRelatedElectrolysis() {
+    const relatedProblems = [];
+
+    // Problem 1: Simple Electrolysis Calculation
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Mass from Electrolysis',
+        problem: 'Calculate mass of Cu deposited by 2.00 A for 1.00 hour in CuSO₄ solution',
+        parameters: {
+            current: 2.00,
+            time: 3600,
+            substance: 'Cu',
+            electrons: 2
+        },
+        type: 'electrolytic_cell',
+        context: { difficulty: 'beginner', topic: 'Faraday\'s Law' },
+        subparts: [
+            'Given: I = 2.00 A, t = 1.00 hr = 3600 s',
+            'Reaction: Cu²⁺ + 2e⁻ → Cu',
+            'Q = I × t = 2.00 × 3600 = 7200 C',
+            'mol e⁻ = Q / F = 7200 / 96,485 = 0.0746 mol',
+            'mol Cu = 0.0746 / 2 = 0.0373 mol',
+            'M(Cu) = 63.5 g/mol',
+            'mass = 0.0373 × 63.5 = 2.37 g'
+        ],
+        helper: 'Q = It, then use Faraday\'s law',
+        solution: '2.37 g Cu deposited',
+        realWorldContext: 'Copper electroplating'
+    });
+
+    // Problem 2: Time Calculation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Time for Electrolysis',
+        problem: 'How long to deposit 10.0 g Ag using 5.00 A current?',
+        parameters: {
+            current: 5.00,
+            substance: 'Ag',
+            electrons: 1,
+            mass: 10.0
+        },
+        type: 'electrolytic_cell',
+        context: { difficulty: 'intermediate', topic: 'Electrolysis Time' },
+        subparts: [
+            'Given: mass Ag = 10.0 g, I = 5.00 A',
+            'Reaction: Ag⁺ + e⁻ → Ag (n = 1)',
+            'M(Ag) = 107.9 g/mol',
+            'mol Ag = 10.0 / 107.9 = 0.0927 mol',
+            'mol e⁻ = 0.0927 mol (1:1 ratio)',
+            'Q = mol e⁻ × F = 0.0927 × 96,485 = 8944 C',
+            't = Q / I = 8944 / 5.00 = 1789 s',
+            't = 29.8 min'
+        ],
+        helper: 'Find Q needed, then t = Q/I',
+        solution: '1789 s (29.8 minutes)',
+        realWorldContext: 'Silver plating process'
+    });
+
+    // Problem 3: Multiple Products
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Electrolysis of Water',
+        problem: 'Calculate volumes of H₂ and O₂ (at STP) from 10.0 A for 30.0 min',
+        parameters: {
+            current: 10.0,
+            time: 1800,
+            substance: 'H2O',
+            electrons: 2
+        },
+        type: 'electrolytic_cell',
+        context: { difficulty: 'intermediate', topic: 'Gas Production' },
+        subparts: [
+            'Given: I = 10.0 A, t = 30.0 min = 1800 s',
+            'Cathode: 2H₂O + 2e⁻ → H₂ + 2OH⁻',
+            'Anode: 2H₂O → O₂ + 4H⁺ + 4e⁻',
+            'Q = 10.0 × 1800 = 18,000 C',
+            'mol e⁻ = 18,000 / 96,485 = 0.187 mol',
+            'mol H₂ = 0.187 / 2 = 0.093 mol',
+            'V(H₂) = 0.093 × 22.4 = 2.08 L',
+            'mol O₂ = 0.187 / 4 = 0.047 mol',
+            'V(O₂) = 0.047 × 22.4 = 1.05 L'
+        ],
+        helper: 'Use stoichiometry for each product',
+        solution: 'V(H₂) = 2.08 L, V(O₂) = 1.05 L',
+        realWorldContext: 'Hydrogen production by electrolysis'
+    });
+
+    // Problem 4: Current Efficiency
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Electrolysis Efficiency',
+        problem: 'If 5.00 g Cu expected but 4.50 g obtained, find current efficiency',
+        parameters: {
+            theoreticalYield: 5.00,
+            actualYield: 4.50
+        },
+        type: 'percent_yield',
+        context: { difficulty: 'intermediate', topic: 'Electrolysis Efficiency' },
+        subparts: [
+            'Given: Theoretical = 5.00 g, Actual = 4.50 g',
+            'Efficiency = (actual / theoretical) × 100%',
+            'Efficiency = (4.50 / 5.00) × 100%',
+            'Efficiency = 90.0%',
+            'Reasons for <100%: side reactions, impurities'
+        ],
+        helper: 'Same as percent yield calculation',
+        solution: '90.0% efficiency',
+        realWorldContext: 'Industrial electrolysis optimization'
+    });
+
+    // Problem 5: Competing Reactions
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Competing Cathode Reactions',
+        problem: 'In NaCl(aq) electrolysis, which occurs: Na⁺ + e⁻ → Na (E° = -2.71 V) or 2H₂O + 2e⁻ → H₂ + 2OH⁻ (E° = -0.83 V)?',
+        parameters: {
+            reaction1: 'Na+ + e- → Na',
+            E1: -2.71,
+            reaction2: '2H2O + 2e- → H2 + 2OH-',
+            E2: -0.83
+        },
+        type: 'cell_potential',
+        context: { difficulty: 'advanced', topic: 'Competing Reactions' },
+        subparts: [
+            'Cathode options:',
+            '1. Na⁺ + e⁻ → Na, E° = -2.71 V',
+            '2. 2H₂O + 2e⁻ → H₂ + 2OH⁻, E° = -0.83 V',
+            'More positive E° is easier to reduce',
+            'E°(H₂O) = -0.83 V > E°(Na⁺) = -2.71 V',
+            'Water reduction occurs, not Na⁺',
+            'Produces H₂ gas, not Na metal'
+        ],
+        helper: 'Higher (more positive) E° occurs preferentially',
+        solution: 'H₂ produced (water reduced, not Na⁺)',
+        realWorldContext: 'Predicting electrolysis products'
+    });
+
+    return relatedProblems;
+}
+
+// ============== SOLVE RELATED PROBLEMS USING WORKBOOKS ==============
+
+function solveRedoxStoichiometryRelatedProblems() {
+    const problems = generateRelatedRedoxStoichiometry();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Redox Stoichiometry Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedRedoxMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed',
+            includeElectronFlow: true
+        });
+
+        // Fix: Provide proper equation string
+        const equationStr = problem.parameters.equation || problem.problem.split(':').pop().trim() || '';
+
+        workbook.solveRedoxProblem({
+            equation: equationStr,
+            species: problem.parameters.formula || '',
+            parameters: problem.parameters,
+            problemType: problem.type,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveOxidationStatesRelatedProblems() {
+    const problems = generateRelatedOxidationStates();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Oxidation States Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedRedoxMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        workbook.solveRedoxProblem({
+            equation: '',  // No equation needed for oxidation state problems
+            species: problem.parameters.formula || '',
+            parameters: problem.parameters,
+            problemType: problem.type,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveHalfReactionsRelatedProblems() {
+    const problems = generateRelatedHalfReactions();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Half-Reactions Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedRedoxMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed',
+            includeElectronFlow: true
+        });
+
+        // Fix: Provide proper equation
+        const equationStr = problem.parameters.equation || 
+                          problem.parameters.oxidationHalf || 
+                          problem.parameters.reductionHalf || 
+                          problem.problem.split(':').pop().trim() || '';
+
+        workbook.solveRedoxProblem({
+            equation: equationStr,
+            parameters: problem.parameters,
+            problemType: problem.type,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveElectrochemistryRelatedProblems() {
+    const problems = generateRelatedElectrochemistry();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Electrochemistry Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedRedoxMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        // Fix: Provide empty equation for electrochemistry calculations
+        workbook.solveRedoxProblem({
+            equation: '',  // Electrochemistry problems don't need full equations
+            parameters: problem.parameters,
+            problemType: problem.type,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveGalvanicCellsRelatedProblems() {
+    const problems = generateRelatedGalvanicCells();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Galvanic Cells Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedRedoxMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed',
+            includeElectronFlow: true
+        });
+
+        // Fix: Provide empty equation for galvanic cell problems
+        workbook.solveRedoxProblem({
+            equation: '',
+            parameters: problem.parameters,
+            problemType: problem.type,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveElectrolysisRelatedProblems() {
+    const problems = generateRelatedElectrolysis();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Electrolysis Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedRedoxMathematicalWorkbook({
+            theme: 'scientific',
+            explanationLevel: 'detailed',
+            includeVerificationInSteps: true,
+            includeConceptualConnections: true,
+            includeAlternativeMethods: true,
+            includeErrorPrevention: true,
+            includeCommonMistakes: true,
+            includePedagogicalNotes: true,
+            verificationDetail: 'detailed'
+        });
+
+        // Fix: Provide empty equation for electrolysis problems
+        workbook.solveRedoxProblem({
+            equation: '',
+            parameters: problem.parameters,
+            problemType: problem.type,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveRedoxDocument() {
+    console.log('Generating Comprehensive Redox Chemistry Workbook with Related Problems...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Redox Chemistry Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Oxidation-Reduction Reactions, Electrochemistry, and Applications',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Redox Stoichiometry
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Redox Stoichiometry (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const stoichiometryProblems = generateRelatedRedoxStoichiometry();
+    stoichiometryProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part II: Oxidation States
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Oxidation States (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const oxidationProblems = generateRelatedOxidationStates();
+    oxidationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 7}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part III: Half-Reactions
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Half-Reactions and Balancing (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const halfReactionProblems = generateRelatedHalfReactions();
+    halfReactionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 13}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part IV: Electrochemistry
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Electrochemistry Fundamentals (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const electrochemProblems = generateRelatedElectrochemistry();
+    electrochemProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 18}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part V: Galvanic Cells
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Galvanic Cells (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const galvanicProblems = generateRelatedGalvanicCells();
+    galvanicProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 23}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    // Part VI: Electrolysis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Electrolysis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const electrolysisProblems = generateRelatedElectrolysis();
+    electrolysisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 28}. ${problem.scenario}: ${problem.problem}`,
+                spacing: { after: 100 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+
+    // ============== PART I: REDOX STOICHIOMETRY ==============
+    console.log('\nProcessing Part I: Redox Stoichiometry...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Redox Stoichiometry',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const stoichiometrySolved = solveRedoxStoichiometryRelatedProblems();
+    stoichiometrySolved.forEach((solved, index) => {
+        console.log(`  Adding Redox Stoichiometry Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: OXIDATION STATES ==============
+    console.log('\nProcessing Part II: Oxidation States...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Oxidation States',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const oxidationSolved = solveOxidationStatesRelatedProblems();
+    oxidationSolved.forEach((solved, index) => {
+        console.log(`  Adding Oxidation States Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 7}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: HALF-REACTIONS ==============
+    console.log('\nProcessing Part III: Half-Reactions...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Half-Reactions and Balancing',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const halfReactionSolved = solveHalfReactionsRelatedProblems();
+    halfReactionSolved.forEach((solved, index) => {
+        console.log(`  Adding Half-Reactions Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 13}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: ELECTROCHEMISTRY ==============
+    console.log('\nProcessing Part IV: Electrochemistry...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Electrochemistry Fundamentals',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const electrochemSolved = solveElectrochemistryRelatedProblems();
+    electrochemSolved.forEach((solved, index) => {
+        console.log(`  Adding Electrochemistry Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 18}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: GALVANIC CELLS ==============
+    console.log('\nProcessing Part V: Galvanic Cells...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Galvanic Cells',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const galvanicSolved = solveGalvanicCellsRelatedProblems();
+    galvanicSolved.forEach((solved, index) => {
+        console.log(`  Adding Galvanic Cells Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 23}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: ELECTROLYSIS ==============
+    console.log('\nProcessing Part VI: Electrolysis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Electrolysis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const electrolysisSolved = solveElectrolysisRelatedProblems();
+    electrolysisSolved.forEach((solved, index) => {
+        console.log(`  Adding Electrolysis Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 28}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_redox_chemistry_workbook.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE REDOX DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 32');
+        console.log('    - Redox Stoichiometry: 6 problems');
+        console.log('    - Oxidation States: 6 problems');
+        console.log('    - Half-Reactions: 5 problems');
+        console.log('    - Electrochemistry: 5 problems');
+        console.log('    - Galvanic Cells: 5 problems');
+        console.log('    - Electrolysis: 5 problems');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I: Redox Stoichiometry (Problems 1-6)');
+        console.log('  • Part II: Oxidation States (Problems 7-12)');
+        console.log('  • Part III: Half-Reactions (Problems 13-17)');
+        console.log('  • Part IV: Electrochemistry (Problems 18-22)');
+        console.log('  • Part V: Galvanic Cells (Problems 23-27)');
+        console.log('  • Part VI: Electrolysis (Problems 28-32)');
+        console.log('\n📄 EXPECTED PAGES: 120+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step solution');
+        console.log('  • Enhanced explanations with electron flow');
+        console.log('  • Oxidation state tracking and verification');
+        console.log('  • Electrochemical principles and calculations');
+        console.log('  • Key concepts and pedagogical notes');
+        console.log('  • Alternative solution methods');
+        console.log('  • Real-world context and applications');
+        console.log('  • Common mistakes and error prevention');
+        console.log('  • Cell diagrams and electron transfer visualization');
+        console.log('='.repeat(80) + '\n');
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE REDOX DOCUMENT GENERATION ==============
+
+generateComprehensiveRedoxDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
