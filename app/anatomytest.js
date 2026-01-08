@@ -1,0 +1,8257 @@
+
+import { EnhancedHumanAnatomyWorkbook } from './anatomybiology.js';
+import * as docx from 'docx';
+import fs from 'fs';
+import path from 'path';
+
+// ============== HUMAN ANATOMY - CIRCULATORY SYSTEM RELATED PROBLEMS ==============
+
+// ============== UTILITY FUNCTION ==============
+
+// Generate all workbook sections for a biology topic
+function generateProblemSections(workbookInstance) {
+    const workbook = workbookInstance.currentWorkbook;
+    if (!workbook) {
+        console.error('No workbook generated');
+        return [];
+    }
+
+    const sections = [];
+
+    // Process each section
+    workbook.sections.forEach((section, sectionIndex) => {
+        // Section title
+        sections.push(
+            new docx.Paragraph({
+                text: section.title,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 200 }
+            })
+        );
+
+        // Section content
+        if (section.data && Array.isArray(section.data)) {
+            section.data.forEach(row => {
+                if (Array.isArray(row)) {
+                    // Handle table-like data
+                    if (row.length === 2 && row[0] && row[1]) {
+                        // Check if it's a header or separator
+                        if (row[0] === '' && row[1] === '') {
+                            // Spacing row
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: '',
+                                    spacing: { after: 200 }
+                                })
+                            );
+                        } else if (row[0].toUpperCase() === row[0] && row[1] === '') {
+                            // Section header
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: row[0],
+                                    heading: docx.HeadingLevel.HEADING_3,
+                                    spacing: { before: 200, after: 100 }
+                                })
+                            );
+                        } else if (row[0] === '•') {
+                            // Bullet point
+                            sections.push(
+                                new docx.Paragraph({
+                                    text: row[1],
+                                    bullet: {
+                                        level: 0
+                                    },
+                                    spacing: { after: 50 }
+                                })
+                            );
+                        } else {
+                            // Key-value pair
+                            sections.push(
+                                new docx.Paragraph({
+                                    children: [
+                                        new docx.TextRun({
+                                            text: `${row[0]}: `,
+                                            bold: true
+                                        }),
+                                        new docx.TextRun({
+                                            text: String(row[1])
+                                        })
+                                    ],
+                                    spacing: { after: 100 }
+                                })
+                            );
+                        }
+                    } else if (row.length > 2) {
+                        // Multi-column row (table headers or data)
+                        const isHeader = row.every(cell => 
+                            typeof cell === 'string' && 
+                            (cell.includes('Type') || cell.includes('Name') || cell.includes('Category'))
+                        );
+                        
+                        sections.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: row.join(' | '),
+                                        bold: isHeader
+                                    })
+                                ],
+                                spacing: { after: isHeader ? 150 : 100 }
+                            })
+                        );
+                    }
+                }
+            });
+        }
+
+        // Add extra spacing after section
+        sections.push(
+            new docx.Paragraph({
+                text: '',
+                spacing: { after: 300 }
+            })
+        );
+    });
+
+    return sections;
+}
+
+
+
+function generateRelatedCirculatorySystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Heart Structure Basics
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Heart Chamber Function',
+        problem: 'Describe the four chambers of the heart and explain the flow of blood through them',
+        parameters: {
+            specificItems: ['Heart', 'chambers'],
+            category: 'heart structure',
+            limit: 1
+        },
+        type: 'circulatory_system',
+        context: { difficulty: 'beginner', topic: 'Circulatory System', focus: 'heart chambers' },
+        subparts: [
+            'Four Chambers of the Heart:',
+            '',
+            'RIGHT SIDE (Deoxygenated Blood):',
+            '  1. Right Atrium:',
+            '     - Receives deoxygenated blood from body',
+            '     - Via superior and inferior vena cava',
+            '     - Contracts to push blood into right ventricle',
+            '',
+            '  2. Right Ventricle:',
+            '     - Receives blood from right atrium',
+            '     - Pumps blood to lungs via pulmonary artery',
+            '     - Thinner walls (less pressure needed)',
+            '',
+            'LEFT SIDE (Oxygenated Blood):',
+            '  3. Left Atrium:',
+            '     - Receives oxygenated blood from lungs',
+            '     - Via pulmonary veins',
+            '     - Contracts to push blood into left ventricle',
+            '',
+            '  4. Left Ventricle:',
+            '     - Receives blood from left atrium',
+            '     - Pumps blood to entire body via aorta',
+            '     - Thickest walls (needs most force)',
+            '',
+            'Blood Flow Path:',
+            '  Body → Vena Cava → Right Atrium → Right Ventricle',
+            '  → Pulmonary Artery → Lungs → Pulmonary Veins',
+            '  → Left Atrium → Left Ventricle → Aorta → Body',
+            '',
+            'Key Point: Blood never mixes between right and left sides'
+        ],
+        helper: 'Right side = to lungs (deoxygenated), Left side = to body (oxygenated)',
+        solution: 'Heart has 4 chambers: Right atrium/ventricle (pump to lungs), Left atrium/ventricle (pump to body)',
+        realWorldContext: 'Heart defects like holes between chambers cause mixing of oxygenated and deoxygenated blood'
+    });
+
+    // Problem 2: Blood Vessel Types
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Blood Vessel Comparison',
+        problem: 'Compare and contrast arteries, veins, and capillaries in structure and function',
+        parameters: {
+            specificItems: ['Arteries', 'Veins', 'Capillaries'],
+            category: 'blood vessels',
+            limit: 3
+        },
+        type: 'circulatory_system',
+        context: { difficulty: 'intermediate', topic: 'Circulatory System', focus: 'vessel types' },
+        subparts: [
+            'Three Types of Blood Vessels:',
+            '',
+            '1. ARTERIES:',
+            '   Structure:',
+            '   - Thick, muscular walls',
+            '   - Elastic tissue (stretches with each heartbeat)',
+            '   - Small internal space (lumen)',
+            '   - No valves (except at heart)',
+            '',
+            '   Function:',
+            '   - Carry blood AWAY from heart',
+            '   - Usually oxygenated (except pulmonary artery)',
+            '   - High pressure system',
+            '   - Pulse felt in arteries near skin',
+            '',
+            '2. VEINS:',
+            '   Structure:',
+            '   - Thinner walls than arteries',
+            '   - Less elastic tissue',
+            '   - Larger lumen',
+            '   - Valves present (prevent backflow)',
+            '',
+            '   Function:',
+            '   - Carry blood TOWARD heart',
+            '   - Usually deoxygenated (except pulmonary veins)',
+            '   - Low pressure system',
+            '   - Blood return aided by muscle contractions',
+            '',
+            '3. CAPILLARIES:',
+            '   Structure:',
+            '   - ONE cell thick walls',
+            '   - Smallest vessels (5-10 micrometers)',
+            '   - Form networks (capillary beds)',
+            '   - No muscle layer',
+            '',
+            '   Function:',
+            '   - Site of EXCHANGE between blood and tissues',
+            '   - O₂, CO₂, nutrients, wastes diffuse across walls',
+            '   - Connect arterioles to venules',
+            '   - Slow blood flow allows time for exchange',
+            '',
+            'Pathway: Artery → Arteriole → Capillary → Venule → Vein'
+        ],
+        helper: 'Arteries = Away from heart (thick), Veins = Toward heart (valves), Capillaries = Exchange (thin)',
+        solution: 'Arteries (thick, high pressure, away from heart), Veins (thin, valves, toward heart), Capillaries (1 cell thick, exchange)',
+        realWorldContext: 'Varicose veins occur when vein valves fail, allowing blood to pool'
+    });
+
+    // Problem 3: Blood Pressure Regulation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Blood Pressure Control',
+        problem: 'Explain how blood pressure is measured and regulated by the body',
+        parameters: {
+            specificItems: ['Blood Pressure'],
+            function: 'regulation',
+            limit: 1
+        },
+        type: 'circulatory_system',
+        context: { difficulty: 'intermediate', topic: 'Circulatory System', focus: 'blood pressure' },
+        subparts: [
+            'Blood Pressure Measurement:',
+            '',
+            'Definition: Force of blood against arterial walls',
+            '',
+            'Two Numbers:',
+            '  1. SYSTOLIC (top number):',
+            '     - Pressure during ventricular contraction',
+            '     - Higher number (e.g., 120 mmHg)',
+            '     - Maximum pressure in arteries',
+            '',
+            '  2. DIASTOLIC (bottom number):',
+            '     - Pressure during ventricular relaxation',
+            '     - Lower number (e.g., 80 mmHg)',
+            '     - Minimum pressure maintained',
+            '',
+            'Normal: 120/80 mmHg',
+            'High BP (Hypertension): ≥140/90 mmHg',
+            '',
+            'Blood Pressure Regulation:',
+            '',
+            '1. SHORT-TERM (Immediate):',
+            '   Baroreceptors:',
+            '   - Pressure sensors in arteries',
+            '   - Detect changes in blood pressure',
+            '   - Signal brain (medulla)',
+            '',
+            '   Response if BP too high:',
+            '   - Decrease heart rate',
+            '   - Vasodilation (widen vessels)',
+            '',
+            '   Response if BP too low:',
+            '   - Increase heart rate',
+            '   - Vasoconstriction (narrow vessels)',
+            '',
+            '2. LONG-TERM (Hours to days):',
+            '   Kidneys:',
+            '   - Regulate blood volume',
+            '   - More volume = Higher pressure',
+            '',
+            '   Hormones:',
+            '   - Renin-Angiotensin-Aldosterone System',
+            '   - ADH (retains water)',
+            '   - ANP (releases water)',
+            '',
+            'Factors Affecting BP:',
+            '  - Cardiac output (heart rate × stroke volume)',
+            '  - Blood volume',
+            '  - Vessel diameter',
+            '  - Blood viscosity'
+        ],
+        helper: 'BP = 120/80 mmHg; Baroreceptors control quickly, kidneys control long-term',
+        solution: 'Blood pressure measured as systolic/diastolic; regulated by baroreceptors (quick) and kidneys (long-term)',
+        realWorldContext: 'Hypertension is "silent killer" - damages organs without symptoms'
+    });
+
+    // Problem 4: Cardiac Cycle
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Heart Beating Cycle',
+        problem: 'Describe the events of the cardiac cycle, including systole and diastole',
+        parameters: {
+            specificItems: ['Cardiac Cycle'],
+            category: 'heart function',
+            limit: 1
+        },
+        type: 'circulatory_system',
+        context: { difficulty: 'intermediate', topic: 'Circulatory System', focus: 'cardiac cycle' },
+        subparts: [
+            'CARDIAC CYCLE = One complete heartbeat',
+            'Duration: ~0.8 seconds (at 75 bpm)',
+            '',
+            'Two Main Phases:',
+            '',
+            '1. SYSTOLE (Contraction):',
+            '   Duration: ~0.4 seconds',
+            '',
+            '   Atrial Systole:',
+            '   - Atria contract',
+            '   - Push remaining blood into ventricles',
+            '   - Ventricles ~70% full before this',
+            '   - AV valves (tricuspid, mitral) open',
+            '',
+            '   Ventricular Systole:',
+            '   - Ventricles contract',
+            '   - AV valves close (prevent backflow)',
+            '   - First heart sound "lub" (valve closure)',
+            '   - Pressure builds in ventricles',
+            '   - Semilunar valves (pulmonary, aortic) open',
+            '   - Blood ejected into arteries',
+            '   - Right ventricle → Pulmonary artery',
+            '   - Left ventricle → Aorta',
+            '',
+            '2. DIASTOLE (Relaxation):',
+            '   Duration: ~0.4 seconds',
+            '',
+            '   Complete Diastole:',
+            '   - All chambers relax',
+            '   - Semilunar valves close',
+            '   - Second heart sound "dub" (valve closure)',
+            '   - Ventricles fill passively',
+            '   - Blood flows from veins into atria',
+            '   - Then into ventricles (AV valves open)',
+            '   - Ventricles fill to ~70%',
+            '',
+            'Blood Pressure During Cycle:',
+            '  - Systolic pressure: Ventricular contraction (120 mmHg)',
+            '  - Diastolic pressure: Ventricular relaxation (80 mmHg)',
+            '',
+            'Heart Sounds:',
+            '  - "Lub" (S1): AV valves close (start of ventricular systole)',
+            '  - "Dub" (S2): Semilunar valves close (start of diastole)',
+            '',
+            'Sequence Summary:',
+            '  Atrial systole → Ventricular systole → Complete diastole'
+        ],
+        helper: 'Systole = contraction (lub), Diastole = relaxation (dub); cycle repeats ~75 times/min',
+        solution: 'Cardiac cycle: Atrial systole (fill ventricles) → Ventricular systole (pump blood) → Diastole (refill)',
+        realWorldContext: 'Heart murmurs are abnormal sounds from faulty valves'
+    });
+
+    // Problem 5: Blood Components
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Blood Composition and Function',
+        problem: 'Describe the components of blood and explain the function of each',
+        parameters: {
+            specificItems: ['Blood'],
+            category: 'blood composition',
+            limit: 1
+        },
+        type: 'circulatory_system',
+        context: { difficulty: 'intermediate', topic: 'Circulatory System', focus: 'blood components' },
+        subparts: [
+            'Blood Composition:',
+            'Volume: ~5 liters in average adult',
+            '',
+            'Two Main Parts:',
+            '',
+            '1. PLASMA (55% of volume):',
+            '   Description: Liquid portion of blood',
+            '   Color: Pale yellow',
+            '',
+            '   Composition:',
+            '   - Water: 90%',
+            '   - Proteins: 7-8%',
+            '     • Albumin (maintains osmotic pressure)',
+            '     • Globulins (antibodies, transport)',
+            '     • Fibrinogen (blood clotting)',
+            '   - Other solutes: 2-3%',
+            '     • Nutrients (glucose, amino acids, lipids)',
+            '     • Wastes (urea, CO₂)',
+            '     • Electrolytes (Na⁺, K⁺, Ca²⁺, Cl⁻)',
+            '     • Hormones',
+            '',
+            '2. FORMED ELEMENTS (45% of volume):',
+            '',
+            '   a) RED BLOOD CELLS (Erythrocytes):',
+            '      Count: ~5 million per microliter',
+            '      Structure:',
+            '      - Biconcave disc shape',
+            '      - No nucleus (more room for hemoglobin)',
+            '      - Flexible (squeeze through capillaries)',
+            '',
+            '      Function:',
+            '      - Transport O₂ (via hemoglobin)',
+            '      - Transport some CO₂',
+            '      - Each RBC has ~280 million hemoglobin molecules',
+            '',
+            '      Lifespan: ~120 days',
+            '      Production: Bone marrow (erythropoiesis)',
+            '      Destruction: Spleen and liver',
+            '',
+            '   b) WHITE BLOOD CELLS (Leukocytes):',
+            '      Count: ~7,000 per microliter',
+            '      Structure: Have nucleus',
+            '',
+            '      Function: Immune defense',
+            '      Types:',
+            '      - Neutrophils (60-70%): Phagocytosis',
+            '      - Lymphocytes (20-25%): Antibodies, T cells',
+            '      - Monocytes (3-8%): Become macrophages',
+            '      - Eosinophils (2-4%): Parasites, allergies',
+            '      - Basophils (<1%): Release histamine',
+            '',
+            '      Lifespan: Hours to years (varies by type)',
+            '',
+            '   c) PLATELETS (Thrombocytes):',
+            '      Count: ~250,000 per microliter',
+            '      Structure: Cell fragments, no nucleus',
+            '',
+            '      Function: Blood clotting',
+            '      Process:',
+            '      1. Vessel injury',
+            '      2. Platelets stick to site',
+            '      3. Release clotting factors',
+            '      4. Form platelet plug',
+            '      5. Activate fibrinogen → fibrin',
+            '      6. Fibrin forms mesh (clot)',
+            '',
+            '      Lifespan: ~10 days',
+            '',
+            'Blood Type:',
+            '  - Determined by antigens on RBC surface',
+            '  - ABO system: A, B, AB, O',
+            '  - Rh factor: + or -'
+        ],
+        helper: 'Blood = Plasma (liquid) + Cells (RBCs for O₂, WBCs for immunity, Platelets for clotting)',
+        solution: 'Blood has plasma (55%, liquid) and formed elements (45%): RBCs (O₂ transport), WBCs (immunity), Platelets (clotting)',
+        realWorldContext: 'Anemia (low RBCs), leukemia (cancer of WBCs), hemophilia (clotting disorder) are blood diseases'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - RESPIRATORY SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedRespiratorySystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Respiratory Pathway
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Air Pathway Through Respiratory System',
+        problem: 'Trace the path of air from the nose to the alveoli, identifying all structures',
+        parameters: {
+            specificItems: ['Respiratory Tract'],
+            category: 'respiratory anatomy',
+            limit: 1
+        },
+        type: 'respiratory_system',
+        context: { difficulty: 'beginner', topic: 'Respiratory System', focus: 'air pathway' },
+        subparts: [
+            'Air Pathway (Inhalation):',
+            '',
+            '1. NOSE/NASAL CAVITY:',
+            '   - Air enters through nostrils',
+            '   - Warmed, moistened, filtered',
+            '   - Mucus traps particles',
+            '   - Cilia sweep mucus to throat',
+            '',
+            '2. PHARYNX (Throat):',
+            '   - Shared passage for air and food',
+            '   - Three regions: nasopharynx, oropharynx, laryngopharynx',
+            '',
+            '3. LARYNX (Voice Box):',
+            '   - Contains vocal cords',
+            '   - Epiglottis covers during swallowing',
+            '   - Prevents food from entering airways',
+            '',
+            '4. TRACHEA (Windpipe):',
+            '   - ~12 cm long tube',
+            '   - C-shaped cartilage rings (keep open)',
+            '   - Lined with cilia and mucus',
+            '   - Divides into two bronchi',
+            '',
+            '5. BRONCHI (Singular: Bronchus):',
+            '   - Right and left primary bronchi',
+            '   - Enter lungs',
+            '   - Branch into secondary bronchi (lobar)',
+            '   - Then tertiary bronchi (segmental)',
+            '',
+            '6. BRONCHIOLES:',
+            '   - Smaller branches from bronchi',
+            '   - No cartilage (smooth muscle)',
+            '   - Diameter can change (bronchodilation/constriction)',
+            '   - Terminal bronchioles (smallest)',
+            '',
+            '7. ALVEOLI (Singular: Alveolus):',
+            '   - Tiny air sacs (~300 million per lung)',
+            '   - Site of GAS EXCHANGE',
+            '   - ONE cell thick',
+            '   - Surrounded by capillaries',
+            '   - Large surface area (~70 m²)',
+            '',
+            'Complete Path:',
+            '  Nose → Pharynx → Larynx → Trachea → Bronchi',
+            '  → Bronchioles → Alveoli',
+            '',
+            'Then exhaled air travels backward through same path'
+        ],
+        helper: 'Path: Nose → Pharynx → Larynx → Trachea → Bronchi → Bronchioles → Alveoli',
+        solution: 'Air travels: Nose → Pharynx → Larynx → Trachea → Bronchi → Bronchioles → Alveoli (gas exchange)',
+        realWorldContext: 'Choking occurs when epiglottis fails to cover larynx, food enters trachea'
+    });
+
+    // Problem 2: Mechanics of Breathing
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Inhalation and Exhalation Process',
+        problem: 'Explain the mechanics of breathing, including the role of the diaphragm and pressure changes',
+        parameters: {
+            specificItems: ['Breathing', 'Diaphragm'],
+            category: 'breathing mechanics',
+            limit: 2
+        },
+        type: 'respiratory_system',
+        context: { difficulty: 'intermediate', topic: 'Respiratory System', focus: 'breathing mechanics' },
+        subparts: [
+            'Mechanics of Breathing (Ventilation):',
+            '',
+            'Key Principle: Air flows from HIGH to LOW pressure',
+            '',
+            '1. INHALATION (Inspiration):',
+            '   Active process (requires energy)',
+            '',
+            '   Muscle Actions:',
+            '   - DIAPHRAGM contracts',
+            '     • Moves downward (flattens)',
+            '     • Increases vertical space in thorax',
+            '   - EXTERNAL INTERCOSTALS contract',
+            '     • Pull ribs up and out',
+            '     • Increases front-to-back and side-to-side space',
+            '',
+            '   Pressure Changes:',
+            '   - Thoracic cavity volume INCREASES',
+            '   - Lung volume INCREASES (lungs expand)',
+            '   - Pressure inside lungs DECREASES',
+            '   - Pressure drops below atmospheric (760 mmHg)',
+            '   - Air flows IN (high to low pressure)',
+            '',
+            '2. EXHALATION (Expiration):',
+            '   Passive process at rest (no energy)',
+            '',
+            '   Muscle Actions:',
+            '   - DIAPHRAGM relaxes',
+            '     • Returns to dome shape',
+            '     • Decreases vertical space',
+            '   - EXTERNAL INTERCOSTALS relax',
+            '     • Ribs move down and in',
+            '     • Elastic recoil of lungs',
+            '',
+            '   Pressure Changes:',
+            '   - Thoracic cavity volume DECREASES',
+            '   - Lung volume DECREASES',
+            '   - Pressure inside lungs INCREASES',
+            '   - Pressure rises above atmospheric',
+            '   - Air flows OUT (high to low pressure)',
+            '',
+            'FORCED EXHALATION (exercise, coughing):',
+            '   Active process',
+            '   - INTERNAL INTERCOSTALS contract',
+            '   - Abdominal muscles contract',
+            '   - Pushes air out forcefully',
+            '',
+            'Pleural Membranes:',
+            '   - Two layers surrounding lungs',
+            '   - Visceral pleura (on lung surface)',
+            '   - Parietal pleura (on chest wall)',
+            '   - Pleural fluid between layers',
+            '   - Creates surface tension',
+            '   - Lungs follow chest wall movement',
+            '',
+            'Normal Breathing Rate: 12-20 breaths/minute at rest'
+        ],
+        helper: 'Diaphragm down = chest expands = pressure drops = air in; Diaphragm up = chest shrinks = pressure rises = air out',
+        solution: 'Inhalation: Diaphragm contracts (down) → volume increases → pressure decreases → air in; Exhalation: reverse',
+        realWorldContext: 'Pneumothorax (collapsed lung) occurs when pleural space fills with air'
+    });
+
+    // Problem 3: Gas Exchange
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Alveolar Gas Exchange',
+        problem: 'Describe how oxygen and carbon dioxide are exchanged between alveoli and blood',
+        parameters: {
+            specificItems: ['Alveoli', 'Gas Exchange'],
+            function: 'gas exchange',
+            limit: 2
+        },
+        type: 'respiratory_system',
+        context: { difficulty: 'intermediate', topic: 'Respiratory System', focus: 'gas exchange' },
+        subparts: [
+            'Gas Exchange at Alveoli:',
+            '',
+            'Location: Alveolar-capillary interface',
+            'Mechanism: DIFFUSION (passive)',
+            'Driving force: Partial pressure gradients',
+            '',
+            'Respiratory Membrane (Very Thin):',
+            '  1. Alveolar epithelium (type I cells)',
+            '  2. Shared basement membrane',
+            '  3. Capillary endothelium',
+            '  Total thickness: ~0.5 micrometers',
+            '',
+            'OXYGEN (O₂) DIFFUSION:',
+            '',
+            '  Partial Pressures:',
+            '  - Alveolar air: PO₂ = 104 mmHg (HIGH)',
+            '  - Deoxygenated blood: PO₂ = 40 mmHg (LOW)',
+            '  - Gradient: 64 mmHg',
+            '',
+            '  Process:',
+            '  1. O₂ diffuses from alveoli into blood',
+            '  2. O₂ binds to hemoglobin in RBCs',
+            '  3. Forms oxyhemoglobin (HbO₂)',
+            '  4. Oxygenated blood leaves lungs',
+            '  5. Travels to tissues',
+            '',
+            'CARBON DIOXIDE (CO₂) DIFFUSION:',
+            '',
+            '  Partial Pressures:',
+            '  - Deoxygenated blood: PCO₂ = 45 mmHg (HIGH)',
+            '  - Alveolar air: PCO₂ = 40 mmHg (LOW)',
+            '  - Gradient: 5 mmHg',
+            '',
+            '  Process:',
+            '  1. CO₂ diffuses from blood into alveoli',
+            '  2. CO₂ exhaled from lungs',
+            '  3. Blood returns to tissues',
+            '',
+            'Gas Transport in Blood:',
+            '',
+            '  OXYGEN:',
+            '  - 98.5% bound to hemoglobin',
+            '  - 1.5% dissolved in plasma',
+            '  - Hemoglobin saturation ~98% in arteries',
+            '',
+            '  CARBON DIOXIDE:',
+            '  - 70% as bicarbonate (HCO₃⁻) in plasma',
+            '  - 23% bound to hemoglobin (carbaminohemoglobin)',
+            '  - 7% dissolved in plasma',
+            '',
+            'At Tissues (Internal Respiration):',
+            '  - O₂ diffuses from blood to cells (reverse process)',
+            '  - CO₂ diffuses from cells to blood',
+            '  - Same diffusion mechanism',
+            '',
+            'Factors Enhancing Exchange:',
+            '  - Large surface area (~70 m²)',
+            '  - Thin membrane (~0.5 μm)',
+            '  - Rich capillary network',
+            '  - Steep concentration gradients'
+        ],
+        helper: 'O₂ diffuses into blood (high to low), CO₂ diffuses out of blood (high to low)',
+        solution: 'Gas exchange by diffusion: O₂ from alveoli to blood (binds hemoglobin); CO₂ from blood to alveoli (exhaled)',
+        realWorldContext: 'Emphysema destroys alveoli, reducing surface area for gas exchange'
+    });
+
+    // Problem 4: Respiratory Control
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Breathing Regulation',
+        problem: 'Explain how breathing rate is controlled by the respiratory center and chemoreceptors',
+        parameters: {
+            specificItems: ['Respiratory Control'],
+            category: 'respiratory regulation',
+            limit: 1
+        },
+        type: 'respiratory_system',
+        context: { difficulty: 'intermediate', topic: 'Respiratory System', focus: 'breathing control' },
+        subparts: [
+            'Respiratory Control:',
+            '',
+            'Breathing is MOSTLY INVOLUNTARY',
+            '(Can be voluntarily controlled temporarily)',
+            '',
+            '1. RESPIRATORY CENTER (Brainstem):',
+            '',
+            '   Medulla Oblongata:',
+            '   - Dorsal Respiratory Group (DRG):',
+            '     • Controls INHALATION',
+            '     • Sets basic rhythm',
+            '     • Sends signals to diaphragm',
+            '',
+            '   - Ventral Respiratory Group (VRG):',
+            '     • Inactive during quiet breathing',
+            '     • Active during FORCED breathing',
+            '     • Controls both inhalation and exhalation muscles',
+            '',
+            '   Pons:',
+            '   - Pneumotaxic Center:',
+            '     • Inhibits inhalation',
+            '     • Controls breathing rate and depth',
+            '     • Prevents over-inflation',
+            '',
+            '   - Apneustic Center:',
+            '     • Stimulates inhalation',
+            '     • Prolongs inhalation',
+            '',
+            '2. CHEMORECEPTORS (Chemical Sensors):',
+            '',
+            '   Central Chemoreceptors (in medulla):',
+            '   - Detect CO₂ and H⁺ in CSF',
+            '   - Most important for breathing control',
+            '   - HIGH CO₂ → INCREASE breathing',
+            '   - Respond to pH changes',
+            '',
+            '   Peripheral Chemoreceptors:',
+            '   - Carotid bodies (neck)',
+            '   - Aortic bodies (aorta)',
+            '   - Detect O₂, CO₂, H⁺ in blood',
+            '   - Backup system',
+            '   - LOW O₂ → INCREASE breathing',
+            '',
+            '3. FACTORS AFFECTING BREATHING:',
+            '',
+            '   Primary Stimulus: CO₂ levels',
+            '   - Rising CO₂ is MAIN trigger',
+            '   - Sensed as decreased pH',
+            '   - Response: Breathe faster and deeper',
+            '',
+            '   Secondary Stimulus: O₂ levels',
+            '   - Only when severely low (<60 mmHg)',
+            '   - Not primary control',
+            '',
+            '   Other Factors:',
+            '   - Exercise: Anticipatory increase',
+            '   - Emotions: Fear, anxiety increase rate',
+            '   - Temperature: Fever increases rate',
+            '   - Pain: Sudden increase',
+            '   - Stretch receptors: Prevent over-inflation',
+            '',
+            '4. VOLUNTARY CONTROL:',
+            '   - Cerebral cortex can override',
+            '   - Hold breath temporarily',
+            '   - Control during speech, singing',
+            '   - Limited duration (CO₂ buildup overrides)',
+            '',
+            'Feedback Loop:',
+            '  High CO₂ → Chemoreceptors → Medulla → Increase breathing',
+            '  → More CO₂ exhaled → CO₂ drops → Breathing slows'
+        ],
+        helper: 'Medulla controls breathing automatically; High CO₂ (not low O₂) is main trigger to breathe',
+        solution: 'Medulla sets breathing rhythm; Central chemoreceptors detect CO₂ (main control); Peripheral detect O₂ (backup)',
+        realWorldContext: 'Sleep apnea: breathing stops during sleep, brain doesn\'t respond to CO₂ buildup'
+    });
+
+    // Problem 5: Lung Volumes
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Respiratory Volumes and Capacities',
+        problem: 'Define and explain the different lung volumes and capacities measured in spirometry',
+        parameters: {
+            specificItems: ['Lung Volumes'],
+            category: 'respiratory measurements',
+            limit: 1
+        },
+        type: 'respiratory_system',
+        context: { difficulty: 'intermediate', topic: 'Respiratory System', focus: 'lung volumes' },
+        subparts: [
+            'Lung Volumes and Capacities:',
+            '',
+            'Measured by SPIROMETRY',
+            'Values are for average adult male',
+            '',
+            'FOUR PRIMARY VOLUMES:',
+            '',
+            '1. TIDAL VOLUME (TV):',
+            '   - Air moved in/out during NORMAL breathing',
+            '   - Volume: ~500 mL',
+            '   - Most common volume',
+            '   - At rest, quiet breathing',
+            '',
+            '2. INSPIRATORY RESERVE VOLUME (IRV):',
+            '   - EXTRA air that can be inhaled',
+            '   - After normal inhalation',
+            '   - Volume: ~3,000 mL',
+            '   - Used during deep breathing/exercise',
+            '',
+            '3. EXPIRATORY RESERVE VOLUME (ERV):',
+            '   - EXTRA air that can be exhaled',
+            '   - After normal exhalation',
+            '   - Volume: ~1,200 mL',
+            '   - Forced exhalation',
+            '',
+            '4. RESIDUAL VOLUME (RV):',
+            '   - Air remaining in lungs',
+            '   - After MAXIMUM exhalation',
+            '   - Volume: ~1,200 mL',
+            '   - Cannot be measured by spirometry',
+            '   - Prevents lung collapse',
+            '   - Keeps alveoli partially inflated',
+            '',
+            'FOUR LUNG CAPACITIES (Combinations):',
+            '',
+            '1. INSPIRATORY CAPACITY (IC):',
+            '   - IC = TV + IRV',
+            '   - = 500 + 3,000 = 3,500 mL',
+            '   - Maximum inhalation from resting',
+            '',
+            '2. FUNCTIONAL RESIDUAL CAPACITY (FRC):',
+            '   - FRC = ERV + RV',
+            '   - = 1,200 + 1,200 = 2,400 mL',
+            '   - Air in lungs after normal exhalation',
+            '',
+            '3. VITAL CAPACITY (VC):',
+            '   - VC = TV + IRV + ERV',
+            '   - = 500 + 3,000 + 1,200 = 4,700 mL',
+            '   - Maximum air that can be moved',
+            '   - Most important clinical measurement',
+            '   - Decreases with age and disease',
+            '',
+            '4. TOTAL LUNG CAPACITY (TLC):',
+            '   - TLC = TV + IRV + ERV + RV',
+            '   - = VC + RV',
+            '   - = 4,700 + 1,200 = 5,900 mL',
+            '   - Total air lungs can hold',
+            '',
+            'OTHER IMPORTANT MEASUREMENTS:',
+            '',
+            'Minute Ventilation:',
+            '  - Total air moved per minute',
+            '  - = Tidal Volume × Breathing Rate',
+            '  - = 500 mL × 12 breaths/min = 6,000 mL/min',
+            '',
+            'Dead Space:',
+            '  - Air in airways that doesn\'t participate in gas exchange',
+            '  - Anatomical dead space: ~150 mL',
+            '  - Trachea, bronchi, bronchioles',
+            '  - Not in alveoli',
+            '',
+            'Alveolar Ventilation:',
+            '  - Air reaching alveoli per minute',
+            '  - = (TV - Dead Space) × Breathing Rate',
+            '  - = (500 - 150) × 12 = 4,200 mL/min',
+            '  - More important than minute ventilation',
+            '',
+            'Clinical Significance:',
+            '  - Restrictive diseases: Reduced lung volumes',
+            '  - Obstructive diseases: Normal volumes, impaired flow',
+            '  - Emphysema: Increased RV (air trapping)',
+            '  - Fibrosis: Decreased VC'
+        ],
+        helper: 'TV (normal breath), IRV (deep in), ERV (force out), RV (always remains); VC = TV + IRV + ERV',
+        solution: 'Four volumes: TV (500mL normal), IRV (3000mL deep in), ERV (1200mL force out), RV (1200mL remains); VC = 4700mL',
+        realWorldContext: 'Spirometry tests lung function; reduced vital capacity indicates lung disease'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - DIGESTIVE SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedDigestiveSystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Digestive Pathway
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Food Journey Through Digestive Tract',
+        problem: 'Trace the path of food through the entire digestive system from mouth to anus',
+        parameters: {
+            specificItems: ['Digestive Tract'],
+            category: 'digestive anatomy',
+            limit: 1
+        },
+        type: 'digestive_system',
+        context: { difficulty: 'beginner', topic: 'Digestive System', focus: 'digestive pathway' },
+        subparts: [
+            'Digestive Tract Pathway:',
+            'Also called: Alimentary Canal or GI Tract',
+            'Length: ~9 meters (30 feet)',
+            '',
+            '1. MOUTH (Oral Cavity):',
+            '   - Mechanical digestion: Teeth chew (mastication)',
+            '   - Chemical digestion: Salivary amylase on starch',
+            '   - Forms bolus (ball of food)',
+            '   - Duration: Seconds to minutes',
+            '',
+            '2. PHARYNX (Throat):',
+            '   - Shared by digestive and respiratory systems',
+            '   - Swallowing reflex initiated',
+            '   - Epiglottis covers trachea',
+            '   - Duration: ~1 second',
+            '',
+            '3. ESOPHAGUS:',
+            '   - ~25 cm muscular tube',
+            '   - Peristalsis moves food down',
+            '   - No digestion occurs here',
+            '   - Lower esophageal sphincter at end',
+            '   - Duration: 5-10 seconds',
+            '',
+            '4. STOMACH:',
+            '   - J-shaped muscular sac',
+            '   - Mechanical: Churning',
+            '   - Chemical: Pepsin digests proteins, HCl',
+            '   - Produces chyme (acidic mixture)',
+            '   - Duration: 2-6 hours',
+            '',
+            '5. SMALL INTESTINE:',
+            '   - ~6 meters long, 2.5 cm diameter',
+            '   - THREE sections:',
+            '     a) Duodenum (~25 cm): Most digestion',
+            '     b) Jejunum (~2.5 m): Absorption',
+            '     c) Ileum (~3.5 m): Absorption, B12',
+            '   - Receives bile (liver) and enzymes (pancreas)',
+            '   - Villi and microvilli increase surface area',
+            '   - MAIN site of digestion and absorption',
+            '   - Duration: 3-5 hours',
+            '',
+            '6. LARGE INTESTINE (Colon):',
+            '   - ~1.5 meters long, 6 cm diameter',
+            '   - Sections: Cecum → Ascending → Transverse',
+            '     → Descending → Sigmoid colon',
+            '   - Absorbs water and electrolytes',
+            '   - Bacteria produce vitamins (K, B)',
+            '   - Forms feces',
+            '   - Duration: 12-48 hours',
+            '',
+            '7. RECTUM:',
+            '   - Stores feces',
+            '   - Stretch triggers defecation reflex',
+            '',
+            '8. ANUS:',
+            '   - Opening for elimination',
+            '   - Internal sphincter (involuntary)',
+            '   - External sphincter (voluntary)',
+            '',
+            'Total Transit Time: 24-72 hours',
+            '',
+            'Accessory Organs (food doesn\'t enter):',
+            '  - Salivary glands',
+            '  - Liver (produces bile)',
+            '  - Gallbladder (stores bile)',
+            '  - Pancreas (produces enzymes)'
+        ],
+        helper: 'Path: Mouth → Pharynx → Esophagus → Stomach → Small Intestine → Large Intestine → Rectum → Anus',
+        solution: 'Food travels: Mouth (chew) → Esophagus (transport) → Stomach (churn) → Small intestine (digest/absorb) → Large intestine (water) → Rectum/Anus (eliminate)',
+        realWorldContext: 'Appendicitis occurs when appendix (off cecum) becomes inflamed and infected'
+    });
+
+    // Problem 2: Enzyme Digestion
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Chemical Digestion by Enzymes',
+        problem: 'Explain how different enzymes break down carbohydrates, proteins, and fats',
+        parameters: {
+            specificItems: ['Enzymes', 'Chemical Digestion'],
+            category: 'digestion',
+            limit: 2
+        },
+        type: 'digestive_system',
+        context: { difficulty: 'intermediate', topic: 'Digestive System', focus: 'enzyme action' },
+        subparts: [
+            'Chemical Digestion by Enzymes:',
+            '',
+            'Enzyme: Biological catalyst (speeds up reaction)',
+            'Naming: Usually end in "-ase"',
+            '',
+            '1. CARBOHYDRATE DIGESTION:',
+            '',
+            '   Mouth:',
+            '   - Enzyme: Salivary Amylase',
+            '   - Source: Salivary glands',
+            '   - Substrate: Starch (polysaccharide)',
+            '   - Products: Maltose (disaccharide)',
+            '   - pH: Neutral (~7)',
+            '',
+            '   Stomach:',
+            '   - NO carbohydrate digestion',
+            '   - Acid inactivates salivary amylase',
+            '',
+            '   Small Intestine:',
+            '   - Enzyme: Pancreatic Amylase',
+            '   - Source: Pancreas',
+            '   - Substrate: Starch',
+            '   - Products: Maltose',
+            '',
+            '   - Brush Border Enzymes:',
+            '     • Maltase: Maltose → Glucose + Glucose',
+            '     • Sucrase: Sucrose → Glucose + Fructose',
+            '     • Lactase: Lactose → Glucose + Galactose',
+            '',
+            '   Final Products: Monosaccharides',
+            '   - Glucose, Fructose, Galactose',
+            '   - Absorbed into blood',
+            '',
+            '2. PROTEIN DIGESTION:',
+            '',
+            '   Mouth:',
+            '   - NO protein digestion',
+            '',
+            '   Stomach:',
+            '   - Enzyme: Pepsin',
+            '   - Source: Chief cells (as pepsinogen)',
+            '   - Activated by: HCl',
+            '   - Substrate: Proteins',
+            '   - Products: Polypeptides (shorter chains)',
+            '   - pH: Acidic (1.5-3.5)',
+            '',
+            '   Small Intestine:',
+            '   - Pancreatic Enzymes:',
+            '     • Trypsin: Polypeptides → Smaller peptides',
+            '     • Chymotrypsin: Polypeptides → Smaller peptides',
+            '     • Carboxypeptidase: Peptides → Amino acids',
+            '',
+            '   - Brush Border Enzymes:',
+            '     • Aminopeptidase: Peptides → Amino acids',
+            '     • Dipeptidase: Dipeptides → Amino acids',
+            '',
+            '   Final Products: Amino acids',
+            '   - Absorbed into blood',
+            '',
+            '3. FAT (LIPID) DIGESTION:',
+            '',
+            '   Mouth:',
+            '   - Enzyme: Lingual Lipase (minimal)',
+            '   - Limited fat digestion',
+            '',
+            '   Stomach:',
+            '   - Enzyme: Gastric Lipase',
+            '   - Limited fat digestion (~10-30%)',
+            '',
+            '   Small Intestine:',
+            '   - Bile (from liver/gallbladder):',
+            '     • NOT an enzyme',
+            '     • Emulsifies fats (breaks into droplets)',
+            '     • Increases surface area',
+            '',
+            '   - Enzyme: Pancreatic Lipase',
+            '   - Source: Pancreas',
+            '   - Substrate: Triglycerides (emulsified)',
+            '   - Products: Fatty acids + Monoglycerides',
+            '',
+            '   Final Products:',
+            '   - Fatty acids and monoglycerides',
+            '   - Absorbed into lacteals (lymph vessels)',
+            '   - Later enter bloodstream',
+            '',
+            'NUCLEIC ACID DIGESTION:',
+            '   - Nucleases (from pancreas)',
+            '   - DNA/RNA → Nucleotides',
+            '   - Absorbed in small intestine',
+            '',
+            'Summary:',
+            '  - Carbs → Monosaccharides',
+            '  - Proteins → Amino acids',
+            '  - Fats → Fatty acids + Glycerol',
+            '  - All absorbed in small intestine'
+        ],
+        helper: 'Amylase (starch→sugars), Pepsin/Trypsin (proteins→amino acids), Lipase (fats→fatty acids)',
+        solution: 'Carbs: amylase→monosaccharides; Proteins: pepsin/trypsin→amino acids; Fats: bile emulsifies, lipase→fatty acids',
+        realWorldContext: 'Lactose intolerance: lack lactase enzyme, can\'t digest milk sugar'
+    });
+
+    // Problem 3: Nutrient Absorption
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Small Intestine Absorption',
+        problem: 'Describe how the small intestine is specialized for nutrient absorption',
+        parameters: {
+            specificItems: ['Small Intestine', 'Villi'],
+            function: 'absorption',
+            limit: 2
+        },
+        type: 'digestive_system',
+        context: { difficulty: 'intermediate', topic: 'Digestive System', focus: 'absorption' },
+        subparts: [
+            'Small Intestine: Absorption Specialist',
+            '',
+            'PRIMARY SITE of nutrient absorption',
+            'Length: ~6 meters',
+            'Surface area: ~250 m² (size of tennis court!)',
+            '',
+            'THREE ADAPTATIONS for Maximum Absorption:',
+            '',
+            '1. CIRCULAR FOLDS (Plicae Circulares):',
+            '   - Large folds of mucosa and submucosa',
+            '   - Visible to naked eye',
+            '   - Increase surface area 3×',
+            '   - Slow movement of chyme',
+            '   - Allow more contact time',
+            '',
+            '2. VILLI (Singular: Villus):',
+            '   - Finger-like projections (~1 mm tall)',
+            '   - Cover entire inner surface',
+            '   - Millions of villi',
+            '   - Increase surface area 10×',
+            '',
+            '   Structure of Each Villus:',
+            '   - Epithelial cells on surface',
+            '   - Core contains:',
+            '     • Capillary network (blood)',
+            '     • Lacteal (lymph vessel for fats)',
+            '     • Nerve fibers',
+            '',
+            '3. MICROVILLI (Brush Border):',
+            '   - Microscopic projections on epithelial cells',
+            '   - ~1,000 per cell',
+            '   - Look like "brush" under microscope',
+            '   - Increase surface area 20×',
+            '   - Contain brush border enzymes',
+            '',
+            'TOTAL INCREASE: 3 × 10 × 20 = 600× surface area!',
+            '',
+            'ABSORPTION MECHANISMS:',
+            '',
+            '1. Simple Diffusion:',
+            '   - Small, lipid-soluble molecules',
+            '   - Example: Fatty acids, vitamins A, D, E, K',
+            '',
+            '2. Facilitated Diffusion:',
+            '   - Carrier proteins',
+            '   - Example: Fructose',
+            '',
+            '3. Active Transport:',
+            '   - Requires energy (ATP)',
+            '   - Against concentration gradient',
+            '   - Example: Glucose, amino acids, Na⁺',
+            '',
+            '4. Endocytosis:',
+            '   - For large molecules',
+            '   - Example: Antibodies in breast milk (infants)',
+            '',
+            'WHAT GETS ABSORBED WHERE:',
+            '',
+            'Into Blood Capillaries:',
+            '  - Monosaccharides (glucose, fructose, galactose)',
+            '  - Amino acids',
+            '  - Water-soluble vitamins (B, C)',
+            '  - Minerals (Na⁺, K⁺, Ca²⁺, Fe²⁺)',
+            '  - Water',
+            '  → Portal vein → Liver',
+            '',
+            'Into Lacteals (Lymph):',
+            '  - Fatty acids and monoglycerides',
+            '  - Fat-soluble vitamins (A, D, E, K)',
+            '  - Packaged as chylomicrons',
+            '  → Lymphatic system → Bloodstream',
+            '',
+            'Absorption by Region:',
+            '  - Duodenum: Iron, Ca²⁺, most nutrients',
+            '  - Jejunum: Most nutrients (main site)',
+            '  - Ileum: Vitamin B12, bile salts',
+            '',
+            'Efficiency: ~90% of nutrients absorbed'
+        ],
+        helper: 'Villi (finger-like) and microvilli (tiny brushes) massively increase surface area for absorption',
+        solution: 'Small intestine has circular folds, villi, and microvilli (600× surface area); absorbs nutrients via diffusion and active transport',
+        realWorldContext: 'Celiac disease damages villi, causing malabsorption and nutrient deficiencies'
+    });
+
+    // Problem 4: Accessory Organs
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Liver, Pancreas, and Gallbladder Functions',
+        problem: 'Explain the digestive roles of the liver, pancreas, and gallbladder',
+        parameters: {
+            specificItems: ['Liver', 'Pancreas', 'Gallbladder'],
+            category: 'accessory organs',
+            limit: 3
+        },
+        type: 'digestive_system',
+        context: { difficulty: 'intermediate', topic: 'Digestive System', focus: 'accessory organs' },
+        subparts: [
+            'Accessory Digestive Organs:',
+            '(Food doesn\'t pass through them)',
+            '',
+            '1. LIVER:',
+            '   Location: Right upper abdomen, below diaphragm',
+            '   Size: Largest internal organ (~1.5 kg)',
+            '',
+            '   Digestive Function:',
+            '   - Produces BILE',
+            '     • 500-1,000 mL per day',
+            '     • Composition: Water, bile salts, cholesterol, bilirubin',
+            '     • Function: EMULSIFIES fats',
+            '     • Breaks large fat droplets into smaller ones',
+            '     • Increases surface area for lipase',
+            '     • NOT an enzyme (physical, not chemical)',
+            '',
+            '   - Bile travels:',
+            '     Liver → Hepatic ducts → Common bile duct',
+            '     → Duodenum OR Gallbladder (for storage)',
+            '',
+            '   Other Important Functions:',
+            '   - Processes nutrients from intestine',
+            '   - Stores glycogen, vitamins, iron',
+            '   - Detoxifies drugs and alcohol',
+            '   - Produces blood proteins (albumin, clotting factors)',
+            '   - Breaks down old red blood cells',
+            '   - Regulates blood glucose',
+            '',
+            '2. GALLBLADDER:',
+            '   Location: Attached to underside of liver',
+            '   Size: Small pear-shaped sac (~50 mL)',
+            '',
+            '   Function:',
+            '   - STORES bile between meals',
+            '   - CONCENTRATES bile (removes water)',
+            '   - RELEASES bile when needed',
+            '',
+            '   Process:',
+            '   1. Bile continuously produced by liver',
+            '   2. Stored in gallbladder when not eating',
+            '   3. Fat enters duodenum',
+            '   4. CCK hormone released',
+            '   5. Gallbladder contracts',
+            '   6. Bile released into duodenum',
+            '',
+            '   Clinical Note:',
+            '   - Not essential (can live without it)',
+            '   - Gallstones can block bile duct',
+            '   - Removal = cholecystectomy',
+            '',
+            '3. PANCREAS:',
+            '   Location: Behind stomach',
+            '   Length: ~15 cm',
+            '',
+            '   TWO FUNCTIONS (Dual organ):',
+            '',
+            '   A) EXOCRINE Function (99% of tissue):',
+            '      Produces Pancreatic Juice:',
+            '      - Volume: 1-1.5 liters per day',
+            '      - Secreted into duodenum',
+            '',
+            '      Components:',
+            '      1. BICARBONATE (HCO₃⁻):',
+            '         - Neutralizes stomach acid',
+            '         - Raises pH from 2 to 8',
+            '         - Creates optimal pH for enzymes',
+            '',
+            '      2. DIGESTIVE ENZYMES:',
+            '         - Pancreatic Amylase: Starch → Maltose',
+            '         - Pancreatic Lipase: Fats → Fatty acids',
+            '         - Trypsin: Proteins → Polypeptides',
+            '         - Chymotrypsin: Proteins → Polypeptides',
+            '         - Nucleases: DNA/RNA → Nucleotides',
+            '',
+            '      Regulation:',
+            '      - Secretin hormone → Bicarbonate release',
+            '      - CCK hormone → Enzyme release',
+            '',
+            '   B) ENDOCRINE Function (1% of tissue):',
+            '      Islets of Langerhans:',
+            '      - Insulin: Lowers blood glucose',
+            '      - Glucagon: Raises blood glucose',
+            '      - Not directly related to digestion',
+            '',
+            'COORDINATION:',
+            '  Fat enters duodenum',
+            '  → CCK released',
+            '  → Gallbladder contracts (bile)',
+            '  → Pancreas secretes enzymes',
+            '  → Fat digestion proceeds',
+            '',
+            'Without These Organs:',
+            '  - Liver failure: Fatal (can\'t detoxify)',
+            '  - No gallbladder: Can manage (continuous bile drip)',
+            '  - Pancreas failure: Need enzyme supplements, insulin'
+        ],
+        helper: 'Liver makes bile (emulsifies fat), Gallbladder stores bile, Pancreas makes enzymes and neutralizes acid',
+        solution: 'Liver produces bile (fat emulsification), Gallbladder stores/releases bile, Pancreas secretes enzymes and bicarbonate',
+        realWorldContext: 'Pancreatitis (inflamed pancreas) causes severe pain and impaired digestion'
+    });
+
+    // Problem 5: Large Intestine Function
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Colon Function and Gut Bacteria',
+        problem: 'Describe the functions of the large intestine including the role of gut bacteria',
+        parameters: {
+            specificItems: ['Large Intestine', 'Bacteria'],
+            category: 'large intestine',
+            limit: 2
+        },
+        type: 'digestive_system',
+        context: { difficulty: 'intermediate', topic: 'Digestive System', focus: 'large intestine' },
+        subparts: [
+            'Large Intestine (Colon):',
+            '',
+            'Size: ~1.5 meters long, 6 cm diameter',
+            '(Shorter but wider than small intestine)',
+            '',
+            'Structure:',
+            '  1. Cecum: Pouch receiving material from ileum',
+            '  2. Appendix: Small projection (lymphoid tissue)',
+            '  3. Ascending Colon: Up right side',
+            '  4. Transverse Colon: Across abdomen',
+            '  5. Descending Colon: Down left side',
+            '  6. Sigmoid Colon: S-shaped curve',
+            '  7. Rectum: Storage before elimination',
+            '  8. Anus: Exit opening',
+            '',
+            'MAIN FUNCTIONS:',
+            '',
+            '1. WATER ABSORPTION:',
+            '   - Receives ~1-2 liters liquid daily',
+            '   - Absorbs ~90% of water',
+            '   - Leaves ~100-200 mL in feces',
+            '   - Also absorbs electrolytes (Na⁺, Cl⁻)',
+            '   - Prevents dehydration',
+            '',
+            '2. VITAMIN PRODUCTION:',
+            '   - Intestinal bacteria synthesize:',
+            '     • Vitamin K (blood clotting)',
+            '     • Vitamin B12 (red blood cells)',
+            '     • Biotin',
+            '     • Folic acid',
+            '   - Absorbed in colon',
+            '',
+            '3. FECES FORMATION:',
+            '   - Compacts waste into solid form',
+            '   - Stores until elimination',
+            '   - Mucus lubricates passage',
+            '',
+            '4. WASTE ELIMINATION:',
+            '   - Defecation reflex',
+            '   - 1-3 times per day normal',
+            '',
+            'GUT MICROBIOME (Intestinal Flora):',
+            '',
+            'Numbers: TRILLIONS of bacteria',
+            'Species: 500-1,000 different types',
+            'Weight: ~1-2 kg of bacteria!',
+            '',
+            'Beneficial Functions:',
+            '  1. Compete with harmful bacteria',
+            '  2. Synthesize vitamins (K, B)',
+            '  3. Break down indigestible carbs',
+            '  4. Ferment fiber → short-chain fatty acids',
+            '  5. Train immune system',
+            '  6. Produce gases (H₂, CO₂, CH₄)',
+            '  7. Maintain intestinal pH',
+            '',
+            'Common Beneficial Bacteria:',
+            '  - Bacteroides',
+            '  - Lactobacillus',
+            '  - Bifidobacterium',
+            '  - E. coli (most strains harmless)',
+            '',
+            'Harmful Effects if Disrupted:',
+            '  - Antibiotics kill good bacteria',
+            '  - Allows harmful bacteria to overgrow',
+            '  - C. difficile infection (severe diarrhea)',
+            '  - Reduced vitamin production',
+            '',
+            'FECES COMPOSITION:',
+            '  - Water: 75%',
+            '  - Bacteria (dead): 30% of solid',
+            '  - Undigested fiber: 30% of solid',
+            '  - Dead cells: 15% of solid',
+            '  - Fats: 5%',
+            '  - Inorganic salts: 5%',
+            '  - Bile pigments (brown color)',
+            '',
+            'TRANSIT TIME:',
+            '  - Material stays 12-48 hours',
+            '  - Slow peristalsis (mass movements)',
+            '  - 3-4 times per day',
+            '',
+            'Common Disorders:',
+            '  - Constipation: Too much water absorbed',
+            '  - Diarrhea: Too little water absorbed',
+            '  - IBS: Functional disorder (no structural damage)',
+            '  - IBD: Crohn\'s/Ulcerative colitis (inflammation)',
+            '  - Appendicitis: Inflamed appendix',
+            '  - Colorectal cancer: Tumor in colon/rectum'
+        ],
+        helper: 'Large intestine absorbs water, bacteria make vitamins, forms/stores feces',
+        solution: 'Large intestine: absorbs water (90%), gut bacteria produce vitamins, compacts waste into feces, eliminates',
+        realWorldContext: 'Probiotics (yogurt, supplements) restore gut bacteria after antibiotic treatment'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - NERVOUS SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedNervousSystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Neuron Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Neuron Anatomy and Function',
+        problem: 'Describe the structure of a neuron and explain the function of each part',
+        parameters: {
+            specificItems: ['Neuron'],
+            category: 'nerve cells',
+            limit: 1
+        },
+        type: 'nervous_system',
+        context: { difficulty: 'beginner', topic: 'Nervous System', focus: 'neuron structure' },
+        subparts: [
+            'Neuron (Nerve Cell):',
+            'Function: Transmit electrical signals (nerve impulses)',
+            '',
+            'MAIN PARTS:',
+            '',
+            '1. CELL BODY (Soma):',
+            '   - Contains nucleus and organelles',
+            '   - Metabolic center of neuron',
+            '   - Produces proteins and neurotransmitters',
+            '   - Integrates incoming signals',
+            '',
+            '2. DENDRITES:',
+            '   - Short, branched extensions',
+            '   - RECEIVE signals from other neurons',
+            '   - Increase surface area for connections',
+            '   - Contain receptors for neurotransmitters',
+            '   - Multiple dendrites per neuron',
+            '   - Input zone',
+            '',
+            '3. AXON:',
+            '   - Long, single extension',
+            '   - TRANSMITS signals away from cell body',
+            '   - Can be very long (up to 1 meter!)',
+            '   - Conducts action potentials',
+            '   - One axon per neuron',
+            '   - Output zone',
+            '',
+            '   Axon Features:',
+            '   - Axon Hillock: Where axon joins cell body',
+            '     • Action potential initiated here',
+            '   - Axon Terminal (Synaptic Bouton):',
+            '     • End of axon',
+            '     • Contains synaptic vesicles',
+            '     • Releases neurotransmitters',
+            '',
+            '4. MYELIN SHEATH (some neurons):',
+            '   - Fatty insulation around axon',
+            '   - Produced by:',
+            '     • Schwann cells (PNS)',
+            '     • Oligodendrocytes (CNS)',
+            '   - Speeds up signal transmission',
+            '   - White appearance ("white matter")',
+            '',
+            '   Nodes of Ranvier:',
+            '   - Gaps between myelin segments',
+            '   - Action potential "jumps" between nodes',
+            '   - Saltatory conduction (very fast)',
+            '',
+            'TYPES OF NEURONS:',
+            '',
+            '1. Sensory (Afferent) Neurons:',
+            '   - Carry signals TO CNS',
+            '   - From receptors (eyes, ears, skin)',
+            '   - Cell body in ganglia outside CNS',
+            '   - Example: Touch, pain, temperature',
+            '',
+            '2. Motor (Efferent) Neurons:',
+            '   - Carry signals FROM CNS',
+            '   - To effectors (muscles, glands)',
+            '   - Cell body in CNS',
+            '   - Example: Muscle contraction commands',
+            '',
+            '3. Interneurons (Association):',
+            '   - Connect neurons to each other',
+            '   - 99% of all neurons!',
+            '   - Entirely within CNS',
+            '   - Process and integrate information',
+            '   - Example: Spinal cord reflex circuits',
+            '',
+            'SIGNAL DIRECTION:',
+            '  Dendrites → Cell Body → Axon Hillock',
+            '  → Axon → Axon Terminals',
+            '',
+            'NEURON PROPERTIES:',
+            '  - Excitability: Respond to stimuli',
+            '  - Conductivity: Transmit signals',
+            '  - Amitotic: Cannot divide (mostly)',
+            '  - High metabolic rate: Need lots of O₂ and glucose',
+            '  - Longevity: Can live entire human lifespan'
+        ],
+        helper: 'Dendrites RECEIVE, Cell body INTEGRATES, Axon TRANSMITS signals',
+        solution: 'Neuron parts: Dendrites (receive), Cell body (process), Axon (transmit), Myelin (insulate/speed up)',
+        realWorldContext: 'Multiple sclerosis: immune system attacks myelin, slowing nerve signals'
+    });
+
+    // Problem 2: Action Potential
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Nerve Signal Transmission',
+        problem: 'Explain how an action potential is generated and propagated along an axon',
+        parameters: {
+            specificItems: ['Action Potential'],
+            category: 'nerve signals',
+            limit: 1
+        },
+        type: 'nervous_system',
+        context: { difficulty: 'intermediate', topic: 'Nervous System', focus: 'action potential' },
+        subparts: [
+            'Action Potential = Nerve Impulse',
+            '',
+            'Definition: Rapid change in membrane voltage',
+            'All-or-None: Either happens fully or not at all',
+            '',
+            'RESTING POTENTIAL:',
+            '  - Voltage: -70 mV (inside negative)',
+            '  - Maintained by:',
+            '    • Na⁺/K⁺ pump (3 Na⁺ out, 2 K⁺ in)',
+            '    • Leak channels (more K⁺ leaks out)',
+            '  - Ready to fire',
+            '',
+            'ACTION POTENTIAL PHASES:',
+            '',
+            '1. DEPOLARIZATION (Rising Phase):',
+            '   - Stimulus reaches threshold (-55 mV)',
+            '   - Voltage-gated Na⁺ channels OPEN',
+            '   - Na⁺ rushes INTO cell (down gradient)',
+            '   - Inside becomes POSITIVE',
+            '   - Voltage rises to +30 mV',
+            '   - Duration: ~1 millisecond',
+            '',
+            '2. REPOLARIZATION (Falling Phase):',
+            '   - Na⁺ channels CLOSE (inactivate)',
+            '   - Voltage-gated K⁺ channels OPEN',
+            '   - K⁺ rushes OUT of cell',
+            '   - Inside becomes NEGATIVE again',
+            '   - Returns toward -70 mV',
+            '   - Duration: ~1-2 milliseconds',
+            '',
+            '3. HYPERPOLARIZATION (Undershoot):',
+            '   - K⁺ channels slow to close',
+            '   - Too much K⁺ leaves',
+            '   - Voltage drops below -70 mV (to -90 mV)',
+            '   - Briefly more negative than resting',
+            '',
+            '4. RETURN TO RESTING:',
+            '   - K⁺ channels close',
+            '   - Na⁺/K⁺ pump restores ion balance',
+            '   - Returns to -70 mV',
+            '   - Ready for next action potential',
+            '',
+            'REFRACTORY PERIODS:',
+            '',
+            'Absolute Refractory Period:',
+            '  - During depolarization/early repolarization',
+            '  - CANNOT fire another action potential',
+            '  - Na⁺ channels inactivated',
+            '  - Duration: ~1 millisecond',
+            '  - Ensures one-way signal propagation',
+            '',
+            'Relative Refractory Period:',
+            '  - During hyperpolarization',
+            '  - CAN fire but needs stronger stimulus',
+            '  - Some Na⁺ channels recovered',
+            '  - Limits firing frequency',
+            '',
+            'PROPAGATION (How signal travels):',
+            '',
+            'Continuous Conduction (Unmyelinated):',
+            '  - Action potential at one point',
+            '  - Triggers adjacent segment',
+            '  - Like dominos falling',
+            '  - Speed: 0.5-2 m/s (slow)',
+            '',
+            'Saltatory Conduction (Myelinated):',
+            '  - Action potential at Node of Ranvier',
+            '  - "Jumps" to next node',
+            '  - Myelin insulates between nodes',
+            '  - Speed: Up to 120 m/s (fast!)',
+            '  - 50× faster than unmyelinated',
+            '',
+            'FACTORS AFFECTING SPEED:',
+            '  1. Myelination: Faster if myelinated',
+            '  2. Axon Diameter: Larger = Faster',
+            '  3. Temperature: Warmer = Faster',
+            '',
+            'THRESHOLD CONCEPT:',
+            '  - Subthreshold: No action potential',
+            '  - Threshold (-55 mV): Action potential fires',
+            '  - Suprathreshold: Same size action potential',
+            '  - All-or-None Law: Size doesn\'t vary',
+            '',
+            'FREQUENCY CODING:',
+            '  - Stronger stimulus = MORE action potentials',
+            '  - Not LARGER action potentials',
+            '  - Frequency encodes intensity'
+        ],
+        helper: 'Threshold → Na⁺ in (depolarize +30mV) → K⁺ out (repolarize -70mV) → signal moves',
+        solution: 'Action potential: Depolarization (Na⁺ in, +30mV) → Repolarization (K⁺ out, -70mV) → propagates along axon',
+        realWorldContext: 'Local anesthetics block Na⁺ channels, preventing action potentials (no pain signals)'
+    });
+
+    // Problem 3: Synapse and Neurotransmission
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Synaptic Transmission',
+        problem: 'Describe how signals are transmitted across a synapse between neurons',
+        parameters: {
+            specificItems: ['Synapse', 'Neurotransmitters'],
+            category: 'synaptic transmission',
+            limit: 2
+        },
+        type: 'nervous_system',
+        context: { difficulty: 'intermediate', topic: 'Nervous System', focus: 'synapse' },
+        subparts: [
+            'Synapse: Junction between neurons',
+            '',
+            'Types:',
+            '  - Electrical: Direct connection (rare)',
+            '  - Chemical: Via neurotransmitters (common)',
+            '',
+            'CHEMICAL SYNAPSE STRUCTURE:',
+            '',
+            '1. Presynaptic Neuron (Sending):',
+            '   - Axon terminal',
+            '   - Contains synaptic vesicles',
+            '   - Filled with neurotransmitters',
+            '   - Voltage-gated Ca²⁺ channels',
+            '',
+            '2. Synaptic Cleft:',
+            '   - Gap between neurons',
+            '   - Width: ~20-40 nanometers',
+            '   - Contains enzymes',
+            '',
+            '3. Postsynaptic Neuron (Receiving):',
+            '   - Dendrite or cell body',
+            '   - Contains receptors',
+            '   - Ligand-gated ion channels',
+            '',
+            'SYNAPTIC TRANSMISSION PROCESS:',
+            '',
+            'Step 1: ACTION POTENTIAL ARRIVES',
+            '  - Reaches axon terminal',
+            '  - Depolarizes presynaptic membrane',
+            '',
+            'Step 2: Ca²⁺ CHANNELS OPEN',
+            '  - Voltage-gated Ca²⁺ channels',
+            '  - Ca²⁺ rushes INTO terminal',
+            '  - Triggers vesicle fusion',
+            '',
+            'Step 3: VESICLE FUSION',
+            '  - Synaptic vesicles move to membrane',
+            '  - Fuse with presynaptic membrane',
+            '  - Exocytosis',
+            '',
+            'Step 4: NEUROTRANSMITTER RELEASE',
+            '  - Released into synaptic cleft',
+            '  - Diffuses across gap',
+            '  - Takes ~0.5 milliseconds',
+            '',
+            'Step 5: BINDING TO RECEPTORS',
+            '  - Neurotransmitter binds receptors',
+            '  - On postsynaptic membrane',
+            '  - Lock-and-key mechanism',
+            '  - Specific binding',
+            '',
+            'Step 6: POSTSYNAPTIC RESPONSE',
+            '',
+            '  Excitatory Response:',
+            '  - Opens Na⁺ channels',
+            '  - Na⁺ enters',
+            '  - EPSP (Excitatory Postsynaptic Potential)',
+            '  - Depolarizes (toward threshold)',
+            '  - Makes action potential MORE likely',
+            '',
+            '  Inhibitory Response:',
+            '  - Opens K⁺ or Cl⁻ channels',
+            '  - K⁺ leaves or Cl⁻ enters',
+            '  - IPSP (Inhibitory Postsynaptic Potential)',
+            '  - Hyperpolarizes (away from threshold)',
+            '  - Makes action potential LESS likely',
+            '',
+            'Step 7: SIGNAL TERMINATION',
+            '',
+            'Three Methods:',
+            '  1. Reuptake:',
+            '     - Transporter proteins',
+            '     - Pump neurotransmitter back into presynaptic neuron',
+            '     - Most common',
+            '',
+            '  2. Enzymatic Degradation:',
+            '     - Enzymes in cleft break down neurotransmitter',
+            '     - Example: Acetylcholinesterase breaks down ACh',
+            '',
+            '  3. Diffusion:',
+            '     - Neurotransmitter drifts away',
+            '     - Less common',
+            '',
+            'INTEGRATION (Summation):',
+            '',
+            'Temporal Summation:',
+            '  - Multiple signals from SAME synapse',
+            '  - Rapid succession',
+            '  - Add together',
+            '',
+            'Spatial Summation:',
+            '  - Signals from DIFFERENT synapses',
+            '  - At same time',
+            '  - Add together',
+            '',
+            'Result:',
+            '  - If total > threshold → Action potential',
+            '  - Excitatory and inhibitory cancel out',
+            '  - Integration at axon hillock',
+            '',
+            'COMMON NEUROTRANSMITTERS:',
+            '',
+            'Acetylcholine (ACh):',
+            '  - Excitatory at neuromuscular junction',
+            '  - Memory, attention',
+            '',
+            'Glutamate:',
+            '  - Main excitatory in CNS',
+            '  - Learning, memory',
+            '',
+            'GABA:',
+            '  - Main inhibitory in CNS',
+            '  - Calming effect',
+            '',
+            'Dopamine:',
+            '  - Reward, movement',
+            '  - Low in Parkinson\'s',
+            '',
+            'Serotonin:',
+            '  - Mood, sleep',
+            '  - Low in depression',
+            '',
+            'Norepinephrine:',
+            '  - Alertness, arousal',
+            '  - Fight-or-flight',
+            '',
+            'Endorphins:',
+            '  - Natural painkillers',
+            '  - "Runner\'s high"'
+        ],
+        helper: 'Action potential → Ca²⁺ in → Vesicle release → Neurotransmitter crosses gap → Binds receptor → Response',
+        solution: 'Synapse: Action potential → Ca²⁺ triggers neurotransmitter release → binds receptors → EPSP (excite) or IPSP (inhibit)',
+        realWorldContext: 'Antidepressants block serotonin reuptake, increasing serotonin in synapses'
+    });
+
+    // Problem 4: Central Nervous System
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Brain and Spinal Cord Structure',
+        problem: 'Describe the major regions of the brain and explain their primary functions',
+        parameters: {
+            specificItems: ['Brain', 'Spinal Cord'],
+            category: 'CNS',
+            limit: 2
+        },
+        type: 'nervous_system',
+        context: { difficulty: 'intermediate', topic: 'Nervous System', focus: 'CNS structure' },
+        subparts: [
+            'Central Nervous System (CNS):',
+            'Brain + Spinal Cord',
+            '',
+            'BRAIN STRUCTURE:',
+            '',
+            '1. CEREBRUM (Largest Part):',
+            '   - 85% of brain mass',
+            '   - Two hemispheres (left and right)',
+            '   - Connected by corpus callosum',
+            '',
+            '   Cerebral Cortex (Outer Layer):',
+            '   - Gray matter (cell bodies)',
+            '   - Highly folded (gyri = ridges, sulci = grooves)',
+            '   - Divided into 4 lobes per hemisphere:',
+            '',
+            '     a) FRONTAL LOBE:',
+            '        - Motor cortex (voluntary movement)',
+            '        - Broca\'s area (speech production)',
+            '        - Prefrontal cortex (personality, planning, decision-making)',
+            '        - Executive functions',
+            '',
+            '     b) PARIETAL LOBE:',
+            '        - Somatosensory cortex (touch, temperature, pain)',
+            '        - Spatial awareness',
+            '        - Integration of sensory information',
+            '',
+            '     c) TEMPORAL LOBE:',
+            '        - Auditory cortex (hearing)',
+            '        - Wernicke\'s area (language comprehension)',
+            '        - Memory formation (hippocampus)',
+            '        - Emotion (amygdala)',
+            '',
+            '     d) OCCIPITAL LOBE:',
+            '        - Visual cortex (vision)',
+            '        - Visual processing',
+            '',
+            '   White Matter (Inner):',
+            '   - Myelinated axons',
+            '   - Connects different regions',
+            '',
+            '2. DIENCEPHALON:',
+            '   Deep brain structures',
+            '',
+            '   a) THALAMUS:',
+            '      - Relay station for sensory info',
+            '      - All senses (except smell) pass through',
+            '      - "Gateway to cortex"',
+            '',
+            '   b) HYPOTHALAMUS:',
+            '      - Homeostasis control',
+            '      - Temperature regulation',
+            '      - Hunger and thirst',
+            '      - Circadian rhythms',
+            '      - Controls pituitary gland',
+            '      - Autonomic nervous system',
+            '',
+            '3. BRAINSTEM:',
+            '   Connects brain to spinal cord',
+            '',
+            '   a) MIDBRAIN:',
+            '      - Eye movements',
+            '      - Auditory and visual reflexes',
+            '      - Motor control',
+            '',
+            '   b) PONS:',
+            '      - Relays signals',
+            '      - Breathing regulation',
+            '      - Sleep and arousal',
+            '',
+            '   c) MEDULLA OBLONGATA:',
+            '      - Vital functions:',
+            '        • Heart rate',
+            '        • Blood pressure',
+            '        • Breathing',
+            '        • Swallowing, vomiting',
+            '      - Autonomic reflexes',
+            '',
+            '4. CEREBELLUM:',
+            '   - "Little brain" (behind brainstem)',
+            '   - 10% of volume, 50% of neurons!',
+            '   - Functions:',
+            '     • Balance and posture',
+            '     • Coordination of movement',
+            '     • Motor learning',
+            '     • Fine motor control',
+            '   - Damage → Ataxia (uncoordinated movement)',
+            '',
+            '5. LIMBIC SYSTEM:',
+            '   Group of structures for emotion/memory',
+            '',
+            '   - Hippocampus: Memory formation',
+            '   - Amygdala: Fear and emotion',
+            '   - Cingulate gyrus: Emotional processing',
+            '',
+            'SPINAL CORD:',
+            '',
+            'Structure:',
+            '  - Length: ~45 cm',
+            '  - Protected by vertebral column',
+            '  - 31 pairs of spinal nerves exit',
+            '',
+            'Cross-Section:',
+            '  - Gray Matter (inside, H-shaped):',
+            '    • Cell bodies and interneurons',
+            '    • Dorsal horn (sensory)',
+            '    • Ventral horn (motor)',
+            '',
+            '  - White Matter (outside):',
+            '    • Ascending tracts (sensory to brain)',
+            '    • Descending tracts (motor from brain)',
+            '',
+            'Functions:',
+            '  1. Pathway for signals:',
+            '     - Brain ↔ Body',
+            '',
+            '  2. Reflex center:',
+            '     - Spinal reflexes (no brain needed)',
+            '     - Fast, automatic responses',
+            '',
+            'Meninges (Protective Layers):',
+            '  1. Dura mater (tough outer)',
+            '  2. Arachnoid mater (middle)',
+            '  3. Pia mater (thin inner)',
+            '  - CSF between arachnoid and pia',
+            '',
+            'Cerebrospinal Fluid (CSF):',
+            '  - Clear liquid',
+            '  - Cushions brain/spinal cord',
+            '  - Removes wastes',
+            '  - Volume: ~150 mL'
+        ],
+        helper: 'Cerebrum (thinking), Cerebellum (balance), Brainstem (vital functions), Spinal cord (pathway/reflexes)',
+        solution: 'Brain: Cerebrum (conscious thought), Cerebellum (coordination), Brainstem (vital functions); Spinal cord (pathways, reflexes)',
+        realWorldContext: 'Stroke damages brain regions; symptoms depend on location (motor cortex → paralysis)'
+    });
+
+    // Problem 5: Peripheral Nervous System
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Somatic vs Autonomic Nervous System',
+        problem: 'Compare the somatic and autonomic nervous systems, including sympathetic and parasympathetic divisions',
+        parameters: {
+            specificItems: ['Somatic', 'Autonomic', 'Sympathetic', 'Parasympathetic'],
+            category: 'PNS',
+            limit: 4
+        },
+        type: 'nervous_system',
+        context: { difficulty: 'intermediate', topic: 'Nervous System', focus: 'PNS divisions' },
+        subparts: [
+            'Peripheral Nervous System (PNS):',
+            'All nerves outside CNS',
+            '',
+            'Two Main Divisions:',
+            '',
+            '═══════════════════════════════════',
+            '1. SOMATIC NERVOUS SYSTEM:',
+            '═══════════════════════════════════',
+            '',
+            'Control: VOLUNTARY (conscious)',
+            '',
+            'Components:',
+            '  - Sensory (afferent) neurons:',
+            '    • Carry signals FROM receptors',
+            '    • Touch, pain, temperature, proprioception',
+            '    • To CNS',
+            '',
+            '  - Motor (efferent) neurons:',
+            '    • Carry signals FROM CNS',
+            '    • To skeletal muscles',
+            '    • Cause voluntary movement',
+            '',
+            'Pathway:',
+            '  CNS → Single motor neuron → Skeletal muscle',
+            '',
+            'Neurotransmitter:',
+            '  - Acetylcholine (ACh)',
+            '  - Always excitatory at muscle',
+            '',
+            'Functions:',
+            '  - Voluntary movement',
+            '  - Walking, talking, writing',
+            '  - Reflex arcs (involuntary but somatic)',
+            '',
+            'Example:',
+            '  - Decide to pick up pen',
+            '  - Motor cortex sends signal',
+            '  - Arm muscles contract',
+            '',
+            '═══════════════════════════════════',
+            '2. AUTONOMIC NERVOUS SYSTEM (ANS):',
+            '═══════════════════════════════════',
+            '',
+            'Control: INVOLUNTARY (unconscious)',
+            '',
+            'General Features:',
+            '  - Controls smooth muscle, cardiac muscle, glands',
+            '  - Two-neuron pathway:',
+            '    1. Preganglionic neuron (CNS to ganglion)',
+            '    2. Postganglionic neuron (ganglion to organ)',
+            '  - Most organs have dual innervation',
+            '',
+            'TWO DIVISIONS (Antagonistic):',
+            '',
+            '┌─────────────────────────────────┐',
+            '│ A) SYMPATHETIC DIVISION         │',
+            '│    ("Fight or Flight")          │',
+            '└─────────────────────────────────┘',
+            '',
+            'Function: Mobilizes body for action',
+            'When: Stress, danger, exercise, excitement',
+            '',
+            'Origin:',
+            '  - Thoracolumbar (T1-L2)',
+            '  - Middle of spinal cord',
+            '',
+            'Pathway:',
+            '  - Short preganglionic neuron',
+            '  - Synapse in ganglion near spine',
+            '  - Long postganglionic neuron to organ',
+            '',
+            'Neurotransmitters:',
+            '  - Preganglionic: Acetylcholine',
+            '  - Postganglionic: Norepinephrine (most organs)',
+            '',
+            'Effects on Body:',
+            '  • Heart: ↑ Rate, ↑ Force',
+            '  • Blood Vessels: Vasoconstriction (skin, digestive)',
+            '                   Vasodilation (skeletal muscle)',
+            '  • Lungs: Bronchodilation (airways open)',
+            '  • Eyes: Pupils dilate',
+            '  • Liver: ↑ Glucose release',
+            '  • Digestion: ↓ Activity (not priority)',
+            '  • Bladder: Relaxes (hold urine)',
+            '  • Sweat glands: ↑ Sweating',
+            '  • Adrenal medulla: Release epinephrine/norepinephrine',
+            '',
+            'Summary: "E" responses',
+            '  - Emergency',
+            '  - Exercise',
+            '  - Excitement',
+            '  - Embarrassment',
+            '',
+            '┌─────────────────────────────────┐',
+            '│ B) PARASYMPATHETIC DIVISION     │',
+            '│    ("Rest and Digest")          │',
+            '└─────────────────────────────────┘',
+            '',
+            'Function: Conserves energy, maintains routine',
+            'When: Relaxed, resting, after meals',
+            '',
+            'Origin:',
+            '  - Craniosacral',
+            '  - Brainstem (cranial nerves) + Sacral (S2-S4)',
+            '',
+            'Pathway:',
+            '  - Long preganglionic neuron',
+            '  - Synapse in ganglion NEAR or IN organ',
+            '  - Short postganglionic neuron',
+            '',
+            'Neurotransmitters:',
+            '  - Both: Acetylcholine',
+            '',
+            'Effects on Body:',
+            '  • Heart: ↓ Rate, ↓ Force',
+            '  • Blood Vessels: No major effect',
+            '  • Lungs: Bronchoconstriction',
+            '  • Eyes: Pupils constrict',
+            '  • Liver: ↑ Glycogen storage',
+            '  • Digestion: ↑ Activity (salivation, peristalsis, secretion)',
+            '  • Bladder: Contracts (urination)',
+            '  • No effect on sweat glands or adrenal medulla',
+            '',
+            'Summary: "D" responses',
+            '  - Digestion',
+            '  - Defecation',
+            '  - Diuresis (urination)',
+            '',
+            '═══════════════════════════════════',
+            'COMPARISON TABLE:',
+            '═══════════════════════════════════',
+            '',
+            'Feature          Sympathetic         Parasympathetic',
+            '─────────────────────────────────────────────────────',
+            'Situation        Stress/Active       Rest/Routine',
+            'Origin           T1-L2               Brainstem+Sacral',
+            'Preganglionic    Short               Long',
+            'Postganglionic   Long                Short',
+            'Ganglion         Near spine          Near/in organ',
+            'NT (post)        Norepinephrine      Acetylcholine',
+            'Heart Rate       Increase            Decrease',
+            'Digestion        Decrease            Increase',
+            'Pupils           Dilate              Constrict',
+            'Airways          Dilate              Constrict',
+            '',
+            'BALANCE:',
+            '  - Homeostasis maintained by balance',
+            '  - Usually one dominant at a time',
+            '  - Can shift rapidly based on situation',
+            '  - Most organs receive both',
+            '  - Antagonistic effects (opposite)',
+            '',
+            'Examples:',
+            '  Danger → Sympathetic active',
+            '    (Heart races, pupils wide, alert)',
+            '  Meal → Parasympathetic active',
+            '    (Digestion, salivation, relaxed)'
+        ],
+        helper: 'Somatic = voluntary muscles; Autonomic = involuntary (Sympathetic = fight/flight, Parasympathetic = rest/digest)',
+        solution: 'Somatic (voluntary movement); Autonomic (involuntary): Sympathetic (stress response), Parasympathetic (rest/routine)',
+        realWorldContext: 'Beta-blockers block sympathetic effects on heart (treat high blood pressure, anxiety)'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - ENDOCRINE SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedEndocrineSystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Endocrine vs Nervous System
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Hormonal vs Neural Communication',
+        problem: 'Compare and contrast the endocrine system with the nervous system in terms of communication',
+        parameters: {
+            specificItems: ['Endocrine System'],
+            category: 'comparison',
+            limit: 1
+        },
+        type: 'endocrine_system',
+        context: { difficulty: 'beginner', topic: 'Endocrine System', focus: 'comparison' },
+        subparts: [
+            'Two Control Systems:',
+            '',
+            '═══════════════════════════════════',
+            'NERVOUS SYSTEM:',
+            '═══════════════════════════════════',
+            '',
+            'Signal Type: Electrical and chemical',
+            '  - Action potentials in neurons',
+            '  - Neurotransmitters at synapses',
+            '',
+            'Pathway: Specific',
+            '  - Neurons connect to specific targets',
+            '  - Like telephone wires',
+            '',
+            'Speed: FAST',
+            '  - Milliseconds to seconds',
+            '  - Rapid response',
+            '',
+            'Duration: SHORT',
+            '  - Effects brief',
+            '  - Stops when stimulation ends',
+            '',
+            'Target: Localized',
+            '  - Specific muscles or glands',
+            '  - Precise targeting',
+            '',
+            'Example:',
+            '  - Touch hot stove',
+            '  - Nerve signal to brain (milliseconds)',
+            '  - Signal to muscles',
+            '  - Hand pulls away (instant)',
+            '',
+            '═══════════════════════════════════',
+            'ENDOCRINE SYSTEM:',
+            '═══════════════════════════════════',
+            '',
+            'Signal Type: Chemical only',
+            '  - Hormones',
+            '  - Released into bloodstream',
+            '',
+            'Pathway: Broadcast',
+            '  - Hormones travel throughout body',
+            '  - Like radio broadcast',
+            '  - Affect any cell with receptors',
+            '',
+            'Speed: SLOW',
+            '  - Seconds to hours',
+            '  - Gradual response',
+            '',
+            'Duration: LONG',
+            '  - Effects prolonged',
+            '  - Can last hours to days',
+            '  - Sustained action',
+            '',
+            'Target: Widespread',
+            '  - Can affect many organs',
+            '  - Systemic effects',
+            '  - Only cells with receptors respond',
+            '',
+            'Example:',
+            '  - Growth hormone',
+            '  - Released over years',
+            '  - Affects all body cells',
+            '  - Gradual growth',
+            '',
+            '═══════════════════════════════════',
+            'COMPARISON TABLE:',
+            '═══════════════════════════════════',
+            '',
+            'Feature          Nervous         Endocrine',
+            '─────────────────────────────────────────────',
+            'Signal           Electrical      Chemical',
+            'Messenger        Neurotransmitter Hormone',
+            'Pathway          Neuron          Blood',
+            'Speed            Fast (ms)       Slow (sec-hr)',
+            'Duration         Brief           Prolonged',
+            'Target           Specific        Widespread',
+            'Control          Voluntary/      Involuntary',
+            '                 Involuntary     only',
+            '',
+            'SIMILARITIES:',
+            '  ✓ Both are communication systems',
+            '  ✓ Both maintain homeostasis',
+            '  ✓ Both use chemical messengers (at synapse/blood)',
+            '  ✓ Both regulated by feedback',
+            '  ✓ Both controlled by hypothalamus/brain',
+            '',
+            'COOPERATION:',
+            '  - Often work together',
+            '  - Nervous system can trigger hormone release',
+            '  - Hormones can affect nervous system',
+            '',
+            'Example: Stress Response',
+            '  1. Nervous: Immediate fight-or-flight (seconds)',
+            '     - Fast heart rate',
+            '     - Alertness',
+            '',
+            '  2. Endocrine: Sustained stress response (minutes-hours)',
+            '     - Cortisol maintains elevated energy',
+            '     - Prolonged alertness',
+            '',
+            'NEUROENDOCRINE INTERFACE:',
+            '  - Hypothalamus links both systems',
+            '  - Neurons release hormones',
+            '  - Example: ADH, oxytocin',
+            '',
+            'Which System When?',
+            '  - NERVOUS: Quick, precise actions',
+            '    • Reflexes',
+            '    • Movement',
+            '    • Immediate responses',
+            '',
+            '  - ENDOCRINE: Slow, sustained changes',
+            '    • Growth',
+            '    • Metabolism',
+            '    • Reproduction',
+            '    • Long-term stress'
+        ],
+        helper: 'Nervous = fast & specific (phone call); Endocrine = slow & broadcast (radio)',
+        solution: 'Nervous: fast (ms), brief, specific via neurons; Endocrine: slow (hrs), prolonged, widespread via hormones in blood',
+        realWorldContext: 'Adrenaline (epinephrine) works as both: neurotransmitter (fast) and hormone (sustained)'
+    });
+
+    // Problem 2: Hormone Mechanisms
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'How Hormones Work',
+        problem: 'Explain the difference between lipid-soluble and water-soluble hormones in their mechanisms of action',
+        parameters: {
+            specificItems: ['Hormones', 'mechanism'],
+            category: 'hormone action',
+            limit: 2
+        },
+        type: 'endocrine_system',
+        context: { difficulty: 'intermediate', topic: 'Endocrine System', focus: 'hormone mechanisms' },
+        subparts: [
+            'Hormones: Chemical messengers in blood',
+            '',
+            'Key Concept: Only TARGET CELLS respond',
+            '  - Must have specific receptors',
+            '  - Lock-and-key mechanism',
+            '',
+            'TWO TYPES BY SOLUBILITY:',
+            '',
+            '═══════════════════════════════════════════',
+            '1. LIPID-SOLUBLE (STEROID) HORMONES:',
+            '═══════════════════════════════════════════',
+            '',
+            'Chemical Nature:',
+            '  - Made from cholesterol',
+            '  - Hydrophobic (fat-loving)',
+            '  - Can cross cell membrane',
+            '',
+            'Examples:',
+            '  - Cortisol (stress)',
+            '  - Testosterone (male sex)',
+            '  - Estrogen (female sex)',
+            '  - Progesterone (pregnancy)',
+            '  - Aldosterone (kidney)',
+            '  - Vitamin D (technically a hormone)',
+            '',
+            'Transport in Blood:',
+            '  - Carried by transport proteins',
+            '  - Not water-soluble',
+            '  - Bound to carrier proteins',
+            '',
+            'MECHANISM OF ACTION:',
+            '',
+            'Step 1: DIFFUSION THROUGH MEMBRANE',
+            '  - Lipid-soluble hormone',
+            '  - Passes directly through plasma membrane',
+            '  - No receptor needed on surface',
+            '',
+            'Step 2: BINDING TO INTRACELLULAR RECEPTOR',
+            '  - Receptor inside cell (cytoplasm or nucleus)',
+            '  - Hormone binds to receptor',
+            '  - Forms hormone-receptor complex',
+            '',
+            'Step 3: ENTERS NUCLEUS',
+            '  - Complex enters nucleus (if not already there)',
+            '  - Acts as transcription factor',
+            '',
+            'Step 4: GENE ACTIVATION',
+            '  - Binds to DNA',
+            '  - Turns genes ON or OFF',
+            '  - Changes gene expression',
+            '',
+            'Step 5: PROTEIN SYNTHESIS',
+            '  - mRNA produced',
+            '  - New proteins made',
+            '  - Proteins cause cellular effects',
+            '',
+            'Characteristics:',
+            '  ⏱️ Onset: SLOW (minutes to hours)',
+            '  ⏱️ Duration: LONG (hours to days)',
+            '  💪 Effect: Changes protein synthesis',
+            '  🔄 Reason: Must transcribe/translate genes',
+            '',
+            '═══════════════════════════════════════════',
+            '2. WATER-SOLUBLE (PROTEIN/AMINE) HORMONES:',
+            '═══════════════════════════════════════════',
+            '',
+            'Chemical Nature:',
+            '  - Amino acid-based',
+            '  - Proteins, peptides, or modified amino acids',
+            '  - Hydrophilic (water-loving)',
+            '  - CANNOT cross cell membrane',
+            '',
+            'Examples:',
+            '  Proteins/Peptides:',
+            '  - Insulin (glucose regulation)',
+            '  - Growth hormone',
+            '  - Prolactin',
+            '  - ADH (antidiuretic hormone)',
+            '  - Oxytocin',
+            '',
+            '  Amines (modified amino acids):',
+            '  - Epinephrine/Norepinephrine',
+            '  - Dopamine',
+            '  - Melatonin',
+            '',
+            'Transport in Blood:',
+            '  - Dissolved directly in plasma',
+            '  - Water-soluble',
+            '  - No carrier needed',
+            '',
+            'MECHANISM OF ACTION:',
+            '',
+            'Step 1: BINDS TO SURFACE RECEPTOR',
+            '  - Hormone in blood',
+            '  - Cannot enter cell',
+            '  - Binds to receptor on plasma membrane',
+            '  - First messenger',
+            '',
+            'Step 2: ACTIVATES G-PROTEIN or ENZYME',
+            '  - Receptor changes shape',
+            '  - Activates intracellular signaling',
+            '',
+            'Step 3: SECOND MESSENGER SYSTEM',
+            '  - Generates second messenger inside cell',
+            '  - Common second messengers:',
+            '    • cAMP (cyclic AMP)',
+            '    • cGMP',
+            '    • Ca²⁺',
+            '    • IP₃, DAG',
+            '',
+            'Step 4: AMPLIFICATION CASCADE',
+            '  - Second messenger activates enzymes',
+            '  - Cascade of enzyme activations',
+            '  - Amplifies signal (1 hormone → thousands of enzymes)',
+            '',
+            'Step 5: CELLULAR RESPONSE',
+            '  - Activates/inhibits existing proteins',
+            '  - Changes metabolic pathways',
+            '  - Alters cell function',
+            '  - NO gene transcription needed',
+            '',
+            'Characteristics:',
+            '  ⏱️ Onset: FAST (seconds to minutes)',
+            '  ⏱️ Duration: SHORT (minutes to hours)',
+            '  💪 Effect: Activates existing proteins',
+            '  🔄 Reason: No gene transcription needed',
+            '  📈 Amplification: Large signal from small amount',
+            '',
+            '═══════════════════════════════════════════',
+            'COMPARISON:',
+            '═══════════════════════════════════════════',
+            '',
+            'Feature          Lipid-Soluble    Water-Soluble',
+            '─────────────────────────────────────────────────',
+            'Chemistry        Steroids         Proteins/Amines',
+            'Solubility       Fat              Water',
+            'Transport        Carrier protein  Dissolved',
+            'Membrane         Crosses          Cannot cross',
+            'Receptor         Inside cell      On surface',
+            'Mechanism        Gene activation  Second messenger',
+            'Speed            Slow (min-hr)    Fast (sec-min)',
+            'Duration         Long (hr-days)   Short (min-hr)',
+            'Effect           New proteins     Activate existing',
+            '',
+            'EXAMPLE COMPARISON:',
+            '',
+            'Cortisol (Lipid-Soluble):',
+            '  - Crosses membrane',
+            '  - Binds nuclear receptor',
+            '  - Changes gene expression',
+            '  - Takes hours',
+            '  - Lasts days',
+            '  - Long-term stress response',
+            '',
+            'Epinephrine (Water-Soluble):',
+            '  - Binds surface receptor',
+            '  - Activates cAMP cascade',
+            '  - Activates existing enzymes',
+            '  - Takes seconds',
+            '  - Lasts minutes',
+            '  - Immediate fight-or-flight',
+            '',
+            'Permissiveness:',
+            '  - Some hormones need others to work',
+            '  - Example: Thyroid hormone needed for epinephrine effect',
+            '',
+            'Synergism:',
+            '  - Multiple hormones work together',
+            '  - Example: Glucagon + Epinephrine both raise glucose',
+            '',
+            'Antagonism:',
+            '  - Hormones oppose each other',
+            '  - Example: Insulin (lowers glucose) vs Glucagon (raises glucose)'
+        ],
+        helper: 'Lipid hormones: cross membrane, change genes (slow); Water hormones: surface receptor, activate enzymes (fast)',
+        solution: 'Lipid-soluble: cross membrane, bind nuclear receptor, change gene expression (slow); Water-soluble: bind surface receptor, second messenger (fast)',
+        realWorldContext: 'Birth control pills use steroid hormones (slow, sustained effect on reproduction)'
+    });
+
+    // Problem 3: Pituitary Gland
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Master Gland Functions',
+        problem: 'Describe the structure of the pituitary gland and explain the hormones produced by each lobe',
+        parameters: {
+            specificItems: ['Pituitary'],
+            category: 'major glands',
+            limit: 1
+        },
+        type: 'endocrine_system',
+        context: { difficulty: 'intermediate', topic: 'Endocrine System', focus: 'pituitary' },
+        subparts: [
+            'Pituitary Gland (Hypophysis):',
+            '',
+            'Nickname: "Master Gland"',
+            '  - Controls other endocrine glands',
+            '  - But controlled by hypothalamus!',
+            '',
+            'Location:',
+            '  - Base of brain',
+            '  - Below hypothalamus',
+            '  - In sella turcica (bony pocket)',
+            '  - Connected to hypothalamus by stalk',
+            '',
+            'Size: Pea-sized (~1 cm)',
+            '',
+            'TWO LOBES (Different origins):',
+            '',
+            '═══════════════════════════════════════════',
+            '1. ANTERIOR PITUITARY (Adenohypophysis):',
+            '═══════════════════════════════════════════',
+            '',
+            'Size: 75% of gland',
+            'Origin: Epithelial tissue',
+            '',
+            'Control:',
+            '  - Hypothalamus releases hormones',
+            '  - Travel via portal blood vessels',
+            '  - Releasing hormones (stimulate)',
+            '  - Inhibiting hormones (suppress)',
+            '',
+            'SIX MAJOR HORMONES:',
+            '',
+            '1. GROWTH HORMONE (GH):',
+            '   Also called: Somatotropin',
+            '   Target: All body cells',
+            '   Effects:',
+            '   - Stimulates growth',
+            '   - Increases protein synthesis',
+            '   - Promotes fat breakdown',
+            '   - Raises blood glucose',
+            '   - Most active in childhood/adolescence',
+            '   Disorders:',
+            '   - Too much (child): Gigantism',
+            '   - Too much (adult): Acromegaly',
+            '   - Too little (child): Dwarfism',
+            '',
+            '2. THYROID-STIMULATING HORMONE (TSH):',
+            '   Also called: Thyrotropin',
+            '   Target: Thyroid gland',
+            '   Effect: Stimulates thyroid to release T3 and T4',
+            '   Regulation: Negative feedback from thyroid hormones',
+            '',
+            '3. ADRENOCORTICOTROPIC HORMONE (ACTH):',
+            '   Also called: Corticotropin',
+            '   Target: Adrenal cortex',
+            '   Effect: Stimulates cortisol release',
+            '   Increased by: Stress',
+            '',
+            '4. PROLACTIN (PRL):',
+            '   Target: Mammary glands (breasts)',
+            '   Effect:',
+            '   - Stimulates milk production',
+            '   - After childbirth',
+            '   - Maintained by suckling',
+            '   Control: Inhibited by dopamine (from hypothalamus)',
+            '',
+            '5. FOLLICLE-STIMULATING HORMONE (FSH):',
+            '   Type: Gonadotropin',
+            '   Target: Gonads (ovaries/testes)',
+            '   Effects:',
+            '   - Females: Stimulates follicle development, estrogen',
+            '   - Males: Stimulates sperm production',
+            '',
+            '6. LUTEINIZING HORMONE (LH):',
+            '   Type: Gonadotropin',
+            '   Target: Gonads',
+            '   Effects:',
+            '   - Females: Triggers ovulation, progesterone production',
+            '   - Males: Stimulates testosterone production',
+            '',
+            'Mnemonic: FLAT PiG',
+            '  F - FSH',
+            '  L - LH',
+            '  A - ACTH',
+            '  T - TSH',
+            '  P - Prolactin',
+            '  G - GH',
+            '',
+            '═══════════════════════════════════════════',
+            '2. POSTERIOR PITUITARY (Neurohypophysis):',
+            '═══════════════════════════════════════════',
+            '',
+            'Size: 25% of gland',
+            'Origin: Neural tissue (extension of brain)',
+            '',
+            'Important: Does NOT produce hormones!',
+            '  - Stores hormones made by hypothalamus',
+            '  - Releases them when signaled',
+            '',
+            'Control:',
+            '  - Direct nerve signals from hypothalamus',
+            '  - Neurosecretory cells in hypothalamus',
+            '  - Axons extend into posterior pituitary',
+            '',
+            'TWO HORMONES (Made in hypothalamus):',
+            '',
+            '1. ANTIDIURETIC HORMONE (ADH):',
+            '   Also called: Vasopressin',
+            '   Target: Kidneys (collecting ducts)',
+            '   Effect:',
+            '   - Increases water reabsorption',
+            '   - Reduces urine volume',
+            '   - Concentrates urine',
+            '   - "Anti-diuresis" = less urination',
+            '   Released when:',
+            '   - Dehydrated',
+            '   - High blood osmolarity',
+            '   - Low blood volume',
+            '   - Alcohol inhibits ADH (more urination)',
+            '   Disorder:',
+            '   - Diabetes insipidus: ADH deficiency',
+            '   - Produces huge amounts of dilute urine',
+            '',
+            '2. OXYTOCIN:',
+            '   Target: Uterus and mammary glands',
+            '   Effects:',
+            '   - Stimulates uterine contractions (labor)',
+            '   - Triggers milk ejection (let-down reflex)',
+            '   - "Love hormone" (bonding)',
+            '   Positive Feedback:',
+            '   - Contractions → more oxytocin → more contractions',
+            '   - Suckling → more oxytocin → more milk release',
+            '   Use: Pitocin (synthetic) to induce labor',
+            '',
+            '═══════════════════════════════════════════',
+            'HYPOTHALAMUS-PITUITARY CONNECTION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Anterior Pituitary:',
+            '  Hypothalamus → Releasing/Inhibiting hormones',
+            '  → Portal blood vessels → Anterior pituitary',
+            '  → Tropic hormones → Target glands',
+            '',
+            'Posterior Pituitary:',
+            '  Hypothalamus neurons → Make ADH/Oxytocin',
+            '  → Axons to posterior pituitary → Store',
+            '  → Nerve signal → Release into blood',
+            '',
+            'TROPIC vs NON-TROPIC HORMONES:',
+            '',
+            'Tropic: Target other endocrine glands',
+            '  - TSH → Thyroid',
+            '  - ACTH → Adrenal cortex',
+            '  - FSH/LH → Gonads',
+            '',
+            'Non-tropic: Target non-endocrine tissues',
+            '  - GH → All cells',
+            '  - Prolactin → Mammary glands',
+            '  - ADH → Kidneys',
+            '  - Oxytocin → Uterus/breasts'
+        ],
+        helper: 'Anterior makes 6 hormones (FLAT PiG); Posterior releases 2 from hypothalamus (ADH, Oxytocin)',
+        solution: 'Anterior pituitary: GH, TSH, ACTH, Prolactin, FSH, LH (control growth/other glands); Posterior: ADH (water), Oxytocin (birth/milk)',
+        realWorldContext: 'Pituitary tumors can cause hormone excess (e.g., acromegaly from too much GH)'
+    });
+
+    // Problem 4: Thyroid and Parathyroid
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Metabolic Rate and Calcium Regulation',
+        problem: 'Explain the functions of thyroid and parathyroid hormones and their regulation',
+        parameters: {
+            specificItems: ['Thyroid', 'Parathyroid'],
+            category: 'major glands',
+            limit: 2
+        },
+        type: 'endocrine_system',
+        context: { difficulty: 'intermediate', topic: 'Endocrine System', focus: 'thyroid/parathyroid' },
+        subparts: [
+            '═══════════════════════════════════════════',
+            'THYROID GLAND:',
+            '═══════════════════════════════════════════',
+            '',
+            'Location:',
+            '  - Neck, below larynx',
+            '  - Wraps around trachea',
+            '  - Butterfly-shaped',
+            '  - Two lobes connected by isthmus',
+            '',
+            'Size: Largest pure endocrine gland',
+            '',
+            'THREE HORMONES:',
+            '',
+            '1. THYROXINE (T4):',
+            '   - Contains 4 iodine atoms',
+            '   - Main hormone secreted (90%)',
+            '   - Less active than T3',
+            '   - Converted to T3 in tissues',
+            '',
+            '2. TRIIODOTHYRONINE (T3):',
+            '   - Contains 3 iodine atoms',
+            '   - More active form',
+            '   - Only 10% secreted',
+            '   - Most made from T4',
+            '',
+            'T3 and T4 Functions:',
+            '  - INCREASE METABOLIC RATE',
+            '    • Speed up all cellular reactions',
+            '    • Increase O₂ consumption',
+            '    • Generate heat',
+            '',
+            '  - Growth and Development',
+            '    • Essential for brain development (fetus/child)',
+            '    • Work with GH for body growth',
+            '',
+            '  - Cardiovascular Effects',
+            '    • Increase heart rate',
+            '    • Increase cardiac output',
+            '',
+            '  - Nervous System',
+            '    • Increase alertness',
+            '    • Normal reflexes',
+            '',
+            'Regulation (Negative Feedback):',
+            '  1. Hypothalamus releases TRH',
+            '  2. Anterior pituitary releases TSH',
+            '  3. Thyroid releases T3 and T4',
+            '  4. High T3/T4 inhibit TRH and TSH',
+            '',
+            'Iodine Required:',
+            '  - Needed to make T3 and T4',
+            '  - Dietary source: Iodized salt, seafood',
+            '  - Deficiency → Goiter (enlarged thyroid)',
+            '',
+            'DISORDERS:',
+            '',
+            'Hypothyroidism (Too Little):',
+            '  Causes:',
+            '  - Iodine deficiency',
+            '  - Hashimoto\'s thyroiditis (autoimmune)',
+            '  - Surgical removal',
+            '  Symptoms:',
+            '  - Low metabolic rate',
+            '  - Weight gain',
+            '  - Fatigue, sluggishness',
+            '  - Cold intolerance',
+            '  - Slow heart rate',
+            '  - Constipation',
+            '  - Depression',
+            '  In Infants: Cretinism',
+            '  - Mental retardation',
+            '  - Stunted growth',
+            '  Treatment: Synthetic T4 (levothyroxine)',
+            '',
+            'Hyperthyroidism (Too Much):',
+            '  Causes:',
+            '  - Graves\' disease (autoimmune)',
+            '  - Thyroid nodules',
+            '  - Too much iodine',
+            '  Symptoms:',
+            '  - High metabolic rate',
+            '  - Weight loss (despite eating)',
+            '  - Nervousness, irritability',
+            '  - Heat intolerance, sweating',
+            '  - Rapid heart rate',
+            '  - Diarrhea',
+            '  - Bulging eyes (Graves\')',
+            '  Treatment:',
+            '  - Antithyroid drugs',
+            '  - Radioactive iodine (destroys thyroid)',
+            '  - Surgery',
+            '',
+            'Goiter:',
+            '  - Enlarged thyroid',
+            '  - Can occur in hypo OR hyper',
+            '  - Iodine deficiency: thyroid enlarges trying to make hormones',
+            '',
+            '3. CALCITONIN:',
+            '   Source: C cells (parafollicular cells)',
+            '   Target: Bones and kidneys',
+            '   Effect: LOWERS blood calcium',
+            '   Mechanism:',
+            '   - Inhibits osteoclasts (bone breakdown)',
+            '   - Increases calcium excretion by kidneys',
+            '   Released when: Blood Ca²⁺ too high',
+            '   Note: Minor role in humans (not essential)',
+            '',
+            '═══════════════════════════════════════════',
+            'PARATHYROID GLANDS:',
+            '═══════════════════════════════════════════',
+            '',
+            'Location:',
+            '  - Embedded in posterior thyroid',
+            '  - Four small glands (usually)',
+            '  - Size of rice grain',
+            '',
+            'PARATHYROID HORMONE (PTH):',
+            '',
+            'Target: Bones, kidneys, intestines',
+            'Effect: RAISES blood calcium',
+            '',
+            'Mechanisms:',
+            '  1. BONES:',
+            '     - Stimulates osteoclasts',
+            '     - Breaks down bone matrix',
+            '     - Releases Ca²⁺ into blood',
+            '',
+            '  2. KIDNEYS:',
+            '     - Increases Ca²⁺ reabsorption',
+            '     - Decreases PO₄³⁻ reabsorption',
+            '     - Activates vitamin D',
+            '',
+            '  3. INTESTINES (indirect):',
+            '     - Via activated vitamin D',
+            '     - Increases Ca²⁺ absorption from food',
+            '',
+            'Released when: Blood Ca²⁺ too low',
+            '',
+            'Importance of Calcium:',
+            '  - Bone structure',
+            '  - Muscle contraction',
+            '  - Nerve function',
+            '  - Blood clotting',
+            '  - Enzyme activation',
+            '  - Must be tightly regulated',
+            '',
+            'CALCIUM HOMEOSTASIS:',
+            '',
+            'Normal Blood Ca²⁺: 9-11 mg/dL',
+            '',
+            'LOW Calcium:',
+            '  → PTH released',
+            '  → Bone breakdown, kidney reabsorption',
+            '  → Ca²⁺ rises',
+            '',
+            'HIGH Calcium:',
+            '  → Calcitonin released (minor)',
+            '  → Less bone breakdown',
+            '  → Ca²⁺ drops',
+            '',
+            'PTH vs Calcitonin:',
+            '  - Antagonistic (opposite effects)',
+            '  - PTH more important in humans',
+            '  - Calcitonin has minor role',
+            '',
+            'PARATHYROID DISORDERS:',
+            '',
+            'Hyperparathyroidism (Too Much PTH):',
+            '  - High blood calcium',
+            '  - Bone loss (osteoporosis)',
+            '  - Kidney stones',
+            '  - Muscle weakness',
+            '  - "Stones, bones, groans, psychiatric overtones"',
+            '',
+            'Hypoparathyroidism (Too Little PTH):',
+            '  - Low blood calcium',
+            '  - Muscle spasms (tetany)',
+            '  - Tingling, numbness',
+            '  - Seizures (severe)',
+            '  - Can be life-threatening',
+            '',
+            '═══════════════════════════════════════════',
+            'THYROID vs PARATHYROID:',
+            '═══════════════════════════════════════════',
+            '',
+            'Different glands (despite names):',
+            '  - Thyroid: Large, butterfly, controls metabolism',
+            '  - Parathyroid: Small, 4 glands, controls calcium',
+            '',
+            'Location:',
+            '  - Thyroid: Anterior neck',
+            '  - Parathyroid: Posterior thyroid',
+            '',
+            'Calcium Regulation:',
+            '  - Calcitonin (thyroid): Lowers Ca²⁺ (minor)',
+            '  - PTH (parathyroid): Raises Ca²⁺ (major)',
+            '',
+            'Can both be removed surgically:',
+            '  - Thyroid removal: Need T4 replacement',
+            '  - Parathyroid damage: Need calcium/vitamin D supplements'
+        ],
+        helper: 'Thyroid: T3/T4 (speed metabolism), Calcitonin (lower Ca²⁺); Parathyroid: PTH (raise Ca²⁺)',
+        solution: 'Thyroid makes T3/T4 (metabolic rate) and calcitonin (lower Ca²⁺); Parathyroid makes PTH (raise Ca²⁺ from bone/kidney)',
+        realWorldContext: 'Hypothyroidism is common (affects 5% of population); treated with daily thyroid hormone pill'
+    });
+
+    // Problem 5: Pancreas and Blood Glucose
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Blood Sugar Regulation',
+        problem: 'Explain how insulin and glucagon work together to maintain blood glucose homeostasis',
+        parameters: {
+            specificItems: ['Pancreas', 'Insulin', 'Glucagon'],
+            category: 'glucose regulation',
+            limit: 3
+        },
+        type: 'endocrine_system',
+        context: { difficulty: 'intermediate', topic: 'Endocrine System', focus: 'blood glucose' },
+        subparts: [
+            'Pancreas: Dual Function Organ',
+            '',
+            'Location: Behind stomach',
+            '',
+            'Two Functions:',
+            '  1. Exocrine (99%): Digestive enzymes',
+            '  2. Endocrine (1%): Hormones',
+            '',
+            'ENDOCRINE FUNCTION:',
+            '',
+            'Islets of Langerhans:',
+            '  - Clusters of endocrine cells',
+            '  - Scattered throughout pancreas',
+            '  - ~1 million islets',
+            '',
+            'Cell Types:',
+            '  - Alpha (α) cells: 20% - Make glucagon',
+            '  - Beta (β) cells: 70% - Make insulin',
+            '  - Delta (δ) cells: 5% - Make somatostatin',
+            '  - Others: 5%',
+            '',
+            '═══════════════════════════════════════════',
+            'BLOOD GLUCOSE REGULATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Normal Blood Glucose: 70-110 mg/dL (fasting)',
+            '',
+            'Importance:',
+            '  - Brain depends on glucose (no storage)',
+            '  - All cells need glucose for energy',
+            '  - Must be tightly regulated',
+            '  - Too high OR too low is dangerous',
+            '',
+            '┌─────────────────────────────────────────┐',
+            '│ HIGH BLOOD GLUCOSE (After eating)      │',
+            '└─────────────────────────────────────────┘',
+            '',
+            'INSULIN (from Beta cells):',
+            '',
+            'Released when: Blood glucose > 110 mg/dL',
+            '',
+            'Target Cells: Most cells (muscle, liver, fat)',
+            '  - Bind to insulin receptors',
+            '  - Tyrosine kinase receptors',
+            '',
+            'Effects: LOWERS blood glucose',
+            '',
+            '1. Cellular Uptake:',
+            '   - Inserts GLUT4 transporters into membranes',
+            '   - Cells absorb glucose from blood',
+            '   - Especially muscle and fat cells',
+            '   - Brain does NOT need insulin (always permeable)',
+            '',
+            '2. Liver:',
+            '   - Promotes glycogenesis',
+            '   - Glucose → Glycogen (storage)',
+            '   - Inhibits gluconeogenesis',
+            '   - Stops making new glucose',
+            '',
+            '3. Fat Cells:',
+            '   - Promotes lipogenesis',
+            '   - Converts excess glucose to fat',
+            '   - Inhibits lipolysis',
+            '   - Stops fat breakdown',
+            '',
+            '4. Protein Synthesis:',
+            '   - Promotes amino acid uptake',
+            '   - Builds proteins',
+            '',
+            'Summary: "Storage hormone"',
+            '  - Stores glucose as glycogen',
+            '  - Stores excess as fat',
+            '  - Anabolic effects',
+            '',
+            'Result: Blood glucose DECREASES',
+            '',
+            '┌─────────────────────────────────────────┐',
+            '│ LOW BLOOD GLUCOSE (Between meals)      │',
+            '└─────────────────────────────────────────┘',
+            '',
+            'GLUCAGON (from Alpha cells):',
+            '',
+            'Released when: Blood glucose < 70 mg/dL',
+            '',
+            'Target: Mainly LIVER',
+            '',
+            'Effects: RAISES blood glucose',
+            '',
+            '1. Liver:',
+            '   - Promotes glycogenolysis',
+            '   - Glycogen → Glucose',
+            '   - Releases glucose into blood',
+            '',
+            '   - Promotes gluconeogenesis',
+            '   - Makes NEW glucose',
+            '   - From amino acids, glycerol',
+            '',
+            '2. Fat Cells:',
+            '   - Promotes lipolysis',
+            'ysis',
+            '   - Fat → Fatty acids + Glycerol',
+            '   - Glycerol used for gluconeogenesis',
+            '',
+            'Summary: "Mobilization hormone"',
+            '  - Releases stored glucose',
+            '  - Makes new glucose',
+            '  - Catabolic effects',
+            '',
+            'Result: Blood glucose INCREASES',
+            '',
+            '═══════════════════════════════════════════',
+            'ANTAGONISTIC REGULATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Insulin and Glucagon work OPPOSITE:',
+            '',
+            'Feature          Insulin          Glucagon',
+            '─────────────────────────────────────────────',
+            'Secreted when    High glucose     Low glucose',
+            'Source           Beta cells       Alpha cells',
+            'Effect           Lower glucose    Raise glucose',
+            'Glycogen         Storage          Breakdown',
+            'Gluconeogenesis  Inhibit          Stimulate',
+            'Fat storage      Promote          Inhibit',
+            'Fat breakdown    Inhibit          Promote',
+            'Type             Anabolic         Catabolic',
+            '',
+            'NEGATIVE FEEDBACK:',
+            '',
+            'High Glucose:',
+            '  → Insulin released',
+            '  → Glucose stored/used',
+            '  → Blood glucose drops',
+            '  → Insulin secretion decreases',
+            '',
+            'Low Glucose:',
+            '  → Glucagon released',
+            '  → Glucose released to blood',
+            '  → Blood glucose rises',
+            '  → Glucagon secretion decreases',
+            '',
+            '═══════════════════════════════════════════',
+            'DAILY GLUCOSE REGULATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'After Meal:',
+            '  1. Glucose absorbed from intestines',
+            '  2. Blood glucose rises',
+            '  3. Insulin released',
+            '  4. Cells take up glucose',
+            '  5. Liver stores as glycogen',
+            '  6. Excess stored as fat',
+            '  7. Glucose returns to normal',
+            '',
+            'Between Meals (Fasting):',
+            '  1. No glucose coming in',
+            '  2. Blood glucose starts to drop',
+            '  3. Glucagon released',
+            '  4. Liver breaks down glycogen',
+            '  5. Releases glucose to blood',
+            '  6. Glucose maintained',
+            '',
+            'Overnight Fasting:',
+            '  - Glycogen stores depleted (~12 hours)',
+            '  - Gluconeogenesis becomes important',
+            '  - Makes glucose from amino acids',
+            '',
+            'Prolonged Fasting/Starvation:',
+            '  - Fat breakdown primary',
+            '  - Ketones produced (brain can use)',
+            '  - Protein breakdown (muscle wasting)',
+            '',
+            '═══════════════════════════════════════════',
+            'DIABETES MELLITUS:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: High blood glucose (hyperglycemia)',
+            'Prevalence: ~10% of US population',
+            '',
+            'TYPE 1 DIABETES:',
+            '',
+            'Cause: AUTOIMMUNE',
+            '  - Immune system destroys beta cells',
+            '  - No insulin production',
+            '  - Usually childhood onset',
+            '',
+            'Percentage: ~5-10% of diabetics',
+            '',
+            'Symptoms:',
+            '  - Very high blood glucose (>300 mg/dL)',
+            '  - Glucose in urine (glycosuria)',
+            '  - Polyuria (frequent urination)',
+            '  - Polydipsia (excessive thirst)',
+            '  - Polyphagia (excessive hunger)',
+            '  - Weight loss',
+            '  - Ketoacidosis (dangerous)',
+            '',
+            'Mechanism:',
+            '  - No insulin',
+            '  - Cells can\'t take up glucose',
+            '  - Blood glucose very high',
+            '  - Cells starve despite high blood sugar',
+            '  - Body breaks down fat → ketones',
+            '  - Ketones acidify blood (ketoacidosis)',
+            '',
+            'Treatment:',
+            '  - Insulin injections (REQUIRED)',
+            '  - Blood glucose monitoring',
+            '  - Diet management',
+            '  - Cannot be cured',
+            '',
+            'TYPE 2 DIABETES:',
+            '',
+            'Cause: INSULIN RESISTANCE',
+            '  - Beta cells produce insulin',
+            '  - But cells don\'t respond well',
+            '  - Eventually beta cells may fail',
+            '  - Usually adult onset (but increasing in children)',
+            '',
+            'Percentage: ~90-95% of diabetics',
+            '',
+            'Risk Factors:',
+            '  - Obesity (major factor)',
+            '  - Sedentary lifestyle',
+            '  - Genetics',
+            '  - Age',
+            '  - Ethnicity',
+            '',
+            'Symptoms:',
+            '  - Often GRADUAL onset',
+            '  - May be asymptomatic initially',
+            '  - Moderate hyperglycemia',
+            '  - Polyuria, polydipsia',
+            '  - Fatigue',
+            '  - Blurred vision',
+            '  - Slow wound healing',
+            '',
+            'Mechanism:',
+            '  - Insulin present but not effective',
+            '  - Cells resistant to insulin signal',
+            '  - Beta cells compensate (make more)',
+            '  - Eventually beta cells burn out',
+            '  - Glucose can\'t enter cells efficiently',
+            '',
+            'Treatment:',
+            '  - Lifestyle changes:',
+            '    • Weight loss (most important)',
+            '    • Exercise',
+            '    • Diet (low sugar/refined carbs)',
+            '  - Oral medications:',
+            '    • Metformin (first-line)',
+            '    • Increase insulin sensitivity',
+            '    • Reduce liver glucose output',
+            '  - Insulin (if severe or beta cell failure)',
+            '  - CAN be reversed with weight loss/lifestyle',
+            '',
+            'LONG-TERM COMPLICATIONS (Both Types):',
+            '',
+            'Microvascular (Small Blood Vessels):',
+            '  - Retinopathy (blindness)',
+            '  - Nephropathy (kidney failure)',
+            '  - Neuropathy (nerve damage)',
+            '',
+            'Macrovascular (Large Blood Vessels):',
+            '  - Heart disease',
+            '  - Stroke',
+            '  - Peripheral artery disease',
+            '',
+            'Other:',
+            '  - Foot ulcers (poor circulation + neuropathy)',
+            '  - Infections (impaired immune function)',
+            '  - Slow wound healing',
+            '',
+            'Why Damage Occurs:',
+            '  - High glucose damages blood vessels',
+            '  - Glycation of proteins',
+            '  - Oxidative stress',
+            '  - Inflammation',
+            '',
+            '═══════════════════════════════════════════',
+            'HYPOGLYCEMIA (Low Blood Sugar):',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Blood glucose < 70 mg/dL',
+            '',
+            'Causes:',
+            '  - Too much insulin (diabetics)',
+            '  - Skipped meals',
+            '  - Excessive exercise',
+            '  - Alcohol (inhibits gluconeogenesis)',
+            '  - Rare: insulin-producing tumor',
+            '',
+            'Symptoms (Progressive):',
+            '  Early:',
+            '  - Shakiness, trembling',
+            '  - Sweating',
+            '  - Rapid heartbeat',
+            '  - Anxiety',
+            '  - Hunger',
+            '',
+            '  Moderate:',
+            '  - Confusion',
+            '  - Difficulty concentrating',
+            '  - Weakness',
+            '  - Blurred vision',
+            '',
+            '  Severe:',
+            '  - Seizures',
+            '  - Loss of consciousness',
+            '  - Can be fatal',
+            '',
+            'Why Dangerous:',
+            '  - Brain depends entirely on glucose',
+            '  - No glucose storage in brain',
+            '  - Brain damage if prolonged',
+            '',
+            'Treatment:',
+            '  - Mild: Eat/drink sugar (juice, candy)',
+            '  - Severe: Glucagon injection or IV glucose',
+            '',
+            '═══════════════════════════════════════════',
+            'OTHER HORMONES AFFECTING GLUCOSE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Also RAISE Blood Glucose:',
+            '  1. Glucagon (main)',
+            '  2. Epinephrine (stress)',
+            '  3. Cortisol (stress, long-term)',
+            '  4. Growth hormone',
+            '',
+            'Only LOWERS Blood Glucose:',
+            '  1. Insulin (only hormone)',
+            '',
+            'Multiple hormones can raise glucose:',
+            '  - Evolutionary advantage',
+            '  - Hypoglycemia more immediately dangerous',
+            '  - Need backup systems',
+            '',
+            'Stress Response:',
+            '  - Fight-or-flight needs energy',
+            '  - Epinephrine rapidly raises glucose',
+            '  - Mobilizes stored glucose',
+            '  - Prepares for action'
+        ],
+        helper: 'Insulin (high glucose → store); Glucagon (low glucose → release from storage)',
+        solution: 'Insulin lowers glucose (promote storage/uptake); Glucagon raises glucose (promote release/production); work antagonistically',
+        realWorldContext: 'Type 2 diabetes epidemic linked to obesity; 90% of cases preventable with lifestyle changes'
+    });
+
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - SKELETAL SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedSkeletalSystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Bone Structure and Function
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Bone Tissue Composition',
+        problem: 'Describe the structure of bone tissue and explain the functions of the skeletal system',
+        parameters: {
+            specificItems: ['Bone', 'Structure'],
+            category: 'bone tissue',
+            limit: 1
+        },
+        type: 'skeletal_system',
+        context: { difficulty: 'beginner', topic: 'Skeletal System', focus: 'bone structure' },
+        subparts: [
+            'Skeletal System Functions:',
+            '',
+            '1. SUPPORT:',
+            '   - Framework for body',
+            '   - Maintains body shape',
+            '   - Holds up soft tissues',
+            '',
+            '2. PROTECTION:',
+            '   - Skull protects brain',
+            '   - Rib cage protects heart and lungs',
+            '   - Vertebrae protect spinal cord',
+            '   - Pelvis protects reproductive organs',
+            '',
+            '3. MOVEMENT:',
+            '   - Bones act as levers',
+            '   - Muscles attach to bones',
+            '   - Joints allow movement',
+            '',
+            '4. MINERAL STORAGE:',
+            '   - Stores calcium and phosphorus',
+            '   - 99% of body\'s calcium in bones',
+            '   - Released when blood levels low',
+            '   - Maintains calcium homeostasis',
+            '',
+            '5. BLOOD CELL PRODUCTION:',
+            '   - Hematopoiesis in bone marrow',
+            '   - Red bone marrow makes:',
+            '     • Red blood cells',
+            '     • White blood cells',
+            '     • Platelets',
+            '',
+            '6. FAT STORAGE:',
+            '   - Yellow bone marrow',
+            '   - Adipose tissue',
+            '   - Energy reserve',
+            '',
+            '═══════════════════════════════════════════',
+            'BONE STRUCTURE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Bones are LIVING TISSUE:',
+            '  - Constantly remodeling',
+            '  - Have blood supply',
+            '  - Can heal when broken',
+            '  - Respond to stress',
+            '',
+            'TWO TYPES OF BONE TISSUE:',
+            '',
+            '1. COMPACT (DENSE) BONE:',
+            '   Location: Outer layer of all bones',
+            '   Appearance: Smooth, dense, ivory-like',
+            '   Structure:',
+            '   - Tightly packed',
+            '   - Very strong',
+            '   - 80% of skeleton',
+            '',
+            '   Microscopic Structure:',
+            '   - Osteons (Haversian systems)',
+            '   - Concentric lamellae (rings)',
+            '   - Central (Haversian) canal:',
+            '     • Contains blood vessels',
+            '     • Contains nerves',
+            '   - Lacunae: spaces with osteocytes',
+            '   - Canaliculi: tiny channels connecting lacunae',
+            '',
+            '2. SPONGY (TRABECULAR) BONE:',
+            '   Location: Inside bones, ends of long bones',
+            '   Appearance: Porous, honeycomb-like',
+            '   Structure:',
+            '   - Trabeculae (thin plates)',
+            '   - Spaces between trabeculae',
+            '   - Filled with bone marrow',
+            '   - Lightweight but strong',
+            '   - 20% of skeleton',
+            '',
+            '   Function:',
+            '   - Reduces weight',
+            '   - Houses red bone marrow',
+            '   - Provides strength along stress lines',
+            '',
+            '═══════════════════════════════════════════',
+            'BONE COMPOSITION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Bone Matrix (Extracellular Material):',
+            '',
+            '1. ORGANIC Component (35%):',
+            '   - Collagen fibers',
+            '   - Provides FLEXIBILITY',
+            '   - Allows some bending',
+            '   - Prevents brittleness',
+            '',
+            '2. INORGANIC Component (65%):',
+            '   - Calcium phosphate crystals',
+            '   - Hydroxyapatite',
+            '   - Provides HARDNESS',
+            '   - Compression resistance',
+            '',
+            'Combination:',
+            '  - Hard yet somewhat flexible',
+            '  - Strong and resilient',
+            '  - Like steel-reinforced concrete',
+            '',
+            'BONE CELLS:',
+            '',
+            '1. OSTEOBLASTS:',
+            '   Function: BUILD bone',
+            '   - Synthesize new bone matrix',
+            '   - Secrete collagen',
+            '   - Promote mineralization',
+            '   - Active during growth and repair',
+            '   - Become osteocytes when trapped',
+            '',
+            '2. OSTEOCYTES:',
+            '   Function: MAINTAIN bone',
+            '   - Mature bone cells',
+            '   - Trapped in lacunae',
+            '   - Most common bone cell',
+            '   - Sense mechanical stress',
+            '   - Communicate via canaliculi',
+            '   - Long lifespan',
+            '',
+            '3. OSTEOCLASTS:',
+            '   Function: BREAK DOWN bone',
+            '   - Resorb bone tissue',
+            '   - Release enzymes and acids',
+            '   - Dissolve matrix',
+            '   - Release calcium to blood',
+            '   - Large, multinucleated cells',
+            '   - Active in remodeling',
+            '',
+            'Balance:',
+            '  - Osteoblasts vs Osteoclasts',
+            '  - Continuous remodeling',
+            '  - Entire skeleton replaced ~every 10 years',
+            '',
+            '═══════════════════════════════════════════',
+            'LONG BONE ANATOMY:',
+            '═══════════════════════════════════════════',
+            '',
+            'Parts of Long Bone (e.g., femur):',
+            '',
+            '1. DIAPHYSIS (Shaft):',
+            '   - Long cylindrical main portion',
+            '   - Compact bone',
+            '   - Hollow center (medullary cavity)',
+            '',
+            '2. EPIPHYSES (Ends):',
+            '   - Proximal and distal ends',
+            '   - Mostly spongy bone',
+            '   - Thin compact bone covering',
+            '   - Articulate with other bones',
+            '',
+            '3. EPIPHYSEAL PLATE (Growth Plate):',
+            '   - In children/adolescents',
+            '   - Layer of hyaline cartilage',
+            '   - Site of lengthwise growth',
+            '   - Closes when growth stops',
+            '   - Becomes epiphyseal line in adults',
+            '',
+            '4. MEDULLARY CAVITY:',
+            '   - Hollow space in diaphysis',
+            '   - Contains yellow bone marrow',
+            '   - Fat storage',
+            '',
+            '5. PERIOSTEUM:',
+            '   - Outer fibrous membrane',
+            '   - Covers entire bone except joints',
+            '   - Contains blood vessels and nerves',
+            '   - Osteoblasts for growth and repair',
+            '   - Attachment point for tendons/ligaments',
+            '',
+            '6. ENDOSTEUM:',
+            '   - Thin membrane lining medullary cavity',
+            '   - Contains osteoblasts and osteoclasts',
+            '',
+            '7. ARTICULAR CARTILAGE:',
+            '   - Hyaline cartilage',
+            '   - Covers joint surfaces',
+            '   - Smooth, glassy',
+            '   - Reduces friction',
+            '   - Shock absorption',
+            '',
+            'BONE MARROW:',
+            '',
+            'Red Bone Marrow:',
+            '  - Hematopoietic tissue',
+            '  - Produces blood cells',
+            '  - In spongy bone',
+            '  - In children: most bones',
+            '  - In adults: skull, ribs, sternum, pelvis, vertebrae, ends of long bones',
+            '',
+            'Yellow Bone Marrow:',
+            '  - Adipose tissue',
+            '  - Fat storage',
+            '  - In medullary cavity of long bones',
+            '  - Can convert to red marrow if needed',
+            '',
+            'Conversion:',
+            '  - At birth: all red marrow',
+            '  - Childhood: gradual conversion to yellow',
+            '  - By adulthood: mostly yellow in long bones',
+            '  - Severe blood loss: yellow → red'
+        ],
+        helper: 'Bones = living tissue (compact outside, spongy inside); functions: support, protect, move, store minerals, make blood cells',
+        solution: 'Bone structure: compact (dense outer), spongy (porous inner); composition: collagen (flexible) + minerals (hard); Functions: support, protect, movement, storage, blood production',
+        realWorldContext: 'Osteoporosis: bone breakdown exceeds formation, bones become fragile and fracture easily'
+    });
+
+    // Problem 2: Bone Development and Growth
+    /**relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Ossification and Bone Growth',
+        problem: 'Explain how bones form and grow through ossification and the role of growth plates',
+        parameters: {
+            specificItems: ['Ossification', 'Growth'],
+            category: 'bone development',
+            limit: 2
+        },
+        type: 'skeletal_system',
+        context: { difficulty: 'intermediate', topic: 'Skeletal System', focus: 'bone formation' },
+        subparts: [
+            'BONE FORMATION (Ossification):',
+            '',
+            'Babies: Born with ~270 bones (some cartilage)',
+            'Adults: Have 206 bones (fusion occurs)',
+            '',
+            'TWO TYPES OF OSSIFICATION:',
+            '',
+            '═══════════════════════════════════════════',
+            '1. INTRAMEMBRANOUS OSSIFICATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Bone develops directly from mesenchyme',
+            '  - From fibrous connective tissue',
+            '  - No cartilage model',
+            '',
+            'Bones Formed:',
+            '  - Flat bones of SKULL',
+            '  - Facial bones',
+            '  - Clavicle (collarbone)',
+            '',
+            'Process:',
+            '  1. Ossification centers appear',
+            '     - Mesenchyme cells → osteoblasts',
+            '     - In fibrous connective tissue',
+            '',
+            '  2. Bone matrix secreted',
+            '     - Osteoblasts secrete osteoid',
+            '     - Osteoid calcifies',
+            '     - Trabeculae form',
+            '',
+            '  3. Trabeculae merge',
+            '     - Spongy bone forms first',
+            '     - Blood vessels incorporated',
+            '',
+            '  4. Periosteum forms',
+            '     - On outer surface',
+            '     - Compact bone replaces surface spongy bone',
+            '',
+            '  5. Final bone structure',
+            '     - Spongy bone (diploe) in middle',
+            '     - Compact bone on surfaces',
+            '',
+            'Fontanels (Soft Spots):',
+            '  - Fibrous membranes between skull bones',
+            '  - In infant skull',
+            '  - Allow brain growth',
+            '  - Allow head compression during birth',
+            '  - Close by 18-24 months',
+            '',
+            '═══════════════════════════════════════════',
+            '2. ENDOCHONDRAL OSSIFICATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Bone develops from hyaline cartilage model',
+            '  - Cartilage template first',
+            '  - Then replaced by bone',
+            '',
+            'Bones Formed:',
+            '  - ALL bones EXCEPT skull and clavicle',
+            '  - Long bones, short bones, irregular bones',
+            '  - Most of skeleton',
+            '',
+            'Process (Long Bone):',
+            '',
+            '1. CARTILAGE MODEL FORMS (Fetal):',
+            '   - Hyaline cartilage shaped like future bone',
+            '   - Covered by perichondrium',
+            '',
+            '2. COLLAR FORMATION (8 weeks fetal):',
+            '   - Perichondrium → periosteum',
+            '   - Bone collar forms around diaphysis',
+            '   - Compact bone on outside',
+            '',
+            '3. PRIMARY OSSIFICATION CENTER (8-12 weeks):',
+            '   - In diaphysis (shaft)',
+            '   - Cartilage calcifies',
+            '   - Chondrocytes die',
+            '   - Blood vessels invade',
+            '   - Bring osteoblasts',
+            '   - Osteoblasts make bone',
+            '   - Medullary cavity forms',
+            '',
+            '4. SECONDARY OSSIFICATION CENTERS (Birth-puberty):',
+            '   - In epiphyses (ends)',
+            '   - After birth',
+            '   - Blood vessels invade',
+            '   - Ossification spreads outward',
+            '   - Leaves articular cartilage',
+            '   - Leaves epiphyseal plate',
+            '',
+            '5. EPIPHYSEAL PLATE REMAINS:',
+            '   - Between diaphysis and epiphysis',
+            '   - Cartilage persists',
+            '   - Site of lengthwise growth',
+            '   - Active until late teens/early 20s',
+            '',
+            '═══════════════════════════════════════════',
+            'BONE GROWTH:',
+            '═══════════════════════════════════════════',
+            '',
+            'TWO TYPES OF GROWTH:',
+            '',
+            '1. LENGTHWISE GROWTH:',
+            '   Location: Epiphyseal (growth) plates',
+            '   Type: Interstitial growth',
+            '',
+            'Epiphyseal Plate Structure:',
+            '  Four Zones (from epiphysis to diaphysis):',
+            '',
+            '  Zone 1 - Resting (Reserve) Cartilage:',
+            '    - Inactive chondrocytes',
+            '    - Anchor plate to epiphysis',
+            '',
+            '  Zone 2 - Proliferating Cartilage:',
+            '    - Chondrocytes divide rapidly',
+            '    - Stack like coins',
+            '    - Push older cells toward diaphysis',
+            '',
+            '  Zone 3 - Hypertrophic Cartilage:',
+            '    - Cells enlarge',
+            '    - Matrix calcifies',
+            '    - Cells die (no nutrients)',
+            '',
+            '  Zone 4 - Calcified Cartilage:',
+            '    - Dead calcified cartilage',
+            '    - Osteoblasts invade',
+            '    - Replace with bone',
+            '    - Bone lengthens',
+            '',
+            'Process:',
+            '  - Cartilage added at epiphysis end (Zone 2)',
+            '  - Cartilage replaced by bone at diaphysis end (Zone 4)',
+            '  - Plate maintains thickness',
+            '  - Bone gets longer',
+            '',
+            'Growth Rate:',
+            '  - Infancy: Rapid',
+            '  - Childhood: Steady',
+            '  - Puberty: Growth spurt (sex hormones)',
+            '  - Late teens: Slows',
+            '',
+            'Closure:',
+            '  - Cartilage production slows',
+            '  - Ossification catches up',
+            '  - Plate fully ossifies',
+            '  - Becomes epiphyseal LINE',
+            '  - No more lengthwise growth',
+            '  - Timing: Females 18, Males 21 (average)',
+            '',
+            'Factors Affecting:',
+            '  ✓ Nutrition (especially Ca²⁺, vitamin D, protein)',
+            '  ✓ Hormones:',
+            '    • Growth hormone (GH): Stimulates',
+            '    • Thyroid hormones: Essential',
+            '    • Sex hormones: Pubertal spurt, then closure',
+            '  ✓ Genetics: Major determinant',
+            '  ✓ Health: Chronic illness stunts growth',
+            '',
+            '2. WIDTH GROWTH (Thickness):',
+            '   Location: Periosteum',
+            '   Type: Appositional growth',
+            '   Duration: Throughout life (slower in adults)',
+            '',
+            'Process:',
+            '  - Osteoblasts in periosteum',
+            '  - Add bone to outer surface',
+            '  - Bone gets wider/thicker',
+            '',
+            '  Simultaneously:',
+            '  - Osteoclasts in endosteum',
+            '  - Remove bone from inner surface',
+            '  - Medullary cavity enlarges',
+            '',
+            'Result:',
+            '  - Bone diameter increases',
+            '  - Wall thickness increases',
+            '  - Maintains proportions',
+            '',
+            '═══════════════════════════════════════════',
+            'BONE REMODELING:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Continuous process of bone breakdown and rebuilding',
+            '',
+            'Process:',
+            '  1. Osteoclasts resorb old bone',
+            '  2. Osteoblasts deposit new bone',
+            '  3. Coordinated and balanced',
+            '',
+            'Purposes:',
+            '  - Replace old bone with new',
+            '  - Repair microfractures',
+            '  - Reshape bone',
+            '  - Maintain calcium homeostasis',
+            '  - Adapt to stress (Wolff\'s Law)',
+            '',
+            'Rate:',
+            '  - 5-10% of skeleton per year',
+            '  - Entire skeleton replaced ~every 10 years',
+            '  - Faster in spongy bone (20% per year)',
+            '  - Slower in compact bone (5% per year)',
+            '',
+            'Regulation:',
+            '',
+            '  Mechanical Stress:',
+            '  - Weight-bearing exercise',
+            '  - Stimulates bone deposition',
+            '  - Bones become stronger/denser',
+            '  - Lack of stress → bone loss',
+            '  - Astronauts lose bone (weightlessness)',
+            '',
+            '  Hormonal:',
+            '  - PTH: Stimulates osteoclasts (releases Ca²⁺)',
+            '  - Calcitonin: Inhibits osteoclasts (deposits Ca²⁺)',
+            '  - Growth hormone: Stimulates osteoblasts',
+            '  - Sex hormones: Maintain bone mass',
+            '  - Thyroid hormones: Regulate remodeling',
+            '',
+            'Wolff\'s Law:',
+            '  - Bone adapts to stress placed on it',
+            '  - Used → becomes stronger',
+            '  - Unused → becomes weaker',
+            '  - Explains:',
+            '    • Tennis player: dominant arm bones thicker',
+            '    • Bedridden patients: lose bone mass',
+            '    • Weight-bearing exercise strengthens bones',
+            '',
+            '═══════════════════════════════════════════',
+            'BONE HEALING (Fracture Repair):',
+            '═══════════════════════════════════════════',
+            '',
+            'Steps:',
+            '',
+            '1. HEMATOMA FORMATION (0-48 hours):',
+            '   - Blood vessels broken',
+            '   - Blood clots at fracture site',
+            '   - Hematoma forms',
+            '   - Bone cells at break die (no nutrients)',
+            '   - Inflammation',
+            '',
+            '2. FIBROCARTILAGE CALLUS (3 days - 3 weeks):',
+            '   - Capillaries grow into hematoma',
+            '   - Fibroblasts produce collagen',
+            '   - Chondrocytes produce cartilage',
+            '   - Soft callus forms',
+            '   - Stabilizes fracture (not strong yet)',
+            '',
+            '3. BONY (HARD) CALLUS (3-4 months):',
+            '   - Osteoblasts produce bone matrix',
+            '   - Replaces fibrocartilage',
+            '   - Hard callus forms',
+            '   - Spongy bone',
+            '   - Stronger, can bear weight',
+            '',
+            '4. BONE REMODELING (Months to years):',
+            '   - Osteoclasts and osteoblasts reshape',
+            '   - Excess material removed',
+            '   - Compact bone replaces spongy',
+            '   - Returns to original shape',
+            '   - Complete healing',
+            '',
+            'Healing Time:',
+            '  - Simple fracture: 6-8 weeks',
+            '  - Complete remodeling: Months to years',
+            '  - Age affects: Slower in elderly',
+            '',
+            'Factors Affecting Healing:',
+            '  ✓ Age: Faster in young',
+            '  ✓ Nutrition: Need Ca²⁺, vitamin D, protein',
+            '  ✓ Blood supply: Good supply heals faster',
+            '  ✓ Type of fracture: Simple vs compound',
+            '  ✓ Immobilization: Movement slows healing',
+            '  ✓ Health: Diabetes, smoking slow healing',
+            '',
+            'X-rays show:',
+            '  - Immediate: Fracture line clear',
+            '  - 2 weeks: Soft callus (not visible)',
+            '  - 6 weeks: Hard callus visible',
+            '  - 6 months: Remodeling, line fading'
+        ],
+        helper: 'Intramembranous (skull, no cartilage); Endochondral (most bones, cartilage→bone); Growth plates lengthen bones until teens',
+        solution: 'Intramembranous: flat bones from membrane; Endochondral: most bones from cartilage model; Growth occurs at epiphyseal plates (length) and periosteum (width)',
+        realWorldContext: 'Growth hormone deficiency causes dwarfism; excess before plate closure causes gigantism'
+    });
+    
+
+    // Problem 3: Axial vs Appendicular Skeleton
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Skeletal Divisions',
+        problem: 'Compare the axial and appendicular skeletons, identifying major bones in each',
+        parameters: {
+            specificItems: ['Axial Skeleton', 'Appendicular Skeleton'],
+            category: 'skeletal divisions',
+            limit: 2
+        },
+        type: 'skeletal_system',
+        context: { difficulty: 'intermediate', topic: 'Skeletal System', focus: 'skeleton divisions' },
+        subparts: [
+            'Adult Skeleton: 206 bones',
+            '',
+            'TWO DIVISIONS:',
+            '',
+            '═══════════════════════════════════════════',
+            '1. AXIAL SKELETON (80 bones):',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Forms AXIS (midline) of body',
+            'Function: Support and protect organs',
+            '',
+            'COMPONENTS:',
+            '',
+            'A) SKULL (22 bones):',
+            '',
+            '   Cranium (8 bones): Enclose brain',
+            '   - Frontal (1): Forehead',
+            '   - Parietal (2): Top and sides',
+            '   - Temporal (2): Temples, ear',
+            '   - Occipital (1): Back, base (foramen magnum)',
+            '   - Sphenoid (1): Butterfly, base of skull',
+            '   - Ethmoid (1): Between eyes',
+            '',
+            '   Facial Bones (14):',
+            '   - Maxilla (2): Upper jaw',
+            '   - Mandible (1): Lower jaw (ONLY movable skull bone)',
+            '   - Zygomatic (2): Cheekbones',
+            '   - Nasal (2): Bridge of nose',
+            '   - Lacrimal (2): Medial orbit (tear ducts)',
+            '   - Palatine (2): Posterior hard palate',
+            '   - Inferior nasal conchae (2): Lateral nasal wall',
+            '   - Vomer (1): Nasal septum',
+            '',
+            '   Features:',
+            '   - Sutures: Immovable joints (fibrous)',
+            '   - Sinuses: Air-filled spaces (lighten skull)',
+            '   - Foramen magnum: Spinal cord passes through',
+            '   - Fontanels in infants (close by age 2)',
+            '',
+            'B) AUDITORY OSSICLES (6 bones):',
+            '   - In middle ear (3 per ear)',
+            '   - Malleus (hammer)',
+            '   - Incus (anvil)',
+            '   - Stapes (stirrup - SMALLEST bone in body)',
+            '   - Function: Transmit sound vibrations',
+            '',
+            'C) HYOID BONE (1 bone):',
+            '   - U-shaped',
+            '   - In neck, below mandible',
+            '   - ONLY bone NOT articulating with another bone',
+            '   - Suspended by ligaments from temporal bones',
+            '   - Supports tongue and larynx',
+            '',
+            'D) VERTEBRAL COLUMN (26 bones):',
+            '   Also called: Spine, backbone',
+            '',
+            '   Regions (top to bottom):',
+            '',
+            '   1. Cervical (7): Neck vertebrae',
+            '      - C1 (Atlas): Supports skull, "yes" movement',
+            '      - C2 (Axis): "No" movement (rotation)',
+            '      - C3-C7: Typical cervical',
+            '',
+            '   2. Thoracic (12): Chest vertebrae',
+            '      - T1-T12',
+            '      - Articulate with ribs',
+            '      - Larger than cervical',
+            '',
+            '   3. Lumbar (5): Lower back',
+            '      - L1-L5',
+            '      - Largest vertebrae',
+            '      - Bear most body weight',
+            '      - Common site of back pain',
+            '',
+            '   4. Sacrum (1): 5 fused vertebrae',
+            '      - Triangular',
+            '      - Forms posterior pelvic wall',
+            '      - Articulates with hip bones',
+            '',
+            '   5. Coccyx (1): Tailbone',
+            '      - 3-5 fused vertebrae',
+            '      - Vestigial tail',
+            '',
+            '   Mnemonic: "Breakfast at 7, Lunch at 12, Dinner at 5"',
+            '   (Cervical 7, Thoracic 12, Lumbar 5)',
+            '',
+            '   Functions:',
+            '   - Supports head and trunk',
+            '   - Protects spinal cord',
+            '   - Attachment for ribs and muscles',
+            '   - Allows flexibility',
+            '',
+            '   Curves (Side View):',
+            '   - Cervical: Concave (lordosis)',
+            '   - Thoracic: Convex (kyphosis)',
+            '   - Lumbar: Concave (lordosis)',
+            '   - Sacral: Convex',
+            '   - S-shaped curve provides shock absorption',
+            '',
+            '   Intervertebral Discs:',
+            '   - Fibrocartilage pads between vertebrae',
+            '   - Shock absorbers',
+            '   - Allow slight movement',
+            '   - Herniated disc: bulges, presses nerves (pain)',
+            '',
+            'E) THORACIC CAGE (25 bones):',
+            '   Also called: Rib cage',
+            '',
+            '   Ribs (24 = 12 pairs):',
+            '   - Protect heart, lungs, great vessels',
+            '   - Assist breathing',
+            '',
+            '   Types:',
+            '   - True ribs (1-7): Attach directly to sternum via costal cartilage',
+            '   - False ribs (8-10): Attach indirectly to sternum',
+            '   - Floating ribs (11-12): No anterior attachment',
+            '',
+            '   Sternum (1): Breastbone',
+            '   - Manubrium (top)',
+            '   - Body (middle)',
+            '   - Xiphoid process (bottom, cartilage tip)',
+            '   - CPR landmark: Compressions on lower sternum',
+            '',
+            '═══════════════════════════════════════════',
+            '2. APPENDICULAR SKELETON (126 bones):',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: APPENDAGES (limbs) and girdles',
+            'Function: Movement and manipulation',
+            '',
+            'COMPONENTS:',
+            '',
+            'A) PECTORAL (SHOULDER) GIRDLE (4 bones):',
+            '   Function: Attach upper limbs to axial skeleton',
+            '',
+            '   Clavicle (2): Collarbones',
+            '   - S-shaped',
+            '   - Connects sternum to scapula',
+            '   - Most frequently fractured bone',
+            '',
+            '   Scapula (2): Shoulder blades',
+            '   - Flat, triangular',
+            '   - On posterior thorax',
+            '   - Glenoid cavity: Socket for humerus',
+            '   - Very mobile',
+            '',
+            'B) UPPER LIMBS (60 bones = 30 per arm):',
+            '',
+            '   Arm (1 per side):',
+            '   - Humerus: Upper arm bone (longest of upper limb)',
+            '',
+            '   Forearm (2 per side):',
+            '   - Radius: Lateral (thumb side)',
+            '     • Rotates for pronation/supination',
+            '   - Ulna: Medial (pinky side)',
+            '     • Forms elbow joint',
+            '',
+            '   Hand (27 per side):',
+            '   - Carpals (8): Wrist bones',
+            '     • Two rows of 4',
+            '     • Scaphoid often fractured',
+            '   - Metacarpals (5): Palm bones',
+            '   - Phalanges (14): Finger bones',
+            '     • 3 per finger (proximal, middle, distal)',
+            '     • 2 in thumb (no middle)',
+            '',
+            'C) PELVIC (HIP) GIRDLE (2 bones):',
+            '   Function: Attach lower limbs, support body weight',
+            '',
+            '   Hip Bones (2): Each called os coxae or innominate',
+            '   - Each formed by fusion of 3 bones:',
+            '     • Ilium: Large, flared upper portion',
+            '     • Ischium: Posterior, inferior ("sit bones")',
+            '     • Pubis: Anterior, medial',
+            '   - Acetabulum: Deep socket for femur head',
+            '   - Fusion complete by age 23',
+            '',
+            '   Pelvis = Hip bones + Sacrum + Coccyx',
+            '',
+            '   Gender Differences:',
+            '   Male Pelvis:',
+            '   - Narrower',
+            '   - Deeper',
+            '   - Heavier bones',
+            '   - Heart-shaped pelvic inlet',
+            '   - Pubic arch < 90° (acute)',
+            '',
+            '   Female Pelvis:',
+            '   - Wider, shallower',
+            '   - Lighter bones',
+            '   - Oval pelvic inlet',
+            '   - Pubic arch > 90° (obtuse)',
+            '   - ADAPTED FOR CHILDBIRTH',
+            '',
+            'D) LOWER LIMBS (60 bones = 30 per leg):',
+            '',
+            '   Thigh (1 per side):',
+            '   - Femur: Thigh bone',
+            '     • LONGEST and STRONGEST bone in body',
+            '     • Head fits into acetabulum',
+            '     • Neck: Common fracture site in elderly',
+            '',
+            '   Patella (1 per side):',
+            '   - Kneecap',
+            '   - Sesamoid bone (within tendon)',
+            '   - Protects knee joint',
+            '   - Improves leverage',
+            '',
+            '   Leg (2 per side):',
+            '   - Tibia: Shin bone',
+            '     • Medial, larger',
+            '     • Weight-bearing',
+            '   - Fibula: Lateral, smaller',
+            '     • Not weight-bearing',
+            '     • Muscle attachment',
+            '',
+            '   Foot (26 per side):',
+            '   - Tarsals (7): Ankle bones',
+            '     • Calcaneus: Heel bone (largest tarsal)',
+            '     • Talus: Articulates with tibia',
+            '   - Metatarsals (5): Sole bones',
+            '   - Phalanges (14): Toe bones',
+            '     • 3 per toe (except big toe)',
+            '     • 2 in big toe',
+            '',
+            '   Arches of Foot:',
+            '   - Longitudinal (medial and lateral)',
+            '   - Transverse',
+            '   - Function: Shock absorption, weight distribution',
+            '   - Flat feet: Fallen arches',
+            '',
+            '═══════════════════════════════════════════',
+            'COMPARISON:',
+            '═══════════════════════════════════════════',
+            '',
+            'Feature          Axial            Appendicular',
+            '─────────────────────────────────────────────────',
+            'Number           80 bones         126 bones',
+            'Location         Midline          Limbs/girdles',
+            'Function         Support/Protect  Movement',
+            'Examples         Skull, spine,    Arms, legs,',
+            '                 ribs             shoulders, hips',
+            'Movement         Limited          Extensive',
+            '',
+            'Memory Aid:',
+            '  - AXIAL = AXIS (center line of body)',
+            '  - APPENDICULAR = APPENDAGES (arms, legs)'
+        ],
+        helper: 'Axial (80) = skull, spine, ribs (midline, protect); Appendicular (126) = limbs and girdles (movement)',
+        solution: 'Axial skeleton (80 bones): skull, vertebrae, ribs (support/protect); Appendicular (126 bones): limbs, girdles (movement)',
+        realWorldContext: 'Hip fractures common in elderly (osteoporosis); femur neck fracture often requires surgery'
+    });
+
+    // Problem 4: Joint Types and Movement
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Joint Classification and Function',
+        problem: 'Classify joints by structure and function, describing synovial joint types and movements',
+        parameters: {
+            specificItems: ['Joints', 'Movement'],
+            category: 'joints',
+            limit: 2
+        },
+        type: 'skeletal_system',
+        context: { difficulty: 'intermediate', topic: 'Skeletal System', focus: 'joints' },
+        subparts: [
+            'Joints (Articulations):',
+            'Definition: Point where two or more bones meet',
+            '',
+            'TWO CLASSIFICATION SYSTEMS:',
+            '',
+            '═══════════════════════════════════════════',
+            'STRUCTURAL CLASSIFICATION:',
+            '(Based on connective tissue)',
+            '═══════════════════════════════════════════',
+            '',
+            '1. FIBROUS JOINTS:',
+            '   Connection: Dense fibrous connective tissue',
+            '   Joint cavity: None',
+            '   Movement: Little to none',
+            '',
+            '   Types:',
+            '   a) Sutures:',
+            '      - Between skull bones',
+            '      - Interlocking edges',
+            '      - Immovable (synarthrosis)',
+            '      - Fuse with age (synostosis)',
+            '',
+            '   b) Syndesmoses:',
+            '      - Bones connected by ligament',
+            '      - Example: Tibia-fibula (interosseous membrane)',
+            '      - Slight movement',
+            '',
+            '   c) Gomphoses:',
+            '      - Peg-in-socket',
+            '      - Teeth in jaw sockets',
+            '      - Periodontal ligament',
+            '      - Immovable',
+            '',
+            '2. CARTILAGINOUS JOINTS:',
+            '   Connection: Cartilage',
+            '   Joint cavity: None',
+            '   Movement: Slight',
+            '',
+            '   Types:',
+            '   a) Synchondroses:',
+            '      - Hyaline cartilage',
+            '      - Example: Epiphyseal plates (temporary)',
+            '      - Example: First rib-sternum',
+            '      - Immovable',
+            '',
+            '   b) Symphyses:',
+            '      - Fibrocartilage',
+            '      - Example: Intervertebral discs',
+            '      - Example: Pubic symphysis',
+            '      - Slightly movable (amphiarthrosis)',
+            '',
+            '3. SYNOVIAL JOINTS:',
+            '   Connection: Ligaments',
+            '   Joint cavity: Yes (filled with synovial fluid)',
+            '   Movement: Freely movable (diarthrosis)',
+            '   Most common type',
+            '',
+            '═══════════════════════════════════════════',
+            'FUNCTIONAL CLASSIFICATION:',
+            '(Based on degree of movement)',
+            '═══════════════════════════════════════════',
+            '',
+            '1. SYNARTHROSIS:',
+            '   Movement: Immovable',
+            '   Examples: Sutures, gomphoses',
+            '',
+            '2. AMPHIARTHROSIS:',
+            '   Movement: Slightly movable',
+            '   Examples: Intervertebral discs, pubic symphysis',
+            '',
+            '3. DIARTHROSIS:',
+            '   Movement: Freely movable',
+            '   Examples: All synovial joints',
+            '',
+            '═══════════════════════════════════════════',
+            'SYNOVIAL JOINTS (Detailed):',
+            '═══════════════════════════════════════════',
+            '',
+            'GENERAL STRUCTURE:',
+            '',
+            '1. Articular Cartilage:',
+            '   - Hyaline cartilage',
+            '   - Covers bone ends',
+            '   - Smooth, glassy surface',
+            '   - Reduces friction',
+            '   - No nerves or blood vessels',
+            '',
+            '2. Joint (Synovial) Cavity:',
+            '   - Space between bones',
+            '   - Filled with synovial fluid',
+            '   - Allows movement',
+            '',
+            '3. Articular (Joint) Capsule:',
+            '   Two layers:',
+            '   - Outer: Fibrous capsule (dense connective tissue)',
+            '   - Inner: Synovial membrane',
+            '     • Secretes synovial fluid',
+            '     • Lines cavity',
+            '',
+            '4. Synovial Fluid:',
+            '   - Viscous, slippery',
+            '   - Like egg white consistency',
+            '   - Functions:',
+            '     • Lubrication (reduces friction)',
+            '     • Shock absorption',
+            '     • Nourishes cartilage (no blood vessels)',
+            '     • Removes waste',
+            '',
+            '5. Reinforcing Ligaments:',
+            '   - Connect bone to bone',
+            '   - Strengthen joint',
+            '   - Limit movement (prevent overextension)',
+            '   - Can be inside or outside capsule',
+            '',
+            '6. Nerves and Blood Vessels:',
+            '   - Rich nerve supply (sense pain, position)',
+            '   - Blood vessels in synovial membrane',
+            '',
+            'ADDITIONAL FEATURES (some joints):',
+            '',
+            '- Bursae:',
+            '  • Fluid-filled sacs',
+            '  • Between bones and tendons/skin',
+            '  • Reduce friction',
+            '  • Bursitis: inflammation',
+            '',
+            '- Tendon Sheaths:',
+            '  • Elongated bursae',
+            '  • Wrap around tendons',
+            '  • Common in wrist, ankle',
+            '',
+            '- Menisci (Articular Discs):',
+            '  • Fibrocartilage pads',
+            '  • Example: Knee (medial and lateral menisci)',
+            '  • Improve fit, shock absorption',
+            '  • Can tear (common sports injury)',
+            '',
+            'SIX TYPES OF SYNOVIAL JOINTS:',
+            '(By shape and movement)',
+            '',
+            '1. HINGE JOINT:',
+            '   Movement: Uniaxial (one plane)',
+            '   - Flexion and extension only',
+            '   Examples:',
+            '   - Elbow (humeroulnar)',
+            '   - Knee (modified hinge)',
+            '   - Ankle (talocrural)',
+            '   - Interphalangeal (fingers, toes)',
+            '   Like: Door hinge',
+            '',
+            '2. PIVOT JOINT:',
+            '   Movement: Uniaxial',
+            '   - Rotation only',
+            '   Examples:',
+            '   - Atlantoaxial (C1-C2, shake head "no")',
+            '   - Radioulnar (forearm rotation - supination/pronation)',
+            '   Like: Turning doorknob',
+            '',
+            '3. BALL-AND-SOCKET JOINT:',
+            '   Movement: Multiaxial (all directions)',
+            '   - Flexion, extension',
+            '   - Abduction, adduction',
+            '   - Rotation',
+            '   - Circumduction',
+            '   Most mobile joint type',
+            '   Examples:',
+            '   - Shoulder (glenohumeral) - MOST mobile',
+            '   - Hip (coxal) - More stable than shoulder',
+            '   Like: Joystick',
+            '',
+            '4. CONDYLOID (ELLIPSOID) JOINT:',
+            '   Movement:  Biaxial (two planes)',
+            '   - Flexion, extension',
+            '   - Abduction, adduction',
+            '   - Circumduction (but NOT rotation)',
+            '   Examples:',
+            '   - Wrist (radiocarpal)',
+            '   - Metacarpophalangeal (knuckles)',
+            '   - Atlanto-occipital (skull-C1, nod "yes")',
+            '   Like: Oval peg in oval hole',
+            '',
+            '5. SADDLE JOINT:',
+            '   Movement: Biaxial',
+            '   - Similar to condyloid but greater range',
+            '   - Flexion, extension',
+            '   - Abduction, adduction',
+            '   - Circumduction',
+            '   - Opposition (unique to thumb)',
+            '   Examples:',
+            '   - Carpometacarpal of thumb (ONLY true saddle joint)',
+            '   Like: Rider on saddle (both curved)',
+            '   Allows: Opposable thumb (grasp)',
+            '',
+            '6. GLIDING (PLANE) JOINT:',
+            '   Movement: Nonaxial',
+            '   - Sliding/gliding',
+            '   - Short, limited movements',
+            '   - Side-to-side, back-and-forth',
+            '   Examples:',
+            '   - Intercarpal (between carpals)',
+            '   - Intertarsal (between tarsals)',
+            '   - Between vertebral articular processes',
+            '   - Acromioclavicular (shoulder)',
+            '   Like: Two flat surfaces sliding',
+            '',
+            '═══════════════════════════════════════════',
+            'TYPES OF MOVEMENTS:',
+            '═══════════════════════════════════════════',
+            '',
+            'ANGULAR MOVEMENTS:',
+            '(Change angle between bones)',
+            '',
+            '1. Flexion:',
+            '   - DECREASE angle',
+            '   - Bending',
+            '   - Examples:',
+            '     • Elbow: Bend arm',
+            '     • Knee: Bend leg',
+            '     • Neck: Chin to chest',
+            '',
+            '2. Extension:',
+            '   - INCREASE angle',
+            '   - Straightening',
+            '   - Return to anatomical position',
+            '   - Examples:',
+            '     • Elbow: Straighten arm',
+            '     • Knee: Straighten leg',
+            '',
+            '3. Hyperextension:',
+            '   - Extension beyond anatomical position',
+            '   - Examples:',
+            '     • Head: Tilt back',
+            '     • Leg: Kick backward',
+            '',
+            '4. Abduction:',
+            '   - Movement AWAY from midline',
+            '   - "Abduct = take away"',
+            '   - Examples:',
+            '     • Arm: Raise to side',
+            '     • Fingers: Spread apart',
+            '',
+            '5. Adduction:',
+            '   - Movement TOWARD midline',
+            '   - "Adduct = bring together"',
+            '   - Opposite of abduction',
+            '   - Examples:',
+            '     • Arm: Lower to side',
+            '     • Fingers: Bring together',
+            '',
+            '6. Circumduction:',
+            '   - Circular movement',
+            '   - Combines flexion, extension, abduction, adduction',
+            '   - Distal end traces circle',
+            '   - Examples:',
+            '     • Shoulder: Arm circles',
+            '     • Hip: Leg circles',
+            '',
+            'ROTATIONAL MOVEMENTS:',
+            '',
+            '1. Rotation:',
+            '   - Turning around longitudinal axis',
+            '   - Medial (internal): Toward midline',
+            '   - Lateral (external): Away from midline',
+            '   - Examples:',
+            '     • Head: Shake "no"',
+            '     • Hip: Turn leg in/out',
+            '',
+            '2. Supination:',
+            '   - Forearm rotation',
+            '   - Radius and ulna parallel',
+            '   - Palm faces UP/FORWARD',
+            '   - "Soup-ination" = hold soup bowl',
+            '   - Anatomical position',
+            '',
+            '3. Pronation:',
+            '   - Forearm rotation',
+            '   - Radius crosses ulna',
+            '   - Palm faces DOWN/BACKWARD',
+            '   - Opposite of supination',
+            '',
+            'SPECIAL MOVEMENTS:',
+            '',
+            '1. Dorsiflexion (Foot):',
+            '   - Flex ankle',
+            '   - Toes UP toward shin',
+            '   - Standing on heels',
+            '',
+            '2. Plantar Flexion (Foot):',
+            '   - Extend ankle',
+            '   - Point toes DOWN',
+            '   - Standing on tiptoes',
+            '',
+            '3. Inversion (Foot):',
+            '   - Sole turns INWARD (medial)',
+            '   - Common in ankle sprains',
+            '',
+            '4. Eversion (Foot):',
+            '   - Sole turns OUTWARD (lateral)',
+            '   - Less common',
+            '',
+            '5. Protraction:',
+            '   - Move FORWARD',
+            '   - Examples:',
+            '     • Mandible: Jutting jaw forward',
+            '     • Scapula: Hunching shoulders forward',
+            '',
+            '6. Retraction:',
+            '   - Move BACKWARD',
+            '   - Opposite of protraction',
+            '   - Examples:',
+            '     • Mandible: Pull jaw back',
+            '     • Scapula: Pull shoulders back',
+            '',
+            '7. Elevation:',
+            '   - Move UPWARD',
+            '   - Examples:',
+            '     • Mandible: Close mouth',
+            '     • Scapula: Shrug shoulders',
+            '',
+            '8. Depression:',
+            '   - Move DOWNWARD',
+            '   - Opposite of elevation',
+            '   - Examples:',
+            '     • Mandible: Open mouth',
+            '     • Scapula: Drop shoulders',
+            '',
+            '9. Opposition (Thumb):',
+            '   - Touch thumb to fingertips',
+            '   - UNIQUE to humans',
+            '   - Allows grasping',
+            '   - Saddle joint of thumb',
+            '',
+            '10. Reposition:',
+            '    - Return thumb to anatomical position',
+            '    - Opposite of opposition',
+            '',
+            '═══════════════════════════════════════════',
+            'JOINT DISORDERS:',
+            '═══════════════════════════════════════════',
+            '',
+            '1. ARTHRITIS:',
+            '   Definition: Inflammation of joints',
+            '',
+            '   Osteoarthritis (OA):',
+            '   - "Wear and tear" arthritis',
+            '   - Cartilage degenerates',
+            '   - Bone-on-bone friction',
+            '   - Common in elderly',
+            '   - Weight-bearing joints (knees, hips, spine)',
+            '   - Symptoms: Pain, stiffness, crepitus (grinding)',
+            '   - Treatment: Pain relief, exercise, joint replacement',
+            '',
+            '   Rheumatoid Arthritis (RA):',
+            '   - Autoimmune disease',
+            '   - Immune system attacks synovial membrane',
+            '   - Chronic inflammation',
+            '   - Affects hands, feet (symmetrical)',
+            '   - Symptoms: Pain, swelling, warmth, deformity',
+            '   - Systemic (fatigue, fever)',
+            '   - Treatment: Immunosuppressants, biologics',
+            '',
+            '2. SPRAINS:',
+            '   - Stretched/torn LIGAMENTS',
+            '   - Bone to bone',
+            '   - Common: Ankle (inversion)',
+            '   - Grades: I (mild), II (partial tear), III (complete tear)',
+            '   - Treatment: RICE (Rest, Ice, Compression, Elevation)',
+            '',
+            '3. STRAINS:',
+            '   - Stretched/torn MUSCLES or TENDONS',
+            '   - Muscle to bone',
+            '   - "Pulled muscle"',
+            '',
+            '4. DISLOCATIONS:',
+            '   - Bone forced out of joint',
+            '   - Common: Shoulder (most mobile = least stable)',
+            '   - Pain, deformity, immobility',
+            '   - Requires medical reduction',
+            '',
+            '5. BURSITIS:',
+            '   - Inflammation of bursa',
+            '   - Causes: Overuse, trauma, infection',
+            '   - Common: Shoulder, elbow, knee, hip',
+            '   - Symptoms: Pain, swelling, limited motion',
+            '',
+            '6. TENDINITIS:',
+            '   - Inflammation of tendon',
+            '   - Overuse injury',
+            '   - Common: Rotator cuff, Achilles, tennis elbow',
+            '',
+            '7. TORN MENISCUS:',
+            '   - Cartilage tear in knee',
+            '   - Common sports injury',
+            '   - Twisting motion while bearing weight',
+            '   - Symptoms: Pain, swelling, "locking"',
+            '   - May require arthroscopic surgery',
+            '',
+            '8. ACL TEAR:',
+            '   - Anterior Cruciate Ligament',
+            '   - In knee',
+            '   - Common in sports (sudden stop, pivot)',
+            '   - Symptoms: "Pop", swelling, instability',
+            '   - Often requires reconstruction',
+            '',
+            'JOINT STABILITY vs MOBILITY:',
+            '',
+            'Trade-off:',
+            '  - More stable = Less mobile',
+            '  - More mobile = Less stable',
+            '',
+            'Examples:',
+            '  Shoulder:',
+            '  - Ball-and-socket',
+            '  - MOST mobile joint',
+            '  - LEAST stable',
+            '  - Shallow socket',
+            '  - Easily dislocated',
+            '',
+            '  Hip:',
+            '  - Ball-and-socket',
+            '  - LESS mobile than shoulder',
+            '  - MORE stable',
+            '  - Deep socket',
+            '  - Rarely dislocates',
+            '',
+            'Factors Affecting Stability:',
+            '  1. Articular surface fit (shape)',
+            '  2. Number and strength of ligaments',
+            '  3. Muscle tone around joint',
+            '  4. Hormones (relaxin loosens in pregnancy)'
+        ],
+        helper: 'Fibrous (skull sutures), Cartilaginous (vertebrae), Synovial (knee, shoulder - most mobile); 6 synovial types',
+        solution: 'Structural: Fibrous, Cartilaginous, Synovial; Functional: Immovable, Slightly movable, Freely movable; Synovial types: Hinge, Pivot, Ball-socket, Condyloid, Saddle, Gliding',
+        realWorldContext: 'Knee replacements common in elderly with severe osteoarthritis (worn cartilage)'
+    });
+
+    // Problem 5: Calcium Homeostasis
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Bone and Calcium Regulation',
+        problem: 'Explain how bones serve as a calcium reservoir and how PTH and calcitonin regulate blood calcium levels',
+        parameters: {
+            specificItems: ['Calcium', 'PTH', 'Calcitonin'],
+            function: 'calcium regulation',
+            limit: 3
+        },
+        type: 'skeletal_system',
+        context: { difficulty: 'intermediate', topic: 'Skeletal System', focus: 'calcium homeostasis' },
+        subparts: [
+            'Calcium (Ca²⁺) Importance:',
+            '',
+            'Essential Functions:',
+            '  1. Bone structure (99% of body Ca²⁺)',
+            '  2. Muscle contraction (including heart)',
+            '  3. Nerve impulse transmission',
+            '  4. Blood clotting',
+            '  5. Enzyme activation',
+            '  6. Hormone secretion',
+            '  7. Cell signaling',
+            '',
+            'Normal Blood Ca²⁺: 9-11 mg/dL',
+            '  - Must be TIGHTLY regulated',
+            '  - Too high or too low is dangerous',
+            '',
+            '═══════════════════════════════════════════',
+            'BONES AS CALCIUM RESERVOIR:',
+            '═══════════════════════════════════════════',
+            '',
+            'Storage:',
+            '  - 99% of body calcium in bones',
+            '  - Stored as calcium phosphate crystals',
+            '  - Hydroxyapatite',
+            '  - Can be mobilized when needed',
+            '',
+            'Dynamic Tissue:',
+            '  - Bone constantly remodeled',
+            '  - Osteoclasts release Ca²⁺ (resorption)',
+            '  - Osteoblasts deposit Ca²⁺ (formation)',
+            '  - Balance determines bone mass',
+            '',
+            'Two Competing Needs:',
+            '  1. Structural: Strong skeleton',
+            '  2. Metabolic: Constant blood Ca²⁺',
+            '  - Metabolic need takes PRIORITY',
+            '  - Will sacrifice bone to maintain blood levels',
+            '',
+            '═══════════════════════════════════════════',
+            'CALCIUM HOMEOSTASIS:',
+            '═══════════════════════════════════════════',
+            '',
+            'THREE ORGANS INVOLVED:',
+            '',
+            '1. BONES:',
+            '   - Storage site',
+            '   - Source when blood levels low',
+            '   - Deposit site when levels high',
+            '',
+            '2. KIDNEYS:',
+            '   - Filter blood',
+            '   - Can reabsorb or excrete Ca²⁺',
+            '   - Control Ca²⁺ loss in urine',
+            '',
+            '3. INTESTINES:',
+            '   - Absorb dietary Ca²⁺',
+            '   - Controlled by vitamin D',
+            '   - Need vitamin D for absorption',
+            '',
+            '═══════════════════════════════════════════',
+            'HORMONAL REGULATION:',
+            '═══════════════════════════════════════════',
+            '',
+            '┌─────────────────────────────────────────┐',
+            '│ LOW BLOOD CALCIUM (Hypocalcemia)       │',
+            '└─────────────────────────────────────────┘',
+            '',
+            'PARATHYROID HORMONE (PTH):',
+            '',
+            'Source: Parathyroid glands (4 glands on thyroid)',
+            'Trigger: Blood Ca²⁺ drops below 9 mg/dL',
+            'Effect: RAISES blood calcium',
+            'Type: Most important calcium-regulating hormone',
+            '',
+            'Three Mechanisms:',
+            '',
+            '1. BONES (Direct, rapid):',
+            '   - Stimulates osteoclasts',
+            '   - Bone resorption increases',
+            '   - Ca²⁺ released from bone matrix',
+            '   - Into bloodstream',
+            '   - Works within HOURS',
+            '',
+            '2. KIDNEYS (Direct, rapid):',
+            '   - Increases Ca²⁺ reabsorption',
+            '   - Less Ca²⁺ lost in urine',
+            '   - Conserves calcium',
+            '   - Also activates vitamin D',
+            '',
+            '   - Decreases PO₄³⁻ reabsorption',
+            '   - More phosphate excreted',
+            '   - (High phosphate lowers Ca²⁺)',
+            '',
+            '3. INTESTINES (Indirect, slow):',
+            '   - PTH activates vitamin D (in kidneys)',
+            '   - Active vitamin D (calcitriol)',
+            '   - Increases Ca²⁺ absorption from food',
+            '   - Works within DAYS',
+            '',
+            'Result: Blood Ca²⁺ RISES',
+            '',
+            'Negative Feedback:',
+            '  - Rising Ca²⁺ inhibits PTH release',
+            '  - Homeostasis restored',
+            '',
+            '┌─────────────────────────────────────────┐',
+            '│ HIGH BLOOD CALCIUM (Hypercalcemia)     │',
+            '└─────────────────────────────────────────┘',
+            '',
+            'CALCITONIN:',
+            '',
+            'Source: C cells (parafollicular) of thyroid gland',
+            'Trigger: Blood Ca²⁺ rises above 11 mg/dL',
+            'Effect: LOWERS blood calcium',
+            'Type: MINOR role in humans (not essential)',
+            '',
+            'Two Mechanisms:',
+            '',
+            '1. BONES:',
+            '   - Inhibits osteoclasts',
+            '   - Less bone breakdown',
+            '   - Less Ca²⁺ released',
+            '   - Stimulates osteoblasts (minor)',
+            '   - More bone formation',
+            '',
+            '2. KIDNEYS:',
+            '   - Increases Ca²⁺ excretion in urine',
+            '   - Less reabsorption',
+            '',
+            'Result: Blood Ca²⁺ DROPS',
+            '',
+            'Importance:',
+            '  - Protects against hypercalcemia',
+            '  - Prevents bone loss',
+            '  - BUT: Minor role compared to PTH',
+            '  - Humans can live without it',
+            '  - More important in children (growing bones)',
+            '',
+            '═══════════════════════════════════════════',
+            'PTH vs CALCITONIN:',
+            '═══════════════════════════════════════════',
+            '',
+            'Feature          PTH              Calcitonin',
+            '─────────────────────────────────────────────────',
+            'Source           Parathyroid      Thyroid C cells',
+            'Trigger          Low Ca²⁺         High Ca²⁺',
+            'Effect           Raise Ca²⁺       Lower Ca²⁺',
+            'Bone             ↑ Resorption     ↓ Resorption',
+            'Osteoclasts      Stimulate        Inhibit',
+            'Kidneys          ↑ Reabsorb Ca²⁺  ↑ Excrete Ca²⁺',
+            'Importance       MAJOR            MINOR',
+            'Timing           Hours            Rapid',
+            '',
+            'Antagonistic: Opposite effects',
+            '',
+            '═══════════════════════════════════════════',
+            'VITAMIN D ROLE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Actually a HORMONE (not a vitamin):',
+            '',
+            'Production:',
+            '  1. Skin: UV light converts cholesterol',
+            '     → Vitamin D₃ (cholecalciferol)',
+            '  2. Liver: Converts to calcidiol',
+            '  3. Kidneys: PTH activates',
+            '     → Calcitriol (active form)',
+            '',
+            'Function:',
+            '  - Increases Ca²⁺ absorption in intestines',
+            '  - Works with PTH',
+            '  - Essential for bone health',
+            '',
+            'Sources:',
+            '  - Sunlight (primary)',
+            '  - Fatty fish, fortified milk',
+            '  - Supplements',
+            '',
+            'Deficiency:',
+            '  Children: Rickets',
+            '  - Soft, weak bones',
+            '  - Bowed legs',
+            '  - Inadequate mineralization',
+            '',
+            '  Adults: Osteomalacia',
+            '  - Soft bones',
+            '  - Bone pain',
+            '  - Muscle weakness',
+            '',
+            '═══════════════════════════════════════════',
+            'BLOOD CALCIUM DISORDERS:',
+            '═══════════════════════════════════════════',
+            '',
+            'HYPOCALCEMIA (Low Ca²⁺ < 9 mg/dL):',
+            '',
+            'Causes:',
+            '  - Hypoparathyroidism (low PTH)',
+            '  - Vitamin D deficiency',
+            '  - Kidney disease',
+            '  - Inadequate dietary intake',
+            '',
+            'Symptoms:',
+            '  - Muscle cramps, spasms',
+            '  - TETANY (sustained contraction)',
+            '  - Tingling, numbness (paresthesia)',
+            '  - Seizures (severe)',
+            '  - Abnormal heart rhythms',
+            '',
+            'Why Dangerous:',
+            '  - Muscles overly excitable',
+            '  - Nerves fire spontaneously',
+            '  - Can affect breathing muscles',
+            '  - Can cause cardiac arrest',
+            '',
+            'Treatment:',
+            '  - Calcium supplements',
+            '  - Vitamin D',
+            '  - IV calcium (emergency)',
+            '',
+            'HYPERCALCEMIA (High Ca²⁺ > 11 mg/dL):',
+            '',
+            'Causes:',
+            '  - Hyperparathyroidism (excess PTH)',
+            '  - Cancer (bone metastases)',
+            '  - Excess vitamin D',
+            '  - Immobilization (bone resorption)',
+            '',
+            'Symptoms:',
+            '  - Muscle weakness',
+            '  - Fatigue, lethargy',
+            '  - Kidney stones',
+            '  - Constipation',
+            '  - Confusion',
+            '  - "Stones, bones, groans, psychiatric overtones"',
+            '',
+            'Why Dangerous:',
+            '  - Muscles less excitable',
+            '  - Heart rhythm problems',
+            '  - Kidney damage',
+            '  - Calcium deposits in soft tissues',
+            '',
+            'Treatment:',
+            '  - Hydration',
+            '  - Diuretics',
+            '  - Treat underlying cause',
+            '  - Bisphosphonates (inhibit bone resorption)',
+            '',
+            '═══════════════════════════════════════════',
+            'CALCIUM BALANCE SUMMARY:',
+            '═══════════════════════════════════════════',
+            '',
+            'Daily Balance:',
+            '',
+            'INPUT:',
+            '  - Diet: ~1000 mg/day',
+            '  - Intestinal absorption: ~300 mg/day (30%)',
+            '    • Depends on vitamin D',
+            '    • Varies with need',
+            '',
+            'OUTPUT:',
+            '  - Feces: ~700 mg/day (unabsorbed)',
+            '  - Urine: ~100-200 mg/day',
+            '    • Controlled by PTH',
+            '  - Sweat: ~20 mg/day (minor)',
+            '',
+            'Bone Turnover:',
+            '  - Resorption: ~500 mg/day released',
+            '  - Formation: ~500 mg/day deposited',
+            '  - Net change: Zero (in healthy adult)',
+            '',
+            'Positive Balance:',
+            '  - Absorption > Excretion',
+            '  - Occurs: Growth, pregnancy',
+            '  - Result: Bone mass increases',
+            '',
+            'Negative Balance:',
+            '  - Excretion > Absorption',
+            '  - Occurs: Aging, menopause, immobilization',
+            '  - Result: Bone mass decreases (osteoporosis)',
+            '',
+            'Maintaining Balance:',
+            '  ✓ Adequate Ca²⁺ intake (1000-1200 mg/day)',
+            '  ✓ Vitamin D (sun exposure or supplement)',
+            '  ✓ Weight-bearing exercise',
+            '  ✓ Limit caffeine, alcohol',
+            '  ✓ Don\'t smoke'
+        ],
+        helper: 'PTH (low Ca²⁺ → release from bone/kidney reabsorb); Calcitonin (high Ca²⁺ → deposit in bone/kidney excrete)',
+        solution: 'Bones store 99% of Ca²⁺; PTH raises blood Ca²⁺ (bone resorption, kidney reabsorb); Calcitonin lowers Ca²⁺ (inhibit resorption)',
+        realWorldContext: 'Hyperparathyroidism causes bone loss and kidney stones; hypoparathyroidism causes dangerous muscle spasms'
+    });
+    */
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - MUSCULAR SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedMuscularSystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Muscle Types
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Three Types of Muscle Tissue',
+        problem: 'Compare and contrast skeletal, cardiac, and smooth muscle in structure and function',
+        parameters: {
+            specificItems: ['Skeletal Muscle', 'Cardiac Muscle', 'Smooth Muscle'],
+            category: 'muscle types',
+            limit: 3
+        },
+        type: 'muscular_system',
+        context: { difficulty: 'beginner', topic: 'Muscular System', focus: 'muscle types' },
+        subparts: [
+            'Three Types of Muscle Tissue:',
+            '',
+            '═══════════════════════════════════════════',
+            '1. SKELETAL MUSCLE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Appearance: STRIATED (striped)',
+            '  - Alternating light and dark bands',
+            '  - Due to organized sarcomeres',
+            '',
+            'Control: VOLUNTARY',
+            '  - Conscious control',
+            '  - Somatic nervous system',
+            '',
+            'Location:',
+            '  - Attached to bones via tendons',
+            '  - Throughout body',
+            '  - ~40% of body weight',
+            '',
+            'Cell Structure:',
+            '  - Long, cylindrical fibers',
+            '  - Multinucleated (many nuclei)',
+            '  - Nuclei at periphery',
+            '  - Can be several centimeters long',
+            '  - Unbranched',
+            '',
+            'Functions:',
+            '  - Body movement (locomotion)',
+            '  - Posture maintenance',
+            '  - Heat production (thermogenesis)',
+            '  - Protect organs',
+            '  - Control openings (sphincters)',
+            '',
+            'Contraction:',
+            '  - Fast and forceful',
+            '  - Fatigues relatively quickly',
+            '  - Controlled contractions',
+            '  - Can be strengthened with exercise',
+            '',
+            'Regeneration:',
+            '  - Limited (satellite cells)',
+            '  - Damaged muscle can repair somewhat',
+            '  - Lost fibers not replaced',
+            '',
+            '═══════════════════════════════════════════',
+            '2. CARDIAC MUSCLE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Appearance: STRIATED',
+            '  - Like skeletal (organized sarcomeres)',
+            '  - But cells branched',
+            '',
+            'Control: INVOLUNTARY',
+            '  - No conscious control',
+            '  - Autonomic nervous system',
+            '  - Intrinsic rhythm (autorhythmic)',
+            '',
+            'Location:',
+            '  - Heart wall ONLY',
+            '  - Nowhere else in body',
+            '',
+            'Cell Structure:',
+            '  - Short, branched cells',
+            '  - Usually ONE nucleus per cell',
+            '  - Nucleus centrally located',
+            '  - Cells interconnected',
+            '  - INTERCALATED DISCS:',
+            '    • Specialized junctions between cells',
+            '    • Desmosomes (hold cells together)',
+            '    • Gap junctions (electrical coupling)',
+            '    • Allow coordinated contraction',
+            '',
+            'Functions:',
+            '  - Pump blood',
+            '  - Continuous rhythmic contraction',
+            '  - Never rests (beats ~100,000 times/day)',
+            '',
+            'Contraction:',
+            '  - Involuntary and rhythmic',
+            '  - DOES NOT FATIGUE',
+            '  - Coordinated (acts as functional syncytium)',
+            '  - All-or-none (entire heart contracts)',
+            '  - Longer refractory period (prevents tetanus)',
+            '',
+            'Special Properties:',
+            '  - Autorhythmic: SA node pacemaker',
+            '  - Self-excitable',
+            '  - Contracts without nerve stimulation',
+            '  - Nerves only modulate rate',
+            '',
+            'Regeneration:',
+            '  - VERY LIMITED',
+            '  - Damaged cells form scar tissue',
+            '  - Heart attack damage permanent',
+            '',
+            '═══════════════════════════════════════════',
+            '3. SMOOTH MUSCLE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Appearance: NON-STRIATED (smooth)',
+            '  - No visible striations',
+            '  - Sarcomeres present but not organized',
+            '',
+            'Control: INVOLUNTARY',
+            '  - No conscious control',
+            '  - Autonomic nervous system',
+            '  - Also hormones',
+            '',
+            'Location:',
+            '  - Walls of HOLLOW organs:',
+            '    • Digestive tract',
+            '    • Blood vessels',
+            '    • Bladder',
+            '    • Uterus',
+            '    • Airways (bronchi)',
+            '    • Eyes (iris, ciliary)',
+            '  - NOT attached to bones',
+            '',
+            'Cell Structure:',
+            '  - Spindle-shaped (tapered ends)',
+            '  - Small cells',
+            '  - ONE nucleus per cell',
+            '  - Nucleus centrally located',
+            '  - Unbranched',
+            '  - Arranged in sheets',
+            '',
+            'Functions:',
+            '  - Move substances through organs',
+            '  - Peristalsis (digestive tract)',
+            '  - Control blood vessel diameter',
+            '  - Control airway diameter',
+            '  - Regulate organ volume',
+            '',
+            'Contraction:',
+            '  - Slow and sustained',
+            '  - Rhythmic waves',
+            '  - DOES NOT FATIGUE',
+            '  - Can maintain tone for long periods',
+            '  - Stretches well',
+            '',
+            'Types:',
+            '  Single-Unit (Visceral):',
+            '  - Most common',
+            '  - Cells electrically coupled (gap junctions)',
+            '  - Contract as unit',
+            '  - Example: Digestive tract, uterus',
+            '',
+            '  Multi-Unit:',
+            '  - Cells independent',
+            '  - Each innervated separately',
+            '  - Fine control',
+            '  - Example: Iris, large airways',
+            '',
+            'Regeneration:',
+            '  - BEST regeneration of all muscle types',
+            '  - Can divide and repair',
+            '  - Can hypertrophy (enlarge)',
+            '',
+            '═══════════════════════════════════════════',
+            'COMPARISON TABLE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Feature          Skeletal      Cardiac       Smooth',
+            '─────────────────────────────────────────────────────',
+            'Striations       Yes           Yes           No',
+            'Control          Voluntary     ""            ""',
+            '    Involuntary   Involuntary',
+            'Nuclei           Multi         1-2           1',
+            'Shape            Long,         Short,        Spindle',
+            '                 cylindrical   branched      shaped',
+            'Location         Bones         Heart only    Organs',
+            'Speed            Fast          Moderate      Slow',
+            'Fatigue          Yes           No            No',
+            'Contraction      Forceful      Rhythmic      Sustained',
+            'Regeneration     Limited       Very limited  Good',
+            'Connections      None          Intercalated  Gap',
+            '                               discs         junctions',
+            'Nervous          Somatic       Autonomic     Autonomic',
+            'System                         (modulates)',
+            '',
+            '═══════════════════════════════════════════',
+            'SIMILARITIES:',
+            '═══════════════════════════════════════════',
+            '',
+            'All Three Types:',
+            '  ✓ Contain actin and myosin filaments',
+            '  ✓ Contract by sliding filament mechanism',
+            '  ✓ Use ATP for energy',
+            '  ✓ Generate force and movement',
+            '  ✓ Have plasma membrane called sarcolemma',
+            '  ✓ Respond to neurotransmitters',
+            '',
+            '═══════════════════════════════════════════',
+            'FUNCTIONAL DIFFERENCES:',
+            '═══════════════════════════════════════════',
+            '',
+            'Speed of Contraction:',
+            '  Skeletal: FASTEST (milliseconds)',
+            '  - Voluntary movement needs speed',
+            '  Cardiac: MODERATE',
+            '  - Regular, rhythmic pumping',
+            '  Smooth: SLOWEST (seconds)',
+            '  - Sustained contraction for organ function',
+            '',
+            'Fatigue Resistance:',
+            '  Skeletal: FATIGUES',
+            '  - Cannot contract indefinitely',
+            '  - Needs rest periods',
+            '  Cardiac: NEVER FATIGUES',
+            '  - Must beat continuously',
+            '  - Rich blood supply, mitochondria',
+            '  Smooth: NEVER FATIGUES',
+            '  - Maintains tone for hours',
+            '  - Low energy requirement',
+            '',
+            'Stretch Response:',
+            '  Skeletal: Minimal stretch',
+            '  - Fixed length',
+            '  Cardiac: Some stretch (Frank-Starling)',
+            '  - Stronger contraction when stretched',
+            '  Smooth: EXCELLENT stretch',
+            '  - Can stretch greatly (bladder, stomach)',
+            '  - Returns to original length',
+            '',
+            '═══════════════════════════════════════════',
+            'EXAMPLES IN BODY:',
+            '═══════════════════════════════════════════',
+            '',
+            'Skeletal Muscle:',
+            '  - Biceps (bend arm)',
+            '  - Quadriceps (extend leg)',
+            '  - Diaphragm (breathing)',
+            '  - Facial muscles (expressions)',
+            '  - Tongue',
+            '',
+            'Cardiac Muscle:',
+            '  - Myocardium (heart wall)',
+            '  - Atria',
+            '  - Ventricles',
+            '  - ONLY in heart',
+            '',
+            'Smooth Muscle:',
+            '  - Stomach and intestines (peristalsis)',
+            '  - Blood vessel walls (vasoconstriction/dilation)',
+            '  - Bladder (urination)',
+            '  - Uterus (contractions)',
+            '  - Airways (bronchioles)',
+            '  - Iris (pupil size)',
+            '',
+            '═══════════════════════════════════════════',
+            'CLINICAL SIGNIFICANCE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Skeletal Muscle Disorders:',
+            '  - Muscular dystrophy (genetic)',
+            '  - Myasthenia gravis (autoimmune)',
+            '  - Muscle strains, tears',
+            '  - Atrophy (disuse, aging)',
+            '',
+            'Cardiac Muscle Disorders:',
+            '  - Heart attack (myocardial infarction)',
+            '  - Cardiomyopathy (enlarged, weak heart)',
+            '  - Arrhythmias (irregular rhythm)',
+            '  - Heart failure',
+            '',
+            'Smooth Muscle Disorders:',
+            '  - Asthma (airway constriction)',
+            '  - Hypertension (vessel constriction)',
+            '  - Irritable bowel syndrome',
+            '  - Overactive bladder'
+        ],
+        helper: 'Skeletal (striated, voluntary, fast); Cardiac (striated, involuntary, rhythmic, heart only); Smooth (non-striated, involuntary, organs)',
+        solution: 'Skeletal: striated, voluntary, bones, fatigues; Cardiac: striated, involuntary, heart, rhythmic, never fatigues; Smooth: non-striated, involuntary, organs, sustained',
+        realWorldContext: 'Heart attack kills cardiac muscle (can\'t regenerate); smooth muscle problems cause asthma, high blood pressure'
+    });
+
+    // Problem 2: Sliding Filament Theory
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Muscle Contraction Mechanism',
+        problem: 'Explain the sliding filament theory of muscle contraction at the molecular level',
+        parameters: {
+            specificItems: ['Muscle Contraction', 'Sarcomere'],
+            category: 'contraction mechanism',
+            limit: 2
+        },
+        type: 'muscular_system',
+        context: { difficulty: 'intermediate', topic: 'Muscular System', focus: 'contraction mechanism' },
+        subparts: [
+            'MUSCLE CONTRACTION:',
+            'Sliding Filament Theory',
+            '',
+            '═══════════════════════════════════════════',
+            'SARCOMERE STRUCTURE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Sarcomere: Functional unit of contraction',
+            '  - Segment between two Z-discs',
+            '  - Length: ~2.5 μm (relaxed)',
+            '  - Contains thick and thin filaments',
+            '',
+            'Components:',
+            '',
+            '1. Z-DISCS (Z-lines):',
+            '   - Boundaries of sarcomere',
+            '   - Anchor thin filaments',
+            '   - Made of protein (α-actinin)',
+            '',
+            '2. THIN FILAMENTS:',
+            '   Main Protein: ACTIN',
+            '   - Two strands twisted together',
+            '   - Globular subunits (G-actin)',
+            '   - Form filamentous actin (F-actin)',
+            '   - Active sites for myosin binding',
+            '',
+            '   Regulatory Proteins:',
+            '   - TROPOMYOSIN:',
+            '     • Long, rope-like protein',
+            '     • Covers myosin-binding sites',
+            '     • Blocks actin-myosin interaction at rest',
+            '',
+            '   - TROPONIN:',
+            '     • Three-part complex',
+            '     • Troponin T: Binds tropomyosin',
+            '     • Troponin I: Inhibits actin-myosin binding',
+            '     • Troponin C: Binds Ca²⁺',
+            '     • Ca²⁺ binding causes shape change',
+            '',
+            '3. THICK FILAMENTS:',
+            '   Main Protein: MYOSIN',
+            '   - Bundle of myosin molecules',
+            '   - Each myosin has:',
+            '     • Two heads (crossbridges)',
+            '     • Tail region',
+            '   - Heads can:',
+            '     • Bind actin',
+            '     • Hydrolyze ATP',
+            '     • Swivel (power stroke)',
+            '',
+            'Bands and Zones:',
+            '  - A BAND: Entire length of thick filaments',
+            '    • Dark band',
+            '    • Includes overlap',
+            '  - I BAND: Thin filaments only',
+            '    • Light band',
+            '    • Bisected by Z-disc',
+            '  - H ZONE: Thick filaments only (within A band)',
+            '    • No overlap',
+            '  - M LINE: Middle of sarcomere',
+            '    • Connects thick filaments',
+            '',
+            '═══════════════════════════════════════════',
+            'SLIDING FILAMENT THEORY:',
+            '═══════════════════════════════════════════',
+            '',
+            'Key Concept:',
+            '  - Filaments themselves DON\'T shorten',
+            '  - Thin filaments SLIDE past thick filaments',
+            '  - Sarcomere shortens',
+            '  - Muscle contracts',
+            '',
+            'During Contraction:',
+            '  ✓ Sarcomere length DECREASES',
+            '  ✓ Z-discs move CLOSER together',
+            '  ✓ I bands NARROW',
+            '  ✓ H zones NARROW or disappear',
+            '  ✓ A bands stay SAME width',
+            '  ✓ Thin and thick filaments overlap MORE',
+            '',
+            '═══════════════════════════════════════════',
+            'CONTRACTION CYCLE (Crossbridge Cycle):',
+            '═══════════════════════════════════════════',
+            '',
+            'Prerequisites:',
+            '  - ATP available',
+            '  - Ca²⁺ present',
+            '  - Actin binding sites exposed',
+            '',
+            'THE CYCLE (Repeats 50-100 times/second):',
+            '',
+            'Step 1: CROSSBRIDGE FORMATION',
+            '  - Energized myosin head',
+            '  - Binds to actin active site',
+            '  - Forms actin-myosin crossbridge',
+            '  - Myosin holds ADP + Pi (from previous ATP)',
+            '',
+            'Step 2: POWER STROKE',
+            '  - Myosin head swivels/pivots',
+            '  - Pulls actin toward center (M line)',
+            '  - Thin filament SLIDES',
+            '  - Releases ADP + Pi',
+            '  - Sarcomere shortens ~10 nm',
+            '  - This is the FORCE-GENERATING step',
+            '',
+            'Step 3: CROSSBRIDGE DETACHMENT',
+            '  - NEW ATP binds to myosin head',
+            '  - Causes myosin to RELEASE from actin',
+            '  - Without ATP: Rigor (stiff binding)',
+            '  - This is why rigor mortis occurs (no ATP after death)',
+            '',
+            'Step 4: REACTIVATION (Cocking)',
+            '  - ATP hydrolyzed to ADP + Pi',
+            '  - Energy stored in myosin head',
+            '  - Head returns to "cocked" position',
+            '  - Ready to bind actin again',
+            '  - Cycle repeats IF:',
+            '    • Ca²⁺ still present',
+            '    • ATP available',
+            '',
+            'Analogy: Rowing a boat',
+            '  - Oar (myosin) grabs water (actin)',
+            '  - Pulls backward (power stroke)',
+            '  - Lifts out (detachment)',
+            '  - Resets forward (reactivation)',
+            '  - Repeats',
+            '',
+            '═══════════════════════════════════════════',
+            'ROLE OF CALCIUM (Ca²⁺):',
+            '═══════════════════════════════════════════',
+            '',
+            'AT REST (No Ca²⁺):',
+            '  - Ca²⁺ stored in sarcoplasmic reticulum',
+            '  - Low Ca²⁺ in sarcoplasm',
+            '  - Tropomyosin blocks myosin-binding sites',
+            '  - No crossbridges can form',
+            '  - Muscle RELAXED',
+            '',
+            'DURING CONTRACTION (Ca²⁺ present):',
+            '',
+            '  1. Nerve signal arrives',
+            '  2. Action potential in muscle fiber',
+            '  3. Signal travels down T-tubules',
+            '  4. Sarcoplasmic reticulum releases Ca²⁺',
+            '  5. Ca²⁺ floods sarcoplasm',
+            '',
+            '  6. Ca²⁺ binds TROPONIN C',
+            '  7. Troponin changes shape',
+            '  8. Pulls TROPOMYOSIN away',
+            '  9. Exposes myosin-binding sites on actin',
+            '  10. Crossbridge cycle can proceed',
+            '',
+            '  Result: CONTRACTION',
+            '',
+            'RELAXATION (Ca²⁺ removed):',
+            '  1. Nerve signal stops',
+            '  2. Ca²⁺ pumps actively transport Ca²⁺',
+            '  3. Back into sarcoplasmic reticulum',
+            '  4. Ca²⁺ concentration drops',
+            '  5. Ca²⁺ unbinds from troponin',
+            '  6. Tropomyosin covers binding sites again',
+            '  7. No new crossbridges form',
+            '  8. Muscle RELAXES (elastic recoil)',
+            '',
+            '═══════════════════════════════════════════',
+            'ROLE OF ATP:',
+            '═══════════════════════════════════════════',
+            '',
+            'ATP Required for TWO Steps:',
+            '',
+            '1. CROSSBRIDGE DETACHMENT:',
+            '   - ATP binding releases myosin from actin',
+            '   - Without ATP: Heads stay attached',
+            '   - Results in RIGOR (stiffness)',
+            '',
+            '2. REACTIVATION:',
+            '   - ATP hydrolysis energizes myosin',
+            '   - Prepares for next power stroke',
+            '',
+            'ATP also needed for:',
+            '  - Ca²⁺ pump (active transport back to SR)',
+            '  - Na⁺/K⁺ pump (maintain resting potential)',
+            '',
+            'Without ATP:',
+            '  - Crossbridges cannot detach',
+            '  - Muscle locked in contracted state',
+            '  - RIGOR MORTIS:',
+            '    • After death, ATP depleted',
+            '    • Muscles become stiff',
+            '    • Begins 3-4 hours after death',
+            '    • Lasts ~24-48 hours',
+            '    • Then proteins degrade, stiffness disappears',
+            '',
+            '═══════════════════════════════════════════',
+            'EXCITATION-CONTRACTION COUPLING:',
+            '═══════════════════════════════════════════',
+            '',
+            'Links electrical signal to mechanical contraction',
+            '',
+            'Sequence:',
+            '',
+            '1. NEUROMUSCULAR JUNCTION:',
+            '   - Motor neuron releases acetylcholine (ACh)',
+            '   - ACh binds receptors on muscle fiber',
+            '   - Na⁺ channels open',
+            '   - Muscle fiber depolarizes',
+            '',
+            '2. ACTION POTENTIAL:',
+            '   - Spreads across sarcolemma',
+            '   - Travels down T-TUBULES',
+            '   - T-tubules: Extensions of membrane into fiber',
+            '   - Bring signal deep into fiber',
+            '',
+            '3. CALCIUM RELEASE:',
+            '   - T-tubule voltage sensors detect depolarization',
+            '   - Mechanically linked to Ca²⁺ channels',
+            '   - Ca²⁺ channels in sarcoplasmic reticulum open',
+            '   - Ca²⁺ floods out into sarcoplasm',
+            '',
+            '4. TROPONIN BINDING:',
+            '   - Ca²⁺ binds troponin',
+            '   - Exposes actin binding sites',
+            '',
+            '5. CROSSBRIDGE CYCLING:',
+            '   - Myosin binds actin',
+            '   - Power strokes occur',
+            '   - Sarcomeres shorten',
+            '   - MUSCLE CONTRACTS',
+            '',
+            '6. RELAXATION:',
+            '   - ACh broken down by acetylcholinesterase',
+            '   - Action potentials stop',
+            '   - Ca²⁺ actively pumped back into SR',
+            '   - Tropomyosin covers binding sites',
+            '   - Crossbridges cannot form',
+            '   - MUSCLE RELAXES',
+            '',
+            'Timing:',
+            '  - Signal to contraction: ~10 milliseconds',
+            '  - Single twitch duration: ~100 milliseconds',
+            '',
+            '═══════════════════════════════════════════',
+            'LENGTH-TENSION RELATIONSHIP:',
+            '═══════════════════════════════════════════',
+            '',
+            'Optimal Sarcomere Length:',
+            '  - ~2.0-2.4 μm',
+            '  - Maximum overlap of thick and thin filaments',
+            '  - Most crossbridges can form',
+            '  - STRONGEST contraction',
+            '',
+            'Too Short (<1.7 μm):',
+            '  - Thin filaments overlap in center',
+            '  - Thick filaments hit Z-discs',
+            '  - Fewer crossbridges',
+            '  - WEAKER contraction',
+            '',
+            'Too Long (>3.6 μm):',
+            '  - Little overlap',
+            '  - Few crossbridges can form',
+            '  - WEAKER contraction',
+            '',
+            'Normal Muscle:',
+            '  - Usually operates near optimal length',
+            '  - Joint position affects force',
+            '',
+            '═══════════════════════════════════════════',
+            'KEY POINTS:',
+            '═══════════════════════════════════════════',
+            '',
+            '✓ Filaments SLIDE, don\'t shorten',
+            '✓ Ca²⁺ is the TRIGGER (exposes binding sites)',
+            '✓ ATP provides ENERGY (power stroke)',
+            '✓ ATP also needed for DETACHMENT',
+            '✓ Crossbridge cycle repeats rapidly',
+            '✓ Many sarcomeres shortening = muscle contraction',
+            '✓ Without Ca²⁺: Relaxation',
+            '✓ Without ATP: Rigor (can\'t detach)'
+        ],
+        helper: 'Ca²⁺ exposes binding sites → Myosin binds actin → Power stroke (slides filaments) → ATP detaches → Repeat',
+        solution: 'Sliding filament: Ca²⁺ triggers, myosin heads bind actin, power stroke slides thin filaments, ATP detaches myosin, cycle repeats',
+        realWorldContext: 'Botox blocks ACh release, preventing muscle contraction (smooths wrinkles); tetanus toxin prevents ACh breakdown (prolonged contraction/spasms)'
+    });
+
+    // Continue with remaining muscular system problems...
+    // Problem 3: Motor Units and Muscle Response
+    // Problem 4: Muscle Metabolism
+    // Problem 5: Muscle Disorders
+
+    return relatedProblems;
+}
+
+// ============== HUMAN ANATOMY - EXCRETORY SYSTEM RELATED PROBLEMS ==============
+
+// ============== HUMAN ANATOMY - EXCRETORY SYSTEM RELATED PROBLEMS ==============
+
+function generateRelatedExcretorySystem() {
+    const relatedProblems = [];
+
+    // Problem 1: Kidney Structure
+    relatedProblems.push({
+        difficulty: 'easier',
+        scenario: 'Kidney Anatomy and Nephron Structure',
+        problem: 'Describe the structure of the kidney and explain the parts of a nephron',
+        parameters: {
+            specificItems: ['Kidney', 'Nephron'],
+            category: 'kidney structure',
+            limit: 2
+        },
+        type: 'excretory_system',
+        context: { difficulty: 'beginner', topic: 'Excretory System', focus: 'kidney anatomy' },
+        subparts: [
+            'Excretory (Urinary) System:',
+            'Main organs: Kidneys, ureters, bladder, urethra',
+            '',
+            '═══════════════════════════════════════════',
+            'KIDNEY STRUCTURE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Location:',
+            '  - Retroperitoneal (behind peritoneum)',
+            '  - Either side of vertebral column',
+            '  - Level: T12 to L3',
+            '  - Right kidney slightly lower (liver)',
+            '',
+            'Size: Fist-sized (~10-12 cm long)',
+            'Shape: Bean-shaped',
+            'Number: TWO (can survive with one)',
+            '',
+            'External Anatomy:',
+            '  - Renal Hilum: Indentation on medial side',
+            '    • Entry/exit point for:',
+            '      - Renal artery (blood in)',
+            '      - Renal vein (blood out)',
+            '      - Ureter (urine out)',
+            '      - Nerves',
+            '',
+            'Internal Anatomy (Cross-Section):',
+            '',
+            '1. RENAL CORTEX:',
+            '   - Outer region',
+            '   - Light/granular appearance',
+            '   - Contains:',
+            '     • Renal corpuscles',
+            '     • Proximal convoluted tubules',
+            '     • Distal convoluted tubules',
+            '',
+            '2. RENAL MEDULLA:',
+            '   - Inner region',
+            '   - Darker, striated appearance',
+            '   - Contains RENAL PYRAMIDS',
+            '     • Cone-shaped structures',
+            '     • 8-18 pyramids per kidney',
+            '     • Stripes = collecting ducts',
+            '   - Contains:',
+            '     • Loops of Henle',
+            '     • Collecting ducts',
+            '',
+            '3. RENAL PELVIS:',
+            '   - Funnel-shaped cavity',
+            '   - Collects urine from pyramids',
+            '   - Continuous with ureter',
+            '',
+            '4. RENAL COLUMNS:',
+            '   - Cortex tissue between pyramids',
+            '   - Extend into medulla',
+            '',
+            '5. MINOR CALYCES:',
+            '   - Cup-shaped structures',
+            '   - Collect urine from pyramid tips',
+            '',
+            '6. MAJOR CALYCES:',
+            '   - Several minor calyces merge',
+            '   - Drain into renal pelvis',
+            '',
+            'Blood Supply:',
+            '  - Renal arteries (from abdominal aorta)',
+            '  - Receive ~20-25% of cardiac output!',
+            '  - Filter ~1200 mL blood per minute',
+            '  - Renal veins (to inferior vena cava)',
+            '',
+            '═══════════════════════════════════════════',
+            'NEPHRON - Functional Unit:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Microscopic filtering unit',
+            'Number: ~1 MILLION per kidney',
+            'Function: Forms urine',
+            '',
+            'TWO MAIN PARTS:',
+            '',
+            '1. RENAL CORPUSCLE (Filtering Component):',
+            '   Location: Cortex',
+            '',
+            '   Two Structures:',
+            '',
+            '   a) GLOMERULUS:',
+            '      - Tangled capillary network',
+            '      - High-pressure capillaries',
+            '      - Filtration occurs here',
+            '      - Blood enters via afferent arteriole',
+            '      - Blood exits via efferent arteriole',
+            '',
+            '   b) BOWMAN\'S CAPSULE (Glomerular Capsule):',
+            '      - Cup-shaped structure',
+            '      - Surrounds glomerulus',
+            '      - Double-walled',
+            '      - Collects filtrate',
+            '      - Parietal layer (outer)',
+            '      - Visceral layer (inner, podocytes)',
+            '',
+            '   Filtration Membrane (3 layers):',
+            '   1. Glomerular capillary endothelium',
+            '      - Fenestrated (pores)',
+            '   2. Basement membrane',
+            '      - Filters by size',
+            '   3. Podocytes (visceral layer)',
+            '      - Filtration slits',
+            '',
+            '   What Filters Through:',
+            '   ✓ Water',
+            '   ✓ Glucose',
+            '   ✓ Amino acids',
+            '   ✓ Ions (Na⁺, K⁺, Cl⁻)',
+            '   ✓ Urea, uric acid',
+            '   ✓ Small molecules',
+            '',
+            '   What Does NOT Filter:',
+            '   ✗ Blood cells (too large)',
+            '   ✗ Proteins (too large)',
+            '   ✗ Anything bound to proteins',
+            '',
+            '2. RENAL TUBULE (Processing Component):',
+            '',
+            '   a) PROXIMAL CONVOLUTED TUBULE (PCT):',
+            '      Location: Cortex',
+            '      Length: ~15 mm',
+            '      Structure: Highly coiled',
+            '      Cells: Cuboidal with MICROVILLI (brush border)',
+            '',
+            '      Function: MOST REABSORPTION occurs here',
+            '      - Reabsorbs ~65% of filtrate',
+            '      - Actively reabsorbs:',
+            '        • Glucose (100%)',
+            '        • Amino acids (100%)',
+            '        • Na⁺ (65%)',
+            '        • Water (65%, follows Na⁺)',
+            '        • Vitamins',
+            '      - Secretes:',
+            '        • H⁺ (acid)',
+            '        • NH₃ (ammonia)',
+            '        • Drugs, toxins',
+            '',
+            '   b) LOOP OF HENLE (Nephron Loop):',
+            '      Location: Descends into medulla, returns to cortex',
+            '      Shape: Hairpin loop',
+            '',
+            '      Two Limbs:',
+            '',
+            '      DESCENDING LIMB:',
+            '      - Thin walls',
+            '      - PERMEABLE to water',
+            '      - IMPERMEABLE to solutes',
+            '      - Water reabsorbed (osmosis)',
+            '      - Filtrate becomes concentrated',
+            '',
+            '      ASCENDING LIMB:',
+            '      - Thick walls',
+            '      - IMPERMEABLE to water',
+            '      - Actively pumps out Na⁺ and Cl⁻',
+            '      - Filtrate becomes dilute',
+            '',
+            '      Function: Creates concentration gradient',
+            '      - Allows production of concentrated urine',
+            '      - Countercurrent multiplier',
+            '',
+            '   c) DISTAL CONVOLUTED TUBULE (DCT):',
+            '      Location: Cortex',
+            '      Structure: Coiled',
+            '      Cells: Cuboidal without brush border',
+            '',
+            '      Function: Fine-tuning',
+            '      - Reabsorbs Na⁺ (regulated by aldosterone)',
+            '      - Reabsorbs water (regulated by ADH)',
+            '      - Secretes K⁺',
+            '      - Secretes H⁺ (pH regulation)',
+            '',
+            '   d) COLLECTING DUCT:',
+            '      Location: Extends from cortex through medulla',
+            '      Structure: Straight tube',
+            '      Convergence: Multiple nephrons drain into one duct',
+            '',
+            '      Function: Final concentration',
+            '      - Water reabsorption (regulated by ADH)',
+            '      - More ADH = More water reabsorbed',
+            '      - Determines final urine concentration',
+            '      - Empties into minor calyx',
+            '',
+            'TWO TYPES OF NEPHRONS:',
+            '',
+            '1. CORTICAL NEPHRONS (85%):',
+            '   - Renal corpuscle in outer cortex',
+            '   - Short loop of Henle',
+            '   - Barely enters medulla',
+            '   - Most numerous',
+            '',
+            '2. JUXTAMEDULLARY NEPHRONS (15%):',
+            '   - Renal corpuscle near cortex-medulla junction',
+            '   - LONG loop of Henle',
+            '   - Extends deep into medulla',
+            '   - Important for concentrating urine',
+            '   - Create steep osmotic gradient',
+            '',
+            'BLOOD SUPPLY TO NEPHRON:',
+            '',
+            'Pathway:',
+            '  1. Renal artery',
+            '  2. Segmental arteries',
+            '  3. Interlobar arteries',
+            '  4. Arcuate arteries',
+            '  5. Cortical radiate arteries',
+            '  6. AFFERENT ARTERIOLE (to glomerulus)',
+            '  7. GLOMERULUS (capillaries)',
+            '  8. EFFERENT ARTERIOLE (from glomerulus)',
+            '  9. PERITUBULAR CAPILLARIES (surround tubules)',
+            '     OR',
+            '     VASA RECTA (straight vessels around loop)',
+            '  10. Venous system (reverses arterial path)',
+            '  11. Renal vein',
+            '',
+            'Unique Feature:',
+            '  - TWO capillary beds in series',
+            '  - Glomerulus → Efferent → Peritubular',
+            '  - Allows high filtration pressure',
+            '',
+            'JUXTAGLOMERULAR APPARATUS (JGA):',
+            '  Location: Where DCT contacts afferent arteriole',
+            '  Components:',
+            '  - Juxtaglomerular cells (in arteriole wall)',
+            '    • Produce RENIN',
+            '  - Macula densa (in DCT wall)',
+            '    • Senses Na⁺ and Cl⁻ levels',
+            '  Function:',
+            '  - Regulates blood pressure',
+            '  - Regulates GFR',
+            '  - Renin-Angiotensin-Aldosterone System'
+        ],
+        helper: 'Kidney: cortex (outer, filtering) + medulla (inner, concentrating); Nephron: glomerulus (filter) + tubules (process)',
+        solution: 'Kidney has cortex (outer) and medulla (inner); Nephron parts: Renal corpuscle (glomerulus + Bowman\'s), PCT, Loop of Henle, DCT, Collecting duct',
+        realWorldContext: 'Kidney stones form in collecting system; can block ureter causing severe pain'
+    });
+
+    // Problem 2: Urine Formation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Three Processes of Urine Formation',
+        problem: 'Explain the three processes involved in urine formation: filtration, reabsorption, and secretion',
+        parameters: {
+            specificItems: ['Filtration', 'Reabsorption', 'Secretion'],
+            category: 'urine formation',
+            limit: 3
+        },
+        type: 'excretory_system',
+        context: { difficulty: 'intermediate', topic: 'Excretory System', focus: 'urine formation' },
+        subparts: [
+            'Urine Formation: Three Processes',
+            '',
+            'Starting Point:',
+            '  - Blood enters kidneys (1200 mL/min)',
+            '  - Filters to produce ~180 liters/day',
+            '  - Final urine: ~1-2 liters/day',
+            '  - 99% of filtrate REABSORBED',
+            '',
+            '═══════════════════════════════════════════',
+            '1. GLOMERULAR FILTRATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Pressure forces fluid from blood into Bowman\'s capsule',
+            'Location: Glomerulus and Bowman\'s capsule',
+            'Type: PASSIVE process (no energy)',
+            '',
+            'Mechanism:',
+            '  - High blood pressure in glomerulus',
+            '  - Forces plasma through filtration membrane',
+            '  - Non-selective (filters by SIZE)',
+            '',
+            'Filtration Membrane (3 Layers):',
+            '  1. Capillary endothelium:',
+            '     - Fenestrated (pores)',
+            '     - Blocks blood cells',
+            '',
+            '  2. Basement membrane:',
+            '     - Prevents large proteins',
+            '     - Negative charge repels proteins',
+            '',
+            '  3. Podocytes (foot processes):',
+            '     - Filtration slits',
+            '     - Final barrier',
+            '',
+            'What Enters Filtrate:',
+            '  ✓ Water (most abundant)',
+            '  ✓ Glucose',
+            '  ✓ Amino acids',
+            '  ✓ Electrolytes (Na⁺, K⁺, Cl⁻, HCO₃⁻)',
+            '  ✓ Urea, uric acid, creatinine',
+            '  ✓ Small molecules',
+            '',
+            'What Stays in Blood:',
+            '  ✗ Blood cells (RBC, WBC, platelets)',
+            '  ✗ Proteins (albumin, globulins)',
+            '  ✗ Anything bound to proteins',
+            '',
+            'FILTRATE Composition:',
+            '  - Essentially protein-free plasma',
+            '  - Same as blood plasma EXCEPT no proteins',
+            '  - Contains all small solutes',
+            '',
+            'Glomerular Filtration Rate (GFR):',
+            '  Definition: Volume filtered per minute',
+            '  Normal: ~125 mL/min',
+            '  Per day: ~180 liters',
+            '',
+            'Factors Affecting GFR:',
+            '',
+            '  1. Blood Pressure:',
+            '     - Main driving force',
+            '     - Higher BP → Higher GFR',
+            '     - Lower BP → Lower GFR',
+            '',
+            '  2. Autoregulation:',
+            '     - Maintains constant GFR',
+            '     - Despite BP changes (80-180 mmHg)',
+            '     - Afferent arteriole dilates/constricts',
+            '',
+            '  3. Neural Regulation:',
+            '     - Sympathetic stimulation',
+            '     - Constricts afferent arteriole',
+            '     - Decreases GFR (stress, exercise)',
+            '',
+            '  4. Hormonal:',
+            '     - Renin-Angiotensin system',
+            '     - Affects arteriole diameter',
+            '',
+            'Clinical Significance:',
+            '  - GFR < 60 mL/min: Kidney disease',
+            '  - GFR < 15 mL/min: Kidney failure (dialysis needed)',
+            '  - Blood test: Estimated GFR (eGFR)',
+            '',
+            '═══════════════════════════════════════════',
+            '2. TUBULAR REABSORPTION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Movement of substances FROM filtrate BACK TO blood',
+            'Location: Along entire renal tubule',
+            'Amount: Reabsorbs ~99% of filtrate',
+            'Type: ACTIVE and PASSIVE processes',
+            '',
+            'Purpose:',
+            '  - Reclaim needed substances',
+            '  - Prevent loss of:',
+            '    • Water',
+            '    • Glucose',
+            '    • Amino acids',
+            '    • Vitamins',
+            '    • Ions',
+            '',
+            'WHERE REABSORPTION OCCURS:',
+            '',
+            'PROXIMAL CONVOLUTED TUBULE (PCT):',
+            '  - MOST reabsorption here (~65%)',
+            '',
+            '  Reabsorbs:',
+            '  - Water: 65% (osmosis, follows Na⁺)',
+            '  - Na⁺: 65% (active transport)',
+            '  - Glucose: 100% (active, normally)',
+            '  - Amino acids: 100% (active)',
+            '  - Cl⁻: Follows Na⁺',
+            '  - HCO₃⁻: Bicarbonate (pH regulation)',
+            '  - Vitamins, urea (some)',
+            '',
+            '  Mechanism:',
+            '  - Na⁺/K⁺ pump on basal side',
+            '  - Creates gradient',
+            '  - Na⁺ enters from filtrate (cotransport)',
+            '  - Brings glucose, amino acids with it',
+            '  - Water follows by osmosis',
+            '',
+            'LOOP OF HENLE:',
+            '',
+            '  Descending Limb:',
+            '  - Permeable to WATER only',
+            '  - Water reabsorbed (osmosis)',
+            '  - Filtrate becomes concentrated',
+            '',
+            '  Ascending Limb:',
+            '  - Impermeable to water',
+            '  - Actively pumps Na⁺ and Cl⁻ out',
+            '  - Filtrate becomes dilute',
+            '',
+            '  Result: Creates osmotic gradient in medulla',
+            '  - Allows concentrated urine production',
+            '',
+            'DISTAL CONVOLUTED TUBULE (DCT):',
+            '  - Variable reabsorption (regulated)',
+            '',
+            '  Reabsorbs:',
+            '  - Na⁺ (aldosterone-regulated)',
+            '  - Water (ADH-regulated)',
+            '  - Ca²⁺ (PTH-regulated)',
+            '',
+            '  Amount depends on body needs',
+            '',
+            'COLLECTING DUCT:',
+            '  - Final adjustment',
+            '',
+            '  Reabsorbs:',
+            '  - Water (ADH-regulated)',
+            '    • High ADH → More water reabsorbed',
+            '    • Low ADH → Less water reabsorbed',
+            '',
+            '  Determines final urine concentration:',
+            '  - Concentrated urine (with ADH)',
+            '  - Dilute urine (without ADH)',
+            '',
+            'GLUCOSE THRESHOLD:',
+            '  - Normally ALL glucose reabsorbed',
+            '  - Threshold: ~180 mg/dL blood glucose',
+            '  - Above threshold: Appears in urine',
+            '  - Diabetes: Exceeds threshold (glycosuria)',
+            '  - Transporters saturated (Tm)',
+            '',
+            'MECHANISMS:',
+            '',
+            '  Active Transport:',
+            '  - Requires ATP',
+            '  - Against gradient',
+            '  - Examples: Na⁺, glucose, amino acids',
+            '',
+            '  Passive Transport:',
+            '  - No energy needed',
+            '  - Down gradient',
+            '  - Osmosis: Water',
+            '  - Diffusion: Cl⁻, urea',
+            '',
+            '═══════════════════════════════════════════',
+            '3. TUBULAR SECRETION:',
+            '═══════════════════════════════════════════',
+            '',
+            'Definition: Movement of substances FROM blood INTO filtrate',
+            'Location: Mainly PCT and DCT',
+            'Type: ACTIVE process',
+            '',
+            'Purpose:',
+            '  - Eliminate substances not filtered',
+            '  - Remove excess ions',
+            '  - Regulate blood pH',
+            '  - Dispose of drugs/toxins',
+            '',
+            'WHAT IS SECRETED:',
+            '',
+            '  1. H⁺ (Hydrogen ions):',
+            '     - Most important',
+            '     - Regulates blood pH',
+            '     - Secreted in PCT and DCT',
+            '     - Increased if blood too acidic',
+            '',
+            '  2. K⁺ (Potassium):',
+            '     - Secreted in DCT and collecting duct',
+            '     - Regulated by aldosterone',
+            '     - Maintains blood K⁺ levels',
+            '',
+            '  3. NH₃ (Ammonia):',
+            '     - From amino acid breakdown',
+            '     - Buffering system for H⁺',
+            '     - Converts to NH₄⁺ (ammonium)',
+            '',
+            '  4. Creatinine:',
+            '     - Muscle metabolism waste',
+            '     - Completely secreted',
+            '     - Used to estimate GFR',
+            '',
+            '  5. Drugs and Toxins:',
+            '     - Penicillin',
+            '     - Aspirin',
+            '     - Many medications',
+            '     - Environmental toxins',
+            '',
+            'Why Secretion Matters:',
+            '  - Some substances bound to plasma proteins',
+            '  - Can\'t be filtered (too large)',
+            '  - MUST be secreted to eliminate',
+            '',
+            'pH Regulation:',
+            '',
+            '  If blood too ACIDIC (pH < 7.35):',
+            '  - Secrete MORE H⁺',
+            '  - Reabsorb MORE HCO₃⁻',
+            '  - Produce NH₃ (buffers H⁺)',
+            '  - Urine becomes acidic',
+            '',
+            '  If blood too ALKALINE (pH > 7.45):',
+            '  - Secrete LESS H⁺',
+            '  - Excrete HCO₃⁻',
+            '  - Urine becomes alkaline',
+            '',
+            '═══════════════════════════════════════════',
+            'SUMMARY OF THREE PROCESSES:',
+            '═══════════════════════════════════════════',
+            '',
+            'Process          Location        Direction       Type',
+            '─────────────────────────────────────────────────────',
+            'Filtration       Glomerulus      Blood→Filtrate  Passive',
+            'Reabsorption     Tubules         Filtrate→Blood  Active/Passive',
+            'Secretion        Tubules         Blood→Filtrate  Active',
+            '',
+            'EQUATION:',
+            '  Urine Excretion = Filtration - Reabsorption + Secretion',
+            '',
+            'Example: Glucose',
+            '  - Filtered: Yes (enters filtrate)',
+            '  - Reabsorbed: 100% (normally)',
+            '  - Secreted: No',
+            '  - In urine: 0 (normally)',
+            '',
+            'Example: Creatinine',
+            '  - Filtered: Yes',
+            '  - Reabsorbed: No (0%)',
+            '  - Secreted: Yes',
+            '  - In urine: All (100% excreted)',
+            '',
+            'Example: H⁺',
+            '  - Filtered: Small amount',
+            '  - Reabsorbed: No',
+            '  - Secreted: Yes (large amount)',
+            '  - In urine: Most comes from secretion',
+            '',
+            'DAILY VOLUMES:',
+            '  - Cardiac output: 5 L/min',
+            '  - Renal blood flow: 1.2 L/min (25% of CO)',
+            '  - Glomerular filtrate: 180 L/day',
+            '  - Reabsorbed: 178-179 L/day (99%)',
+            '  - Final urine: 1-2 L/day (1%)',
+            '',
+            'Efficiency:',
+            '  - Body reabsorbs 99% of filtrate',
+            '  - Concentrates waste 60-fold',
+            '  - Maintains homeostasis'
+        ],
+        helper: 'Filtration (blood→filtrate, glomerulus), Reabsorption (filtrate→blood, tubules), Secretion (blood→filtrate, tubules)',
+        solution: 'Filtration: pressure forces plasma into Bowman\'s; Reabsorption: tubules reclaim 99% (water, glucose, ions); Secretion: tubules add H⁺, K⁺, drugs',
+        realWorldContext: 'Drug testing detects drugs secreted into urine; diabetes causes glucose in urine (exceeds reabsorption threshold)'
+    });
+
+    // Problem 3: Hormonal Regulation
+    relatedProblems.push({
+        difficulty: 'similar',
+        scenario: 'Kidney Hormone Regulation',
+        problem: 'Explain how ADH and aldosterone regulate kidney function and urine production',
+        parameters: {
+            specificItems: ['ADH', 'Aldosterone'],
+            function: 'hormone regulation',
+            limit: 2
+        },
+        type: 'excretory_system',
+        context: { difficulty: 'intermediate', topic: 'Excretory System', focus: 'hormonal control' },
+        subparts: [
+            'Hormonal Regulation of Kidneys:',
+            '',
+            'Two Main Hormones Control Urine Production:',
+            '',
+            '═══════════════════════════════════════════',
+            'ANTIDIURETIC HORMONE (ADH):',
+            '═══════════════════════════════════════════',
+            '',
+            'Also called: Vasopressin',
+            'Source: Produced by hypothalamus, released by posterior pituitary',
+            'Target: COLLECTING DUCTS (and DCT)',
+            '',
+            'Main Function: Regulates WATER balance',
+            '',
+            '─────────────────────────────────────────',
+            'WHEN ADH IS RELEASED:',
+            '─────────────────────────────────────────',
+            '',
+            'Stimuli for Release:',
+            '  1. DEHYDRATION',
+            '     - Low blood volume',
+            '     - High blood osmolarity (concentrated)',
+            '     - Detected by osmoreceptors (hypothalamus)',
+            '',
+            '  2. Low blood pressure',
+            '     - Detected by baroreceptors',
+            '',
+            '  3. Increased blood Na⁺',
+            '',
+            '  4. Stress, pain, nausea',
+            '',
+            'Mechanism of Action:',
+            '',
+            '  1. ADH released into bloodstream',
+            '',
+            '  2. Binds to receptors on collecting duct cells',
+            '',
+            '  3. Triggers insertion of AQUAPORINS',
+            '     - Water channels',
+            '     - Into apical membrane',
+            '     - Facing tubule lumen',
+            '',
+            '  4. Collecting duct becomes permeable to water',
+            '',
+            '  5. Water reabsorbed by osmosis',
+            '     - From filtrate into blood',
+            '     - Follows osmotic gradient in medulla',
+            '',
+            'EFFECTS:',
+            '',
+            '  ↑ Water reabsorption',
+            '  ↓ Urine volume (oliguria)',
+            '  ↑ Urine concentration (darker, more concentrated)',
+            '  ↑ Blood volume',
+            '  ↑ Blood pressure',
+            '  ↓ Blood osmolarity (more dilute)',
+            '',
+            'Result: CONSERVES water',
+            '  - "Anti-diuresis" = less urination',
+            '  - Concentrated urine',
+            '',
+            'Negative Feedback:',
+            '  - Increased blood volume',
+            '  - Decreased blood osmolarity',
+            '  → Inhibits ADH release',
+            '  → Homeostasis restored',
+            '',
+            '─────────────────────────────────────────',
+            'WHEN ADH IS LOW/ABSENT:',
+            '─────────────────────────────────────────',
+            '',
+            'Stimuli for Decreased Release:',
+            '  1. OVERHYDRATION',
+            '     - High blood volume',
+            '     - Low blood osmolarity (dilute)',
+            '',
+            '  2. High blood pressure',
+            '',
+            '  3. Alcohol consumption',
+            '     - Inhibits ADH release',
+            '',
+            '  4. Caffeine (mild diuretic)',
+            '',
+            'Effects:',
+            '',
+            '  ↓ Water reabsorption',
+            '  ↑ Urine volume (polyuria)',
+            '  ↓ Urine concentration (pale, dilute)',
+            '  ↓ Blood volume',
+            '  ↓ Blood pressure',
+            '',
+            'Result: ELIMINATES excess water',
+            '  - More urination',
+            '  - Dilute urine',
+            '',
+            '─────────────────────────────────────────',
+            'ADH DISORDERS:',
+            '─────────────────────────────────────────',
+            '',
+            '1. DIABETES INSIPIDUS (DI):',
+            '',
+            '   Cause: ADH deficiency or kidney resistance',
+            '',
+            '   Types:',
+            '   - Central DI: Insufficient ADH production',
+            '   - Nephrogenic DI: Kidneys don\'t respond to ADH',
+            '',
+            '   Symptoms:',
+            '   - POLYURIA: Excessive urination (5-20 L/day!)',
+            '   - POLYDIPSIA: Excessive thirst',
+            '   - Dilute urine (low specific gravity)',
+            '   - Dehydration if can\'t drink enough',
+            '',
+            '   NOT related to diabetes mellitus (different disease)',
+            '',
+            '   Treatment:',
+            '   - Central: Synthetic ADH (desmopressin)',
+            '   - Nephrogenic: Treat underlying cause',
+            '',
+            '2. SIADH (Syndrome of Inappropriate ADH):',
+            '',
+            '   Cause: Excess ADH secretion',
+            '',
+            '   Symptoms:',
+            '   - Water retention',
+            '   - Hyponatremia (low blood Na⁺)',
+            '   - Concentrated urine despite hydration',
+            '   - Low urine output',
+            '   - Confusion, seizures (severe)',
+            '',
+            '   Treatment:',
+            '   - Fluid restriction',
+            '   - Treat underlying cause',
+            '',
+            '═══════════════════════════════════════════',
+            'ALDOSTERONE:',
+            '═══════════════════════════════════════════',
+            '',
+            'Source: Adrenal cortex (zona glomerulosa)',
+            'Target: DCT and COLLECTING DUCT',
+            'Type: Mineralocorticoid (steroid hormone)',
+            '',
+            'Main Function: Regulates Na⁺, K⁺, and indirectly WATER',
+            '',
+            '─────────────────────────────────────────',
+            'WHEN ALDOSTERONE IS RELEASED:',
+            '─────────────────────────────────────────',
+            '',
+            'Stimuli for Release:',
+            '  1. LOW blood pressure',
+            '     - Detected by kidneys',
+            '     - Triggers RAAS (see below)',
+            '',
+            '  2. LOW blood Na⁺ (hyponatremia)',
+            '',
+            '  3. HIGH blood K⁺ (hyperkalemia)',
+            '     - Direct stimulus on adrenal cortex',
+            '',
+            '  4. ACTH (from pituitary)',
+            '     - Minor role',
+            '',
+            'Mechanism of Action:',
+            '',
+            '  1. Aldosterone released into bloodstream',
+            '',
+            '  2. Lipid-soluble → crosses cell membrane',
+            '',
+            '  3. Binds nuclear receptors in DCT/collecting duct',
+            '',
+            '  4. Changes gene expression',
+            '     - Makes more Na⁺/K⁺ pumps',
+            '     - Makes more Na⁺ channels',
+            '',
+            '  5. EFFECTS (takes hours):',
+            '',
+            '     PRINCIPAL CELLS:',
+            '     - ↑ Na⁺ reabsorption (from filtrate → blood)',
+            '     - ↑ K⁺ secretion (from blood → filtrate)',
+            '     - Water follows Na⁺ (osmosis)',
+            '',
+            'EFFECTS:',
+            '',
+            '  ↑ Na⁺ reabsorption',
+            '  ↑ K⁺ secretion (opposite of Na⁺)',
+            '  ↑ Water reabsorption (follows Na⁺)',
+            '  ↑ Blood volume',
+            '  ↑ Blood pressure',
+            '',
+            'Result: Increases blood volume and pressure',
+            '  - Saves Na⁺ and water',
+            '  - Eliminates K⁺',
+            '',
+            'Negative Feedback:',
+            '  - Increased blood pressure',
+            '  - Increased blood Na⁺',
+            '  → Inhibits renin/aldosterone',
+            '  → Homeostasis restored',
+            '',
+            '─────────────────────────────────────────',
+            'RENIN-ANGIOTENSIN-ALDOSTERONE SYSTEM (RAAS):',
+            '─────────────────────────────────────────',
+            '',
+            'Complex hormonal cascade regulating BP',
+            '',
+            'STEPS:',
+            '',
+            '1. LOW BLOOD PRESSURE detected',
+            '   - By juxtaglomerular cells in kidney',
+            '   - Or low Na⁺ detected by macula densa',
+            '',
+            '2. KIDNEYS RELEASE RENIN',
+            '   - Enzyme from juxtaglomerular cells',
+            '',
+            '3. Renin converts ANGIOTENSINOGEN (from liver)',
+            '   → ANGIOTENSIN I',
+            '',
+            '4. ACE (Angiotensin Converting Enzyme)',
+            '   - Primarily in LUNGS',
+            '   - Converts Angiotensin I',
+            '   → ANGIOTENSIN II (active form)',
+            '',
+            '5. ANGIOTENSIN II effects:',
+            '',
+            '   a) VASOCONSTRICTION',
+            '      - Constricts arterioles',
+            '      - ↑ Blood pressure (immediate)',
+            '',
+            '   b) STIMULATES ALDOSTERONE release',
+            '      - From adrenal cortex',
+            '      - ↑ Na⁺ and water retention',
+            '      - ↑ Blood volume (slower)',
+            '',
+            '   c) STIMULATES ADH release',
+            '      - From posterior pituitary',
+            '      - ↑ Water reabsorption',
+            '',
+            '   d) Stimulates THIRST',
+            '      - Increases fluid intake',
+            '',
+            '   e) Constricts efferent arteriole',
+            '      - Maintains GFR despite low BP',
+            '',
+            'RESULT: Blood pressure INCREASES',
+            '  - Short-term: Vasoconstriction',
+            '  - Long-term: Increased blood volume',
+            '',
+            'Clinical Importance:',
+            '  - ACE inhibitors: Block ACE',
+            '    • Treat hypertension',
+            '    • Drug names end in "-pril"',
+            '    • Lisinopril, enalapril',
+            '  - ARBs (Angiotensin Receptor Blockers)',
+            '    • Block Ang II receptors',
+            '    • Drug names end in "-sartan"',
+            '    • Losartan, valsartan',
+            '',
+            '═══════════════════════════════════════════',
+            'ADH vs ALDOSTERONE COMPARISON:',
+            '═══════════════════════════════════════════',
+            '',
+            'Feature          ADH              Aldosterone',
+            '─────────────────────────────────────────────────',
+            'Source           Hypothalamus/    Adrenal cortex',
+            '                 Post. pituitary',
+            'Target           Collecting duct  DCT/Coll. duct',
+            'Main Effect      ↑ Water reabs.   ↑ Na⁺ reabs.',
+            'Also affects     -                ↑ K⁺ secretion',
+            'Water effect     Direct           Indirect (follows Na⁺)',
+            'Speed            Minutes          Hours',
+            'Type             Peptide          Steroid',
+            'Mechanism        Aquaporins       Gene expression',
+            'Triggered by     Dehydration      Low BP, Low Na⁺',
+            '',
+            'BOTH increase blood volume and pressure',
+            'BOTH result in less urine output',
+            '',
+            '═══════════════════════════════════════════',
+            'OTHER HORMONES AFFECTING KIDNEYS:',
+            '═══════════════════════════════════════════',
+            '',
+            '1. ATRIAL NATRIURETIC PEPTIDE (ANP):',
+            '',
+            '   Source: Heart atria',
+            '   Trigger: High blood volume (stretches atria)',
+            '',
+            '   Effects: OPPOSITE of aldosterone',
+            '   - ↓ Na⁺ reabsorption (excrete more Na⁺)',
+            '   - ↓ Water reabsorption (more urine)',
+            '   - Dilates afferent arteriole (↑ GFR)',
+            '   - Inhibits renin and aldosterone',
+            '',
+            '   Result: Decreases blood volume and pressure',
+            '   - More urine produced',
+            '   - "Natriuretic" = Na⁺ in urine',
+            '',
+            '2. PARATHYROID HORMONE (PTH):',
+            '',
+            '   Source: Parathyroid glands',
+            '   Trigger: Low blood Ca²⁺',
+            '',
+            '   Effects on kidneys:',
+            '   - ↑ Ca²⁺ reabsorption (DCT)',
+            '   - ↓ PO₄³⁻ reabsorption (excrete phosphate)',
+            '   - Activates vitamin D',
+            '',
+            '   Result: Raises blood Ca²⁺',
+            '',
+            '3. ANGIOTENSIN II:',
+            '   (Described above in RAAS)',
+            '   - Vasoconstriction',
+            '   - Stimulates aldosterone',
+            '   - Maintains GFR',
+            '',
+            '═══════════════════════════════════════════',
+            'CLINICAL SCENARIOS:',
+            '═══════════════════════════════════════════',
+            '',
+            'DEHYDRATION (Hot day, no water):',
+            '',
+            '  Problem:',
+            '  - Blood volume LOW',
+            '  - Blood osmolarity HIGH',
+            '  - Blood pressure LOW',
+            '',
+            '  Hormonal Response:',
+            '  - ↑ ADH: Conserve water',
+            '  - ↑ Renin → Angiotensin II → Aldosterone',
+            '  - Save Na⁺ and water',
+            '',
+            '  Result:',
+            '  - Small volume of concentrated urine',
+            '  - Dark yellow color',
+            '  - High specific gravity',
+            '  - Thirst',
+            '',
+            'OVERHYDRATION (Drank too much water):',
+            '',
+            '  Problem:',
+            '  - Blood volume HIGH',
+            '  - Blood osmolarity LOW',
+            '  - Blood pressure HIGH',
+            '',
+            '  Hormonal Response:',
+            '  - ↓ ADH: Eliminate water',
+            '  - ↑ ANP: Excrete Na⁺ and water',
+            '  - ↓ Aldosterone',
+            '',
+            '  Result:',
+            '  - Large volume of dilute urine',
+            '  - Clear/pale color',
+            '  - Low specific gravity',
+            '',
+            'HEMORRHAGE (Blood loss):',
+            '',
+            '  Problem:',
+            '  - Blood volume LOW',
+            '  - Blood pressure LOW',
+            '  - Emergency!',
+            '',
+            '  Hormonal Response:',
+            '  - ↑↑ ADH: Maximum water conservation',
+            '  - ↑↑ RAAS: Vasoconstriction + Na⁺/water retention',
+            '  - ↓ ANP',
+            '',
+            '  Result:',
+            '  - Minimal urine output',
+            '  - Very concentrated',
+            '  - Maintains blood pressure',
+            '',
+            'HEART FAILURE (Fluid overload):',
+            '',
+            '  Problem:',
+            '  - Total body volume HIGH',
+            '  - But effective circulating volume LOW',
+            '  - Paradox: Edema but low BP',
+            '',
+            '  Hormonal Response:',
+            '  - ↑ ADH (responds to low effective volume)',
+            '  - ↑ RAAS (responds to low BP)',
+            '  - ANP elevated but overwhelmed',
+            '',
+            '  Result:',
+            '  - Retains even more fluid',
+            '  - Worsens edema',
+            '  - Treatment: Diuretics (force urination)',
+            '',
+            '═══════════════════════════════════════════',
+            'SUMMARY:',
+            '═══════════════════════════════════════════',
+            '',
+            'Hormone Cascade for LOW Blood Pressure:',
+            '',
+            '  Low BP',
+            '  → Renin (kidney)',
+            '  → Angiotensinogen → Angiotensin I',
+            '  → ACE (lung)',
+            '  → Angiotensin II',
+            '  → Multiple effects:',
+            '     1. Vasoconstriction (immediate ↑ BP)',
+            '     2. Aldosterone (↑ Na⁺, water retention)',
+            '     3. ADH (↑ water retention)',
+            '     4. Thirst (↑ fluid intake)',
+            '  → Blood volume ↑',
+            '  → Blood pressure ↑',
+            '',
+            'Key Principle:',
+            '  - Kidneys can\'t directly increase BP',
+            '  - But can increase blood VOLUME',
+            '  - More volume → More pressure',
+            '  - Long-term BP regulation'
+        ],
+        helper: 'ADH (water retention, collecting duct); Aldosterone (Na⁺ retention → water follows); Both increase blood volume/pressure',
+        solution: 'ADH: increases water reabsorption in collecting duct (conserve water); Aldosterone: increases Na⁺ reabsorption, K⁺ secretion (water follows Na⁺); Both raise blood volume and pressure',
+        realWorldContext: 'Blood pressure medications target RAAS (ACE inhibitors, ARBs) to reduce blood volume and pressure'
+    });
+
+    // Problem 4: Urine Characteristics
+    relatedProblems.push({
+        difficulty: 'harder',
+        scenario: 'Normal Urine Composition and Analysis',
+        problem: 'Describe normal urine composition and explain how urinalysis can detect disease',
+        parameters: {
+            specificItems: ['Urine Composition', 'Urinalysis'],
+            category: 'urine analysis',
+            limit: 2
+        },
+        type: 'excretory_system',
+        context: { difficulty: 'intermediate', topic: 'Excretory System', focus: 'urine characteristics' },
+        subparts: [
+            'Urine: Final product of kidney filtration',
+            '',
+            '═══════════════════════════════════════════',
+            'NORMAL URINE CHARACTERISTICS:',
+            '═══════════════════════════════════════════',
+            '',
+            'VOLUME:',
+            '  Normal: 1-2 liters per day',
+            '  Range: 600 mL - 2500 mL',
+            '',
+            '  Varies with:',
+            '  - Fluid intake',
+            '  - Temperature (sweating)',
+            '  - Exercise',
+            '  - Diet',
+            '  - Medications',
+            '',
+            '  Terms:',
+            '  - Polyuria: >2.5 L/day (excessive)',
+            '  - Oliguria: <500 mL/day (decreased)',
+            '  - Anuria: <100 mL/day (absence)',
+            '',
+            'COLOR:',
+            '  Normal: Yellow to amber',
+            '  Pigment: Urochrome (from hemoglobin breakdown)',
+            '',
+            '  Variations:',
+            '  - Pale/Clear: Dilute (overhydrated, diabetes insipidus)',
+            '  - Dark yellow/amber: Concentrated (dehydrated)',
+            '  - Orange: Dehydration, B vitamins, rifampin',
+            '  - Red/Pink: Blood (hematuria), beets, medications',
+            '  - Brown: Severe dehydration, liver disease, old blood',
+            '  - Green/Blue: Medications, UTI (rare bacteria)',
+            '  - Cloudy: Infection, crystals, cells',
+            '',
+            'ODOR:',
+            '  Normal: Slightly aromatic',
+            '  Fresh urine: Not foul',
+            '',
+            '  Abnormal:',
+            '  - Ammonia smell: Old urine (bacterial breakdown)',
+            '  - Sweet/fruity: Diabetes (ketones)',
+            '  - Foul: Urinary tract infection',
+            '  - Foods: Asparagus, coffee, garlic',
+            '',
+            'pH:',
+            '  Normal range: 4.5 - 8.0',
+            '  Average: ~6.0 (slightly acidic)',
+            '',
+            '  Varies with:',
+            '  - Diet: Meat (acidic), vegetables (alkaline)',
+            '  - Time of day',
+            '  - Acid-base balance',
+            '',
+            '  Clinical significance:',
+            '  - Very acidic: High protein diet, acidosis',
+            '  - Alkaline: Vegetarian diet, UTI, alkalosis',
+            '  - UTI (some bacteria): Makes urine alkaline',
+            '',
+            'SPECIFIC GRAVITY:',
+            '  Definition: Density compared to water',
+            '  Normal range: 1.001 - 1.035',
+            '  Water = 1.000',
+            '',
+            '  Indicates:',
+            '  - Kidney\'s ability to concentrate urine',
+            '  - Hydration status',
+            '',
+            '  Low (dilute): <1.010',
+            '  - Overhydration',
+            '  - Diabetes insipidus',
+            '  - Kidney disease',
+            '',
+            '  High (concentrated): >1.025',
+            '  - Dehydration',
+            '  - SIADH',
+            '  - Heart failure',
+            '',
+            'TRANSPARENCY:',
+            '  Normal: Clear to slightly hazy',
+            '',
+            '  Cloudy indicates:',
+            '  - White blood cells (infection)',
+            '  - Bacteria',
+            '  - Crystals',
+            '  - Mucus',
+            '  - Epithelial cells',
+            '',
+            '═══════════════════════════════════════════',
+            'NORMAL URINE COMPOSITION:',
+            '═══════════════════════════════════════════',
+            '',
+            'WATER: 95%',
+            '',
+            'SOLUTES: 5% (dissolved substances)',
+            '',
+            'ORGANIC WASTES:',
+            '',
+            '  1. UREA: 50% of solutes',
+            '     - From protein/amino acid metabolism',
+            '     - Liver produces from ammonia',
+            '     - Main nitrogenous waste',
+            '     - Concentration: 20-30 g/day',
+            '',
+            '  2. CREATININE:',
+            '     - From muscle creatine metabolism',
+            '     - Produced at constant rate',
+            '     - All filtered and secreted (not reabsorbed)',
+            '     - Used to estimate GFR',
+            '     - ~1-2 g/day',
+            '',
+            '  3. URIC ACID:',
+            '     - From nucleic acid breakdown',
+            '     - Purines → Uric acid',
+            '     - ~0.5 g/day',
+            '     - Excess: Gout, kidney stones',
+            '',
+            'ELECTROLYTES:',
+            '',
+            '  - Na⁺ (Sodium): 3-4 g/day',
+            '  - Cl⁻ (Chloride): 6-8 g/day',
+            '  - K⁺ (Potassium): 2-3 g/day',
+            '  - Ca²⁺ (Calcium): Variable',
+            '  - Mg²⁺ (Magnesium): Variable',
+            '  - PO₄³⁻ (Phosphate): 1-2 g/day',
+            '  - SO₄²⁻ (Sulfate): From proteins',
+            '',
+            'OTHER SUBSTANCES:',
+            '  - Ammonia (from amino acids)',
+            '  - Hormones and metabolites',
+            '  - Vitamins',
+            '  - Small amounts of enzymes',
+            '',
+            'SUBSTANCES THAT SHOULD NOT BE PRESENT:',
+            '(Indicate disease if found)',
+            '',
+            '  ✗ Glucose (glycosuria)',
+            '  ✗ Proteins (proteinuria)',
+            '  ✗ Blood (hematuria)',
+            '  ✗ Ketones (ketonuria)',
+            '  ✗ Bilirubin',
+            '  ✗ Bacteria',
+            '  ✗ White blood cells (pyuria)',
+            '',
+            '═══════════════════════════════════════════',
+            'URINALYSIS - Three Parts:',
+            '═══════════════════════════════════════════',
+            '',
+            '1. PHYSICAL EXAMINATION:',
+            '',
+            '  Color:',
+            '  - Normal: Yellow to amber',
+            '  - Abnormal colors indicate disease',
+            '',
+            '  Clarity:',
+            '  - Normal: Clear',
+            '  - Cloudy: Infection, crystals',
+            '',
+            '  Odor:',
+            '  - Normal: Mild',
+            '  - Sweet: Diabetes',
+            '  - Foul: Infection',
+            '',
+            '  Specific Gravity:',
+            '  - Tests concentration ability',
+            '  - Refractometer or dipstick',
+            '',
+            '2. CHEMICAL EXAMINATION (Dipstick):',
+            '',
+            'Reagent strips test for:',
+            '',
+            '  pH:',
+            '  - Range: 4.5-8.0',
+            '',
+            '  Protein:',
+            '  - Normal: Negative or trace',
+            '  - Positive: Kidney damage',
+            '    • Glomerulonephritis',
+            '    • Diabetic nephropathy',
+            '    • Preeclampsia (pregnancy)',
+            '',
+            '  Glucose:',
+            '  - Normal: Negative',
+            '  - Positive: Diabetes mellitus',
+            '    • Blood glucose >180 mg/dL',
+            '    • Exceeds renal threshold',
+            '',
+            '  Ketones:',
+            '  - Normal: Negative',
+            '  - Positive: Diabetic ketoacidosis',
+            '    • Starvation',
+            '    • Very low-carb diet',
+            '    • Fat metabolism predominates',
+            '',
+            '  Blood:',
+            '  - Normal: Negative',
+            '  - Positive (Hematuria):',
+            '    • UTI',
+            '    • Kidney stones',
+            '    • Glomerulonephritis',
+            '    • Cancer',
+            '    • Trauma',
+            '    • Menstruation (contamination)',
+            '',
+            '  Leukocyte Esterase:',
+            '  - Normal: Negative',
+            '  - Positive: White blood cells present',
+            '    • Urinary tract infection',
+            '',
+            '  Nitrites:',
+            '  - Normal: Negative',
+            '  - Positive: Bacteria present',
+            '    • UTI (some bacteria convert nitrates)',
+            '',
+            '  Bilirubin:',
+            '  - Normal: Negative',
+            '  - Positive: Liver disease',
+            '    • Hepatitis',
+            '    • Bile duct obstruction',
+            '',
+            '  Urobilinogen:',
+            '  - Normal: Small amount',
+            '  - Increased: Liver disease, hemolysis',
+            '  - Decreased: Bile duct obstruction',
+            '',
+            '  Specific Gravity:',
+            '  - Tests concentration',
+            '',
+            '3. MICROSCOPIC EXAMINATION:',
+            '',
+            'Sediment examined after centrifuge:',
+            '',
+            '  Red Blood Cells:',
+            '  - Normal: 0-2 per high-power field (HPF)',
+            '  - Increased: Bleeding anywhere in tract',
+            '',
+            '  White Blood Cells:',
+            '  - Normal: 0-5 per HPF',
+            '  - Increased: Infection, inflammation',
+            '  - Many WBCs = Pyuria (pus in urine)',
+            '',
+            '  Epithelial Cells:',
+            '  - Few: Normal (sloughed cells)',
+            '  - Many: Possible contamination',
+            '',
+            '  Bacteria:',
+            '  - Normal: None or rare',
+            '  - Present: UTI (if midstream, clean catch)',
+            '',
+            '  Casts:',
+            '  - Protein molds of tubules',
+            '  - Types:',
+            '    • Hyaline: Normal in small amounts',
+            '    • RBC casts: Glomerulonephritis',
+            '    • WBC casts: Pyelonephritis',
+            '    • Granular: Tubular damage',
+            '  - Indicate kidney pathology',
+            '',
+            '  Crystals:',
+            '  - Can be normal or abnormal',
+            '  - Depend on urine pH',
+            '  - Types:',
+            '    • Calcium oxalate: Kidney stones',
+            '    • Uric acid: Gout, leukemia',
+            '    • Struvite: UTI with bacteria',
+            '    • Cystine: Genetic disorder',
+            '',
+            '  Yeast:',
+            '  - Candida infection',
+            '  - Common in diabetes, immunocompromised',
+            '',
+            '═══════════════════════════════════════════',
+            'CLINICAL INTERPRETATION:',
+            '═══════════════════════════════════════════',
+            '',
+            'DIABETES MELLITUS:',
+            '  Findings:',
+            '  - Glucose: Positive',
+            '  - Ketones: Positive (if uncontrolled)',
+            '  - High specific gravity',
+            '  - Sweet odor',
+            '',
+            'URINARY TRACT INFECTION (UTI):',
+            '  Findings:',
+            '  - Cloudy appearance',
+            '  - Foul odor',
+            '  - WBCs: Increased',
+            '  - Bacteria: Present',
+            '  - Nitrites: Positive',
+            '  - Leukocyte esterase: Positive',
+            '  - Blood: May be positive',
+            '  - pH: Often alkaline',
+            '',
+            'KIDNEY DISEASE (Glomerulonephritis):',
+            '  Findings:',
+            '  - Protein: Positive (significant)',
+            '  - Blood: Positive',
+            '  - RBC casts present',
+            '  - Low specific gravity (if chronic)',
+            '  - Decreased GFR',
+            '',
+            'DEHYDRATION:',
+            '  Findings:',
+            '  - Dark yellow color',
+            '  - High specific gravity (>1.025)',
+            '  - Concentrated',
+            '  - Low volume',
+            '',
+            'DIABETES INSIPIDUS:',
+            '  Findings:',
+            '  - Very pale/clear color',
+            '  - Low specific gravity (<1.005)',
+            '  - Large volume',
+            '  - Dilute despite dehydration',
+            '',
+            'KIDNEY STONES:',
+            '  Findings:',
+            '  - Blood: Positive',
+            '  - Crystals: May be present',
+            '  - RBCs present',
+            '  - pH varies with stone type',
+            '',
+            'LIVER DISEASE:',
+            '  Findings:',
+            '  - Dark brown color',
+            '  - Bilirubin: Positive',
+            '  - Urobilinogen: Abnormal',
+            '',
+            '═══════════════════════════════════════════',
+            'COLLECTION METHODS:',
+            '═══════════════════════════════════════════',
+            '',
+            'Clean Catch Midstream:',
+            '  - Most common',
+            '  - Clean external area first',
+            '  - Start urinating (flush bacteria)',
+            '  - Collect middle portion',
+            '  - Reduces contamination',
+            '',
+            '24-Hour Collection:',
+            '  - Collects all urine for 24 hours',
+            '  - Tests total excretion:',
+            '    • Protein',
+            '    • Creatinine clearance (GFR)',
+            '    • Hormones',
+            '',
+            'Catheterized:',
+            '  - Sterile catheter inserted',
+            '  - Most sterile',
+            '  - Used when clean catch not possible',
+            '',
+            'Suprapubic Aspiration:',
+            '  - Needle through abdominal wall into bladder',
+            '  - Most sterile',
+            '  - Used in infants or special cases',
+            '',
+            '═══════════════════════════════════════════',
+            'SUMMARY:',
+            '═══════════════════════════════════════════',
+            '',
+            'Normal Urine:',
+            '  ✓ Yellow to amber',
+            '  ✓ Clear',
+            '  ✓ Mild odor',
+            '  ✓ pH 4.5-8.0',
+            '  ✓ Specific gravity 1.001-1.035',
+            '  ✓ No glucose, protein, blood, ketones',
+            '  ✓ Few or no cells/bacteria',
+            '',
+            'Urinalysis Detects:',
+            '  - Kidney disease',
+            '  - Diabetes',
+            '  - Urinary tract infections',
+            '  - Liver disease',
+            '  - Dehydration',
+            '  - Drug use',
+            '  - Pregnancy (hCG test)',
+            '',
+            'Key Principle:',
+            '  Urine composition reflects:',
+            '  - Kidney function',
+            '  - Overall health status',
+            '  - Hydration',
+            '  - Metabolism'
+        ],
+        helper: 'Normal: yellow, clear, pH 6, no glucose/protein/blood; Abnormal findings indicate disease (UTI, diabetes, kidney damage)',
+        solution: 'Normal urine: 95% water, 5% solutes (urea, creatinine, ions), yellow, clear, no glucose/protein/blood; Urinalysis detects UTI, diabetes, kidney disease',
+        realWorldContext: 'Urinalysis is routine screening test; glucose in urine was first way diabetes was diagnosed (doctors tasted urine!)'
+    });
+
+    // Problem 5: Kidney Disorders
+
+    return relatedProblems;
+}
+// ============== SOLVER FUNCTIONS FOR HUMAN ANATOMY ==============
+
+function solveCirculatorySystemProblems() {
+    const problems = generateRelatedCirculatorySystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Circulatory System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true,
+            detailLevel: 'detailed'
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: problem.subTopic || null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveRespiratorySystemProblems() {
+    const problems = generateRelatedRespiratorySystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Respiratory System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includeCommonMisconceptions: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveDigestiveSystemProblems() {
+    const problems = generateRelatedDigestiveSystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Digestive System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveNervousSystemProblems() {
+    const problems = generateRelatedNervousSystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Nervous System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveEndocrineSystemProblems() {
+    const problems = generateRelatedEndocrineSystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Endocrine System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveSkeletalSystemProblems() {
+    const problems = generateRelatedSkeletalSystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Skeletal System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveMuscularSystemProblems() {
+    const problems = generateRelatedMuscularSystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Muscular System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+function solveExcretorySystemProblems() {
+    const problems = generateRelatedExcretorySystem();
+    const solvedProblems = [];
+
+    problems.forEach((problem, index) => {
+        console.log(`  Solving Excretory System Problem ${index + 1}: ${problem.scenario}`);
+
+        const workbook = new EnhancedHumanAnatomyWorkbook({
+            theme: 'anatomical',
+            explanationLevel: 'detailed',
+            includeVisualizations: true,
+            includeConceptualConnections: true,
+            includeExamples: true,
+            includeComparisons: true,
+            includePedagogicalNotes: true
+        });
+
+        workbook.handleAnatomyProblem({
+            topic: problem.type,
+            parameters: problem.parameters,
+            subTopic: null,
+            context: problem.context
+        });
+
+        solvedProblems.push({
+            problem: problem,
+            workbook: workbook
+        });
+    });
+
+    return solvedProblems;
+}
+
+
+
+
+// ============== COMPREHENSIVE DOCUMENT GENERATION ==============
+
+async function generateComprehensiveBiologyDocument() {
+    console.log('Generating Comprehensive Cell Biology Workbook with Related Problems...');
+    console.log('='.repeat(80));
+
+    const documentChildren = [];
+
+    // ============== DOCUMENT HEADER ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Comprehensive Cell Biology Workbook',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { after: 200 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Complete Guide with Related Problems',
+            spacing: { after: 150 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Cell Structure, Organelles, Membrane, Division, Transport, and Metabolism',
+            spacing: { after: 300 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: `Generated: ${new Date().toLocaleString()}`,
+            spacing: { after: 600 },
+            alignment: docx.AlignmentType.CENTER
+        })
+    );
+
+    // ============== TABLE OF CONTENTS ==============
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Table of Contents',
+            heading: docx.HeadingLevel.HEADING_2,
+            spacing: { after: 200 }
+        })
+    );
+
+    // Part I: Cell Structure
+   /** documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellStructureProblems = generateRelatedCellStructure();
+    cellStructureProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 1}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part II: Cell Membrane
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const membraneProblems = generateRelatedCellMembrane();
+    membraneProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 6}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part III: Organelles
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles (6 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const organellesProblems = generateRelatedOrganelles();
+    organellesProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 12}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part IV: Cell Division
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const cellDivisionProblems = generateRelatedCellDivision();
+    cellDivisionProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 18}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part V: Mitosis and Meiosis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const mitosisProblems = generateRelatedMitosisMeiosis();
+    mitosisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 23}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VI: Cell Transport
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const transportProblems = generateRelatedCellTransport();
+    transportProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 28}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VII: Cellular Respiration
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const respirationProblems = generateRelatedCellularRespiration();
+    respirationProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 33}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part VIII: Photosynthesis
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const photosynthesisProblems = generateRelatedPhotosynthesis();
+    photosynthesisProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${index + 38}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    documentChildren.push(
+        new docx.Paragraph({
+            text: '',
+            spacing: { after: 400 }
+        })
+    );
+    */
+
+
+    
+    // Part IX: Circulatory System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Human Anatomy - Circulatory System (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const circulatoryProblems = generateRelatedCirculatorySystem();
+    circulatoryProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${43 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part X: Respiratory System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Human Anatomy - Respiratory System (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const respiratoryProblems = generateRelatedRespiratorySystem();
+    respiratoryProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${48 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XI: Digestive System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: Human Anatomy - Digestive System (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const digestiveProblems = generateRelatedDigestiveSystem();
+    digestiveProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${53 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XII: Nervous System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: Human Anatomy - Nervous System (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const nervousProblems = generateRelatedNervousSystem();
+    nervousProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${58 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XIII: Endocrine System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Human Anatomy - Endocrine System (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const endocrineProblems = generateRelatedEndocrineSystem();
+    endocrineProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${63 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XIV: Skeletal System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIV: Human Anatomy - Skeletal System (5 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const skeletalProblems = generateRelatedSkeletalSystem();
+    skeletalProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${68 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XV: Muscular System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XV: Human Anatomy - Muscular System (2 Problems)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const muscularProblems = generateRelatedMuscularSystem();
+    muscularProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${73 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+    // Part XVI: Excretory System
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XVI: Human Anatomy - Excretory System (Problems TBD)',
+            heading: docx.HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 }
+        })
+    );
+
+    const excretoryProblems = generateRelatedExcretorySystem();
+    excretoryProblems.forEach((problem, index) => {
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${73 + index}. ${problem.scenario}`,
+                spacing: { after: 100 },
+                indent: { left: 360 }
+            })
+        );
+    });
+
+
+    // ============== PART I: CELL STRUCTURE ==============
+    /**console.log('\nProcessing Part I: Cell Structure and Types...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part I: Cell Structure and Types',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellStructureSolved = solveCellStructureProblems();
+    cellStructureSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Structure Problem${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 1}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART II: CELL MEMBRANE ==============
+    console.log('\nProcessing Part II: Cell Membrane...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part II: Cell Membrane',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const membraneSolved = solveCellMembraneProblems();
+    membraneSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Membrane Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 6}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART III: ORGANELLES ==============
+    console.log('\nProcessing Part III: Cell Organelles...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part III: Cell Organelles',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const organellesSolved = solveOrganellesProblems();
+    organellesSolved.forEach((solved, index) => {
+        console.log(`  Adding Organelles Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 12}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART IV: CELL DIVISION ==============
+    console.log('\nProcessing Part IV: Cell Division...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IV: Cell Division and Cell Cycle',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const cellDivisionSolved = solveCellDivisionProblems();
+    cellDivisionSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Division Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 18}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART V: MITOSIS AND MEIOSIS ==============
+    console.log('\nProcessing Part V: Mitosis and Meiosis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part V: Mitosis and Meiosis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const mitosisSolved = solveMitosisMeiosisProblems();
+    mitosisSolved.forEach((solved, index) => {
+        console.log(`  Adding Mitosis/Meiosis Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 23}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VI: CELL TRANSPORT ==============
+    console.log('\nProcessing Part VI: Cell Transport...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VI: Cell Transport Mechanisms',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const transportSolved = solveCellTransportProblems();
+    transportSolved.forEach((solved, index) => {
+        console.log(`  Adding Cell Transport Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 28}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VII: CELLULAR RESPIRATION ==============
+    console.log('\nProcessing Part VII: Cellular Respiration...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VII: Cellular Respiration',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const respirationSolved = solveCellularRespirationProblems();
+    respirationSolved.forEach((solved, index) => {
+        console.log(`  Adding Cellular Respiration Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 33}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+
+    // ============== PART VIII: PHOTOSYNTHESIS ==============
+    console.log('\nProcessing Part VIII: Photosynthesis...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part VIII: Photosynthesis',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const photosynthesisSolved = solvePhotosynthesisProblems();
+    photosynthesisSolved.forEach((solved, index) => {
+        console.log(`  Adding Photosynthesis Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${index + 38}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+    });
+    */
+
+    
+    // ============== PART IX: HUMAN ANATOMY - CIRCULATORY SYSTEM ==============
+    console.log('\nProcessing Part IX: Circulatory System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part IX: Human Anatomy - Circulatory System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const circulatorySolved = solveCirculatorySystemProblems();
+    let problemNumber = 43; // Continue from cell biology problems
+
+    circulatorySolved.forEach((solved, index) => {
+        console.log(`  Adding Circulatory System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART X: HUMAN ANATOMY - RESPIRATORY SYSTEM ==============
+    console.log('\nProcessing Part X: Respiratory System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part X: Human Anatomy - Respiratory System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const respiratorySolved = solveRespiratorySystemProblems();
+    respiratorySolved.forEach((solved, index) => {
+        console.log(`  Adding Respiratory System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART XI: HUMAN ANATOMY - DIGESTIVE SYSTEM ==============
+    console.log('\nProcessing Part XI: Digestive System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XI: Human Anatomy - Digestive System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const digestiveSolved = solveDigestiveSystemProblems();
+    digestiveSolved.forEach((solved, index) => {
+        console.log(`  Adding Digestive System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART XII: HUMAN ANATOMY - NERVOUS SYSTEM ==============
+    console.log('\nProcessing Part XII: Nervous System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XII: Human Anatomy - Nervous System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const nervousSolved = solveNervousSystemProblems();
+    nervousSolved.forEach((solved, index) => {
+        console.log(`  Adding Nervous System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART XIII: HUMAN ANATOMY - ENDOCRINE SYSTEM ==============
+    console.log('\nProcessing Part XIII: Endocrine System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIII: Human Anatomy - Endocrine System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const endocrineSolved = solveEndocrineSystemProblems();
+    endocrineSolved.forEach((solved, index) => {
+        console.log(`  Adding Endocrine System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART XIV: HUMAN ANATOMY - SKELETAL SYSTEM ==============
+    console.log('\nProcessing Part XIV: Skeletal System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XIV: Human Anatomy - Skeletal System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const skeletalSolved = solveSkeletalSystemProblems();
+    skeletalSolved.forEach((solved, index) => {
+        console.log(`  Adding Skeletal System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART XV: HUMAN ANATOMY - MUSCULAR SYSTEM ==============
+    console.log('\nProcessing Part XV: Muscular System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XV: Human Anatomy - Muscular System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const muscularSolved = solveMuscularSystemProblems();
+    muscularSolved.forEach((solved, index) => {
+        console.log(`  Adding Muscular System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+    // ============== PART XVI: HUMAN ANATOMY - EXCRETORY SYSTEM ==============
+    console.log('\nProcessing Part XVI: Excretory System...');
+    documentChildren.push(
+        new docx.Paragraph({
+            text: 'Part XVI: Human Anatomy - Excretory System',
+            heading: docx.HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 300 },
+            pageBreakBefore: true
+        })
+    );
+
+    const excretorySolved = solveExcretorySystemProblems();
+    excretorySolved.forEach((solved, index) => {
+        console.log(`  Adding Excretory System Problem ${index + 1} to document...`);
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Problem ${problemNumber}: ${solved.problem.scenario}`,
+                heading: docx.HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 300 },
+                pageBreakBefore: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `${solved.problem.problem}`,
+                spacing: { after: 200 },
+                bold: true
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Difficulty: ${solved.problem.difficulty}`,
+                spacing: { after: 100 }
+            })
+        );
+
+        documentChildren.push(
+            new docx.Paragraph({
+                text: `Helper Tip: ${solved.problem.helper}`,
+                spacing: { after: 200 },
+                italics: true
+            })
+        );
+
+        documentChildren.push(...generateProblemSections(solved.workbook));
+        problemNumber++;
+    });
+
+
+    // ============== CREATE AND SAVE DOCUMENT ==============
+    const doc = new docx.Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720,    // 0.5 inch
+                        right: 720,
+                        bottom: 720,
+                        left: 720
+                    }
+                }
+            },
+            children: documentChildren
+        }]
+    });
+
+    // Save the document
+    try {
+        const buffer = await docx.Packer.toBuffer(doc);
+        const filename = 'comprehensive_anatomy__workbook_.docx';
+        const outputPath = path.join(process.cwd(), filename);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log('\n' + '='.repeat(80));
+        console.log('✓ COMPREHENSIVE BIOLOGY DOCUMENT GENERATION COMPLETE');
+        console.log('='.repeat(80));
+        console.log(`\n✓ Document saved as: ${outputPath}`);
+        console.log('\n📊 DOCUMENT STATISTICS:');
+        console.log('  • Total Problems: 75+ (estimated)');
+        console.log('\n  HUMAN ANATOMY (Problems 43+):');
+        console.log('    - Circulatory System: 5 problems');
+        console.log('    - Respiratory System: 5 problems');
+        console.log('    - Digestive System: 5 problems');
+        console.log('    - Nervous System: 5 problems');
+        console.log('    - Endocrine System: 5 problems');
+        console.log('    - Skeletal System: 5 problems');
+        console.log('    - Muscular System: 2 problems');
+        console.log('    - Excretory System: (expandable)');
+        console.log('\n📖 CONTENT BREAKDOWN:');
+        console.log('  • Part I-VIII: Cell Biology');
+        console.log('  • Part IX-XVI: Human Anatomy');
+        console.log('\n📄 EXPECTED PAGES: 250+ pages');
+        console.log('\n✨ Each problem includes:');
+        console.log('  • Problem statement with difficulty level');
+        console.log('  • Helper tips for quick guidance');
+        console.log('  • Complete step-by-step explanation');
+        console.log('='.repeat(80) + '\n');
+
+    } catch (error) {
+        console.error(`\n❌ Error saving document: ${error.message}`);
+        console.error(error.stack);
+    }
+}
+
+// ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
+
+generateComprehensiveBiologyDocument().catch(error => {
+    console.error('\n❌ FATAL ERROR:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+});
