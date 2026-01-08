@@ -6,7 +6,7 @@ import path from 'path';
 // ============== UTILITY FUNCTION ==============
 
 // Generate all workbook sections for a biology topic
-function generateProblemSections(workbookInstance) {
+ generateProblemSections(workbookInstance) {
     const workbook = workbookInstance.currentWorkbook;
     if (!workbook) {
         console.error('No workbook generated');
@@ -115,7 +115,7 @@ function generateProblemSections(workbookInstance) {
 
 // ============== CELL STRUCTURE - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedCellStructure() {
+generateRelatedCellStructure() {
     const relatedProblems = [];
 
     // Problem 1: Basic Cell Types
@@ -291,7 +291,7 @@ function generateRelatedCellStructure() {
 
 // ============== CELL MEMBRANE - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedCellMembrane() {
+generateRelatedCellMembrane() {
     const relatedProblems = [];
 
     // Problem 1: Fluid Mosaic Model
@@ -533,7 +533,7 @@ function generateRelatedCellMembrane() {
 
 // ============== ORGANELLES - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedOrganelles() {
+generateRelatedOrganelles() {
     const relatedProblems = [];
 
     // Problem 1: Energy-Producing Organelles
@@ -806,7 +806,7 @@ function generateRelatedOrganelles() {
 
 // ============== CELL DIVISION - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedCellDivision() {
+generateRelatedCellDivision() {
     const relatedProblems = [];
 
     // Problem 1: Cell Cycle Overview
@@ -1064,7 +1064,7 @@ function generateRelatedCellDivision() {
 
 // ============== MITOSIS AND MEIOSIS - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedMitosisMeiosis() {
+generateRelatedMitosisMeiosis() {
     const relatedProblems = [];
 
     // Problem 1: Mitosis Stages
@@ -1356,7 +1356,7 @@ function generateRelatedMitosisMeiosis() {
 
 // ============== CELL TRANSPORT - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedCellTransport() {
+generateRelatedCellTransport() {
     const relatedProblems = [];
 
     // Problem 1: Diffusion
@@ -1679,7 +1679,7 @@ function generateRelatedCellTransport() {
 
 // ============== CELLULAR RESPIRATION - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedCellularRespiration() {
+generateRelatedCellularRespiration() {
     const relatedProblems = [];
 
     // Problem 1: Overview of Cellular Respiration
@@ -2051,7 +2051,7 @@ function generateRelatedCellularRespiration() {
 
 // ============== PHOTOSYNTHESIS - RELATED PROBLEMS GENERATOR ==============
 
-function generateRelatedPhotosynthesis() {
+generateRelatedPhotosynthesis() {
     const relatedProblems = [];
 
     // Problem 1: Photosynthesis Overview
@@ -2480,7 +2480,7 @@ function generateRelatedPhotosynthesis() {
 
 // ============== SOLVER FUNCTIONS ==============
 
-function solveCellStructureProblems() {
+solveCellStructureProblems() {
     const problems = generateRelatedCellStructure();
     const solvedProblems = [];
 
@@ -2515,7 +2515,7 @@ function solveCellStructureProblems() {
     return solvedProblems;
 }
 
-function solveCellMembraneProblems() {
+solveCellMembraneProblems() {
     const problems = generateRelatedCellMembrane();
     const solvedProblems = [];
 
@@ -2549,7 +2549,7 @@ function solveCellMembraneProblems() {
     return solvedProblems;
 }
 
-function solveOrganellesProblems() {
+solveOrganellesProblems() {
     const problems = generateRelatedOrganelles();
     const solvedProblems = [];
 
@@ -2582,7 +2582,7 @@ function solveOrganellesProblems() {
     return solvedProblems;
 }
 
-function solveCellDivisionProblems() {
+solveCellDivisionProblems() {
     const problems = generateRelatedCellDivision();
     const solvedProblems = [];
 
@@ -2616,7 +2616,7 @@ function solveCellDivisionProblems() {
     return solvedProblems;
 }
 
-function solveMitosisMeiosisProblems() {
+solveMitosisMeiosisProblems() {
     const problems = generateRelatedMitosisMeiosis();
     const solvedProblems = [];
 
@@ -2650,7 +2650,7 @@ function solveMitosisMeiosisProblems() {
     return solvedProblems;
 }
 
-function solveCellTransportProblems() {
+solveCellTransportProblems() {
     const problems = generateRelatedCellTransport();
     const solvedProblems = [];
 
@@ -2684,7 +2684,7 @@ function solveCellTransportProblems() {
     return solvedProblems;
 }
 
-function solveCellularRespirationProblems() {
+solveCellularRespirationProblems() {
     const problems = generateRelatedCellularRespiration();
     const solvedProblems = [];
 
@@ -2717,7 +2717,7 @@ function solveCellularRespirationProblems() {
     return solvedProblems;
 }
 
-function solvePhotosynthesisProblems() {
+solvePhotosynthesisProblems() {
     const problems = generateRelatedPhotosynthesis();
     const solvedProblems = [];
 
@@ -2752,7 +2752,7 @@ function solvePhotosynthesisProblems() {
 
 // ============== COMPREHENSIVE DOCUMENT GENERATION ==============
 
-async function generateComprehensiveBiologyDocument() {
+async generateComprehensiveBiologyDocument() {
     console.log('Generating Comprehensive Cell Biology Workbook with Related Problems...');
     console.log('='.repeat(80));
 
