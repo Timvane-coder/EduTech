@@ -2,7 +2,7 @@
 
 // ============== COMPREHENSIVE DOCUMENT GENERATION (UPDATED) ==============
 
-async function generateComprehensiveBiologyDocument() {
+async exportGenerateComprehensiveBiologyDocument() {
     console.log('Generating Comprehensive Biology Workbook with Cell Biology and Genetics...');
     console.log('='.repeat(80));
 
