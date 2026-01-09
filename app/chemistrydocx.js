@@ -210,7 +210,7 @@ generateProblemSections(workbookInstance) {
 
 // ============== COMPREHENSIVE DOCUMENT GENERATION ==============
 
-async  generateComprehensiveOrganicChemistryDocument() {
+async  generateComprehensiveChemistryDocument() {
     console.log('Generating Comprehensive Organic Chemistry Workbook with Related Problems...');
     console.log('='.repeat(80));
 
@@ -3927,7 +3927,7 @@ kineticSolved.forEach((solved, index) => {
 
 // ============== RUN THE COMPREHENSIVE DOCUMENT GENERATION ==============
 
-generateComprehensiveOrganicChemistryDocument().catch(error => {
+generateComprehensiveChemistryDocument().catch(error => {
     console.error('\n❌ FATAL ERROR:', error.message);
     console.error(error.stack);
     process.exit(1);
