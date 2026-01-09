@@ -6,7 +6,7 @@ import path from 'path';
 // ============== UTILITY FUNCTION ==============
 
 // Generate all workbook sections for a problem
-function generateProblemSections(workbookInstance) {
+generateProblemSections(workbookInstance) {
     const workbook = workbookInstance.currentWorkbook;
     if (!workbook) {
         console.error('No workbook generated');
@@ -210,7 +210,7 @@ function generateProblemSections(workbookInstance) {
 
 // ============== COMPREHENSIVE DOCUMENT GENERATION ==============
 
-async function generateComprehensiveOrganicChemistryDocument() {
+async  generateComprehensiveOrganicChemistryDocument() {
     console.log('Generating Comprehensive Organic Chemistry Workbook with Related Problems...');
     console.log('='.repeat(80));
 
