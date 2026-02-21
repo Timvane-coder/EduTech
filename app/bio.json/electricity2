@@ -1,0 +1,772 @@
+Here are the matching helper methods for the electricity workbook class:
+// ========================================
+// ELECTRICITY SPECIFIC HELPER METHODS
+// ========================================
+
+getRelevantElectricityDiagrams(topicType) {
+    const diagramMap = {
+        charge_and_current: [
+            "current_flow_diagram",
+            "drift_velocity_model",
+            "charge_carrier_movement",
+            "current_time_graph",
+            "charge_time_graph",
+            "electron_flow_vs_conventional"
+        ],
+        potential_difference_emf: [
+            "emf_internal_resistance_circuit",
+            "terminal_voltage_graph",
+            "v_vs_i_graph",
+            "cell_energy_diagram",
+            "lost_volts_diagram",
+            "open_vs_closed_circuit"
+        ],
+        resistance_resistivity: [
+            "iv_characteristic_ohmic",
+            "iv_characteristic_lamp",
+            "iv_characteristic_diode",
+            "iv_characteristic_thermistor",
+            "resistivity_formula_diagram",
+            "temperature_resistance_graphs",
+            "conductor_structure"
+        ],
+        dc_circuits: [
+            "series_circuit_diagram",
+            "parallel_circuit_diagram",
+            "mixed_circuit_diagram",
+            "potential_divider_circuit",
+            "kirchhoff_current_law",
+            "kirchhoff_voltage_law",
+            "wheatstone_bridge",
+            "ldr_sensor_circuit",
+            "thermistor_sensor_circuit"
+        ],
+        electrical_power_energy: [
+            "power_equations_triangle",
+            "energy_transfer_diagram",
+            "sankey_diagram_electrical",
+            "transmission_line_diagram",
+            "fuse_circuit_diagram",
+            "step_up_transformer",
+            "power_loss_graph"
+        ],
+        capacitance: [
+            "capacitor_structure",
+            "parallel_plate_capacitor",
+            "capacitor_symbols",
+            "rc_charging_circuit",
+            "rc_discharging_circuit",
+            "charging_graphs",
+            "discharging_graphs",
+            "ln_v_vs_t_graph",
+            "capacitors_in_series",
+            "capacitors_in_parallel",
+            "energy_storage_diagram"
+        ]
+    };
+
+    return diagramMap[topicType] || [];
+}
+
+getTopicRelevance(topicType) {
+    const relevance = {
+        charge_and_current: "Understanding charge and current is fundamental to all of electricity and electronics",
+        potential_difference_emf: "Potential difference and EMF are central to understanding how circuits transfer energy",
+        resistance_resistivity: "Resistance controls current flow and is essential for circuit design and safety",
+        dc_circuits: "DC circuit analysis is the foundation for electronics, power systems, and electrical engineering",
+        electrical_power_energy: "Power and energy calculations are critical for electrical safety, efficiency, and cost management",
+        capacitance: "Capacitors are ubiquitous in electronics, from power supplies to timing circuits to energy storage"
+    };
+
+    return relevance[topicType] || "Important electrical physics concept";
+}
+
+suggestRelatedTopics() {
+    if (!this.currentProblem) return [];
+
+    const relatedTopicsMap = {
+        charge_and_current: ['potential_difference_emf', 'resistance_resistivity'],
+        potential_difference_emf: ['charge_and_current', 'dc_circuits', 'electrical_power_energy'],
+        resistance_resistivity: ['charge_and_current', 'potential_difference_emf', 'dc_circuits'],
+        dc_circuits: ['resistance_resistivity', 'potential_difference_emf', 'electrical_power_energy'],
+        electrical_power_energy: ['potential_difference_emf', 'dc_circuits', 'resistance_resistivity'],
+        capacitance: ['dc_circuits', 'electrical_power_energy', 'charge_and_current']
+    };
+
+    const relatedTypes = relatedTopicsMap[this.currentProblem.type] || [];
+
+    return relatedTypes.map(type => ({
+        type: type,
+        name: this.electricityTopics[type]?.name,
+        description: this.electricityTopics[type]?.description
+    }));
+}
+
+generateElectricityDiagramData() {
+    if (!this.currentContent) return;
+
+    const { type } = this.currentProblem;
+
+    this.diagramData = {
+        type: type,
+        diagrams: this.getRelevantElectricityDiagrams(type),
+        placeholder: true,
+        note: "Diagram generation will be implemented with actual circuit diagrams and I-V characteristics"
+    };
+}
+
+generateGlossary() {
+    if (!this.currentContent) return {};
+
+    const glossary = {};
+
+    // Extract from definitions
+    if (this.currentContent.definitions) {
+        Object.entries(this.currentContent.definitions).forEach(([term, def]) => {
+            if (typeof def === 'object' && def.definition) {
+                glossary[term] = def.definition;
+            } else if (typeof def === 'string') {
+                glossary[term] = def;
+            }
+        });
+    }
+
+    // Extract from fundamental equations
+    if (this.currentContent.fundamentalEquations) {
+        Object.entries(this.currentContent.fundamentalEquations).forEach(([term, equation]) => {
+            if (equation.definition) {
+                glossary[term] = equation.definition;
+            }
+        });
+    }
+
+    // Extract from key terms
+    if (this.currentContent.keyTerms) {
+        Object.entries(this.currentContent.keyTerms).forEach(([term, data]) => {
+            if (data.definition) {
+                glossary[term] = data.definition;
+            }
+        });
+    }
+
+    return glossary;
+}
+
+generateElectricityAnalogy(concept) {
+    const analogies = {
+        // Charge and current
+        charge: "Like water stored in a tank",
+        current: "Like the flow rate of water through a pipe",
+        drift_velocity: "Like slow-moving water with fast wave propagation",
+        conventional_current: "Like defining water flow from high to low pressure (historical convention)",
+        
+        // Potential difference and EMF
+        voltage: "Like water pressure difference between two points",
+        emf: "Like a pump that maintains pressure difference",
+        potential_difference: "Like height difference that water falls through",
+        internal_resistance: "Like friction inside the pump reducing output pressure",
+        terminal_voltage: "Like the actual pressure available outside the pump",
+        
+        // Resistance
+        resistance: "Like the narrowness of a pipe restricting water flow",
+        resistivity: "Like the material property of how rough the pipe interior is",
+        ohms_law: "Like flow rate being proportional to pressure (for smooth pipes)",
+        
+        // Circuits
+        series: "Like beads on a single string — same current through each",
+        parallel: "Like multiple pipes between the same two tanks — same pressure, different flows",
+        kirchhoff_current: "Like water flowing into a junction equals water flowing out",
+        kirchhoff_voltage: "Like total energy gained from pumps equals total energy lost in pipes around a loop",
+        
+        // Power
+        power: "Like the rate of energy transfer (how fast water delivers energy)",
+        joule_heating: "Like friction in pipes converting flow energy to heat",
+        efficiency: "Like the fraction of pump energy that reaches the destination",
+        
+        // Capacitance
+        capacitor: "Like a water tank that fills and empties",
+        capacitance: "Like the size of the tank — more capacitance stores more charge for same voltage",
+        charging: "Like filling a tank through a restricted pipe",
+        discharging: "Like draining a tank through a restricted outlet",
+        time_constant: "Like how long it takes to mostly fill or empty the tank"
+    };
+
+    return analogies[concept] || "An important electrical concept";
+}
+
+adaptElectricityLanguage(text, level) {
+    if (!text) return '';
+
+    const adaptations = {
+        basic: {
+            replacements: {
+                'potential difference': 'voltage',
+                'electromotive force': 'EMF (battery voltage)',
+                'terminal voltage': 'voltage across terminals',
+                'internal resistance': 'resistance inside the battery',
+                'resistivity': 'resistance property of material',
+                'capacitance': 'ability to store charge',
+                'time constant': 'charging/discharging time',
+                'drift velocity': 'average electron speed',
+                'charge carrier density': 'number of free electrons'
+            }
+        },
+        intermediate: {
+            replacements: {
+                'potential difference': 'p.d. (voltage)',
+                'electromotive force': 'EMF (ε)',
+                'terminal voltage': 'V_terminal',
+                'resistivity': 'ρ (material property)'
+            }
+        },
+        advanced: {
+            replacements: {
+                'potential difference': 'p.d. V = W/Q',
+                'current': 'I = dQ/dt = nAve',
+                'resistance': 'R = ρL/A',
+                'power': 'P = IV = I²R = V²/R',
+                'capacitance': 'C = Q/V = ε₀εᵣA/d'
+            }
+        }
+    };
+
+    const levelAdaptation = adaptations[level] || adaptations.intermediate;
+    let adaptedText = text;
+
+    for (const [term, replacement] of Object.entries(levelAdaptation.replacements)) {
+        const regex = new RegExp(`\\b${term}\\b`, 'gi');
+        adaptedText = adaptedText.replace(regex, replacement);
+    }
+
+    return adaptedText;
+}
+
+addElectricityConceptualConnections(content) {
+    if (!this.includeConceptualConnections) return content;
+
+    const connections = {
+        charge_and_current: "Current is the rate of charge flow. It connects to potential difference (voltage drives current) and resistance (opposes current). The microscopic model I = nAve links to material properties.",
+        potential_difference_emf: "Voltage is energy per charge. EMF drives current through circuits. Internal resistance links EMF to terminal voltage. Power calculations require both voltage and current.",
+        resistance_resistivity: "Resistance is defined by R = V/I. Resistivity extends this to materials via R = ρL/A. Ohm's Law connects V, I, and R. Temperature affects resistance differently for conductors vs semiconductors.",
+        dc_circuits: "Kirchhoff's laws (conservation of charge and energy) are fundamental. Series/parallel rules derive from these. Potential dividers create reference voltages. All connect to Ohm's Law and power calculations.",
+        electrical_power_energy: "Power is the rate of energy transfer: P = IV. Energy cost uses kWh. I²R losses affect efficiency and transmission. Power formulas connect to circuits and Ohm's Law.",
+        capacitance: "Capacitors store charge and energy. C = Q/V connects charge, voltage, and capacitance. Energy storage E = ½CV² is crucial. RC circuits show exponential behavior with time constant τ = RC."
+    };
+
+    content.conceptualConnections = connections[this.currentProblem.type] || 
+        "This topic connects to broader electrical principles";
+
+    return content;
+}
+
+enrichWithElectricityExamples(content) {
+    if (!this.includeExamples || content.workedExamples) return content;
+
+    // Examples already included in handler methods
+    return content;
+}
+
+addElectricityComparativeContext(content) {
+    if (!this.includeComparisons) return content;
+
+    const comparativeData = {
+        charge_and_current: {
+            conventional_vs_electron: "Conventional current (+→−) is opposite to electron flow (−→+)",
+            drift_vs_signal: "Drift velocity (~mm/s) is very slow; signal propagates at near-c"
+        },
+        potential_difference_emf: {
+            emf_vs_terminal: "EMF is energy supplied per charge; terminal voltage is energy delivered per charge",
+            open_vs_closed: "Open circuit: V = ε; closed circuit: V = ε − Ir (always less)"
+        },
+        resistance_resistivity: {
+            ohmic_vs_nonohmic: "Ohmic: R constant (straight I-V); non-ohmic: R varies (curved I-V)",
+            metal_vs_semiconductor: "Metal: R increases with T; semiconductor: R decreases with T"
+        },
+        dc_circuits: {
+            series_vs_parallel: "Series: same I, voltages add, R adds; Parallel: same V, currents add, 1/R adds",
+            resistors_vs_capacitors: "Resistor rules opposite to capacitor rules (series↔parallel)"
+        },
+        electrical_power_energy: {
+            power_equations: "P = IV (general), P = I²R (fixed I), P = V²/R (fixed V)",
+            j_vs_kwh: "Joule (SI unit) vs kWh (commercial; 1 kWh = 3.6 MJ)"
+        },
+        capacitance: {
+            charging_vs_discharging: "Charge: V = V₀(1−e^(−t/τ)) rises; Discharge: V = V₀e^(−t/τ) falls",
+            series_vs_parallel: "Parallel: C adds; Series: 1/C adds (opposite to resistors)"
+        }
+    };
+
+    if (comparativeData[this.currentProblem.type]) {
+        content.comparativeContext = comparativeData[this.currentProblem.type];
+    }
+
+    return content;
+}
+
+validateElectricityContent(content) {
+    const validationResults = {
+        isValid: true,
+        warnings: [],
+        suggestions: []
+    };
+
+    if (!content.topic) {
+        validationResults.warnings.push("Missing topic title");
+        validationResults.isValid = false;
+    }
+
+    if (!content.summary) {
+        validationResults.suggestions.push("Consider adding a summary");
+    }
+
+    const hasSubstantiveContent = 
+        content.fundamentalEquations ||
+        content.definitions ||
+        content.workedExamples ||
+        content.ivCharacteristics ||
+        content.seriesCircuitRules ||
+        content.rcCircuits;
+
+    if (!hasSubstantiveContent) {
+        validationResults.warnings.push("Limited substantive content");
+    }
+
+    if (!content.workedExamples) {
+        validationResults.suggestions.push("Consider adding worked examples");
+    }
+
+    if (!content.applications) {
+        validationResults.suggestions.push("Consider adding real-world applications");
+    }
+
+    return validationResults;
+}
+
+calculateElectricityContentCompleteness() {
+    if (!this.currentContent) return 0;
+
+    let score = 0;
+    const maxScore = 10;
+
+    if (this.currentContent.topic) score += 1;
+    if (this.currentContent.summary) score += 1;
+    if (this.currentContent.workedExamples) score += 2;
+    if (this.currentContent.applications) score += 1;
+    
+    const hasMainContent = 
+        this.currentContent.definitions ||
+        this.currentContent.fundamentalEquations ||
+        this.currentContent.ivCharacteristics ||
+        this.currentContent.seriesCircuitRules ||
+        this.currentContent.rcCircuits;
+    if (hasMainContent) score += 3;
+
+    if (this.currentContent.assessmentQuestions) score += 1;
+    if (this.currentContent.commonErrors) score += 1;
+
+    return Math.round((score / maxScore) * 100);
+}
+
+getElectricityContentQualityMetrics() {
+    return {
+        completeness: this.calculateElectricityContentCompleteness(),
+        hasExamples: !!this.currentContent?.workedExamples,
+        hasApplications: !!this.currentContent?.applications,
+        hasCommonErrors: !!this.currentContent?.commonErrors,
+        detailLevel: this.explanationLevel,
+        includesVisualizations: this.includeVisualizations,
+        includesMisconceptions: this.includeCommonMisconceptions,
+        includesExperiments: this.includeExperiments,
+        adaptiveDifficulty: this.adaptiveDifficulty,
+        metacognitiveSupport: this.metacognitiveSupport
+    };
+}
+
+generateElectricityContentSummary() {
+    if (!this.currentContent) return null;
+
+    const summary = {
+        topic: this.currentContent.topic,
+        category: this.currentContent.category,
+        summary: this.currentContent.summary,
+        keyPoints: [],
+        coverage: {},
+        difficulty: this.currentProblem?.difficulty
+    };
+
+    if (this.currentContent.definitions) {
+        summary.keyPoints.push("Key definitions covered");
+        summary.coverage.definitions = Object.keys(this.currentContent.definitions).length;
+    }
+
+    if (this.currentContent.fundamentalEquations) {
+        summary.keyPoints.push("Fundamental equations included");
+        summary.coverage.equations = Object.keys(this.currentContent.fundamentalEquations).length;
+    }
+
+    if (this.currentContent.workedExamples) {
+        summary.keyPoints.push("Worked examples included");
+        summary.coverage.examples = this.currentContent.workedExamples.length;
+    }
+
+    if (this.currentContent.applications) {
+        summary.keyPoints.push("Real-world applications discussed");
+        summary.coverage.applications = true;
+    }
+
+    if (this.currentContent.commonErrors) {
+        summary.keyPoints.push("Common errors addressed");
+        summary.coverage.commonErrors = this.currentContent.commonErrors.length;
+    }
+
+    return summary;
+}
+
+assessElectricityContentDifficulty() {
+    if (!this.currentContent) return 'unknown';
+
+    let difficultyScore = 0;
+
+    const basicTopics = ['charge_and_current'];
+    const intermediateTopics = ['potential_difference_emf', 'resistance_resistivity', 'dc_circuits', 'electrical_power_energy'];
+    const advancedTopics = ['capacitance'];
+
+    if (basicTopics.includes(this.currentProblem.type)) {
+        difficultyScore += 1;
+    } else if (intermediateTopics.includes(this.currentProblem.type)) {
+        difficultyScore += 2;
+    } else if (advancedTopics.includes(this.currentProblem.type)) {
+        difficultyScore += 3;
+    }
+
+    if (this.explanationLevel === 'advanced') difficultyScore += 1;
+    if (this.explanationLevel === 'basic') difficultyScore -= 1;
+
+    if (difficultyScore <= 2) return 'beginner';
+    if (difficultyScore <= 4) return 'intermediate';
+    return 'advanced';
+}
+
+generateElectricityLearningObjectives() {
+    if (!this.currentProblem) return [];
+
+    const objectivesDatabase = {
+        charge_and_current: [
+            "Define electric charge and electric current",
+            "Apply the equation Q = It to calculate charge, current, or time",
+            "Explain the microscopic model of current: I = nAve",
+            "Distinguish between conventional current and electron flow"
+        ],
+        potential_difference_emf: [
+            "Define potential difference and EMF",
+            "Apply V = W/Q to energy transfer calculations",
+            "Use ε = I(R + r) and V = ε − Ir to solve circuit problems",
+            "Determine EMF and internal resistance from a V-I graph"
+        ],
+        resistance_resistivity: [
+            "Define resistance and state Ohm's Law",
+            "Apply R = ρL/A to calculate resistance from dimensions",
+            "Interpret I-V characteristics of ohmic and non-ohmic components",
+            "Explain temperature effects on resistance for conductors and semiconductors"
+        ],
+        dc_circuits: [
+            "State and apply Kirchhoff's Current and Voltage Laws",
+            "Calculate total resistance for series and parallel combinations",
+            "Analyze potential divider circuits",
+            "Solve complex circuits using systematic circuit analysis"
+        ],
+        electrical_power_energy: [
+            "Apply the three power equations: P = IV, P = I²R, P = V²/R",
+            "Calculate electrical energy and cost using kWh",
+            "Explain power transmission efficiency and the role of high voltage",
+            "Calculate fuse ratings and safe current limits"
+        ],
+        capacitance: [
+            "Define capacitance and apply C = Q/V",
+            "Calculate energy stored in a capacitor using E = ½CV²",
+            "Determine total capacitance for series and parallel combinations",
+            "Analyze RC charging and discharging circuits and determine time constants"
+        ]
+    };
+
+    return objectivesDatabase[this.currentProblem.type] || [
+        "Understand the key electrical concepts",
+        "Apply principles to circuit analysis",
+        "Connect theory to practical applications"
+    ];
+}
+
+identifyElectricityPrerequisites() {
+    if (!this.currentProblem) return [];
+
+    const prerequisitesDatabase = {
+        charge_and_current: [
+            "Basic algebra (rearranging equations)",
+            "Understanding of atoms and electrons",
+            "Unit conversions (mA to A, μC to C)"
+        ],
+        potential_difference_emf: [
+            "Charge and current concepts",
+            "Energy concepts (work, joules)",
+            "Algebra (simultaneous equations for EMF and r)",
+            "Graph interpretation (gradients and intercepts)"
+        ],
+        resistance_resistivity: [
+            "Ohm's Law and basic circuit concepts",
+            "Algebra (rearranging R = ρL/A)",
+            "Area of a circle (A = πr²)",
+            "Graph interpretation (I-V characteristics)"
+        ],
+        dc_circuits: [
+            "Ohm's Law (V = IR)",
+            "Resistance and resistivity",
+            "Potential difference and EMF",
+            "Algebra (solving simultaneous equations)",
+            "Series and parallel concepts"
+        ],
+        electrical_power_energy: [
+            "All circuit concepts (V, I, R)",
+            "Energy concepts (joules)",
+            "Power as rate of energy transfer",
+            "Unit conversions (W to kW, J to kWh)"
+        ],
+        capacitance: [
+            "Charge and current",
+            "Energy storage concepts",
+            "Exponential functions (e^x)",
+            "Logarithms (for linearisation)",
+            "Series and parallel circuit rules"
+        ]
+    };
+
+    return prerequisitesDatabase[this.currentProblem.type] || [
+        "Basic algebra",
+        "Understanding of physical quantities and units"
+    ];
+}
+
+generateElectricityStudyTips() {
+    if (!this.currentProblem) return [];
+
+    const studyTipsDatabase = {
+        charge_and_current: [
+            "Always convert mA to A before calculation (1 mA = 0.001 A)",
+            "Remember: I = Q/t, so Q = It (charge = current × time)",
+            "Conventional current flows from + to −; electrons flow − to +",
+            "For I = nAve: make sure n is in m⁻³, A in m², v in m/s, e = 1.6×10⁻¹⁹ C"
+        ],
+        potential_difference_emf: [
+            "Terminal voltage is ALWAYS less than EMF when current flows: V = ε − Ir",
+            "On V-I graph: y-intercept = ε; gradient = −r (negative sign!)",
+            "Lost volts = Ir (energy per charge wasted inside the source)",
+            "Check: EMF (ε) = V_terminal + V_lost always"
+        ],
+        resistance_resistivity: [
+            "R = V/I is the DEFINITION of resistance; Ohm's Law says R is constant",
+            "For R = ρL/A: always use A = π(d/2)², never A = πd²",
+            "On I-V graph: resistance = V/I at a point, NOT the gradient",
+            "Ohmic: straight line through origin. Non-ohmic: curve"
+        ],
+        dc_circuits: [
+            "SERIES: same I; voltages add; R_total = R₁ + R₂",
+            "PARALLEL: same V; currents add; 1/R_total = 1/R₁ + 1/R₂",
+            "For potential divider: V_out = V_s × R₂/(R₁ + R₂)",
+            "Draw circuit diagram clearly; label all values before starting calculations"
+        ],
+        electrical_power_energy: [
+            "Choose power formula based on what you know: P = IV, P = I²R, or P = V²/R",
+            "kWh is ENERGY not power: E(kWh) = P(kW) × t(hours)",
+            "1 kWh = 3.6 × 10⁶ J (3.6 MJ) — memorise this conversion",
+            "For transmission: higher V → lower I → much lower I²R losses"
+        ],
+        capacitance: [
+            "Energy stored: E = ½CV² (the ½ is crucial — common exam error)",
+            "Capacitors in PARALLEL: C adds. In SERIES: 1/C adds (opposite to resistors!)",
+            "Discharge: V = V₀e^(−t/RC); after time τ = RC, V falls to 37% of V₀",
+            "Linearise with ln(V) vs t: gradient = −1/RC"
+        ]
+    };
+
+    return studyTipsDatabase[this.currentProblem.type] || [
+        "Practice regularly with varied problems",
+        "Always sketch the circuit diagram",
+        "Show all working clearly",
+        "Check answers for physical reasonableness"
+    ];
+}
+
+generateElectricityProcessTimeline(processName) {
+    const timelines = {
+        'Circuit Problem Solving Strategy': [
+            { step: '1. Read carefully', action: 'Identify what is asked; extract all given values' },
+            { step: '2. Draw circuit', action: 'Sketch clear diagram; label all components and values' },
+            { step: '3. Identify type', action: 'Series, parallel, or mixed? Ohm\'s Law, Kirchhoff, divider?' },
+            { step: '4. Choose equations', action: 'Select appropriate formulas (V=IR, P=IV, C=Q/V, etc.)' },
+            { step: '5. Solve algebraically', action: 'Rearrange for unknown before substituting numbers' },
+            { step: '6. Substitute and calculate', action: 'Insert values with correct units' },
+            { step: '7. Check answer', action: 'Verify units, sign, magnitude; does it make physical sense?' }
+        ],
+        'I-V Characteristic Analysis': [
+            { step: '1. Set up circuit', action: 'Variable resistor to change V; ammeter and voltmeter' },
+            { step: '2. Vary voltage', action: 'Take at least 8 readings from 0 to max safe voltage' },
+            { step: '3. Record data', action: 'Tabulate V and I values' },
+            { step: '4. Plot I vs V', action: 'I on y-axis, V on x-axis (or vice versa)' },
+            { step: '5. Identify shape', action: 'Straight line (ohmic) or curve (non-ohmic)?' },
+            { step: '6. Calculate R', action: 'R = V/I at each point (or 1/gradient if ohmic)' }
+        ],
+        'RC Discharge Experiment': [
+            { step: '1. Charge capacitor', action: 'Connect to supply for 5τ (fully charged)' },
+            { step: '2. Switch to discharge', action: 'At t=0, connect C through R; start timer' },
+            { step: '3. Record V vs t', action: 'Measure voltage at regular intervals (every ~τ/5)' },
+            { step: '4. Continue until discharged', action: 'Stop when V < 5% of V₀ (about 3–5τ)' },
+            { step: '5. Plot V vs t', action: 'Exponential decay curve confirms theory' },
+            { step: '6. Linearise', action: 'Plot ln(V) vs t; gradient = −1/RC' },
+            { step: '7. Find time constant', action: 'τ = RC = −1/gradient or read t when V = 37%V₀' }
+        ],
+        'Kirchhoff Analysis': [
+            { step: '1. Label currents', action: 'Assign current variable to each branch with assumed direction' },
+            { step: '2. Apply KCL', action: 'At each junction: ΣI_in = ΣI_out' },
+            { step: '3. Choose loops', action: 'Identify independent closed loops' },
+            { step: '4. Apply KVL', action: 'Around each loop: ΣEMFs = ΣIR drops' },
+            { step: '5. Set up equations', action: 'Write simultaneous equations from KCL and KVL' },
+            { step: '6. Solve system', action: 'Solve for unknown currents algebraically' },
+            { step: '7. Interpret', action: 'Negative current means opposite to assumed direction' }
+        ]
+    };
+
+    return timelines[processName] || [];
+}
+
+generateElectricityContentHierarchy() {
+    if (!this.currentContent) return null;
+
+    const hierarchy = {
+        root: this.currentContent.topic,
+        children: []
+    };
+
+    if (this.currentContent.definitions) {
+        hierarchy.children.push({
+            name: 'Definitions and Key Concepts',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.fundamentalEquations) {
+        hierarchy.children.push({
+            name: 'Fundamental Equations',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.ivCharacteristics || this.currentContent.seriesCircuitRules || this.currentContent.rcCircuits) {
+        hierarchy.children.push({
+            name: 'Circuit Analysis Methods',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.workedExamples) {
+        hierarchy.children.push({
+            name: 'Worked Examples',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.commonErrors) {
+        hierarchy.children.push({
+            name: 'Common Errors and Fixes',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.applications) {
+        hierarchy.children.push({
+            name: 'Real-World Applications',
+            type: 'section'
+        });
+    }
+
+    return hierarchy;
+}
+
+formatKey(key) {
+    return key
+        .replace(/_/g, ' ')
+        .replace(/([A-Z])/g, ' $1')
+        .trim()
+        .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Additional electricity-specific helpers
+
+getCircuitSymbol(component) {
+    const symbols = {
+        cell: "—|+—",
+        battery: "—||+—",
+        resistor: "—▭—",
+        variable_resistor: "—▭→—",
+        lamp: "—⊗—",
+        ammeter: "—(A)—",
+        voltmeter: "—(V)— (parallel)",
+        switch: "—/—",
+        diode: "—▷|—",
+        led: "—▷|—→",
+        thermistor: "—▭t—",
+        ldr: "—▭☼—",
+        capacitor: "—||—",
+        electrolytic_capacitor: "—|+|—"
+    };
+
+    return symbols[component] || "Component not found";
+}
+
+getSafetyReminder(context) {
+    const safetyReminders = {
+        high_voltage: "CAUTION: High voltage. Ensure proper insulation and earthing.",
+        capacitor: "CAUTION: Capacitors can store charge. Always discharge before handling.",
+        mains: "DANGER: Mains voltage (230V AC). Only qualified electricians should work on mains circuits.",
+        short_circuit: "WARNING: Never short-circuit a cell or battery — can overheat and cause fire.",
+        polarity: "CAUTION: Electrolytic capacitors are polarised. Reverse connection will damage them.",
+        current_rating: "Check current rating of wires, fuses, and components before connecting."
+    };
+
+    return safetyReminders[context] || "Follow standard electrical safety procedures.";
+}
+
+getCommonUnitConversions() {
+    return {
+        current: "1 A = 1000 mA = 1,000,000 μA",
+        voltage: "1 V = 1000 mV",
+        resistance: "1 Ω = 0.001 kΩ = 0.000001 MΩ",
+        capacitance: "1 F = 1,000,000 μF = 1,000,000,000 nF = 1,000,000,000,000 pF",
+        charge: "1 C = 1000 mC = 1,000,000 μC",
+        energy: "1 J = 0.000000278 kWh; 1 kWh = 3.6 MJ = 3,600,000 J",
+        power: "1 W = 0.001 kW = 1 J/s"
+    };
+}
+
+generateCircuitCheckList() {
+    return {
+        beforeCalculation: [
+            "Circuit diagram drawn and labeled",
+            "All given values written on diagram",
+            "Units consistent (convert mA to A, kΩ to Ω, etc.)",
+            "Circuit type identified (series/parallel/mixed)",
+            "Required equations identified"
+        ],
+        duringCalculation: [
+            "Equations written symbolically first",
+            "Algebraic rearrangement before substitution",
+            "All steps shown clearly",
+            "Units carried through calculation"
+        ],
+        afterCalculation: [
+            "Answer has correct units",
+            "Sign makes physical sense",
+            "Magnitude is reasonable",
+            "Answer checked using alternative method if possible",
+            "Final answer stated clearly with units"
+        ]
+    };
+}

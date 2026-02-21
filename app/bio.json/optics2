@@ -1,0 +1,752 @@
+Here are the matching helper methods for the EnhancedOpticsWorkbook class, adapted from your mechanics methods:
+// ========================================
+// OPTICS SPECIFIC HELPER METHODS
+// ========================================
+
+getRelevantOpticsDiagrams(topicType) {
+    const diagramMap = {
+        reflection: [
+            "law_of_reflection_diagram",
+            "plane_mirror_image",
+            "concave_mirror_rays",
+            "convex_mirror_rays",
+            "mirror_equation_diagram",
+            "ray_diagram_concave_object_positions",
+            "focal_point_illustration"
+        ],
+        refraction: [
+            "snells_law_diagram",
+            "refraction_at_boundary",
+            "critical_angle_diagram",
+            "total_internal_reflection",
+            "optical_fibre_cross_section",
+            "prism_refraction",
+            "glass_block_ray_path"
+        ],
+        lenses: [
+            "converging_lens_rays",
+            "diverging_lens_rays",
+            "thin_lens_diagram",
+            "lens_image_formation",
+            "compound_microscope_diagram",
+            "telescope_diagram",
+            "eye_diagram_defects",
+            "ray_diagram_lens_positions"
+        ],
+        wave_optics: [
+            "youngs_double_slit_setup",
+            "interference_pattern",
+            "diffraction_grating_setup",
+            "path_difference_diagram",
+            "single_slit_diffraction",
+            "fringe_spacing_geometry",
+            "coherent_sources_diagram",
+            "thin_film_interference"
+        ],
+        dispersion_spectra: [
+            "prism_dispersion_diagram",
+            "electromagnetic_spectrum_chart",
+            "emission_spectrum_lines",
+            "absorption_spectrum_lines",
+            "hydrogen_energy_levels",
+            "rainbow_formation_diagram",
+            "continuous_vs_line_spectrum",
+            "fraunhofer_lines"
+        ]
+    };
+
+    return diagramMap[topicType] || [];
+}
+
+getTopicRelevance(topicType) {
+    const relevance = {
+        reflection: "Reflection is fundamental to understanding mirrors, telescopes, and all optical systems using reflective surfaces",
+        refraction: "Refraction explains lenses, optical fibres, and atmospheric phenomena; essential for telecommunications and vision",
+        lenses: "Lenses are the basis of cameras, microscopes, telescopes, spectacles, and the human eye",
+        wave_optics: "Wave optics reveals light's wave nature; essential for understanding interference, diffraction, and holography",
+        dispersion_spectra: "Spectroscopy unlocks the composition of distant stars and materials; connects optics to quantum mechanics"
+    };
+
+    return relevance[topicType] || "Important classical optics concept";
+}
+
+suggestRelatedTopics() {
+    if (!this.currentProblem) return [];
+
+    const relatedTopicsMap = {
+        reflection: ['refraction', 'lenses'],
+        refraction: ['reflection', 'lenses', 'dispersion_spectra'],
+        lenses: ['refraction', 'wave_optics'],
+        wave_optics: ['refraction', 'dispersion_spectra'],
+        dispersion_spectra: ['refraction', 'wave_optics']
+    };
+
+    const relatedTypes = relatedTopicsMap[this.currentProblem.type] || [];
+
+    return relatedTypes.map(type => ({
+        type: type,
+        name: this.opticsTopics[type]?.name,
+        description: this.opticsTopics[type]?.description
+    }));
+}
+
+generateOpticsDiagramData() {
+    if (!this.currentContent) return;
+
+    const { type } = this.currentProblem;
+
+    this.diagramData = {
+        type: type,
+        diagrams: this.getRelevantOpticsDiagrams(type),
+        placeholder: true,
+        note: "Diagram generation will be implemented with actual optics diagrams"
+    };
+}
+
+generateGlossary() {
+    if (!this.currentContent) return {};
+
+    const glossary = {};
+
+    // Extract from definitions
+    if (this.currentContent.definitions) {
+        Object.entries(this.currentContent.definitions).forEach(([term, def]) => {
+            if (typeof def === 'object' && def.definition) {
+                glossary[term] = def.definition;
+            } else if (typeof def === 'string') {
+                glossary[term] = def;
+            }
+        });
+    }
+
+    // Extract from key definitions
+    if (this.currentContent.keyDefinitions) {
+        Object.entries(this.currentContent.keyDefinitions).forEach(([term, def]) => {
+            if (typeof def === 'string') {
+                glossary[term] = def;
+            } else if (def.definition) {
+                glossary[term] = def.definition;
+            }
+        });
+    }
+
+    return glossary;
+}
+
+generateOpticsAnalogy(concept) {
+    const analogies = {
+        // Reflection
+        reflection: "Like a ball bouncing off a wall at the same angle",
+        normal: "Like a perpendicular line drawn on a mirror to measure angles from",
+        plane_mirror: "Like looking at yourself in a bathroom mirror",
+        concave_mirror: "Like the inside of a spoon — can magnify",
+        convex_mirror: "Like car wing mirrors — shows wide view but smaller",
+        
+        // Refraction
+        refraction: "Like a car wheel rolling from pavement onto sand — it turns because one wheel slows first",
+        refractive_index: "Like a measure of how much a material slows light down",
+        critical_angle: "Like the maximum angle before light cannot escape and bounces back",
+        total_internal_reflection: "Like light trapped inside a diamond, bouncing around internally",
+        optical_fibre: "Like a light pipe — light bounces along inside by TIR",
+        
+        // Lenses
+        converging_lens: "Like a magnifying glass — brings light rays together",
+        diverging_lens: "Like spreading light rays apart",
+        focal_point: "Like the point where sunlight focuses through a magnifying glass",
+        real_image: "Like a cinema projection — can be caught on a screen",
+        virtual_image: "Like your reflection in a mirror — cannot be projected",
+        
+        // Wave optics
+        interference: "Like waves on water overlapping to make bigger or smaller waves",
+        constructive_interference: "Like two waves adding up to make a bigger wave",
+        destructive_interference: "Like two waves cancelling each other out",
+        diffraction: "Like water waves spreading out after passing through a gap",
+        coherent: "Like two synchronised swimmers moving in step",
+        
+        // Dispersion
+        dispersion: "Like white light splitting into a rainbow through a prism",
+        emission_spectrum: "Like the unique colour fingerprint of each element when heated",
+        absorption_spectrum: "Like dark lines in a rainbow where atoms have absorbed specific colours",
+        photon: "Like a tiny packet of light energy"
+    };
+
+    return analogies[concept] || "An important optics concept";
+}
+
+adaptOpticsLanguage(text, level) {
+    if (!text) return '';
+
+    const adaptations = {
+        basic: {
+            replacements: {
+                'refractive index': 'light-slowing number',
+                'total internal reflection': 'light trapped and bouncing inside',
+                'converging lens': 'lens that brings light together',
+                'diverging lens': 'lens that spreads light apart',
+                'focal length': 'focus distance',
+                'constructive interference': 'waves adding up',
+                'destructive interference': 'waves cancelling out',
+                'diffraction': 'wave spreading',
+                'coherent': 'synchronized waves',
+                'monochromatic': 'single colour'
+            }
+        },
+        intermediate: {
+            replacements: {
+                'refractive index': 'refractive index (n = c/v)',
+                'total internal reflection': 'TIR (when θᵢ > θ_c)',
+                'focal length': 'focal length f'
+            }
+        },
+        advanced: {
+            replacements: {
+                'refractive index': 'refractive index n = c/v = sin(θᵢ)/sin(θᵣ)',
+                'total internal reflection': 'TIR (sin(θ_c) = n₂/n₁; θᵢ > θ_c)',
+                'focal length': 'focal length f; optical power P = 1/f',
+                'interference': 'interference (Δ = nλ constructive; Δ = (n+½)λ destructive)',
+                'diffraction grating': 'diffraction grating (d·sin(θ) = nλ)'
+            }
+        }
+    };
+
+    const levelAdaptation = adaptations[level] || adaptations.intermediate;
+    let adaptedText = text;
+
+    for (const [term, replacement] of Object.entries(levelAdaptation.replacements)) {
+        const regex = new RegExp(`\\b${term}\\b`, 'gi');
+        adaptedText = adaptedText.replace(regex, replacement);
+    }
+
+    return adaptedText;
+}
+
+addOpticsConceptualConnections(content) {
+    if (!this.includeConceptualConnections) return content;
+
+    const connections = {
+        reflection: "Reflection laws apply universally to all waves. Ray optics (geometric) approximation valid when wavelength << object size. Mirrors exploit reflection to form images predictably.",
+        refraction: "Refraction arises from wave speed change at boundaries. Snell's Law connects angles to refractive indices. TIR enables optical fibres and explains atmospheric phenomena.",
+        lenses: "Lenses combine two refracting surfaces. Thin lens equation unifies image prediction for all lens types. Optical power quantifies lens strength in vision correction.",
+        wave_optics: "Interference and diffraction prove light is a wave. Path difference determines constructive/destructive interference. Diffraction gratings use multi-slit interference for precise wavelength measurement.",
+        dispersion_spectra: "Dispersion reveals wavelength-dependence of n. Atomic spectra connect to quantum energy levels. EM spectrum unifies all electromagnetic radiation from radio to gamma rays."
+    };
+
+    content.conceptualConnections = connections[this.currentProblem.type] || 
+        "This topic connects to broader optics and wave physics principles";
+
+    return content;
+}
+
+enrichWithOpticsExamples(content) {
+    if (!this.includeExamples || content.workedExamples) return content;
+
+    // Examples already included in handler methods
+    return content;
+}
+
+addOpticsComparativeContext(content) {
+    if (!this.includeComparisons) return content;
+
+    const comparativeData = {
+        reflection: {
+            mirror_types: "Plane mirror: virtual images only. Concave: real or virtual. Convex: virtual only (always diminished)",
+            real_vs_virtual: "Real image: light converges; can project. Virtual: light diverges; cannot project"
+        },
+        refraction: {
+            bending_direction: "Into denser (n₂>n₁): toward normal. Into less dense: away from normal",
+            angles: "Below critical angle: refraction occurs. Above: TIR (100% reflection)"
+        },
+        lenses: {
+            lens_types: "Converging: f>0, real focus, can form real/virtual images. Diverging: f<0, virtual focus, only virtual images",
+            image_types: "Real: inverted, can project. Virtual: upright, cannot project"
+        },
+        wave_optics: {
+            interference_types: "Constructive: Δ=nλ, bright. Destructive: Δ=(n+½)λ, dark",
+            double_slit_vs_grating: "Double slit: broad faint maxima. Grating: sharp bright maxima (more slits)"
+        },
+        dispersion_spectra: {
+            spectrum_types: "Continuous: all wavelengths (hot solid). Line emission: discrete bright lines (hot gas). Line absorption: dark lines (cool gas in front of continuous)",
+            em_regions: "Radio (low f, long λ, low E) → Gamma (high f, short λ, high E); all travel at c in vacuum"
+        }
+    };
+
+    if (comparativeData[this.currentProblem.type]) {
+        content.comparativeContext = comparativeData[this.currentProblem.type];
+    }
+
+    return content;
+}
+
+validateOpticsContent(content) {
+    const validationResults = {
+        isValid: true,
+        warnings: [],
+        suggestions: []
+    };
+
+    if (!content.topic) {
+        validationResults.warnings.push("Missing topic title");
+        validationResults.isValid = false;
+    }
+
+    if (!content.summary) {
+        validationResults.suggestions.push("Consider adding a summary");
+    }
+
+    const hasSubstantiveContent = 
+        content.snellsLaw ||
+        content.lensEquation ||
+        content.lawsOfReflection ||
+        content.youngsDoubleSlitExperiment ||
+        content.electromagneticSpectrum ||
+        content.workedExamples ||
+        content.definitions;
+
+    if (!hasSubstantiveContent) {
+        validationResults.warnings.push("Limited substantive content");
+    }
+
+    if (!content.workedExamples) {
+        validationResults.suggestions.push("Consider adding worked examples");
+    }
+
+    return validationResults;
+}
+
+calculateOpticsContentCompleteness() {
+    if (!this.currentContent) return 0;
+
+    let score = 0;
+    const maxScore = 10;
+
+    if (this.currentContent.topic) score += 1;
+    if (this.currentContent.summary) score += 1;
+    if (this.currentContent.workedExamples) score += 2;
+    if (this.currentContent.applications) score += 1;
+    
+    const hasMainContent = 
+        this.currentContent.definitions ||
+        this.currentContent.lawsOfReflection ||
+        this.currentContent.snellsLaw ||
+        this.currentContent.lensEquation ||
+        this.currentContent.youngsDoubleSlitExperiment ||
+        this.currentContent.electromagneticSpectrum;
+    if (hasMainContent) score += 3;
+
+    if (this.currentContent.assessmentQuestions) score += 1;
+    if (this.currentContent.contextualScenarios) score += 1;
+
+    return Math.round((score / maxScore) * 100);
+}
+
+getOpticsContentQualityMetrics() {
+    return {
+        completeness: this.calculateOpticsContentCompleteness(),
+        hasExamples: !!this.currentContent?.workedExamples,
+        hasApplications: !!this.currentContent?.applications,
+        hasContextualScenarios: !!this.currentContent?.contextualScenarios,
+        detailLevel: this.explanationLevel,
+        includesVisualizations: this.includeVisualizations,
+        includesMisconceptions: this.includeCommonMisconceptions,
+        includesExperiments: this.includeExperiments,
+        adaptiveDifficulty: this.adaptiveDifficulty,
+        metacognitiveSupport: this.metacognitiveSupport
+    };
+}
+
+generateOpticsContentSummary() {
+    if (!this.currentContent) return null;
+
+    const summary = {
+        topic: this.currentContent.topic,
+        category: this.currentContent.category,
+        summary: this.currentContent.summary,
+        keyPoints: [],
+        coverage: {},
+        difficulty: this.currentProblem?.difficulty
+    };
+
+    if (this.currentContent.definitions) {
+        summary.keyPoints.push("Key definitions covered");
+        summary.coverage.definitions = Object.keys(this.currentContent.definitions).length;
+    }
+
+    if (this.currentContent.workedExamples) {
+        summary.keyPoints.push("Worked examples included");
+        summary.coverage.examples = this.currentContent.workedExamples.length;
+    }
+
+    if (this.currentContent.applications) {
+        summary.keyPoints.push("Real-world applications discussed");
+        summary.coverage.applications = true;
+    }
+
+    return summary;
+}
+
+assessOpticsContentDifficulty() {
+    if (!this.currentContent) return 'unknown';
+
+    let difficultyScore = 0;
+
+    const basicTopics = ['reflection'];
+    const intermediateTopics = ['refraction', 'lenses', 'dispersion_spectra'];
+    const advancedTopics = ['wave_optics'];
+
+    if (basicTopics.includes(this.currentProblem.type)) {
+        difficultyScore += 1;
+    } else if (intermediateTopics.includes(this.currentProblem.type)) {
+        difficultyScore += 2;
+    } else if (advancedTopics.includes(this.currentProblem.type)) {
+        difficultyScore += 3;
+    }
+
+    if (this.explanationLevel === 'advanced') difficultyScore += 1;
+    if (this.explanationLevel === 'basic') difficultyScore -= 1;
+
+    if (difficultyScore <= 2) return 'beginner';
+    if (difficultyScore <= 4) return 'intermediate';
+    return 'advanced';
+}
+
+generateOpticsLearningObjectives() {
+    if (!this.currentProblem) return [];
+
+    const objectivesDatabase = {
+        reflection: [
+            "State and apply the laws of reflection",
+            "Draw accurate ray diagrams for plane and curved mirrors",
+            "Use the mirror equation 1/v + 1/u = 1/f to solve problems",
+            "Describe image formation for different object positions",
+            "Distinguish between real and virtual images"
+        ],
+        refraction: [
+            "State and apply Snell's Law: n₁ sin(θ₁) = n₂ sin(θ₂)",
+            "Define refractive index and relate it to speed of light in materials",
+            "Calculate critical angle and identify conditions for TIR",
+            "Explain applications of TIR in optical fibres and prisms",
+            "Solve multi-step refraction problems through different media"
+        ],
+        lenses: [
+            "Distinguish between converging and diverging lenses",
+            "Apply the thin lens equation 1/f = 1/v + 1/u",
+            "Draw accurate ray diagrams for different object positions",
+            "Calculate magnification and optical power",
+            "Explain image formation in optical instruments (microscope, telescope, eye)",
+            "Apply lens concepts to vision correction"
+        ],
+        wave_optics: [
+            "Explain the conditions for sustained interference (coherence)",
+            "Apply path difference conditions for constructive and destructive interference",
+            "Use w = λD/d to solve Young's double-slit problems",
+            "Apply the diffraction grating equation d·sin(θ) = nλ",
+            "Measure wavelength using interference and diffraction",
+            "Explain single-slit diffraction and the diffraction envelope"
+        ],
+        dispersion_spectra: [
+            "Explain dispersion as wavelength-dependence of refractive index",
+            "Describe formation of emission and absorption spectra",
+            "Identify elements from spectral line patterns",
+            "Calculate photon energy using E = hf = hc/λ",
+            "Describe the regions of the electromagnetic spectrum",
+            "Explain applications of spectroscopy in astronomy and chemistry"
+        ]
+    };
+
+    return objectivesDatabase[this.currentProblem.type] || [
+        "Understand the key optics concepts",
+        "Apply principles to problem solving",
+        "Connect theory to real-world applications"
+    ];
+}
+
+identifyOpticsPrerequisites() {
+    if (!this.currentProblem) return [];
+
+    const prerequisitesDatabase = {
+        reflection: [
+            "Basic geometry (angles, perpendiculars)",
+            "Algebra (rearranging equations)",
+            "Understanding of light as rays"
+        ],
+        refraction: [
+            "Trigonometry (sin, cos, arcsin)",
+            "Algebra",
+            "Reflection concepts",
+            "Understanding that light is a wave with speed and wavelength"
+        ],
+        lenses: [
+            "Refraction and Snell's Law",
+            "Algebra (reciprocals, solving simultaneous equations)",
+            "Sign conventions",
+            "Ray diagrams"
+        ],
+        wave_optics: [
+            "Wave properties (frequency, wavelength, period)",
+            "Trigonometry (small angle approximations)",
+            "Refraction concepts",
+            "Algebra"
+        ],
+        dispersion_spectra: [
+            "Refraction and wavelength-dependence",
+            "Wave concepts (c = fλ)",
+            "Basic quantum concepts (energy levels)",
+            "Scientific notation and unit conversions"
+        ]
+    };
+
+    return prerequisitesDatabase[this.currentProblem.type] || [
+        "Basic algebra",
+        "Understanding of light and waves"
+    ];
+}
+
+generateOpticsStudyTips() {
+    if (!this.currentProblem) return [];
+
+    const studyTipsDatabase = {
+        reflection: [
+            "ALWAYS draw the normal first — all angles measured from it",
+            "Label angles clearly: θᵢ and θᵣ from the normal",
+            "For curved mirrors: draw at least TWO rays to locate image",
+            "Check sign convention: f>0 concave, f<0 convex; v>0 real, v<0 virtual",
+            "Verify answer: u>2f gives diminished real image for concave"
+        ],
+        refraction: [
+            "ALWAYS draw normal at boundary; measure angles from normal, NOT surface",
+            "Identify which medium is denser (higher n) to predict bending direction",
+            "For TIR: check (1) denser to less dense, AND (2) θᵢ > θ_c",
+            "Use sin(θ_c) = n₂/n₁ = 1/n when going to air",
+            "Remember: frequency unchanged; speed and wavelength both change"
+        ],
+        lenses: [
+            "State sign convention at start: u, v, f positive/negative rules",
+            "Draw at least TWO standard rays to find image position",
+            "For converging lens: f>0; for diverging: f<0",
+            "Image: v>0 real (far side), v<0 virtual (same side as object)",
+            "When calculating power P=1/f, MUST have f in metres"
+        ],
+        wave_optics: [
+            "Coherence is essential — two independent sources give no sustained fringes",
+            "Constructive: path difference = nλ; Destructive: (n+½)λ",
+            "Young's fringes: w = λD/d — measure across MANY fringes to reduce error",
+            "Diffraction grating: ensure sin(θ) ≤ 1 to find maximum order",
+            "Always check units: λ in metres, d in metres, angles in degrees"
+        ],
+        dispersion_spectra: [
+            "Violet has shorter λ, higher n → bends MORE than red",
+            "Emission: bright lines (hot gas emits). Absorption: dark lines (cool gas absorbs)",
+            "Use E = hf = hc/λ; remember h = 6.63×10⁻³⁴ J·s, c = 3×10⁸ m/s",
+            "EM spectrum: all travel at c; higher f → shorter λ → higher photon energy",
+            "Convert λ to metres before calculating photon energy"
+        ]
+    };
+
+    return studyTipsDatabase[this.currentProblem.type] || [
+        "Always draw clear diagrams with labels",
+        "State which convention/formula you're using",
+        "Show all working clearly",
+        "Check units and physical reasonableness"
+    ];
+}
+
+generateOpticsProcessTimeline(processName) {
+    const timelines = {
+        'Ray Diagram for Lenses': [
+            { step: '1. Draw principal axis and lens', action: 'Horizontal line; lens symbol with F marked on both sides' },
+            { step: '2. Mark object position', action: 'Arrow from axis; note distance u from lens' },
+            { step: '3. Draw Ray 1 (parallel)', action: 'From object top, parallel to axis → through F₂ after lens' },
+            { step: '4. Draw Ray 2 (through O)', action: 'From object top, through optical centre → straight through' },
+            { step: '5. Find image intersection', action: 'Where rays meet (or extensions for virtual image)' },
+            { step: '6. Draw image', action: 'Arrow from axis to intersection; check orientation' },
+            { step: '7. Label image properties', action: 'Real/virtual, upright/inverted, magnified/diminished' }
+        ],
+        'Refraction Problem Strategy': [
+            { step: '1. Draw boundary and normal', action: 'Perpendicular line at point of incidence' },
+            { step: '2. Label media', action: 'Identify n₁ (incident) and n₂ (refracted)' },
+            { step: '3. Mark angles', action: 'θ₁ and θ₂ from normal; given angle clearly shown' },
+            { step: '4. Apply Snell's Law', action: 'n₁ sin(θ₁) = n₂ sin(θ₂)' },
+            { step: '5. Solve for unknown', action: 'Rearrange algebraically; substitute values' },
+            { step: '6. Check bending direction', action: 'Into denser → toward normal; less dense → away' },
+            { step: '7. Verify answer', action: 'Angle reasonable? Bending direction correct?' }
+        ],
+        'Young\'s Double Slit Experiment': [
+            { step: '1. Set up apparatus', action: 'Laser → double slit → screen; align carefully' },
+            { step: '2. Measure D', action: 'Perpendicular distance slit-to-screen (≥1m)' },
+            { step: '3. Observe fringes', action: 'Bright and dark bands on screen' },
+            { step: '4. Mark fringes', action: 'Pencil positions of ~10 bright fringes' },
+            { step: '5. Measure total width', action: 'Width spanning n fringes with ruler' },
+            { step: '6. Calculate w', action: 'w = total width / n (fringe spacing)' },
+            { step: '7. Calculate λ', action: 'λ = wd/D (d is slit separation from equipment spec)' }
+        ],
+        'Identifying Unknown Spectral Lines': [
+            { step: '1. Observe spectrum', action: 'Use spectrometer or grating to see lines' },
+            { step: '2. Measure angles', action: 'Angle θ for each line from central maximum' },
+            { step: '3. Calculate wavelengths', action: 'λ = d·sin(θ)/n for each line' },
+            { step: '4. Compare with database', action: 'Match wavelengths to known element spectra' },
+            { step: '5. Identify element', action: 'Unique pattern identifies the element' },
+            { step: '6. Verify with reference', action: 'Check against standard spectral tables' }
+        ]
+    };
+
+    return timelines[processName] || [];
+}
+
+generateOpticsContentHierarchy() {
+    if (!this.currentContent) return null;
+
+    const hierarchy = {
+        root: this.currentContent.topic,
+        children: []
+    };
+
+    if (this.currentContent.definitions) {
+        hierarchy.children.push({
+            name: 'Definitions',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.lawsOfReflection || 
+        this.currentContent.snellsLaw || 
+        this.currentContent.lensEquation ||
+        this.currentContent.youngsDoubleSlitExperiment ||
+        this.currentContent.electromagneticSpectrum) {
+        hierarchy.children.push({
+            name: 'Core Principles',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.workedExamples) {
+        hierarchy.children.push({
+            name: 'Worked Examples',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.applications) {
+        hierarchy.children.push({
+            name: 'Applications',
+            type: 'section'
+        });
+    }
+
+    if (this.currentContent.opticalInstruments) {
+        hierarchy.children.push({
+            name: 'Optical Instruments',
+            type: 'section'
+        });
+    }
+
+    return hierarchy;
+}
+
+formatKey(key) {
+    return key
+        .replace(/_/g, ' ')
+        .replace(/([A-Z])/g, ' $1')
+        .trim()
+        .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Additional optics-specific helper methods
+
+identifyOpticalInstrument(description) {
+    const instruments = {
+        magnifying_glass: /magnif.*glass|simple.*microscope|hand.*lens/i,
+        compound_microscope: /compound.*microscope|microscope.*two.*lens/i,
+        telescope: /telescope|refracting.*telescope|astronomical/i,
+        camera: /camera|photograph/i,
+        eye: /human.*eye|vision|eyesight|retina/i,
+        spectacles: /spectacles|glasses|contact.*lens|vision.*correction/i,
+        spectrometer: /spectrometer|spectroscope|grating.*instrument/i,
+        periscope: /periscope|submarine/i,
+        binoculars: /binoculars|prism.*binoculars/i,
+        projector: /projector|cinema.*projector/i
+    };
+
+    for (const [instrument, pattern] of Object.entries(instruments)) {
+        if (pattern.test(description)) {
+            return instrument;
+        }
+    }
+
+    return null;
+}
+
+calculateWavelengthFromFringes(fringeSpacing, slitSeparation, screenDistance) {
+    // w = λD/d  →  λ = wd/D
+    return (fringeSpacing * slitSeparation) / screenDistance;
+}
+
+calculateFringeSpacing(wavelength, slitSeparation, screenDistance) {
+    // w = λD/d
+    return (wavelength * screenDistance) / slitSeparation;
+}
+
+calculateGratingAngle(wavelength, gratingSpacing, order) {
+    // d·sin(θ) = nλ  →  sin(θ) = nλ/d
+    const sinTheta = (order * wavelength) / gratingSpacing;
+    if (sinTheta > 1) {
+        return null; // Order not visible
+    }
+    return Math.asin(sinTheta);
+}
+
+calculateMaximumGratingOrder(wavelength, gratingSpacing) {
+    // n_max = floor(d/λ)
+    return Math.floor(gratingSpacing / wavelength);
+}
+
+calculatePhotonEnergy(wavelength) {
+    const h = 6.63e-34; // J·s
+    const c = 3.0e8;    // m/s
+    // E = hc/λ
+    return (h * c) / wavelength;
+}
+
+calculatePhotonFrequency(wavelength) {
+    const c = 3.0e8; // m/s
+    // f = c/λ
+    return c / wavelength;
+}
+
+identifyEMRegion(wavelength) {
+    // wavelength in metres
+    if (wavelength > 0.1) return { region: 'Radio Waves', hazard: 'none' };
+    if (wavelength > 1e-3) return { region: 'Microwaves', hazard: 'heating at high power' };
+    if (wavelength > 700e-9) return { region: 'Infrared', hazard: 'burns, eye damage' };
+    if (wavelength > 400e-9) return { region: 'Visible Light', hazard: 'retinal damage if very bright' };
+    if (wavelength > 10e-9) return { region: 'Ultraviolet', hazard: 'skin cancer, cataracts' };
+    if (wavelength > 0.01e-9) return { region: 'X-rays', hazard: 'ionising radiation, cancer' };
+    return { region: 'Gamma Rays', hazard: 'highly ionising, severe radiation damage' };
+}
+
+convertWavelengthToColour(wavelength_nm) {
+    if (wavelength_nm < 380) return 'Ultraviolet (invisible)';
+    if (wavelength_nm < 450) return 'Violet';
+    if (wavelength_nm < 495) return 'Blue';
+    if (wavelength_nm < 570) return 'Green';
+    if (wavelength_nm < 590) return 'Yellow';
+    if (wavelength_nm < 620) return 'Orange';
+    if (wavelength_nm < 700) return 'Red';
+    return 'Infrared (invisible)';
+}
+
+suggestOpticsExperiment(topic) {
+    const experiments = {
+        reflection: ['laws_of_reflection'],
+        refraction: ['snells_law_experiment'],
+        lenses: ['focal_length_lens'],
+        wave_optics: ['youngs_double_slit', 'diffraction_grating_spectra'],
+        dispersion_spectra: ['diffraction_grating_spectra']
+    };
+
+    const experimentIds = experiments[topic] || [];
+    return experimentIds.map(id => ({
+        id,
+        name: this.opticsExperiments[id]?.name,
+        category: this.opticsExperiments[id]?.category
+    }));
+}
