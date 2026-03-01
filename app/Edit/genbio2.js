@@ -8378,3 +8378,167 @@ static drawGProtein(ctx, width, height, componentFocus) {
   ctx.fillText('GEF catalyzes GDP→GTP exchange', cx - w * 0.16, cy - h * 0.2);
 
   ctx.fillStyle = '#222';
+  ctx.font = `bold ${Math.max(12, w * 0.04)}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('G Protein Cycle', cx, 22);
+}
+
+static drawReceptorProtein(ctx, width, height, componentFocus) {
+  const w = width, h = height;
+  const cx = w * 0.5, cy = h * 0.5;
+
+  // Cell membrane
+  const memY = cy;
+  const memH = h * 0.1;
+  const memGrad = ctx.createLinearGradient(0, memY - memH * 0.5, 0, memY + memH * 0.5);
+  memGrad.addColorStop(0, 'rgba(52,152,219,0.3)');
+  memGrad.addColorStop(0.5, 'rgba(52,152,219,0.15)');
+  memGrad.addColorStop(1, 'rgba(52,152,219,0.3)');
+  ctx.fillStyle = memGrad;
+  ctx.strokeStyle = '#3498DB'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(w * 0.04, memY - memH * 0.5, w * 0.92, memH, 4);
+  ctx.fill(); ctx.stroke();
+
+  // Phospholipid heads (dots)
+  for (let layer = 0; layer < 2; layer++) {
+    const ly = memY + (layer === 0 ? -memH * 0.4 : memH * 0.4);
+    for (let i = 0; i < 14; i++) {
+      const lx = w * 0.06 + i * w * 0.065;
+      ctx.fillStyle = '#3498DB';
+      ctx.beginPath();
+      ctx.arc(lx, ly, w * 0.012, 0, Math.PI * 2);
+      ctx.fill();
+      // Tails
+      ctx.strokeStyle = '#3498DB'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(lx, ly + (layer === 0 ? w * 0.012 : -w * 0.012));
+      ctx.lineTo(lx, memY + (layer === 0 ? -2 : 2));
+      ctx.stroke();
+    }
+  }
+
+  ctx.fillStyle = '#3498DB';
+  ctx.font = `${Math.max(7, w * 0.02)}px Arial`;
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText('Lipid bilayer', w * 0.04, memY + memH * 0.55);
+
+  // GPCR (7-transmembrane receptor)
+  const tmColors = ['#E74C3C', '#E67E22', '#F39C12', '#27AE60', '#3498DB', '#9B59B6', '#8E44AD'];
+  const tmSpacing = w * 0.065;
+  const tmStart = cx - tmSpacing * 3;
+
+  for (let i = 0; i < 7; i++) {
+    const tx = tmStart + i * tmSpacing;
+    const tg = ctx.createLinearGradient(tx - tmSpacing * 0.35, 0, tx + tmSpacing * 0.35, 0);
+    tg.addColorStop(0, tmColors[i] + '88');
+    tg.addColorStop(0.5, tmColors[i]);
+    tg.addColorStop(1, tmColors[i] + '88');
+    ctx.fillStyle = tg;
+    ctx.strokeStyle = tmColors[i]; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(tx - tmSpacing * 0.35, memY - memH * 0.48, tmSpacing * 0.7, memH * 0.96, 4);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.max(7, w * 0.02)}px Arial`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(`TM${i + 1}`, tx, memY);
+  }
+
+  // Extracellular loops + N-terminus
+  const ecLoops = [[tmStart + tmSpacing, memY - memH * 0.5 - h * 0.1],
+                   [tmStart + tmSpacing * 3, memY - memH * 0.5 - h * 0.08],
+                   [tmStart + tmSpacing * 5, memY - memH * 0.5 - h * 0.1]];
+
+  for (let i = 0; i < 3; i++) {
+    const lx1 = tmStart + i * 2 * tmSpacing;
+    const lx2 = tmStart + (i * 2 + 2) * tmSpacing;
+    const ly = ecLoops[i][1];
+    ctx.strokeStyle = '#E67E22'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(lx1, memY - memH * 0.48);
+    ctx.bezierCurveTo(lx1, ly, lx2, ly, lx2, memY - memH * 0.48);
+    ctx.stroke();
+  }
+
+  // N-terminus
+  ctx.strokeStyle = '#E74C3C'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(tmStart, memY - memH * 0.48);
+  ctx.lineTo(tmStart, memY - memH * 0.48 - h * 0.15);
+  ctx.stroke();
+  ctx.fillStyle = '#E74C3C';
+  ctx.font = `bold ${Math.max(7, w * 0.02)}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText("N", tmStart, memY - memH * 0.48 - h * 0.17);
+
+  // Intracellular loops + C-terminus
+  const icLoops = [[tmStart + tmSpacing, memY + memH * 0.5 + h * 0.06],
+                   [tmStart + tmSpacing * 3, memY + memH * 0.5 + h * 0.1],
+                   [tmStart + tmSpacing * 5, memY + memH * 0.5 + h * 0.06]];
+
+  for (let i = 0; i < 3; i++) {
+    const lx1 = tmStart + i * 2 * tmSpacing;
+    const lx2 = tmStart + (i * 2 + 2) * tmSpacing;
+    const ly = icLoops[i][1];
+    ctx.strokeStyle = '#9B59B6'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(lx1, memY + memH * 0.48);
+    ctx.bezierCurveTo(lx1, ly, lx2, ly, lx2, memY + memH * 0.48);
+    ctx.stroke();
+  }
+
+  // C-terminus
+  ctx.strokeStyle = '#9B59B6'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(tmStart + 6 * tmSpacing, memY + memH * 0.48);
+  ctx.lineTo(tmStart + 6 * tmSpacing, memY + memH * 0.48 + h * 0.15);
+  ctx.stroke();
+  ctx.fillStyle = '#9B59B6';
+  ctx.font = `bold ${Math.max(7, w * 0.02)}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText("C", tmStart + 6 * tmSpacing, memY + memH * 0.48 + h * 0.16);
+
+  // Ligand binding pocket
+  const lbX = cx, lbY = memY - memH * 0.5 - h * 0.08;
+  ctx.fillStyle = '#F39C12';
+  ctx.strokeStyle = '#D35400'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(lbX, lbY - h * 0.1, w * 0.045, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold ${Math.max(7, w * 0.022)}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Ligand', lbX, lbY - h * 0.1);
+  ctx.strokeStyle = '#F39C12'; ctx.lineWidth = 2;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(lbX, lbY - h * 0.065); ctx.lineTo(lbX, lbY + 4); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // G protein coupling (intracellular)
+  ctx.fillStyle = '#27AE60';
+  ctx.strokeStyle = '#1E8449'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx + w * 0.12, memY + memH * 0.5 + h * 0.14, w * 0.06, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold ${Math.max(7, w * 0.022)}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('G prot.', cx + w * 0.12, memY + memH * 0.5 + h * 0.14);
+
+  // Labels
+  ctx.fillStyle = '#E67E22';
+  ctx.font = `${Math.max(7, w * 0.02)}px Arial`;
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText('Extracellular loops', tmStart - 4, memY - memH * 0.5 - h * 0.06);
+  ctx.fillStyle = '#9B59B6';
+  ctx.textAlign = 'right';
+  ctx.fillText('Intracellular loops', tmStart - 4, memY + memH * 0.5 + h * 0.08);
+
+  ctx.fillStyle = '#222';
+  ctx.font = `bold ${Math.max(12, w * 0.04)}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('GPCR (7-TM Receptor)', cx, 22);
+                    
+}
