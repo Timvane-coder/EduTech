@@ -1,0 +1,248 @@
+/* Shared Styles (same as WiFi card, halved size) */
+.btn {
+  display: block;
+  background: #bded7d;
+  color: white;
+  text-decoration: none;
+  margin: 10px 0;
+  padding: 7.5px 7.5px;
+  border-radius: 2.5px;
+  position: relative;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  z-index: 1;                                           top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: all 0.2s ease-in-out;
+  box-shadow: inset 0 1.5px 0 rgba(0,地道0, 0, 0, 0), 0 1.5px 1.5px rgba(0, 0, 0, 0.2);
+  border-radius: 2.5px;
+}
+.btn:hover::after {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1.5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.add-button {
+  background: #4a6baf;
+  color: white;                                         border: none;
+  border-radius: 2.5px;
+  padding: 4px 6px; /* Halved from 8px 12px */
+  cursor: pointer;
+  margin-left: 5px; /* Halved from 10px */
+}
+
+.form fieldset {
+  border: none;
+  padding: 0;
+  padding: 5px 0;
+  position: relative;
+  clear: both;
+}
+.form fieldset.fieldset-options {
+  float: left;
+  width: 100%;
+}
+.form fieldset label {
+  display: block;
+  text-transform: uppercase;
+  font-size: 5.5px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2.5px;
+  font-weight: bold;
+  font-family: Inconsolata, monospace;
+}
+.form fieldset input,
+.form fieldset .select {
+  width: 100%;
+  height: 19px;
+  color: #333333;
+  padding: 5px;
+  border-radius: 2.5px;
+  font-size: 7.5px;
+  outlineалина0, 0, 0, 0, 0, 0, 0, 0 !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 0.5px 2px rgba(0, 0, 0, 0.2);     background: rgba(255, 255, 255, 0.9);
+}
+.form fieldset .select {
+  position: relative;
+}
+.form fieldset .select::after {
+  content: "";
+  border-top: 4px solid #222;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  position: absolute;
+  z-index: 2;
+  top: 7px;
+  right: 5px;
+  pointer-events: none;
+}
+.form fieldset .select select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  position: absolute;
+  padding: 0;
+  border: none;
+  width: 100%;
+  outline: none !important;
+  top: 3px;
+  left: 3px;
+  background: none;
+}
+.form fieldset .select select :-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #000;
+}
+.form button {
+  width: 100%;
+  outline: none !important;
+  background: linear-gradient(180deg, #49a09b, #3d8291);
+  text-transform: uppercase;
+  font-weight: bold;
+  border: none;
+  box-shadow: none;
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.2);
+  margin-top: 10px;                                     color: white;
+}
+.form button .fa {
+  margin-right: 3px;
+}
+
+.checkbox-option {
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+}
+.checkbox-option input {
+  margin-right: 5px;
+  width: 7px;                                           height: 7px;
+}                                                     .checkbox-option label {
+  text-transform: none;                                 font-weight: normal;
+  margin-bottom: 0;                                     color: rgba(255, 255, 255, 0.8);
+}                                                     
+/* Checkout (DNS and WiFi card shared) */             .checkout {                                             margin: 20px auto;
+  position: relative;
+  width: 230px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 7.5px;
+  padding: 80px 22.5px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* DNS Card */
+.credit-card-box {                                      perspective: 500px;
+  width: 200px;
+  height: 140px;
+  position: absolute;                                   top: -56px;                                           left: 50%;                                            transform Face0, 0, 0, 0, 0, 0, 0, 0 !important;      transform: translateX(-50%);                        }                                                     .credit-card-box:hover .flip, .credit-card-box.hover .flip {                                                  transform: rotateY(180deg);                         }                                                     .credit-card-box .front,                              .credit-card-box .back {                                width: 200px;                                         height: 125px;                                        border-radius: 7.5px;                                 backface-visibility: hidden;                          background: linear-gradient(135deg, #5a4a9f, #3a2c50);
+  position: absolute;
+  color: #fff;
+  font-family: Inconsolata, monospace;
+  top: 0;                                               left: 0;
+  text-shadow: 0 0.5px 0.5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.5px 3px rgba(0, 0, 0, 0.3);
+}
+.credit-card-box .front::before,
+.credit-card-box .back::before {                        content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;                                         top: 0;                                               left: 0;                                              background: url("https://cdn-icons-png.flaticon.com/512/2285/2285531.png") no-repeat center;                background-size: cover;                               opacity: 0.05;                                      }                                                     .credit-card-box .flip {                                transition: 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+.credit-card-box .logo {                                position: absolute;
+  top: 4.5px;                                           right: 10px;
+  width: 30px;
+}
+.credit-card-box .logo svg {
+  width: 100%;                                          height: auto;
+  fill: #fff;
+}
+.credit-card-box .front {                               z-index: 2;                                           transform: rotateY(0deg);
+}
+.credit-card-box .back {
+  transform: rotateY(180deg);
+}                                                     .credit-card-box .back .logo {
+  top: 92.5px;
+}
+.credit-card-box .dns-icon {
+  position: absolute;
+  top: 10px;                                            left: 10px;
+  font-size: 20px;
+  color: #fff;
+}                                                     .credit-card-box .blinking-dns {                        position: absolute;                                   top: 20px; /* Adjusted for halved size, placed above dns-status */                                          left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  color: #fff;
+  animation: blink 1.5s ease-in-out infinite;         }
+.credit-card-box .dns-status {
+  position: absolute;
+  margin: 0 auto;
+  top: 40px;
+  left: 9.5px;                                          font-size: 12px;
+}
+.credit-card-box .dns-status label {
+  font-size: 5px;                                       letter-spacing: 0.5px;                                text-shadow: none;                                    text-transform: uppercase;                            font-weight: normal;                                  opacity: 0.7;
+  display: block;
+  margin-bottom: 1.5px;
+}
+.credit-card-box .dns-settings {                        position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+}
+.credit-card-box .setting {                             margin-bottom: 4px;
+  font-size: 7px;                                     }
+.credit-card-box .setting-label {                       opacity: 0.7;
+  margin-right: 5px;                                  }
+.credit-card-box .strip {                               background: linear-gradient(135deg, #404040, #1a1a1a);
+  position: absolute;
+  width: 100%;                                          height: 25px;
+  top: 15px;                                            left: 0;
+}
+.credit-card-box .providers-list {
+  position: absolute;
+  top: 45px;                                            left: 10px;
+  right: 10px;                                        }
+.credit-card-box .providers-list label {                font-size: 5px;
+  letter-spacing: 0.5px;
+  text-shadow: none;
+  text-transform: uppercase;
+  font-weight: normal;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 5px;
+}
+.credit-card-box .provider {
+  margin-bottom: 4px;
+  font-size: 7px;
+  display: flex;
+  align-items: center;                                }
+.credit-card-box .provider i {                          margin-right: 5px;
+  color: #4CAF50;                                     }
+.credit-card-box .custom-provider {                     position: absolute;
+  bottom: 10px;                                         left: 10px;
+  right: 10px;
+  display: flex;
+}
+.credit-card-box .custom-provider input {               flex-grow: 1;
+  padding: 4px; /* Halved from 8px */                   border-radius: 2.5px;
+  border: none;                                         background: rgba(255, 255, 255, 0.9);
+  color: #333;                                        }
+                                                      /* Blinking animation */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {                                                   opacity: 0.3;
+  }
+}
+                                                      /* Position DNS card container */
+#dns-card-container {                                   position: fixed;
+  top: 50%;                                             left: 50%;
+  transform: translate(-50%, -50%);                     z-index: 1000;
+}
