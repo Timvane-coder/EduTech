@@ -1,0 +1,409 @@
+/* ====================================================================
+   PHOTOSYNTHESIS VISUALIZATION — STYLESHEET
+   Mirrors circulatory system layout: fixed dual-canvas, glassmorphism
+   panels, scroll-driven visibility. Palette: deep botanical greens,
+   chlorophyll emeralds, golden sunlight accents.
+   ==================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(160deg, #0a1a0d 0%, #0f2214 40%, #0d1b10 100%);
+    transition-duration: 1s;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+}
+
+#main {
+    transition-duration: 0s;
+    opacity: 0;
+}
+
+/* ── Scroll Narrative Text ── */
+.texts {
+    color: rgba(255, 255, 255, 0.95);
+    position: fixed;
+    top: 85vh;
+    left: 50vw;
+    transform: translateX(-50%);
+    transition: all 0.5s ease;
+    font-size: 18px;
+    background: rgba(10, 25, 15, 0.82);
+    padding: 15px 32px;
+    border-radius: 28px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 100;
+    text-align: center;
+    max-width: 80vw;
+    border: 1px solid rgba(100, 220, 120, 0.18);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(100,220,120,0.12);
+}
+
+/* ── Scrollable Stage ── */
+#ext {
+    height: 6200px;
+    position: relative;
+}
+
+/* ── Canvas Stack ──
+   lightCanvas (bg rays) → mainCanvas (structures) → particleCanvas (molecules) */
+#lightCanvas {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+#mainCanvas {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+#particleCanvas {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ── Control Panel (top-right) ── */
+#control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(10, 25, 15, 0.85);
+    padding: 16px 18px;
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(100, 220, 120, 0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+    z-index: 101;
+    display: none;
+    min-width: 180px;
+}
+
+.control-btn {
+    display: block;
+    width: 100%;
+    padding: 9px 16px;
+    margin-bottom: 10px;
+    background: rgba(80, 180, 100, 0.18);
+    border: 1px solid rgba(100, 220, 120, 0.45);
+    color: #d4f5dc;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+.control-btn:hover {
+    background: rgba(80, 180, 100, 0.35);
+    box-shadow: 0 0 10px rgba(100,220,120,0.25);
+}
+
+/* Light intensity slider row */
+#light-intensity-wrap {
+    margin-top: 4px;
+    margin-bottom: 10px;
+}
+
+#light-label {
+    display: block;
+    color: #f0d86a;
+    font-size: 13px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+#light-intensity {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #1a3a20 0%, #f0d86a 100%);
+    outline: none;
+    cursor: pointer;
+}
+
+#light-intensity::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f0d86a;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(240,216,106,0.6);
+    border: 2px solid #fff;
+}
+
+#light-intensity::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f0d86a;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(240,216,106,0.6);
+    border: 2px solid #fff;
+}
+
+/* Rate display */
+#rate-display {
+    color: #66dd88;
+    font-weight: 600;
+    text-align: center;
+    font-size: 15px;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(100,220,120,0.2);
+}
+
+#rate-value {
+    color: #a8f5b0;
+}
+
+/* ── Condition Selector (top-left) ── */
+#condition-selector {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(10, 25, 15, 0.85);
+    padding: 14px 16px;
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(100, 220, 120, 0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+    z-index: 101;
+    display: none;
+}
+
+#condition-selector label {
+    color: #c8ecd0;
+    margin-right: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#condition {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(100, 220, 120, 0.35);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#condition:hover,
+#condition:focus {
+    border-color: rgba(100, 220, 120, 0.7);
+}
+
+#condition option {
+    background: #0f2214;
+    color: #fff;
+}
+
+/* ── Info Panels (bottom-left stack) ── */
+#info-panels {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    z-index: 100;
+    display: none;
+}
+
+.info-panel {
+    background: rgba(10, 25, 15, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(100, 220, 120, 0.22);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+    margin-bottom: 14px;
+    max-width: 340px;
+    opacity: 0;
+    transform: translateX(-22px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.info-panel.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.info-panel h3 {
+    font-size: 15px;
+    margin-bottom: 9px;
+    color: #7feeaa;
+    border-bottom: 1px solid rgba(100, 220, 120, 0.28);
+    padding-bottom: 6px;
+    letter-spacing: 0.4px;
+}
+
+.info-panel p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.88);
+    margin: 5px 0;
+    line-height: 1.45;
+}
+
+.structure-info p {
+    margin: 7px 0;
+}
+
+/* Coloured legend dots */
+.light-dot {
+    color: #f0d86a;   /* golden — light reactions */
+    font-size: 18px;
+}
+
+.calvin-dot {
+    color: #5fe88a;   /* emerald — Calvin cycle */
+    font-size: 18px;
+}
+
+#info-stats span {
+    color: #7feeaa;
+    font-weight: 700;
+}
+
+/* ── Back-to-Top Button ── */
+#myBtn {
+    display: none;
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+    border: 2px solid rgba(100, 220, 120, 0.35);
+    outline: none;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(10, 25, 15, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    padding: 12px 26px;
+    border-radius: 28px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+#myBtn:hover {
+    background: rgba(80, 180, 100, 0.3);
+    border-color: #66dd88;
+    color: #fff;
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 5px 18px rgba(100, 220, 120, 0.35);
+}
+
+/* ── Credits Footer ── */
+#credits {
+    margin-top: 40%;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+/* ── Initial Scroll Prompt ── */
+.section {
+    margin-top: 40px;
+    height: 10vh;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100px;
+}
+
+.section::before {
+    animation: bounce 3s ease infinite;
+    color: #7feeaa;
+    content: '↓';
+    font-size: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 1;
+    position: absolute;
+    text-align: center;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-18px); }
+}
+
+.toptext {
+    margin-top: 40%;
+    color: rgba(255, 255, 255, 0.95);
+    text-align: center;
+    font-size: 22px;
+    text-shadow: 0 0 20px rgba(100,220,120,0.3);
+}
+
+/* ── Responsive ── */
+@media screen and (max-width: 768px) {
+    .texts {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    .info-panel {
+        max-width: 240px;
+        padding: 10px 14px;
+    }
+
+    .info-panel h3 {
+        font-size: 13px;
+    }
+
+    .info-panel p {
+        font-size: 11px;
+    }
+
+    #control-panel,
+    #condition-selector {
+        top: 10px;
+        padding: 10px 12px;
+    }
+}
+
+/* ── Utility Animations ── */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* subtle green ambient glow on body when active */
+@keyframes ambientGlow {
+    0%, 100% { box-shadow: inset 0 0 120px rgba(40,100,50,0.08); }
+    50%      { box-shadow: inset 0 0 160px rgba(40,100,50,0.14); }
+}
+
+body.active {
+    animation: ambientGlow 4s ease-in-out infinite;
+}

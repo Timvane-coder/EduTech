@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endocytosis & Exocytosis — Cell Biology Interactive</title>
+    <link rel="stylesheet" href="cytosis.css">
+</head>
+<body id="main">
+
+    <!-- Floating narrative text -->
+    <p class="texts" id="text">Scroll slowly to explore cellular transport...</p>
+    <!-- Initial hero prompt -->
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- ── Control Panel (top-right) ── -->
+    <div id="control-panel">
+        <button id="toggle-labels"  class="control-btn">Hide Labels</button>
+        <button id="toggle-flow"    class="control-btn">Pause Animation</button>
+        <button id="toggle-speed"   class="control-btn">Speed: 1×</button>
+        <div id="bpm-display">Vesicles Active: <span id="vesicle-count">0</span></div>
+    </div>
+
+    <!-- ── Process Selector (top-left) ── -->
+    <div id="process-selector">
+        <label for="process">Focus:</label>
+        <select id="process">
+            <option value="both">Both Processes</option>
+            <option value="endocytosis">Endocytosis Only</option>
+            <option value="exocytosis">Exocytosis Only</option>
+        </select>
+        <select id="subtype">
+            <option value="auto">Auto</option>
+            <option value="phagocytosis">Phagocytosis</option>
+            <option value="pinocytosis">Pinocytosis</option>
+            <option value="receptor">Receptor-Mediated</option>
+        </select>
+    </div>
+
+    <!-- Back to top -->
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <!-- ── Main scroll stage ── -->
+    <div id="ext">
+        <!-- Primary canvas: cell membrane, organelles, static structure -->
+        <canvas id="mainCanvas"></canvas>
+        <!-- Overlay canvas: vesicles, cargo particles, fluid effects -->
+        <canvas id="particleCanvas"></canvas>
+
+        <!-- ── Info Panels (bottom-left stack) ── -->
+        <div id="info-panels">
+
+            <div class="info-panel" id="info-cell">
+                <h3>🧬 The Cell</h3>
+                <p><strong>Plasma Membrane:</strong> Phospholipid bilayer with embedded proteins — the gatekeeper.</p>
+                <p><strong>Cytoplasm:</strong> Aqueous medium where all transport events unfold.</p>
+                <p><strong>Nucleus:</strong> Central organelle housing DNA.</p>
+            </div>
+
+            <div class="info-panel" id="info-endo">
+                <h3>⬇️ Endocytosis</h3>
+                <p><strong>Phagocytosis:</strong> Large particles (bacteria, debris) engulfed by membrane pseudopods.</p>
+                <p><strong>Pinocytosis:</strong> Tiny droplets of extracellular fluid pulled in.</p>
+                <p><strong>Receptor-Mediated:</strong> Specific ligands bind receptors → coated pit → internalization.</p>
+            </div>
+
+            <div class="info-panel" id="info-exo">
+                <h3>⬆️ Exocytosis</h3>
+                <p><strong>Constitutive:</strong> Continuous release of proteins (e.g. enzymes, hormones).</p>
+                <p><strong>Regulated:</strong> Signal-triggered release (e.g. neurotransmitters, insulin).</p>
+                <p><strong>Key step:</strong> SNARE proteins fuse vesicle membrane with plasma membrane.</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>📊 Live Stats</h3>
+                <p>Endocytosis Events: <span id="endo-count">0</span></p>
+                <p>Exocytosis Events: <span id="exo-count">0</span></p>
+                <p>Cargo Delivered: <span id="cargo-count">0</span></p>
+                <p>Membrane Recycled: <span id="recycle-pct">0</span>%</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Cell Biology — Endocytosis & Exocytosis Visualization |
+        <span style="color:#ff6b6b;">⬇</span> Endo &nbsp;
+        <span style="color:#4ecdc4;">⬆</span> Exo &nbsp;·&nbsp; Scientifically Accurate
+    </div>
+
+    <script src="cytosis.js"></script>
+</body>
+</html>

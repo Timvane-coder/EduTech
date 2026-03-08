@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Differentiation - Interactive Journey Through Development</title>
+    <link rel="stylesheet" href="cell-differentiation.css">
+</head>
+<body id="main">
+    <p class="texts" id="text">Scroll slowly to explore cell differentiation...</p>
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey Through Cell Development</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <button id="toggle-labels" class="control-btn">Toggle Labels</button>
+        <button id="toggle-animation" class="control-btn">Pause Animation</button>
+        <div id="stage-display">Development Stage: <span id="stage-value">Stem Cell</span></div>
+        <div id="cell-count-display">Active Cells: <span id="cell-count-value">0</span></div>
+    </div>
+
+    <!-- Differentiation Path Selector -->
+    <div id="path-selector">
+        <label for="diff-path">Lineage Path:</label>
+        <select id="diff-path">
+            <option value="all">All Lineages</option>
+            <option value="blood">Blood Cells</option>
+            <option value="neural">Neural Cells</option>
+            <option value="muscle">Muscle Cells</option>
+            <option value="epithelial">Epithelial Cells</option>
+        </select>
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <div id="ext">
+        <!-- Main Canvas for all drawings -->
+        <canvas id="mainCanvas"></canvas>
+
+        <!-- Overlay canvas for particles/animations -->
+        <canvas id="particleCanvas"></canvas>
+
+        <!-- Info panels -->
+        <div id="info-panels">
+            <div class="info-panel" id="info-stem">
+                <h3>Stem Cells</h3>
+                <div class="stem-info">
+                    <p><strong>Totipotent:</strong> Can become any cell type</p>
+                    <p><strong>Pluripotent:</strong> Can become most cell types</p>
+                    <p><strong>Multipotent:</strong> Limited to cell lineage</p>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-signals">
+                <h3>Signaling Molecules</h3>
+                <p><span class="growth-factor">●</span> <strong>Growth Factors:</strong> Promote differentiation</p>
+                <p><span class="transcription">●</span> <strong>Transcription Factors:</strong> Control genes</p>
+                <p><span class="cytokine">●</span> <strong>Cytokines:</strong> Cell communication</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>Live Stats</h3>
+                <p>Differentiation Rate: <span id="diff-rate">0</span>%</p>
+                <p>Gene Expression: <span id="gene-expr">Baseline</span></p>
+                <p>Signal Strength: <span id="signal-strength">0</span></p>
+            </div>
+
+            <div class="info-panel" id="info-cell-types">
+                <h3>Cell Types</h3>
+                <div id="cell-type-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Scientific Cell Differentiation Visualization |
+        <span style="color: #4ecdc4;">🧬</span> Biologically Accurate
+    </div>
+
+    <script src="cell-differentiation.js"></script>
+</body>
+</html>

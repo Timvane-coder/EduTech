@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photosynthesis - Interactive Plant Biology Journey</title>
+    <link rel="stylesheet" href="photosynthesis.css">
+</head>
+<body id="main">
+    <p class="texts" id="text">Scroll slowly to explore photosynthesis...</p>
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <button id="toggle-labels" class="control-btn">Hide Labels</button>
+        <button id="toggle-flow" class="control-btn">Pause Molecules</button>
+        <button id="toggle-light" class="control-btn" style="background:rgba(255,200,50,0.25);border-color:rgba(255,200,50,0.6);">Toggle Light</button>
+        <div id="light-intensity-wrap">
+            <label id="light-label">☀️ Light Intensity</label>
+            <input type="range" id="light-intensity" min="0" max="100" value="75">
+        </div>
+        <div id="rate-display">Photosynthesis Rate: <span id="rate-value">0</span> µmol/s</div>
+    </div>
+
+    <!-- Environmental Condition Selector -->
+    <div id="condition-selector">
+        <label for="condition">Condition:</label>
+        <select id="condition">
+            <option value="normal">Normal (Sunny Day)</option>
+            <option value="drought">Drought (Stomata Closed)</option>
+            <option value="shade">Deep Shade (Low Light)</option>
+            <option value="highco2">High CO₂ (Enriched)</option>
+        </select>
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <div id="ext">
+        <!-- Main Canvas for structures -->
+        <canvas id="mainCanvas"></canvas>
+        <!-- Overlay canvas for molecules/particles -->
+        <canvas id="particleCanvas"></canvas>
+        <!-- Sunlight ray canvas (behind everything) -->
+        <canvas id="lightCanvas"></canvas>
+
+        <!-- Info Panels -->
+        <div id="info-panels">
+            <div class="info-panel" id="info-chloroplast">
+                <h3>🌿 Chloroplast</h3>
+                <div class="structure-info">
+                    <p><strong>Outer Membrane:</strong> Protects the organelle</p>
+                    <p><strong>Thylakoid:</strong> Stacked membrane discs — site of light reactions</p>
+                    <p><strong>Grana:</strong> Stacks of thylakoids (shown as rings)</p>
+                    <p><strong>Stroma:</strong> Fluid matrix — site of Calvin Cycle</p>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-reactions">
+                <h3>⚡ Two Stages</h3>
+                <p><span class="light-dot">⬤</span> <strong>Light Reactions:</strong> Thylakoid membrane → ATP + NADPH</p>
+                <p><span class="calvin-dot">⬤</span> <strong>Calvin Cycle:</strong> Stroma → G3P → Glucose</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>📊 Live Stats</h3>
+                <p>Molecules Active: <span id="mol-count">0</span></p>
+                <p>ATP Produced: <span id="atp-count">0</span></p>
+                <p>O₂ Released: <span id="o2-count">0</span></p>
+                <p>Glucose Formed: <span id="glucose-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Interactive Photosynthesis Visualization |
+        <span style="color:#66dd66;">🌿</span> Scientifically Accurate Plant Biology
+    </div>
+
+    <script src="photosynthesis.js"></script>
+</body>
+</html>

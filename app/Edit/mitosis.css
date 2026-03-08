@@ -1,0 +1,456 @@
+/* ============================================================
+   CELL DIVISION VISUALIZATION – STYLESHEET
+   Bio-luminescent dark theme | mirrors circulatory layout
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-deep:      #060c1a;
+    --bg-card:      rgba(8, 14, 30, 0.85);
+    --glow-green:   #39ff85;
+    --glow-teal:    #00e5ff;
+    --glow-violet: #b388ff;
+    --chr-red:      #ff5e6a;
+    --chr-blue:     #4fc3f7;
+    --chr-gold:     #ffcc02;
+    --chr-pink:     #f06292;
+    --chr-lime:     #69f0ae;
+    --chr-amber:    #ffb74d;
+    --text-primary: rgba(255,255,255,0.95);
+    --text-muted:   rgba(255,255,255,0.55);
+    --border-glow:  rgba(57, 255, 133, 0.18);
+
+    /* Phase accent colours */
+    --phase-interphase: #4fc3f7;
+    --phase-prophase:   #b388ff;
+    --phase-metaphase:  #ffcc02;
+    --phase-anaphase:   #ff5e6a;
+    --phase-telophase:  #69f0ae;
+    --phase-cytokinesis:#00e5ff;
+}
+
+/* ── Base ── */
+body {
+    background: var(--bg-deep);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    transition-duration: 1s;
+}
+
+#main {
+    transition-duration: 0s;
+    opacity: 0;
+}
+
+/* ── Scroll container (sets page height) ── */
+#ext {
+    height: 6200px;
+    position: relative;
+}
+
+/* ── Floating narrative text ── */
+.texts {
+    color: var(--text-primary);
+    position: fixed;
+    top: 85vh;
+    left: 50vw;
+    transform: translateX(-50%);
+    transition: all 0.5s ease;
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    padding: 14px 32px;
+    border-radius: 28px;
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 0 24px rgba(57,255,133,0.08);
+    z-index: 100;
+    text-align: center;
+    max-width: 78vw;
+    line-height: 1.5;
+}
+
+/* ── Hero text / arrow ── */
+.toptext {
+    margin-top: 40%;
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 21px;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+}
+
+.section {
+    margin-top: 40px;
+    height: 10vh;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100px;
+}
+
+.section::before {
+    animation: bounce 3s ease infinite;
+    color: var(--glow-green);
+    content: '↓';
+    font-size: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.8;
+    position: absolute;
+    text-align: center;
+    text-shadow: 0 0 12px var(--glow-green);
+}
+
+@keyframes bounce {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50%     { transform: translateX(-50%) translateY(-18px); }
+}
+
+/* ── Dual canvases (fixed, centred) ── */
+#mainCanvas,
+#particleCanvas {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+#particleCanvas {
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ============================================================
+   CONTROL PANEL (top-right)
+   ============================================================ */
+#control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    z-index: 101;
+    display: none;
+    min-width: 170px;
+}
+
+.control-btn {
+    display: block;
+    width: 100%;
+    padding: 9px 14px;
+    margin-bottom: 10px;
+    background: rgba(57,255,133,0.1);
+    border: 1px solid rgba(57,255,133,0.35);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.25s, box-shadow 0.25s;
+    letter-spacing: 0.02em;
+}
+.control-btn:hover {
+    background: rgba(57,255,133,0.22);
+    box-shadow: 0 0 10px rgba(57,255,133,0.25);
+}
+
+/* Speed slider row */
+#speed-control {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+#speed-control label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+#speed-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(57,255,133,0.25);
+    outline: none;
+}
+#speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--glow-green);
+    cursor: pointer;
+    box-shadow: 0 0 6px var(--glow-green);
+}
+#speed-value {
+    font-size: 12px;
+    color: var(--glow-green);
+    font-weight: 600;
+    min-width: 34px;
+    text-align: right;
+}
+
+/* ============================================================
+   MUTATION SELECTOR (top-left)
+   ============================================================ */
+#mutation-selector {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    z-index: 101;
+    display: none;
+    align-items: center;
+    gap: 10px;
+}
+#mutation-selector label {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+#mutation {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.25s;
+}
+#mutation:focus { border-color: var(--glow-green); }
+#mutation option {
+    background: #0e1628;
+    color: var(--text-primary);
+}
+
+/* ============================================================
+   PHASE INDICATOR TIMELINE (bottom-centre)
+   ============================================================ */
+#phase-indicator {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    align-items: center;
+    gap: 0;
+    z-index: 101;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 10px 18px;
+    border-radius: 36px;
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+
+.phase-dot {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    padding: 0 4px;
+}
+.phase-dot::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.25);
+    transition: all 0.4s ease;
+}
+.phase-dot.active::before {
+    background: var(--glow-green);
+    border-color: var(--glow-green);
+    box-shadow: 0 0 10px var(--glow-green);
+}
+.phase-dot.completed::before {
+    background: rgba(57,255,133,0.4);
+    border-color: var(--glow-green);
+}
+
+.phase-label {
+    position: absolute;
+    bottom: -22px;
+    font-size: 9.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    transition: color 0.3s;
+}
+.phase-dot.active .phase-label { color: var(--glow-green); font-weight: 600; }
+
+.phase-connector {
+    width: 28px;
+    height: 2px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+}
+.phase-connector::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--glow-green);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s ease;
+}
+.phase-dot.completed + .phase-connector::after {
+    transform: scaleX(1);
+}
+
+/* ============================================================
+   INFO PANELS (left sidebar stack)
+   ============================================================ */
+#info-panels {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    z-index: 100;
+    display: none;
+}
+
+.info-panel {
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glow);
+    margin-bottom: 12px;
+    max-width: 310px;
+    opacity: 0;
+    transform: translateX(-22px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+}
+.info-panel.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.info-panel h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 9px;
+    color: var(--glow-green);
+    border-bottom: 1px solid rgba(57,255,133,0.2);
+    padding-bottom: 6px;
+    letter-spacing: 0.02em;
+}
+.info-panel p {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.85);
+    margin: 5px 0;
+    line-height: 1.45;
+}
+
+/* Phase-colour dots inside info panel */
+.phase-color           { font-size: 16px; }
+.prophase-c            { color: var(--phase-prophase); }
+.metaphase-c           { color: var(--phase-metaphase); }
+.anaphase-c            { color: var(--phase-anaphase); }
+.telophase-c           { color: var(--phase-telophase); }
+
+/* Live stat values */
+#info-stats span {
+    color: var(--glow-teal);
+    font-weight: 600;
+}
+
+/* ============================================================
+   BACK-TO-TOP BUTTON
+   ============================================================ */
+#myBtn {
+    display: none;
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+    border: 1px solid rgba(57,255,133,0.35);
+    outline: none;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    cursor: pointer;
+    padding: 11px 26px;
+    border-radius: 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+#myBtn:hover {
+    background: rgba(57,255,133,0.15);
+    border-color: var(--glow-green);
+    box-shadow: 0 0 18px rgba(57,255,133,0.3);
+    transform: translateX(-50%) translateY(-3px);
+}
+
+/* ============================================================
+   CREDITS
+   ============================================================ */
+#credits {
+    margin-top: 40%;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 11.5px;
+    margin-bottom: 24px;
+    letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media screen and (max-width: 768px) {
+    .texts { font-size: 14px; padding: 10px 20px; }
+    .info-panel { max-width: 240px; padding: 10px 14px; }
+    .info-panel h3 { font-size: 13px; }
+    .info-panel p  { font-size: 11px; }
+    #control-panel, #mutation-selector { top: 10px; padding: 10px 12px; }
+    #phase-indicator { bottom: 8px; padding: 8px 10px; }
+    .phase-label { font-size: 8px; }
+    .phase-connector { width: 18px; }
+}
+
+@media screen and (max-width: 480px) {
+    #phase-indicator { display: none !important; }
+    #mutation-selector { left: 50%; transform: translateX(-50%); top: 8px; }
+}

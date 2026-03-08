@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Division - Interactive Biology Visualization</title>
+    <link rel="stylesheet" href="mitosis.css">
+</head>
+<body id="main">
+    <p class="texts" id="text">Scroll slowly to explore cell division...</p>
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <button id="toggle-labels" class="control-btn">Hide Labels</button>
+        <button id="toggle-flow" class="control-btn">Pause Animation</button>
+        <div id="speed-control">
+            <label>Speed:</label>
+            <input type="range" id="speed-slider" min="0.2" max="3" step="0.1" value="1">
+            <span id="speed-value">1.0x</span>
+        </div>
+    </div>
+
+    <!-- Mutation Scenario Selector -->
+    <div id="mutation-selector">
+        <label for="mutation">Mutation:</label>
+        <select id="mutation">
+            <option value="normal">Normal Division</option>
+            <option value="nondisjunction">Nondisjunction</option>
+            <option value="polyploidy">Polyploidy</option>
+            <option value="deletion">Deletion</option>
+        </select>
+    </div>
+
+    <!-- Phase Indicator -->
+    <div id="phase-indicator">
+        <div class="phase-dot active" data-phase="interphase">
+            <span class="phase-label">Interphase</span>
+        </div>
+        <div class="phase-connector"></div>
+        <div class="phase-dot" data-phase="prophase">
+            <span class="phase-label">Prophase</span>
+        </div>
+        <div class="phase-connector"></div>
+        <div class="phase-dot" data-phase="metaphase">
+            <span class="phase-label">Metaphase</span>
+        </div>
+        <div class="phase-connector"></div>
+        <div class="phase-dot" data-phase="anaphase">
+            <span class="phase-label">Anaphase</span>
+        </div>
+        <div class="phase-connector"></div>
+        <div class="phase-dot" data-phase="telophase">
+            <span class="phase-label">Telophase</span>
+        </div>
+        <div class="phase-connector"></div>
+        <div class="phase-dot" data-phase="cytokinesis">
+            <span class="phase-label">Cytokinesis</span>
+        </div>
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <div id="ext">
+        <!-- Main Canvas for structures -->
+        <canvas id="mainCanvas"></canvas>
+        <!-- Overlay canvas for animated particles (chromosomes, proteins) -->
+        <canvas id="particleCanvas"></canvas>
+
+        <!-- Info Panels -->
+        <div id="info-panels">
+            <div class="info-panel" id="info-cell">
+                <h3>🧬 Cell Structure</h3>
+                <p><strong>Nucleus:</strong> Contains genetic material (DNA)</p>
+                <p><strong>Cytoplasm:</strong> Fluid medium for organelles</p>
+                <p><strong>Cell Membrane:</strong> Phospholipid bilayer boundary</p>
+                <p><strong>Centrosomes:</strong> Organize spindle fibers</p>
+            </div>
+
+            <div class="info-panel" id="info-dna">
+                <h3>🔬 DNA Replication</h3>
+                <p><strong>S Phase:</strong> DNA strands are duplicated</p>
+                <p><strong>Sister Chromatids:</strong> Identical copies joined at centromere</p>
+                <p><strong>Chromosomes:</strong> 46 in human somatic cells</p>
+            </div>
+
+            <div class="info-panel" id="info-mitosis">
+                <h3>⚙️ Mitosis Phases</h3>
+                <p><span class="phase-color prophase-c">⬤</span> <strong>Prophase:</strong> Chromosomes condense</p>
+                <p><span class="phase-color metaphase-c">⬤</span> <strong>Metaphase:</strong> Align at center</p>
+                <p><span class="phase-color anaphase-c">⬤</span> <strong>Anaphase:</strong> Pulled to poles</p>
+                <p><span class="phase-color telophase-c">⬤</span> <strong>Telophase:</strong> Nuclei re-form</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>📊 Live Stats</h3>
+                <p>Chromosomes: <span id="chromo-count">0</span></p>
+                <p>DNA Replicated: <span id="dna-pct">0</span>%</p>
+                <p>Division Progress: <span id="div-progress">0</span>%</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Cell Division Visualization |
+        <span style="color:#7cfc00;">🧬</span> Scientifically Accurate Mitosis
+    </div>
+
+    <script src="mitosis.js"></script>
+</body>
+</html>

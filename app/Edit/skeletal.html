@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Skeletal System - Scientific Interactive Journey</title>
+    <link rel="stylesheet" href="skeletal.css">
+</head>
+<body id="main">
+    <p class="texts" id="text">Scroll slowly to explore the skeletal system...</p>
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <button id="toggle-labels" class="control-btn">Toggle Labels</button>
+        <button id="toggle-remodeling" class="control-btn">Pause Remodeling</button>
+        <div id="bone-health-display">Bone Health: <span id="health-value">100</span>%</div>
+    </div>
+
+    <!-- Disease Scenario Selector -->
+    <div id="disease-selector">
+        <label for="scenario">Scenario:</label>
+        <select id="scenario">
+            <option value="normal">Normal</option>
+            <option value="osteoporosis">Osteoporosis</option>
+            <option value="arthritis">Rheumatoid Arthritis</option>
+            <option value="fracture">Fracture (Healing)</option>
+            <option value="osteomalacia">Osteomalacia</option>
+        </select>
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <div id="ext">
+        <!-- Main Canvas for bone structures -->
+        <canvas id="mainCanvas"></canvas>
+
+        <!-- Overlay canvas for cell particles/animations -->
+        <canvas id="particleCanvas"></canvas>
+
+        <!-- Info panels -->
+        <div id="info-panels">
+            <div class="info-panel" id="info-skeleton">
+                <h3>Skeletal System</h3>
+                <div class="skeleton-info">
+                    <p><strong>206 Bones</strong> in the adult human body</p>
+                    <p><strong>Axial Skeleton:</strong> Skull, spine, ribcage</p>
+                    <p><strong>Appendicular:</strong> Limbs & pelvis</p>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-joints">
+                <h3>Joint Types</h3>
+                <p><span class="ball-socket">⬤</span> <strong>Ball & Socket:</strong> Shoulder, Hip</p>
+                <p><span class="hinge">⬤</span> <strong>Hinge:</strong> Elbow, Knee</p>
+                <p><span class="pivot">⬤</span> <strong>Pivot:</strong> C1–C2 neck</p>
+                <p><span class="gliding">⬤</span> <strong>Gliding:</strong> Wrist, Ankle</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>Bone Remodeling</h3>
+                <p>Osteoblasts (build): <span id="blast-count">0</span></p>
+                <p>Osteoclasts (resorb): <span id="clast-count">0</span></p>
+                <p>Osteocytes (maintain): <span id="cyte-count">0</span></p>
+                <p>Marrow Cells: <span id="marrow-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Scientific Skeletal System Visualization |
+        <span style="color: #e8d5b7;">🦴</span> Anatomically Accurate
+    </div>
+
+    <script src="skeletal.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Circulatory System - Scientific Interactive Journey</title>
+    <link rel="stylesheet" href="circulatory.css">
+</head>
+<body id="main">
+    <p class="texts" id="text">Scroll slowly to explore the circulatory system...</p>
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <button id="toggle-labels" class="control-btn">Toggle Labels</button>
+        <button id="toggle-flow" class="control-btn">Pause Flow</button>
+        <div id="bpm-display">Heart Rate: <span id="bpm-value">72</span> BPM</div>
+    </div>
+
+    <!-- Disease Scenario Selector -->
+    <div id="disease-selector">
+        <label for="scenario">Scenario:</label>
+        <select id="scenario">
+            <option value="normal">Normal</option>
+            <option value="hypertension">Hypertension</option>
+            <option value="atherosclerosis">Atherosclerosis</option>
+            <option value="anemia">Anemia</option>
+        </select>
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <div id="ext">
+        <!-- Main Canvas for all drawings -->
+        <canvas id="mainCanvas"></canvas>
+
+        <!-- Overlay canvas for particles/animations -->
+        <canvas id="particleCanvas"></canvas>
+
+        <!-- Info panels -->
+        <div id="info-panels">
+            <div class="info-panel" id="info-heart">
+                <h3>Heart</h3>
+                <div class="chamber-info">
+                    <p><strong>Right Atrium (RA):</strong> Receives deoxygenated blood</p>
+                    <p><strong>Right Ventricle (RV):</strong> Pumps to lungs</p>
+                    <p><strong>Left Atrium (LA):</strong> Receives oxygenated blood</p>
+                    <p><strong>Left Ventricle (LV):</strong> Pumps to body</p>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-circulation">
+                <h3>Circulation Types</h3>
+                <p><span class="pulmonary">⬤</span> <strong>Pulmonary:</strong> Heart → Lungs → Heart</p>
+                <p><span class="systemic">⬤</span> <strong>Systemic:</strong> Heart → Body → Heart</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>Live Stats</h3>
+                <p>Blood Flow: <span id="flow-rate">5.0</span> L/min</p>
+                <p>Oxygen Saturation: <span id="o2-sat">98</span>%</p>
+                <p>Cells Circulating: <span id="cell-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Scientific Circulatory System Visualization |
+        <span style="color: #ff4444;">❤</span> Anatomically Accurate
+    </div>
+
+    <script src="circus.js"></script>
+</body>
+</html>
+
+
