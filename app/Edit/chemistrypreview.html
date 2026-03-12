@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chemistry SVG Diagrams — Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e1117;
+      --surface: #161b27;
+      --card: #1c2333;
+      --border: #2a3347;
+      --accent-gold: #e8c96a;
+      --accent-teal: #5cc8c8;
+      --text-primary: #e8ecf0;
+      --text-muted: #7a8799;
+      --text-dim: #4a5568;
+      --pill-1: #1e3a5f;
+      --pill-2: #1a3d2e;
+      --pill-3: #3b1d5c;
+      --pill-4: #4a1e1e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Source Serif 4', Georgia, serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #0b0f1a 0%, #111827 60%, #0e1a2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 40px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 20% 50%, rgba(92,200,200,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 40%, rgba(232,201,106,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .header-eyebrow {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent-teal);
+      margin-bottom: 14px;
+      font-weight: 300;
+    }
+    header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+    header h1 span {
+      color: var(--accent-gold);
+    }
+    header p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.65;
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    /* ── NAV PILLS ── */
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 28px 24px 0;
+    }
+    nav a {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.8rem;
+      padding: 7px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      border: 1px solid;
+      transition: all 0.22s ease;
+      font-weight: 400;
+    }
+    nav a:nth-child(1) { background: var(--pill-1); border-color: #2e5a8a; color: #7ec8f7; }
+    nav a:nth-child(2) { background: var(--pill-2); border-color: #2a5c40; color: #6ee7b7; }
+    nav a:nth-child(3) { background: var(--pill-3); border-color: #5b3080; color: #c4a8f7; }
+    nav a:nth-child(4) { background: var(--pill-4); border-color: #6b2e2e; color: #f9a8a8; }
+    nav a:hover { filter: brightness(1.2); transform: translateY(-1px); }
+
+    /* ── MAIN GRID ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: grid;
+      gap: 48px;
+    }
+
+    /* ── DIAGRAM CARD ── */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+      transition: box-shadow 0.25s ease;
+    }
+    .diagram-card:hover {
+      box-shadow: 0 8px 48px rgba(0,0,0,0.55);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, rgba(255,255,255,0.018) 0%, transparent 100%);
+    }
+    .card-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      min-width: 2.4rem;
+      color: var(--accent-gold);
+      opacity: 0.65;
+      margin-top: 2px;
+    }
+    .card-meta { flex: 1; }
+    .card-meta h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      line-height: 1.25;
+    }
+    .card-meta p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+    .card-tag {
+      font-size: 0.7rem;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-family: 'Source Serif 4', serif;
+      font-weight: 400;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+      align-self: center;
+    }
+
+    .card-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    @media (max-width: 780px) {
+      .card-body { grid-template-columns: 1fr; }
+    }
+
+    /* SVG panel */
+    .svg-panel {
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border-right: 1px solid var(--border);
+      min-height: 340px;
+    }
+    .svg-panel svg {
+      width: 100%;
+      height: auto;
+      max-height: 500px;
+    }
+    @media (max-width: 780px) {
+      .svg-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+
+    /* Explanation panel */
+    .explain-panel {
+      padding: 28px 28px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .explain-panel h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-teal);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: -6px;
+    }
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .feature-list li {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      padding-left: 18px;
+      position: relative;
+      font-weight: 300;
+    }
+    .feature-list li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent-gold);
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+    .feature-list li strong {
+      color: var(--text-primary);
+      font-weight: 400;
+    }
+
+    .implementation-block {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .implementation-block h4 {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 9px;
+    }
+    .impl-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 14px;
+    }
+    .impl-item {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-weight: 300;
+    }
+    .impl-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* colour accents per card */
+    .c1 .card-tag { background: var(--pill-1); color: #7ec8f7; border: 1px solid #2e5a8a; }
+    .c1 .impl-dot { background: #3b82f6; }
+    .c2 .card-tag { background: var(--pill-2); color: #6ee7b7; border: 1px solid #2a5c40; }
+    .c2 .impl-dot { background: #22c55e; }
+    .c3 .card-tag { background: var(--pill-3); color: #c4a8f7; border: 1px solid #5b3080; }
+    .c3 .impl-dot { background: #a78bfa; }
+    .c4 .card-tag { background: var(--pill-4); color: #f9a8a8; border: 1px solid #6b2e2e; }
+    .c4 .impl-dot { background: #f87171; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 28px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="header-eyebrow">Educational Science Diagrams</p>
+  <h1>Chemistry <span>SVG</span> Diagrams</h1>
+  <p>Four annotated vector diagrams covering core chemistry concepts — built with pure SVG geometry, colour-coded labels, and physics-diagram parity.</p>
+</header>
+
+<nav>
+  <a href="#titration">① Titration Apparatus</a>
+  <a href="#atomic">② Atomic Shell Config</a>
+  <a href="#electrolysis">③ Electrolysis</a>
+  <a href="#hydrocarbons">④ Hydrocarbon Reactions</a>
+</nav>
+
+<main>
+
+  <!-- ═══════════════════ CARD 1 — TITRATION ═══════════════════ -->
+  <div class="diagram-card c1" id="titration">
+    <div class="card-header">
+      <div class="card-number">01</div>
+      <div class="card-meta">
+        <h2>Titration Apparatus — Labelled Setup</h2>
+        <p>Standard acid-base titration: burette, stopcock, conical flask, analyte with phenolphthalein indicator, white tile, and retort stand — all annotated with leader lines.</p>
+      </div>
+      <span class="card-tag">Analytical Chem</span>
+    </div>
+    <div class="card-body">
+      <div class="svg-panel">
+        <!-- TITRATION SVG INLINE -->
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 620">
+          <text x="90" y="24" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#000">Titration Apparatus — Labelled Setup</text>
+          <text x="100" y="40" font-family="Georgia,serif" font-size="10" fill="#444">Standard acid-base titration: burette delivering titrant into analyte solution</text>
+          <rect x="310" y="545" width="160" height="18" rx="4" fill="#64748b" stroke="#334155" stroke-width="2"/>
+          <rect x="385" y="80" width="12" height="468" rx="3" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+          <rect x="280" y="140" width="108" height="14" rx="3" fill="#64748b" stroke="#334155" stroke-width="1.5"/>
+          <rect x="378" y="132" width="22" height="30" rx="3" fill="#475569" stroke="#334155" stroke-width="1.5"/>
+          <rect x="216" y="100" width="26" height="340" rx="3" fill="#dbeafe" fill-opacity="0.6" stroke="#1e40af" stroke-width="2.5"/>
+          <rect x="218" y="102" width="22" height="200" rx="2" fill="#fed7aa" fill-opacity="0.7"/>
+          <path d="M218,302 Q229,310 240,302" fill="#fed7aa" fill-opacity="0.7" stroke="#f97316" stroke-width="1"/>
+          <line x1="242" y1="110" x2="248" y2="110" stroke="#1e40af" stroke-width="1.5"/><text x="251" y="114" font-family="Georgia,serif" font-size="9" fill="#1e40af">0</text>
+          <line x1="242" y1="142" x2="248" y2="142" stroke="#1e40af" stroke-width="1.5"/><text x="251" y="146" font-family="Georgia,serif" font-size="9" fill="#1e40af">5</text>
+          <line x1="242" y1="174" x2="250" y2="174" stroke="#1e40af" stroke-width="1.8"/><text x="251" y="178" font-family="Georgia,serif" font-size="9" fill="#1e40af">10</text>
+          <line x1="242" y1="206" x2="248" y2="206" stroke="#1e40af" stroke-width="1.5"/><text x="251" y="210" font-family="Georgia,serif" font-size="9" fill="#1e40af">15</text>
+          <line x1="242" y1="238" x2="250" y2="238" stroke="#1e40af" stroke-width="1.8"/><text x="251" y="242" font-family="Georgia,serif" font-size="9" fill="#1e40af">20</text>
+          <line x1="242" y1="270" x2="248" y2="270" stroke="#1e40af" stroke-width="1.5"/><text x="251" y="274" font-family="Georgia,serif" font-size="9" fill="#1e40af">25</text>
+          <line x1="242" y1="302" x2="250" y2="302" stroke="#1e40af" stroke-width="1.8"/><text x="251" y="306" font-family="Georgia,serif" font-size="9" fill="#1e40af">30</text>
+          <line x1="242" y1="334" x2="248" y2="334" stroke="#1e40af" stroke-width="1.5"/><text x="251" y="338" font-family="Georgia,serif" font-size="9" fill="#1e40af">35</text>
+          <line x1="242" y1="366" x2="250" y2="366" stroke="#1e40af" stroke-width="1.8"/><text x="251" y="370" font-family="Georgia,serif" font-size="9" fill="#1e40af">40</text>
+          <line x1="242" y1="398" x2="248" y2="398" stroke="#1e40af" stroke-width="1.5"/><text x="251" y="402" font-family="Georgia,serif" font-size="9" fill="#1e40af">45</text>
+          <line x1="242" y1="430" x2="250" y2="430" stroke="#1e40af" stroke-width="1.8"/><text x="251" y="434" font-family="Georgia,serif" font-size="9" fill="#1e40af">50</text>
+          <line x1="242" y1="116" x2="246" y2="116" stroke="#1e40af" stroke-width="1"/><line x1="242" y1="122" x2="246" y2="122" stroke="#1e40af" stroke-width="1"/>
+          <line x1="242" y1="128" x2="246" y2="128" stroke="#1e40af" stroke-width="1"/><line x1="242" y1="134" x2="246" y2="134" stroke="#1e40af" stroke-width="1"/>
+          <line x1="242" y1="148" x2="246" y2="148" stroke="#1e40af" stroke-width="1"/><line x1="242" y1="154" x2="246" y2="154" stroke="#1e40af" stroke-width="1"/>
+          <line x1="242" y1="160" x2="246" y2="160" stroke="#1e40af" stroke-width="1"/><line x1="242" y1="166" x2="246" y2="166" stroke="#1e40af" stroke-width="1"/>
+          <rect x="212" y="94" width="34" height="10" rx="3" fill="#1e40af" stroke="#1e3a8a" stroke-width="1.5"/>
+          <rect x="225" y="440" width="8" height="30" rx="2" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
+          <ellipse cx="229" cy="444" rx="18" ry="8" fill="#64748b" stroke="#334155" stroke-width="2"/>
+          <rect x="229" y="436" width="32" height="6" rx="3" fill="#334155" stroke="#1e293b" stroke-width="1" transform="rotate(-30,229,439)"/>
+          <ellipse cx="229" cy="477" rx="3" ry="4" fill="#f97316" fill-opacity="0.85"/>
+          <line x1="229" y1="471" x2="229" y2="477" stroke="#f97316" stroke-width="1.5" stroke-dasharray="2,2"/>
+          <rect x="240" y="148" width="42" height="20" rx="3" fill="#475569" fill-opacity="0.7" stroke="#334155" stroke-width="1.5"/>
+          <rect x="208" y="486" width="42" height="30" rx="2" fill="#dbeafe" fill-opacity="0.5" stroke="#1e40af" stroke-width="2"/>
+          <polygon points="208,514 250,514 310,570 148,570" fill="#bbf7d0" fill-opacity="0.55" stroke="#15803d" stroke-width="2.5"/>
+          <polygon points="155,570 305,570 302,548 158,548" fill="#f9a8d4" fill-opacity="0.65"/>
+          <path d="M200,555 Q215,545 230,555 Q215,565 200,555" fill="none" stroke="#db2777" stroke-width="1.5" stroke-opacity="0.6"/>
+          <rect x="206" y="482" width="46" height="8" rx="3" fill="#bfdbfe" stroke="#1e40af" stroke-width="1.5"/>
+          <rect x="140" y="570" width="178" height="18" rx="2" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+          <text x="192" y="583" font-family="Georgia,serif" font-size="9" fill="#64748b">white tile</text>
+          <line x1="214" y1="150" x2="90" y2="140" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="10" y="136" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#1e40af">Burette</text>
+          <text x="10" y="149" font-family="Georgia,serif" font-size="9" fill="#555">(50 mL, glass)</text>
+          <line x1="240" y1="200" x2="330" y2="185" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="332" y="181" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#f97316">Titrant</text>
+          <text x="332" y="194" font-family="Georgia,serif" font-size="9" fill="#555">(e.g. NaOH solution)</text>
+          <line x1="247" y1="444" x2="330" y2="444" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="332" y="440" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#334155">Stopcock</text>
+          <text x="332" y="453" font-family="Georgia,serif" font-size="9" fill="#555">(controls flow rate)</text>
+          <line x1="232" y1="477" x2="330" y2="477" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="332" y="473" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#f97316">Titre drop</text>
+          <text x="332" y="486" font-family="Georgia,serif" font-size="9" fill="#555">(half-drop at endpoint)</text>
+          <line x1="148" y1="545" x2="60" y2="530" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="6" y="526" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#15803d">Conical flask</text>
+          <text x="6" y="539" font-family="Georgia,serif" font-size="9" fill="#555">(Erlenmeyer, 250 mL)</text>
+          <line x1="155" y1="560" x2="60" y2="568" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="6" y="565" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#db2777">Analyte</text>
+          <text x="6" y="578" font-family="Georgia,serif" font-size="9" fill="#555">+ phenolphthalein</text>
+          <text x="6" y="590" font-family="Georgia,serif" font-size="9" fill="#555">indicator (pink = EP)</text>
+          <line x1="397" y1="300" x2="450" y2="290" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="453" y="286" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#64748b">Retort stand</text>
+          <text x="453" y="299" font-family="Georgia,serif" font-size="9" fill="#555">(support rod)</text>
+          <line x1="282" y1="158" x2="230" y2="130" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="140" y="126" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#475569">Clamp &amp; boss</text>
+          <line x1="390" y1="551" x2="450" y2="551" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="453" y="555" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#64748b">Base</text>
+          <rect x="30" y="60" width="270" height="58" rx="5" fill="none" stroke="#000" stroke-width="1.8" stroke-dasharray="5,3"/>
+          <text x="40" y="78" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#000">Titration Equation (example):</text>
+          <text x="40" y="94" font-family="Georgia,serif" font-size="11" fill="#000">NaOH + HCl → NaCl + H₂O</text>
+          <text x="40" y="108" font-family="Georgia,serif" font-size="10" fill="#555">c(acid) = n(base) × V(base) / V(acid)</text>
+        </svg>
+      </div>
+      <div class="explain-panel">
+        <h3>Implementation Breakdown</h3>
+        <ul class="feature-list">
+          <li><strong>Burette tube:</strong> A tall thin <code>&lt;rect&gt;</code> with light-blue fill representing the glass, overlaid with an orange-tinted <code>&lt;rect&gt;</code> for the NaOH solution level. A cubic bezier <code>&lt;path&gt;</code> approximates the meniscus curve at the solution surface.</li>
+          <li><strong>Graduation marks:</strong> Alternating major (stroke-width 1.8) and minor (stroke-width 1) <code>&lt;line&gt;</code> elements spaced at 32 px intervals for 5 mL steps, with SVG <code>&lt;text&gt;</code> labels (0–50 mL).</li>
+          <li><strong>Stopcock:</strong> An <code>&lt;ellipse&gt;</code> for the barrel, plus a rotated <code>&lt;rect&gt;</code> (transform="rotate(−30,…)") for the angled stopcock handle — matching real glassware.</li>
+          <li><strong>Conical flask:</strong> A <code>&lt;polygon&gt;</code> trapezoid for the flask body, a narrower <code>&lt;rect&gt;</code> neck, and a second translucent <code>&lt;polygon&gt;</code> for the pink analyte solution. A cubic bezier swirl hints at mixing.</li>
+          <li><strong>Titre drop:</strong> A small <code>&lt;ellipse&gt;</code> below the burette tip with a dashed <code>&lt;line&gt;</code> streak — indicating the half-drop technique at endpoint.</li>
+          <li><strong>Leader-line labels:</strong> Every label uses a dashed <code>&lt;line&gt;</code> (stroke-dasharray="3,2") to point precisely to the described component — mirroring the physics diagram annotation style.</li>
+        </ul>
+        <div class="implementation-block">
+          <h4>SVG primitives used</h4>
+          <div class="impl-grid">
+            <div class="impl-item"><span class="impl-dot"></span>rect, polygon, path</div>
+            <div class="impl-item"><span class="impl-dot"></span>ellipse, line, text</div>
+            <div class="impl-item"><span class="impl-dot"></span>transform=rotate()</div>
+            <div class="impl-item"><span class="impl-dot"></span>fill-opacity, stroke-dasharray</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ CARD 2 — ATOMIC STRUCTURE ═══════════════════ -->
+  <div class="diagram-card c2" id="atomic">
+    <div class="card-header">
+      <div class="card-number">02</div>
+      <div class="card-meta">
+        <h2>Atomic Structure — Electron Shell Configuration</h2>
+        <p>Bohr model for Sodium (Z=11): three concentric dashed shells (K, L, M), electrons placed at geometrically correct positions, nucleus labelled with proton/neutron count, and a radial energy arrow.</p>
+      </div>
+      <span class="card-tag">Atomic Theory</span>
+    </div>
+    <div class="card-body">
+      <div class="svg-panel">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 560">
+          <text x="100" y="24" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#000">Atomic Structure — Electron Shell Configuration</text>
+          <text x="80" y="40" font-family="Georgia,serif" font-size="10" fill="#444">Bohr model for Sodium (Na, Z = 11): shell configuration 2, 8, 1</text>
+          <circle cx="280" cy="290" r="220" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-dasharray="8,4"/>
+          <circle cx="280" cy="290" r="145" fill="none" stroke="#1d4ed8" stroke-width="1.8" stroke-dasharray="8,4"/>
+          <circle cx="280" cy="290" r="75" fill="none" stroke="#15803d" stroke-width="1.8" stroke-dasharray="8,4"/>
+          <circle cx="280" cy="290" r="38" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+          <text x="280" y="284" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#92400e" text-anchor="middle">11p⁺</text>
+          <text x="280" y="298" font-family="Georgia,serif" font-size="11" fill="#92400e" text-anchor="middle">12n⁰</text>
+          <text x="280" y="312" font-family="Georgia,serif" font-size="9" fill="#b45309" text-anchor="middle">nucleus</text>
+          <circle cx="280" cy="215" r="7" fill="#15803d" stroke="#14532d" stroke-width="1.5"/>
+          <text x="291" y="211" font-family="Georgia,serif" font-size="9" fill="#14532d">e⁻</text>
+          <circle cx="280" cy="365" r="7" fill="#15803d" stroke="#14532d" stroke-width="1.5"/>
+          <text x="291" y="369" font-family="Georgia,serif" font-size="9" fill="#14532d">e⁻</text>
+          <text x="360" y="218" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#15803d">K shell</text>
+          <text x="360" y="231" font-family="Georgia,serif" font-size="10" fill="#15803d">n = 1  (max 2e⁻)</text>
+          <line x1="355" y1="216" x2="329" y2="240" stroke="#15803d" stroke-width="1" stroke-dasharray="3,2"/>
+          <circle cx="425" cy="290" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="383" cy="188" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="280" cy="145" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="177" cy="188" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="135" cy="290" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="177" cy="392" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="280" cy="435" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <circle cx="383" cy="392" r="7" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="1.5"/>
+          <text x="430" y="348" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#1d4ed8">L shell</text>
+          <text x="430" y="361" font-family="Georgia,serif" font-size="10" fill="#1d4ed8">n = 2  (max 8e⁻)</text>
+          <line x1="430" y1="345" x2="415" y2="310" stroke="#1d4ed8" stroke-width="1" stroke-dasharray="3,2"/>
+          <circle cx="436" cy="134" r="7" fill="#7c3aed" stroke="#5b21b6" stroke-width="1.5"/>
+          <text x="446" y="130" font-family="Georgia,serif" font-size="9" fill="#5b21b6">e⁻ (valence)</text>
+          <text x="60" y="78" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#7c3aed">M shell</text>
+          <text x="60" y="91" font-family="Georgia,serif" font-size="10" fill="#7c3aed">n = 3  (max 18e⁻)</text>
+          <line x1="100" y1="92" x2="150" y2="120" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="40" y1="480" x2="40" y2="120" stroke="#dc2626" stroke-width="2"/>
+          <polygon points="35,124 40,110 45,124" fill="#dc2626"/>
+          <text x="10" y="310" font-family="Georgia,serif" font-size="10" fill="#dc2626" transform="rotate(-90 22 300)">Energy increases →</text>
+          <rect x="162" y="274" width="36" height="16" rx="3" fill="#dcfce7" stroke="#15803d" stroke-width="1"/>
+          <text x="180" y="286" font-family="Georgia,serif" font-size="10" font-weight="bold" fill="#15803d" text-anchor="middle">2 e⁻</text>
+          <rect x="262" y="274" width="36" height="16" rx="3" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>
+          <text x="280" y="286" font-family="Georgia,serif" font-size="10" font-weight="bold" fill="#1d4ed8" text-anchor="middle">8 e⁻</text>
+          <rect x="30" y="490" width="500" height="58" rx="5" fill="none" stroke="#000" stroke-width="1.8" stroke-dasharray="5,3"/>
+          <text x="40" y="508" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#000">Electron Configuration of Na (Z = 11):</text>
+          <text x="40" y="524" font-family="Georgia,serif" font-size="11" fill="#000">Shell notation:   K, L, M  →  2 , 8 , 1</text>
+          <text x="40" y="540" font-family="Georgia,serif" font-size="11" fill="#000">Orbital notation: 1s² 2s² 2p⁶ 3s¹     Valence electrons: 1  (Group I)</text>
+        </svg>
+      </div>
+      <div class="explain-panel">
+        <h3>Implementation Breakdown</h3>
+        <ul class="feature-list">
+          <li><strong>Concentric shells:</strong> Three <code>&lt;circle&gt;</code> elements at radii 75, 145, 220 px, all centred at (280, 290), each with a distinct colour and <code>stroke-dasharray="8,4"</code> — a dashed line conventionally used for Bohr-model energy levels.</li>
+          <li><strong>Nucleus:</strong> A filled <code>&lt;circle&gt;</code> (amber) with three <code>&lt;text&gt;</code> lines showing 11p⁺ / 12n⁰ / "nucleus" — keeping chemical notation compact within a small space.</li>
+          <li><strong>Electron placement:</strong> K-shell electrons at 90° and 270° (top/bottom of r=75 circle). L-shell electrons at 45° intervals: positions computed as (cx + r·cosθ, cy − r·sinθ) and hard-coded as SVG coordinates. M-shell single valence electron at 45°, labelled distinctively.</li>
+          <li><strong>Energy level arrow:</strong> A vertical <code>&lt;line&gt;</code> with arrowhead <code>&lt;polygon&gt;</code> on the left margin, with text rotated via <code>transform="rotate(-90…)"</code> — matching the convention from the physics wave diagram.</li>
+          <li><strong>Configuration summary box:</strong> Dashed-border <code>&lt;rect&gt;</code> at base with both shell notation (2,8,1) and full orbital notation (1s²2s²2p⁶3s¹), bridging Bohr and quantum mechanical models.</li>
+        </ul>
+        <div class="implementation-block">
+          <h4>SVG primitives used</h4>
+          <div class="impl-grid">
+            <div class="impl-item"><span class="impl-dot"></span>circle (shells + electrons)</div>
+            <div class="impl-item"><span class="impl-dot"></span>polygon (arrowhead)</div>
+            <div class="impl-item"><span class="impl-dot"></span>transform=rotate()</div>
+            <div class="impl-item"><span class="impl-dot"></span>stroke-dasharray, rect</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ CARD 3 — ELECTROLYSIS ═══════════════════ -->
+  <div class="diagram-card c3" id="electrolysis">
+    <div class="card-header">
+      <div class="card-number">03</div>
+      <div class="card-meta">
+        <h2>Electrolysis — Anode/Cathode &amp; Ion Migration</h2>
+        <p>Electrolysis of CuSO₄(aq): beaker with electrolyte, two electrodes, DC battery in external circuit, Cu²⁺ and SO₄²⁻ migration arrows, electron flow direction, and half-equation boxes.</p>
+      </div>
+      <span class="card-tag">Electrochemistry</span>
+    </div>
+    <div class="card-body">
+      <div class="svg-panel">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 520">
+          <text x="80" y="24" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#000">Electrolysis — Anode/Cathode &amp; Ion Migration</text>
+          <text x="60" y="40" font-family="Georgia,serif" font-size="10" fill="#444">Electrolysis of CuSO₄(aq) — copper(II) sulfate solution</text>
+          <path d="M100,160 L100,420 Q100,440 120,440 L460,440 Q480,440 480,420 L480,160" fill="none" stroke="#334155" stroke-width="3" stroke-linejoin="round"/>
+          <line x1="88" y1="160" x2="492" y2="160" stroke="#334155" stroke-width="3"/>
+          <path d="M102,300 L102,418 Q102,436 120,436 L460,436 Q478,436 478,418 L478,300 Z" fill="#bae6fd" fill-opacity="0.45"/>
+          <path d="M102,300 Q200,292 290,300 Q380,308 478,300" fill="none" stroke="#0ea5e9" stroke-width="1.5"/>
+          <text x="220" y="390" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#0369a1" text-anchor="middle">CuSO₄ (aq)</text>
+          <text x="220" y="406" font-family="Georgia,serif" font-size="10" fill="#0369a1" text-anchor="middle">electrolyte solution</text>
+          <rect x="148" y="155" width="16" height="270" rx="3" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+          <text x="156" y="148" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#1e40af" text-anchor="middle">CATHODE</text>
+          <text x="156" y="136" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#1e40af" text-anchor="middle">(−)</text>
+          <rect x="164" y="300" width="10" height="110" rx="2" fill="#f97316" fill-opacity="0.7"/>
+          <text x="186" y="362" font-family="Georgia,serif" font-size="9" fill="#ea580c">Cu deposit</text>
+          <rect x="416" y="155" width="16" height="270" rx="3" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+          <text x="424" y="148" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#dc2626" text-anchor="middle">ANODE</text>
+          <text x="424" y="136" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#dc2626" text-anchor="middle">(+)</text>
+          <circle cx="410" cy="340" r="5" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="404" cy="320" r="4" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+          <circle cx="412" cy="305" r="3" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+          <line x1="340" y1="340" x2="200" y2="340" stroke="#1d4ed8" stroke-width="2.5"/>
+          <polygon points="204,335 190,340 204,345" fill="#1d4ed8"/>
+          <text x="250" y="332" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#1d4ed8">Cu²⁺</text>
+          <text x="252" y="358" font-family="Georgia,serif" font-size="9" fill="#1d4ed8">(cation → cathode)</text>
+          <line x1="380" y1="370" x2="220" y2="370" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="6,3"/>
+          <polygon points="224,365 210,370 224,375" fill="#1d4ed8"/>
+          <line x1="200" y1="310" x2="360" y2="310" stroke="#15803d" stroke-width="2.5"/>
+          <polygon points="356,305 370,310 356,315" fill="#15803d"/>
+          <text x="252" y="302" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#15803d">SO₄²⁻</text>
+          <text x="248" y="322" font-family="Georgia,serif" font-size="9" fill="#15803d">(anion → anode)</text>
+          <line x1="180" y1="420" x2="380" y2="420" stroke="#15803d" stroke-width="2" stroke-dasharray="6,3"/>
+          <polygon points="376,415 390,420 376,425" fill="#15803d"/>
+          <line x1="156" y1="155" x2="156" y2="90" stroke="#1e293b" stroke-width="3"/>
+          <line x1="156" y1="90" x2="240" y2="90" stroke="#1e293b" stroke-width="3"/>
+          <line x1="424" y1="155" x2="424" y2="90" stroke="#1e293b" stroke-width="3"/>
+          <line x1="424" y1="90" x2="340" y2="90" stroke="#1e293b" stroke-width="3"/>
+          <line x1="260" y1="76" x2="260" y2="104" stroke="#1e293b" stroke-width="5"/>
+          <line x1="270" y1="70" x2="270" y2="110" stroke="#1e293b" stroke-width="2"/>
+          <line x1="283" y1="76" x2="283" y2="104" stroke="#1e293b" stroke-width="5"/>
+          <line x1="293" y1="70" x2="293" y2="110" stroke="#1e293b" stroke-width="2"/>
+          <line x1="306" y1="76" x2="306" y2="104" stroke="#1e293b" stroke-width="5"/>
+          <line x1="316" y1="70" x2="316" y2="110" stroke="#1e293b" stroke-width="2"/>
+          <rect x="248" y="68" width="80" height="44" rx="4" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="237" y="88" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#1e40af">−</text>
+          <text x="334" y="88" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#dc2626">+</text>
+          <text x="272" y="62" font-family="Georgia,serif" font-size="10" fill="#334155">DC Power Supply</text>
+          <polygon points="390,87 402,92 390,97" fill="#7c3aed"/>
+          <text x="362" y="83" font-family="Georgia,serif" font-size="9" fill="#7c3aed">e⁻ →</text>
+          <polygon points="188,87 178,92 188,97" fill="#7c3aed"/>
+          <text x="194" y="83" font-family="Georgia,serif" font-size="9" fill="#7c3aed">← e⁻</text>
+          <text x="204" y="108" font-family="Georgia,serif" font-size="9" fill="#7c3aed">Electron flow (external circuit)</text>
+          <rect x="30" y="200" width="108" height="48" rx="4" fill="#dbeafe" stroke="#1e40af" stroke-width="1.8"/>
+          <text x="84" y="216" font-family="Georgia,serif" font-size="9" font-weight="bold" fill="#1e40af" text-anchor="middle">CATHODE (−)</text>
+          <text x="84" y="228" font-family="Georgia,serif" font-size="9" fill="#1e40af" text-anchor="middle">Reduction:</text>
+          <text x="84" y="242" font-family="Georgia,serif" font-size="9" fill="#1e40af" text-anchor="middle">Cu²⁺ + 2e⁻ → Cu</text>
+          <line x1="138" y1="224" x2="148" y2="224" stroke="#1e40af" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <rect x="442" y="200" width="108" height="48" rx="4" fill="#fee2e2" stroke="#dc2626" stroke-width="1.8"/>
+          <text x="496" y="216" font-family="Georgia,serif" font-size="9" font-weight="bold" fill="#dc2626" text-anchor="middle">ANODE (+)</text>
+          <text x="496" y="228" font-family="Georgia,serif" font-size="9" fill="#dc2626" text-anchor="middle">Oxidation:</text>
+          <text x="496" y="242" font-family="Georgia,serif" font-size="9" fill="#dc2626" text-anchor="middle">Cu → Cu²⁺ + 2e⁻</text>
+          <line x1="432" y1="224" x2="442" y2="224" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <rect x="30" y="458" width="520" height="50" rx="5" fill="none" stroke="#000" stroke-width="1.8" stroke-dasharray="5,3"/>
+          <text x="40" y="474" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#000">Key rules: Cations (+) migrate to Cathode (−) | Anions (−) migrate to Anode (+)</text>
+          <text x="40" y="490" font-family="Georgia,serif" font-size="10" fill="#555">Cathode: REDUCTION (gain e⁻) | Anode: OXIDATION (lose e⁻)   Mnemonic: OIL RIG / AN OX, RED CAT</text>
+        </svg>
+      </div>
+      <div class="explain-panel">
+        <h3>Implementation Breakdown</h3>
+        <ul class="feature-list">
+          <li><strong>Beaker shape:</strong> Drawn with a rounded-corner <code>&lt;path&gt;</code> using L and Q (quadratic bezier) commands — the bottom corners are rounded (rx≈20) to simulate real glassware; a separate <code>&lt;path&gt;</code> fills the solution region.</li>
+          <li><strong>Electrodes:</strong> Simple dark-grey <code>&lt;rect&gt;</code> bars extending from top of beaker into solution. The cathode has an orange copper-deposit <code>&lt;rect&gt;</code> layered on its inner face. The anode shows oxidation bubble circles (<code>&lt;circle&gt;</code> with no fill) rising from its surface.</li>
+          <li><strong>Ion migration arrows:</strong> Bold solid <code>&lt;line&gt;</code> + <code>&lt;polygon&gt;</code> arrowheads in blue (Cu²⁺, leftward to cathode) and green (SO₄²⁻, rightward to anode). Secondary dashed arrows reinforce the directionality of multiple ionic species.</li>
+          <li><strong>Battery symbol:</strong> Alternating thick <code>&lt;line&gt;</code> (short, negative plate) and thin <code>&lt;line&gt;</code> (tall, positive plate) pairs in the conventional electrochemical cell symbol, enclosed in a dashed bounding rect.</li>
+          <li><strong>Electron flow:</strong> Purple <code>&lt;polygon&gt;</code> arrowheads on the external wire showing e⁻ direction (anode → power supply → cathode) — distinct from conventional current direction.</li>
+          <li><strong>Half-equation boxes:</strong> Coloured <code>&lt;rect&gt;</code> panels (blue = cathode, red = anode) with the ionic half-equations, connected to the electrodes by dashed leader lines — directly mirroring the info-box convention from the physics diagrams.</li>
+        </ul>
+        <div class="implementation-block">
+          <h4>SVG primitives used</h4>
+          <div class="impl-grid">
+            <div class="impl-item"><span class="impl-dot"></span>path (Q bezier beaker)</div>
+            <div class="impl-item"><span class="impl-dot"></span>rect, line, polygon</div>
+            <div class="impl-item"><span class="impl-dot"></span>circle (bubbles)</div>
+            <div class="impl-item"><span class="impl-dot"></span>stroke-dasharray, fill-opacity</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ CARD 4 — HYDROCARBON TABLE ═══════════════════ -->
+  <div class="diagram-card c4" id="hydrocarbons">
+    <div class="card-header">
+      <div class="card-number">04</div>
+      <div class="card-meta">
+        <h2>Hydrocarbon Reaction Types — Cross-Reference Table</h2>
+        <p>4×5 matrix showing Alkanes, Alkenes, Alkynes, and Arenes against Combustion, Addition, Substitution, Polymerisation, and Elimination — with ✓ / ~ / ✗ colour-coded cells and example equations.</p>
+      </div>
+      <span class="card-tag">Organic Chemistry</span>
+    </div>
+    <div class="card-body">
+      <div class="svg-panel">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 540">
+          <text x="100" y="24" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#000">Hydrocarbon Reaction Types — Cross-Reference Table</text>
+          <text x="80" y="40" font-family="Georgia,serif" font-size="10" fill="#444">Reaction feasibility by hydrocarbon class: ✓ occurs | ~ limited/special conditions | ✗ does not occur</text>
+          <!-- Header row -->
+          <rect x="30" y="55" width="130" height="70" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="95" y="87" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">Hydrocarbon</text>
+          <text x="95" y="101" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">Class</text>
+          <text x="95" y="115" font-family="Georgia,serif" font-size="10" fill="#94a3b8" text-anchor="middle">→ Reaction type</text>
+          <rect x="160" y="55" width="106" height="70" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="213" y="84" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#f97316" text-anchor="middle">Combustion</text>
+          <text x="213" y="98" font-family="Georgia,serif" font-size="9" fill="#fed7aa" text-anchor="middle">+ O₂ → CO₂ + H₂O</text>
+          <text x="213" y="115" font-family="Georgia,serif" font-size="9" fill="#94a3b8" text-anchor="middle">(complete)</text>
+          <rect x="266" y="55" width="106" height="70" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="319" y="84" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#60a5fa" text-anchor="middle">Addition</text>
+          <text x="319" y="98" font-family="Georgia,serif" font-size="9" fill="#bfdbfe" text-anchor="middle">A + B → AB</text>
+          <text x="319" y="112" font-family="Georgia,serif" font-size="9" fill="#94a3b8" text-anchor="middle">(across C=C)</text>
+          <rect x="372" y="55" width="106" height="70" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="425" y="80" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#a78bfa" text-anchor="middle">Substitution</text>
+          <text x="425" y="94" font-family="Georgia,serif" font-size="9" fill="#ddd6fe" text-anchor="middle">A−B + C → A−C + B</text>
+          <text x="425" y="108" font-family="Georgia,serif" font-size="9" fill="#94a3b8" text-anchor="middle">(UV or Lewis acid)</text>
+          <rect x="478" y="55" width="106" height="70" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="531" y="80" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#34d399" text-anchor="middle">Polym-</text>
+          <text x="531" y="94" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#34d399" text-anchor="middle">erisation</text>
+          <text x="531" y="108" font-family="Georgia,serif" font-size="9" fill="#6ee7b7" text-anchor="middle">n(monomer) → polymer</text>
+          <rect x="584" y="55" width="106" height="70" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="637" y="84" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#fb7185" text-anchor="middle">Elimination</text>
+          <text x="637" y="98" font-family="Georgia,serif" font-size="9" fill="#fda4af" text-anchor="middle">A−B → A + B</text>
+          <text x="637" y="112" font-family="Georgia,serif" font-size="9" fill="#94a3b8" text-anchor="middle">(form C=C)</text>
+          <!-- Alkanes row -->
+          <rect x="30" y="125" width="130" height="90" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="95" y="152" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#1e293b" text-anchor="middle">Alkanes</text>
+          <text x="95" y="167" font-family="Georgia,serif" font-size="11" fill="#334155" text-anchor="middle">CₙH₂ₙ₊₂</text>
+          <text x="95" y="181" font-family="Georgia,serif" font-size="9" fill="#64748b" text-anchor="middle">e.g. CH₄, C₂H₆</text>
+          <text x="95" y="195" font-family="Georgia,serif" font-size="9" fill="#64748b" text-anchor="middle">(single bonds only)</text>
+          <rect x="160" y="125" width="106" height="90" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="213" y="165" font-family="Georgia,serif" font-size="28" fill="#15803d" text-anchor="middle">✓</text>
+          <text x="213" y="185" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">CH₄ + 2O₂ → CO₂ + 2H₂O</text>
+          <text x="213" y="197" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(complete combustion)</text>
+          <rect x="266" y="125" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="319" y="165" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="319" y="186" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">No C=C double bond</text>
+          <text x="319" y="198" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">for addition</text>
+          <rect x="372" y="125" width="106" height="90" fill="#fefce8" stroke="#fef08a" stroke-width="1.5"/>
+          <text x="425" y="155" font-family="Georgia,serif" font-size="22" fill="#854d0e" text-anchor="middle">~✓</text>
+          <text x="425" y="172" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">Free-radical sub.</text>
+          <text x="425" y="184" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">CH₄ + Cl₂ → CH₃Cl + HCl</text>
+          <text x="425" y="196" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">(UV light required)</text>
+          <rect x="478" y="125" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="531" y="165" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="531" y="186" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">No unsaturation</text>
+          <text x="531" y="198" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">to polymerise</text>
+          <rect x="584" y="125" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="637" y="165" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="637" y="186" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">No leaving group</text>
+          <text x="637" y="198" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">(needs haloalkane)</text>
+          <!-- Alkenes row -->
+          <rect x="30" y="215" width="130" height="90" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="95" y="242" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#1e293b" text-anchor="middle">Alkenes</text>
+          <text x="95" y="257" font-family="Georgia,serif" font-size="11" fill="#334155" text-anchor="middle">CₙH₂ₙ</text>
+          <text x="95" y="271" font-family="Georgia,serif" font-size="9" fill="#64748b" text-anchor="middle">e.g. C₂H₄, C₃H₆</text>
+          <text x="95" y="285" font-family="Georgia,serif" font-size="9" fill="#64748b" text-anchor="middle">(C=C double bond)</text>
+          <rect x="160" y="215" width="106" height="90" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="213" y="255" font-family="Georgia,serif" font-size="28" fill="#15803d" text-anchor="middle">✓</text>
+          <text x="213" y="275" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(sooty flame due to</text>
+          <text x="213" y="287" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">high C:H ratio)</text>
+          <rect x="266" y="215" width="106" height="90" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+          <text x="319" y="248" font-family="Georgia,serif" font-size="22" fill="#15803d" text-anchor="middle">✓ KEY</text>
+          <text x="319" y="265" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">C₂H₄ + H₂ → C₂H₆</text>
+          <text x="319" y="277" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">+ Br₂(aq) → dibromoalkane</text>
+          <text x="319" y="289" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(decolorises bromine water)</text>
+          <rect x="372" y="215" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="425" y="255" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="425" y="276" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">Addition preferred</text>
+          <text x="425" y="288" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">over substitution</text>
+          <rect x="478" y="215" width="106" height="90" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+          <text x="531" y="248" font-family="Georgia,serif" font-size="22" fill="#15803d" text-anchor="middle">✓ KEY</text>
+          <text x="531" y="265" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">n(CH₂=CH₂) →</text>
+          <text x="531" y="277" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">poly(ethene)</text>
+          <text x="531" y="289" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(addition polymer)</text>
+          <rect x="584" y="215" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="637" y="255" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="637" y="276" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">Is the product,</text>
+          <text x="637" y="288" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">not the reactant</text>
+          <!-- Alkynes row -->
+          <rect x="30" y="305" width="130" height="90" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="95" y="332" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#1e293b" text-anchor="middle">Alkynes</text>
+          <text x="95" y="347" font-family="Georgia,serif" font-size="11" fill="#334155" text-anchor="middle">CₙH₂ₙ₋₂</text>
+          <text x="95" y="361" font-family="Georgia,serif" font-size="9" fill="#64748b" text-anchor="middle">e.g. C₂H₂ (ethyne)</text>
+          <text x="95" y="375" font-family="Georgia,serif" font-size="9" fill="#64748b" text-anchor="middle">(C≡C triple bond)</text>
+          <rect x="160" y="305" width="106" height="90" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="213" y="345" font-family="Georgia,serif" font-size="28" fill="#15803d" text-anchor="middle">✓</text>
+          <text x="213" y="365" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(very sooty flame,</text>
+          <text x="213" y="377" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">high C:H ratio)</text>
+          <rect x="266" y="305" width="106" height="90" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="319" y="338" font-family="Georgia,serif" font-size="22" fill="#15803d" text-anchor="middle">✓ ×2</text>
+          <text x="319" y="355" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">C₂H₂ + H₂ → C₂H₄</text>
+          <text x="319" y="367" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">→ C₂H₆ (2 steps)</text>
+          <text x="319" y="379" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(two additions possible)</text>
+          <rect x="372" y="305" width="106" height="90" fill="#fefce8" stroke="#fef08a" stroke-width="1.5"/>
+          <text x="425" y="340" font-family="Georgia,serif" font-size="22" fill="#854d0e" text-anchor="middle">~</text>
+          <text x="425" y="358" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">Terminal C≡C−H</text>
+          <text x="425" y="370" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">acidic H replaceable</text>
+          <text x="425" y="382" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">(with strong base)</text>
+          <rect x="478" y="305" width="106" height="90" fill="#fefce8" stroke="#fef08a" stroke-width="1.5"/>
+          <text x="531" y="345" font-family="Georgia,serif" font-size="22" fill="#854d0e" text-anchor="middle">~</text>
+          <text x="531" y="363" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">Less common;</text>
+          <text x="531" y="375" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">cyclic trimers formed</text>
+          <rect x="584" y="305" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="637" y="345" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="637" y="366" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">Already highly</text>
+          <text x="637" y="378" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">unsaturated</text>
+          <!-- Arenes row -->
+          <rect x="30" y="395" width="130" height="90" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="95" y="422" font-family="Georgia,serif" font-size="12" font-weight="bold" fill="#1e293b" text-anchor="middle">Arenes</text>
+          <text x="95" y="437" font-family="Georgia,serif" font-size="11" fill="#334155" text-anchor="middle">(Aromatic)</text>
+          <polygon points="95,455 82,462 82,476 95,483 108,476 108,462" fill="none" stroke="#334155" stroke-width="2"/>
+          <circle cx="95" cy="469" r="8" fill="none" stroke="#334155" stroke-width="1.5"/>
+          <rect x="160" y="395" width="106" height="90" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="213" y="432" font-family="Georgia,serif" font-size="28" fill="#15803d" text-anchor="middle">✓</text>
+          <text x="213" y="452" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">(very smoky — high</text>
+          <text x="213" y="464" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">C content, soot)</text>
+          <rect x="266" y="395" width="106" height="90" fill="#fefce8" stroke="#fef08a" stroke-width="1.5"/>
+          <text x="319" y="432" font-family="Georgia,serif" font-size="22" fill="#854d0e" text-anchor="middle">~</text>
+          <text x="319" y="450" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">Only under forcing</text>
+          <text x="319" y="462" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">conditions (e.g. H₂,</text>
+          <text x="319" y="474" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">Pt cat., high P)</text>
+          <rect x="372" y="395" width="106" height="90" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+          <text x="425" y="425" font-family="Georgia,serif" font-size="16" fill="#15803d" text-anchor="middle">✓ KEY</text>
+          <text x="425" y="441" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">Electrophilic aromatic</text>
+          <text x="425" y="453" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">substitution (EAS)</text>
+          <text x="425" y="465" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">e.g. nitration,</text>
+          <text x="425" y="477" font-family="Georgia,serif" font-size="8" fill="#166534" text-anchor="middle">halogenation (Lewis acid)</text>
+          <rect x="478" y="395" width="106" height="90" fill="#fefce8" stroke="#fef08a" stroke-width="1.5"/>
+          <text x="531" y="432" font-family="Georgia,serif" font-size="22" fill="#854d0e" text-anchor="middle">~</text>
+          <text x="531" y="450" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">Styrene (vinylbenzene)</text>
+          <text x="531" y="462" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">→ polystyrene</text>
+          <text x="531" y="474" font-family="Georgia,serif" font-size="8" fill="#713f12" text-anchor="middle">(side chain addition)</text>
+          <rect x="584" y="395" width="106" height="90" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.5"/>
+          <text x="637" y="432" font-family="Georgia,serif" font-size="28" fill="#dc2626" text-anchor="middle">✗</text>
+          <text x="637" y="452" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">Aromatic ring</text>
+          <text x="637" y="464" font-family="Georgia,serif" font-size="8" fill="#991b1b" text-anchor="middle">preserved (stable)</text>
+          <!-- Legend -->
+          <rect x="30" y="495" width="640" height="34" rx="5" fill="none" stroke="#000" stroke-width="1.8" stroke-dasharray="5,3"/>
+          <rect x="40" y="505" width="14" height="14" rx="2" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+          <text x="58" y="516" font-family="Georgia,serif" font-size="10" fill="#15803d">✓ Occurs (readily)</text>
+          <rect x="180" y="505" width="14" height="14" rx="2" fill="#fefce8" stroke="#854d0e" stroke-width="1.5"/>
+          <text x="198" y="516" font-family="Georgia,serif" font-size="10" fill="#854d0e">~ Limited / special conditions</text>
+          <rect x="390" y="505" width="14" height="14" rx="2" fill="#fff1f2" stroke="#dc2626" stroke-width="1.5"/>
+          <text x="408" y="516" font-family="Georgia,serif" font-size="10" fill="#dc2626">✗ Does not occur</text>
+          <text x="530" y="516" font-family="Georgia,serif" font-size="10" fill="#555">KEY = most characteristic</text>
+        </svg>
+      </div>
+      <div class="explain-panel">
+        <h3>Implementation Breakdown</h3>
+        <ul class="feature-list">
+          <li><strong>Grid structure:</strong> A 4-row × 5-column table built entirely from positioned <code>&lt;rect&gt;</code> elements. Each cell is an independent <code>&lt;rect&gt;</code> with a distinct fill and border colour — no HTML <code>&lt;table&gt;</code> used; pure SVG coordinate arithmetic (column x = 160 + col×106, row y = 125 + row×90).</li>
+          <li><strong>Dark header row:</strong> Column headers use <code>fill="#1e293b"</code> (slate-900) with coloured reaction-type labels (orange=combustion, blue=addition, purple=substitution, green=polymerisation, pink=elimination) — each with a sub-label mini equation.</li>
+          <li><strong>Three-tier colour coding:</strong> Green (#f0fdf4) for ✓, amber (#fefce8) for ~, red (#fff1f2) for ✗ — background fill + border stroke consistently applied. "KEY" cells get a thicker green border (stroke-width:2) to highlight the most characteristic reaction for each class.</li>
+          <li><strong>Benzene ring in row header:</strong> The Arenes cell features a hand-drawn benzene ring: a <code>&lt;polygon&gt;</code> hexagon (6 points at 60° intervals) with an inner <code>&lt;circle&gt;</code> representing the delocalised π-system — a chemistry-specific visual shorthand.</li>
+          <li><strong>Mini equations in cells:</strong> Multi-line <code>&lt;text&gt;</code> elements at font-size 8 provide example reactions, reagents, and conditions within each cell — matching the annotation density of the physics info-boxes.</li>
+          <li><strong>Legend bar:</strong> A dashed-border footer <code>&lt;rect&gt;</code> with coloured swatches + text explaining the ✓/~/✗ encoding — a self-contained key mirroring the physics diagram legend boxes.</li>
+        </ul>
+        <div class="implementation-block">
+          <h4>SVG primitives used</h4>
+          <div class="impl-grid">
+            <div class="impl-item"><span class="impl-dot"></span>rect (grid cells)</div>
+            <div class="impl-item"><span class="impl-dot"></span>polygon (hexagon)</div>
+            <div class="impl-item"><span class="impl-dot"></span>circle (benzene π)</div>
+            <div class="impl-item"><span class="impl-dot"></span>text (multi-line, anchored)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ChemistrySvgDiagrams — pure SVG, no raster images, no external dependencies &nbsp;·&nbsp; Built in the style of PhysicsSvgDiagrams
+</footer>
+
+</body>
+</html>
