@@ -7,6 +7,7012 @@ class ChemistryDiagramsRegistry {
 
 static diagrams = {
 
+
+// ===== ATOMIC STRUCTURE & QUANTUM MECHANICS =====
+'valenceCoreElectronShieldingZeffDiagram': {
+    name: 'Valence Core Electron Shielding Zeff Diagram',
+    category: 'Atomic Structure',
+    description: 'Valence and core electrons with shielding effect and effective nuclear charge',
+    type: 'valence_core_electron_shielding_zeff',
+    defaultOptions: {
+        title: 'Electron Shielding and Effective Nuclear Charge',
+        showShieldingArrows: true,
+        showZeffValues: true,
+        showLabels: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'paramagneticDiamagneticUnpairedElectronDiagram': {
+    name: 'Paramagnetic Diamagnetic Unpaired Electron Diagram',
+    category: 'Atomic Structure',
+    description: 'Orbital box diagrams contrasting paramagnetic and diamagnetic configurations',
+    type: 'paramagnetic_diamagnetic_unpaired_electron',
+    defaultOptions: {
+        title: 'Paramagnetic vs Diamagnetic Electron Configurations',
+        showOrbitalBoxes: true,
+        showMagneticBehaviour: true,
+        showLabels: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'successiveIonisationEnergyBarGraphDiagram': {
+    name: 'Successive Ionisation Energy Bar Graph Diagram',
+    category: 'Atomic Structure',
+    description: 'Bar graph of successive ionisation energies showing shell jumps',
+    type: 'successive_ionisation_energy_bar_graph',
+    defaultOptions: {
+        title: 'Successive Ionisation Energies',
+        showShellJumps: true,
+        showLogScale: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'electronConfigurationCommonMistakesAnnotatedDiagram': {
+    name: 'Electron Configuration Common Mistakes Annotated Diagram',
+    category: 'Atomic Structure',
+    description: 'Annotated electron configurations highlighting common errors and corrections',
+    type: 'electron_configuration_common_mistakes_annotated',
+    defaultOptions: {
+        title: 'Electron Configuration Common Mistakes',
+        showCorrections: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'schrodingerEquationWaveFunctionAnnotatedDiagram': {
+    name: 'Schrodinger Equation Wave Function Annotated Diagram',
+    category: 'Atomic Structure',
+    description: 'Annotated Schrödinger equation with wave function components and physical meaning',
+    type: 'schrodinger_equation_wave_function_annotated',
+    defaultOptions: {
+        title: 'Schrödinger Equation and Wave Function',
+        showEquationComponents: true,
+        showAnnotations: true,
+        showProbabilityDensity: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'shellEnergyLevelRadialProbabilityDiagram': {
+    name: 'Shell Energy Level Radial Probability Diagram',
+    category: 'Atomic Structure',
+    description: 'Radial probability distribution plots for atomic shells and subshells',
+    type: 'shell_energy_level_radial_probability',
+    defaultOptions: {
+        title: 'Radial Probability Distribution',
+        showNodes: true,
+        showShellLabels: true,
+        showProbabilityCurves: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'subshellAngularMomentumOrbitalShapesDiagram': {
+    name: 'Subshell Angular Momentum Orbital Shapes Diagram',
+    category: 'Atomic Structure',
+    description: 'Orbital shapes with angular momentum quantum numbers for s, p, d, f subshells',
+    type: 'subshell_angular_momentum_orbital_shapes',
+    defaultOptions: {
+        title: 'Subshell Angular Momentum and Orbital Shapes',
+        showAngularMomentum: true,
+        showOrbitalShapes: true,
+        showQuantumNumbers: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'pOrbitalThreeOrientationsMagneticQuantumDiagram': {
+    name: 'p Orbital Three Orientations Magnetic Quantum Diagram',
+    category: 'Atomic Structure',
+    description: 'Three p orbital orientations (px, py, pz) with magnetic quantum number labels',
+    type: 'p_orbital_three_orientations_magnetic_quantum',
+    defaultOptions: {
+        title: 'p Orbital Orientations and Magnetic Quantum Numbers',
+        showAxes: true,
+        showMagneticQuantumNumbers: true,
+        showLabels: true,
+        width: 900,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'sternGerlachBeamSplittingSpinDiagram': {
+    name: 'Stern Gerlach Beam Splitting Spin Diagram',
+    category: 'Atomic Structure',
+    description: 'Stern-Gerlach experiment showing beam splitting due to electron spin',
+    type: 'stern_gerlach_beam_splitting_spin',
+    defaultOptions: {
+        title: 'Stern-Gerlach Experiment',
+        showMagneticField: true,
+        showBeamPaths: true,
+        showSpinLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'pauliExclusionOrbitalOccupancyForbiddenStatesDiagram': {
+    name: 'Pauli Exclusion Orbital Occupancy Forbidden States Diagram',
+    category: 'Atomic Structure',
+    description: 'Orbital occupancy rules with forbidden states illustrating the Pauli exclusion principle',
+    type: 'pauli_exclusion_orbital_occupancy_forbidden_states',
+    defaultOptions: {
+        title: 'Pauli Exclusion Principle and Forbidden States',
+        showAllowedStates: true,
+        showForbiddenStates: true,
+        showSpinArrows: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'spdfOrbitalThreeDimensionalShapesDiagram': {
+    name: 'spdf Orbital Three Dimensional Shapes Diagram',
+    category: 'Atomic Structure',
+    description: '3D shapes of s, p, d, and f orbitals with node surfaces',
+    type: 'spdf_orbital_three_dimensional_shapes',
+    defaultOptions: {
+        title: 's, p, d, f Orbital 3D Shapes',
+        showNodeSurfaces: true,
+        showAxes: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'quantumNumberAllowedRangesValidationFlowchartDiagram': {
+    name: 'Quantum Number Allowed Ranges Validation Flowchart Diagram',
+    category: 'Atomic Structure',
+    description: 'Flowchart for validating allowed ranges of n, l, ml, ms quantum numbers',
+    type: 'quantum_number_allowed_ranges_validation_flowchart',
+    defaultOptions: {
+        title: 'Quantum Number Validation Flowchart',
+        showAllQuantumNumbers: true,
+        showAllowedRanges: true,
+        showDecisionNodes: true,
+        width: 900,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'periodicTableQuantumNumberBlockWidthDiagram': {
+    name: 'Periodic Table Quantum Number Block Width Diagram',
+    category: 'Atomic Structure',
+    description: 'Periodic table blocks (s, p, d, f) with quantum number basis for block widths',
+    type: 'periodic_table_quantum_number_block_width',
+    defaultOptions: {
+        title: 'Periodic Table Blocks and Quantum Numbers',
+        showBlockLabels: true,
+        showBlockWidths: true,
+        showQuantumNumbers: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'nmrNuclearSpinEnergyLevelSplittingDiagram': {
+    name: 'NMR Nuclear Spin Energy Level Splitting Diagram',
+    category: 'Atomic Structure',
+    description: 'Nuclear spin energy level splitting in an applied magnetic field for NMR',
+    type: 'nmr_nuclear_spin_energy_level_splitting',
+    defaultOptions: {
+        title: 'NMR Nuclear Spin Energy Level Splitting',
+        showEnergyLevels: true,
+        showMagneticField: true,
+        showTransitionArrow: true,
+        width: 900,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== PERIODIC TRENDS =====
+'effectiveNuclearChargeShieldingPenetrationDiagram': {
+    name: 'Effective Nuclear Charge Shielding Penetration Diagram',
+    category: 'Periodic Trends',
+    description: 'Effective nuclear charge with shielding and penetration effects across periods',
+    type: 'effective_nuclear_charge_shielding_penetration',
+    defaultOptions: {
+        title: 'Effective Nuclear Charge, Shielding and Penetration',
+        showSlatersRules: true,
+        showPenetrationCurves: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'atomicRadiusPeriodGroupTrendAnnotatedDiagram': {
+    name: 'Atomic Radius Period Group Trend Annotated Diagram',
+    category: 'Periodic Trends',
+    description: 'Atomic radius trends across periods and down groups with annotations',
+    type: 'atomic_radius_period_group_trend_annotated',
+    defaultOptions: {
+        title: 'Atomic Radius Trends',
+        showPeriodTrend: true,
+        showGroupTrend: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'isoelectronicSeriesIonicRadiusComparisonDiagram': {
+    name: 'Isoelectronic Series Ionic Radius Comparison Diagram',
+    category: 'Periodic Trends',
+    description: 'Ionic radius comparison within isoelectronic series showing nuclear charge effect',
+    type: 'isoelectronic_series_ionic_radius_comparison',
+    defaultOptions: {
+        title: 'Isoelectronic Series Ionic Radius Comparison',
+        showNuclearCharge: true,
+        showRadiusScale: true,
+        showLabels: true,
+        width: 1000,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'firstIonisationEnergyPeriod2AnomaliesBarGraphDiagram': {
+    name: 'First Ionisation Energy Period 2 Anomalies Bar Graph Diagram',
+    category: 'Periodic Trends',
+    description: 'Bar graph of first ionisation energies across Period 2 with anomaly annotations',
+    type: 'first_ionisation_energy_period2_anomalies_bar_graph',
+    defaultOptions: {
+        title: 'First Ionisation Energy - Period 2 Anomalies',
+        showAnomalyAnnotations: true,
+        showTrendLine: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'electronAffinityPeriodTrendWithAnomaliesDiagram': {
+    name: 'Electron Affinity Period Trend With Anomalies Diagram',
+    category: 'Periodic Trends',
+    description: 'Electron affinity trends across a period with anomaly explanations',
+    type: 'electron_affinity_period_trend_with_anomalies',
+    defaultOptions: {
+        title: 'Electron Affinity Period Trends and Anomalies',
+        showAnomalies: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'paulingElectronegativityScalePeriodicTableHeatmapDiagram': {
+    name: 'Pauling Electronegativity Scale Periodic Table Heatmap Diagram',
+    category: 'Periodic Trends',
+    description: 'Heatmap of Pauling electronegativity values across the periodic table',
+    type: 'pauling_electronegativity_scale_periodic_table_heatmap',
+    defaultOptions: {
+        title: 'Pauling Electronegativity Heatmap',
+        showColorScale: true,
+        showValues: true,
+        showLabels: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'metalNonmetalMetalloidPeriodicTableBoundaryDiagram': {
+    name: 'Metal Nonmetal Metalloid Periodic Table Boundary Diagram',
+    category: 'Periodic Trends',
+    description: 'Periodic table showing the staircase boundary between metals, metalloids and non-metals',
+    type: 'metal_nonmetal_metalloid_periodic_table_boundary',
+    defaultOptions: {
+        title: 'Metal, Non-metal and Metalloid Boundary',
+        showStaircaseBoundary: true,
+        showRegionLabels: true,
+        showExamples: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'group1Group17ReactivityOpposingTrendsDiagram': {
+    name: 'Group 1 Group 17 Reactivity Opposing Trends Diagram',
+    category: 'Periodic Trends',
+    description: 'Opposing reactivity trends down Group 1 (increasing) and Group 17 (decreasing)',
+    type: 'group1_group17_reactivity_opposing_trends',
+    defaultOptions: {
+        title: 'Group 1 and Group 17 Opposing Reactivity Trends',
+        showGroup1Trend: true,
+        showGroup17Trend: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'period3OxideAcidBaseCharacterTrendDiagram': {
+    name: 'Period 3 Oxide Acid Base Character Trend Diagram',
+    category: 'Periodic Trends',
+    description: 'Acid-base character of Period 3 oxides from basic to acidic across the period',
+    type: 'period3_oxide_acid_base_character_trend',
+    defaultOptions: {
+        title: 'Period 3 Oxide Acid-Base Character',
+        showOxideFormulas: true,
+        showAcidBaseTrend: true,
+        showAnnotations: true,
+        width: 1100,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'periodicTrendCommonMistakeAnnotationDiagram': {
+    name: 'Periodic Trend Common Mistake Annotation Diagram',
+    category: 'Periodic Trends',
+    description: 'Annotated periodic trends highlighting common misconceptions and corrections',
+    type: 'periodic_trend_common_mistake_annotation',
+    defaultOptions: {
+        title: 'Periodic Trend Common Mistakes',
+        showMistakes: true,
+        showCorrections: true,
+        showAnnotations: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== NUCLEAR CHEMISTRY =====
+'bandOfStabilityNeutronProtonPlotDiagram': {
+    name: 'Band Of Stability Neutron Proton Plot Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Neutron vs proton plot showing the band of nuclear stability',
+    type: 'band_of_stability_neutron_proton_plot',
+    defaultOptions: {
+        title: 'Band of Stability',
+        showStabilityBand: true,
+        showDecayModes: true,
+        showLabels: true,
+        width: 900,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'alphaBetagammaDecayNuclearChangeAnnotatedDiagram': {
+    name: 'Alpha Beta Gamma Decay Nuclear Change Annotated Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Annotated nuclear equations for alpha, beta, and gamma decay processes',
+    type: 'alpha_beta_gamma_decay_nuclear_change_annotated',
+    defaultOptions: {
+        title: 'Alpha, Beta and Gamma Decay',
+        showNuclearEquations: true,
+        showAnnotations: true,
+        showMassNumberChanges: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'radiationElectricMagneticFieldDeflectionDiagram': {
+    name: 'Radiation Electric Magnetic Field Deflection Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Deflection of alpha, beta and gamma radiation in electric and magnetic fields',
+    type: 'radiation_electric_magnetic_field_deflection',
+    defaultOptions: {
+        title: 'Radiation Deflection in Electric and Magnetic Fields',
+        showFieldLines: true,
+        showDeflectionPaths: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'uraniumDecaySeriesChainDiagram': {
+    name: 'Uranium Decay Series Chain Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Complete uranium-238 decay series chain to stable lead-206',
+    type: 'uranium_decay_series_chain',
+    defaultOptions: {
+        title: 'Uranium-238 Decay Series',
+        showDecaySteps: true,
+        showHalfLives: true,
+        showRadiationTypes: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'exponentialDecayCurveHalfLifeAnnotatedGraph': {
+    name: 'Exponential Decay Curve Half Life Annotated Graph',
+    category: 'Nuclear Chemistry',
+    description: 'Exponential radioactive decay curve with half-life intervals annotated',
+    type: 'exponential_decay_curve_half_life_annotated',
+    defaultOptions: {
+        title: 'Exponential Radioactive Decay Curve',
+        showHalfLifeMarkers: true,
+        showAnnotations: true,
+        showDecayEquation: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'carbon14RadiocarbonDatingDecayCurveDiagram': {
+    name: 'Carbon 14 Radiocarbon Dating Decay Curve Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Carbon-14 decay curve applied to radiocarbon dating with age estimation',
+    type: 'carbon14_radiocarbon_dating_decay_curve',
+    defaultOptions: {
+        title: 'Carbon-14 Radiocarbon Dating',
+        showDecayCurve: true,
+        showAgeScale: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'uranium235NeutronInducedFissionChainReactionDiagram': {
+    name: 'Uranium 235 Neutron Induced Fission Chain Reaction Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Uranium-235 neutron-induced fission chain reaction with branching',
+    type: 'uranium235_neutron_induced_fission_chain_reaction',
+    defaultOptions: {
+        title: 'Uranium-235 Fission Chain Reaction',
+        showChainBranching: true,
+        showEnergyRelease: true,
+        showLabels: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'deuteriumTritiumFusionEnergyReleaseDiagram': {
+    name: 'Deuterium Tritium Fusion Energy Release Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'D-T nuclear fusion reaction with energy release and helium-neutron products',
+    type: 'deuterium_tritium_fusion_energy_release',
+    defaultOptions: {
+        title: 'Deuterium-Tritium Fusion',
+        showReactionEquation: true,
+        showEnergyRelease: true,
+        showLabels: true,
+        width: 1000,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'medicalRadioisotopePetScanTechnetiumDiagram': {
+    name: 'Medical Radioisotope Pet Scan Technetium Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Medical applications of radioisotopes including PET scans and Technetium-99m',
+    type: 'medical_radioisotope_pet_scan_technetium',
+    defaultOptions: {
+        title: 'Medical Radioisotopes: PET Scan and Technetium-99m',
+        showDecayScheme: true,
+        showApplicationDiagram: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'radiationDoseUnitsBecquerelGraySievertDiagram': {
+    name: 'Radiation Dose Units Becquerel Gray Sievert Diagram',
+    category: 'Nuclear Chemistry',
+    description: 'Comparison of radiation dose units: Becquerel, Gray, and Sievert with conversions',
+    type: 'radiation_dose_units_becquerel_gray_sievert',
+    defaultOptions: {
+        title: 'Radiation Dose Units: Bq, Gy, Sv',
+        showUnitDefinitions: true,
+        showConversions: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== AMOUNT OF SUBSTANCE / STOICHIOMETRY =====
+'atomicScaleToMacroScaleBridgeDiagram': {
+    name: 'Atomic Scale To Macro Scale Bridge Diagram',
+    category: 'Amount of Substance',
+    description: 'Bridge diagram connecting atomic scale particles to macroscopic measurable quantities',
+    type: 'atomic_scale_to_macro_scale_bridge',
+    defaultOptions: {
+        title: 'Atomic to Macroscopic Scale Bridge',
+        showScaleLevels: true,
+        showConversionFactors: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'avogadrosNumberParticleScalingDiagram': {
+    name: 'Avogadros Number Particle Scaling Diagram',
+    category: 'Amount of Substance',
+    description: "Avogadro's number visualised with particle scaling from individual atoms to one mole",
+    type: 'avogadros_number_particle_scaling',
+    defaultOptions: {
+        title: "Avogadro's Number and Particle Scaling",
+        showParticleCount: true,
+        showScaleComparison: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'periodicTableMolarMassReadingDiagram': {
+    name: 'Periodic Table Molar Mass Reading Diagram',
+    category: 'Amount of Substance',
+    description: 'Guide to reading molar mass values from the periodic table with worked examples',
+    type: 'periodic_table_molar_mass_reading',
+    defaultOptions: {
+        title: 'Reading Molar Mass from the Periodic Table',
+        showAtomicMass: true,
+        showWorkedExamples: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'moleTriangleInterconversionDiagram': {
+    name: 'Mole Triangle Interconversion Diagram',
+    category: 'Amount of Substance',
+    description: 'Triangle diagram for interconverting moles, mass, molar mass, particles and volume',
+    type: 'mole_triangle_interconversion',
+    defaultOptions: {
+        title: 'Mole Interconversion Triangle',
+        showAllConversions: true,
+        showFormulas: true,
+        showLabels: true,
+        width: 900,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'elementalPercentageCompositionPieChartDiagram': {
+    name: 'Elemental Percentage Composition Pie Chart Diagram',
+    category: 'Amount of Substance',
+    description: 'Pie chart showing percentage composition by mass for a compound',
+    type: 'elemental_percentage_composition_pie_chart',
+    defaultOptions: {
+        title: 'Elemental Percentage Composition',
+        showPercentageLabels: true,
+        showMassCalculation: true,
+        showLabels: true,
+        width: 900,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'empiricalToMolecularFormulaScalingDiagram': {
+    name: 'Empirical To Molecular Formula Scaling Diagram',
+    category: 'Amount of Substance',
+    description: 'Step-by-step scaling from empirical formula to molecular formula using molar mass',
+    type: 'empirical_to_molecular_formula_scaling',
+    defaultOptions: {
+        title: 'Empirical to Molecular Formula',
+        showScalingSteps: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'molarVolumeStandardConditionsComparisonDiagram': {
+    name: 'Molar Volume Standard Conditions Comparison Diagram',
+    category: 'Amount of Substance',
+    description: 'Molar volume of gases at STP and RTP with comparison of conditions',
+    type: 'molar_volume_standard_conditions_comparison',
+    defaultOptions: {
+        title: 'Molar Volume at Standard Conditions',
+        showSTPandRTP: true,
+        showComparison: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'concentrationVolumeTriangleDiagram': {
+    name: 'Concentration Volume Triangle Diagram',
+    category: 'Amount of Substance',
+    description: 'Triangle interconversion diagram for concentration, volume and moles',
+    type: 'concentration_volume_triangle',
+    defaultOptions: {
+        title: 'Concentration-Volume-Moles Triangle',
+        showFormulas: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 900,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'hydratedSaltCrystalLatticeWaterDiagram': {
+    name: 'Hydrated Salt Crystal Lattice Water Diagram',
+    category: 'Amount of Substance',
+    description: 'Crystal lattice of a hydrated salt showing water of crystallisation positions',
+    type: 'hydrated_salt_crystal_lattice_water',
+    defaultOptions: {
+        title: 'Hydrated Salt and Water of Crystallisation',
+        showLatticeStructure: true,
+        showWaterMolecules: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'isotopeAbundanceWeightedAverageMassDiagram': {
+    name: 'Isotope Abundance Weighted Average Mass Diagram',
+    category: 'Amount of Substance',
+    description: 'Weighted average relative atomic mass calculation using isotope abundances',
+    type: 'isotope_abundance_weighted_average_mass',
+    defaultOptions: {
+        title: 'Isotope Abundance and Weighted Average Mass',
+        showIsotopeAbundances: true,
+        showCalculation: true,
+        showMassSpectrum: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'stoichiometricRatioReactantProductDiagram': {
+    name: 'Stoichiometric Ratio Reactant Product Diagram',
+    category: 'Amount of Substance',
+    description: 'Mole ratio relationships between reactants and products in a balanced equation',
+    type: 'stoichiometric_ratio_reactant_product',
+    defaultOptions: {
+        title: 'Stoichiometric Mole Ratios',
+        showBalancedEquation: true,
+        showMoleRatios: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'divideByCoefficientsLimitingReagentDecisionDiagram': {
+    name: 'Divide By Coefficients Limiting Reagent Decision Diagram',
+    category: 'Amount of Substance',
+    description: 'Decision diagram for identifying the limiting reagent by dividing moles by coefficients',
+    type: 'divide_by_coefficients_limiting_reagent_decision',
+    defaultOptions: {
+        title: 'Limiting Reagent: Divide by Coefficients Method',
+        showDecisionSteps: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'theoreticalYieldCalculationFlowchartDiagram': {
+    name: 'Theoretical Yield Calculation Flowchart Diagram',
+    category: 'Amount of Substance',
+    description: 'Flowchart for calculating theoretical yield from limiting reagent and stoichiometry',
+    type: 'theoretical_yield_calculation_flowchart',
+    defaultOptions: {
+        title: 'Theoretical Yield Calculation Flowchart',
+        showDecisionNodes: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'theoreticalVsActualYieldBarComparisonDiagram': {
+    name: 'Theoretical Vs Actual Yield Bar Comparison Diagram',
+    category: 'Amount of Substance',
+    description: 'Bar chart comparing theoretical and actual yield with percentage yield calculation',
+    type: 'theoretical_vs_actual_yield_bar_comparison',
+    defaultOptions: {
+        title: 'Theoretical vs Actual Yield Comparison',
+        showPercentageYield: true,
+        showBarChart: true,
+        showLabels: true,
+        width: 900,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'excessReagentRemainingMassCalculationDiagram': {
+    name: 'Excess Reagent Remaining Mass Calculation Diagram',
+    category: 'Amount of Substance',
+    description: 'Calculation diagram showing remaining mass of excess reagent after reaction',
+    type: 'excess_reagent_remaining_mass_calculation',
+    defaultOptions: {
+        title: 'Excess Reagent Remaining Mass',
+        showBeforeAfter: true,
+        showCalculationSteps: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'concentrationVolumeToMolesPrecipitationDiagram': {
+    name: 'Concentration Volume To Moles Precipitation Diagram',
+    category: 'Amount of Substance',
+    description: 'Concentration and volume to moles conversion applied to a precipitation reaction',
+    type: 'concentration_volume_to_moles_precipitation',
+    defaultOptions: {
+        title: 'Concentration and Volume to Moles in Precipitation',
+        showConversionSteps: true,
+        showPrecipitationReaction: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'completeVsIncompleteCombustionProductsDiagram': {
+    name: 'Complete Vs Incomplete Combustion Products Diagram',
+    category: 'Amount of Substance',
+    description: 'Comparison of products from complete and incomplete combustion reactions',
+    type: 'complete_vs_incomplete_combustion_products',
+    defaultOptions: {
+        title: 'Complete vs Incomplete Combustion Products',
+        showProductComparison: true,
+        showEquations: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'haberProcessFeedRatioOptimisationDiagram': {
+    name: 'Haber Process Feed Ratio Optimisation Diagram',
+    category: 'Amount of Substance',
+    description: 'Feed gas ratio optimisation in the Haber process with stoichiometric analysis',
+    type: 'haber_process_feed_ratio_optimisation',
+    defaultOptions: {
+        title: 'Haber Process Feed Ratio Optimisation',
+        showFeedRatios: true,
+        showStoichiometry: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'cascadingYieldMultiStepSynthesisDiagram': {
+    name: 'Cascading Yield Multi Step Synthesis Diagram',
+    category: 'Amount of Substance',
+    description: 'Overall yield calculation through cascading percentage yields in multi-step synthesis',
+    type: 'cascading_yield_multi_step_synthesis',
+    defaultOptions: {
+        title: 'Cascading Yield in Multi-Step Synthesis',
+        showYieldPerStep: true,
+        showOverallYield: true,
+        showLabels: true,
+        width: 1100,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'impureReagentPurityCorrectionFlowchartDiagram': {
+    name: 'Impure Reagent Purity Correction Flowchart Diagram',
+    category: 'Amount of Substance',
+    description: 'Flowchart for correcting mass calculations when using impure reagents',
+    type: 'impure_reagent_purity_correction_flowchart',
+    defaultOptions: {
+        title: 'Impure Reagent Purity Correction Flowchart',
+        showPurityCorrection: true,
+        showDecisionNodes: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'conservationOfMassAtomCountingDiagram': {
+    name: 'Conservation Of Mass Atom Counting Diagram',
+    category: 'Amount of Substance',
+    description: 'Atom counting diagram demonstrating conservation of mass in chemical equations',
+    type: 'conservation_of_mass_atom_counting',
+    defaultOptions: {
+        title: 'Conservation of Mass - Atom Counting',
+        showAtomCounts: true,
+        showBeforeAfter: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== EQUATIONS & BALANCING =====
+'equationTypeProgressionWordToNetIonicDiagram': {
+    name: 'Equation Type Progression Word To Net Ionic Diagram',
+    category: 'Chemical Equations',
+    description: 'Progression from word equation to full ionic to net ionic equation with annotations',
+    type: 'equation_type_progression_word_to_net_ionic',
+    defaultOptions: {
+        title: 'Equation Type Progression: Word to Net Ionic',
+        showProgressionSteps: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'inspectionBalancingOrderMetalsNonmetalsHydrogenOxygenDiagram': {
+    name: 'Inspection Balancing Order Metals Nonmetals Hydrogen Oxygen Diagram',
+    category: 'Chemical Equations',
+    description: 'Step-by-step inspection balancing order: metals, non-metals, hydrogen, then oxygen',
+    type: 'inspection_balancing_order_metals_nonmetals_hydrogen_oxygen',
+    defaultOptions: {
+        title: 'Inspection Balancing: Recommended Order',
+        showBalancingOrder: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'algebraicCoefficientSimultaneousEquationsDiagram': {
+    name: 'Algebraic Coefficient Simultaneous Equations Diagram',
+    category: 'Chemical Equations',
+    description: 'Algebraic method for balancing complex equations using simultaneous equations',
+    type: 'algebraic_coefficient_simultaneous_equations',
+    defaultOptions: {
+        title: 'Algebraic Coefficient Balancing Method',
+        showAlgebraicSteps: true,
+        showSimultaneousEquations: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'molecularToFullIonicToNetIonicProgressionDiagram': {
+    name: 'Molecular To Full Ionic To Net Ionic Progression Diagram',
+    category: 'Chemical Equations',
+    description: 'Conversion progression from molecular to full ionic to net ionic equation',
+    type: 'molecular_to_full_ionic_to_net_ionic_progression',
+    defaultOptions: {
+        title: 'Molecular → Full Ionic → Net Ionic Progression',
+        showSpectatorIons: true,
+        showProgressionSteps: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'halfEquationElectronTransferOxidationReductionDiagram': {
+    name: 'Half Equation Electron Transfer Oxidation Reduction Diagram',
+    category: 'Chemical Equations',
+    description: 'Half equations showing electron transfer in oxidation and reduction processes',
+    type: 'half_equation_electron_transfer_oxidation_reduction',
+    defaultOptions: {
+        title: 'Half Equations: Electron Transfer in Redox',
+        showHalfEquations: true,
+        showElectronTransfer: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'sixReactionTypesPatternClassificationDiagram': {
+    name: 'Six Reaction Types Pattern Classification Diagram',
+    category: 'Chemical Equations',
+    description: 'Classification of the six main reaction types with pattern recognition',
+    type: 'six_reaction_types_pattern_classification',
+    defaultOptions: {
+        title: 'Six Reaction Types Classification',
+        showAllTypes: true,
+        showPatternExamples: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'polyatomicIonBracketExpansionUnitBalancingDiagram': {
+    name: 'Polyatomic Ion Bracket Expansion Unit Balancing Diagram',
+    category: 'Chemical Equations',
+    description: 'Bracket expansion for polyatomic ions in unit balancing of chemical formulas',
+    type: 'polyatomic_ion_bracket_expansion_unit_balancing',
+    defaultOptions: {
+        title: 'Polyatomic Ion Bracket Expansion',
+        showBracketExpansion: true,
+        showBalancingSteps: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'coefficientMoleRatioMassVolumeInterpretationDiagram': {
+    name: 'Coefficient Mole Ratio Mass Volume Interpretation Diagram',
+    category: 'Chemical Equations',
+    description: 'Interpretation of stoichiometric coefficients as mole ratios, masses and volumes',
+    type: 'coefficient_mole_ratio_mass_volume_interpretation',
+    defaultOptions: {
+        title: 'Coefficient Interpretation: Moles, Mass, Volume',
+        showCoefficientMeaning: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'balancingVerificationAtomCountChecklistDiagram': {
+    name: 'Balancing Verification Atom Count Checklist Diagram',
+    category: 'Chemical Equations',
+    description: 'Checklist-style atom count verification for confirming balanced equations',
+    type: 'balancing_verification_atom_count_checklist',
+    defaultOptions: {
+        title: 'Balancing Verification: Atom Count Checklist',
+        showChecklistFormat: true,
+        showAtomCounts: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== VOLUMETRIC ANALYSIS =====
+'molarConcentrationSoluteVolumeTriangleDiagram': {
+    name: 'Molar Concentration Solute Volume Triangle Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Triangle relationship between molar concentration, moles of solute, and volume',
+    type: 'molar_concentration_solute_volume_triangle',
+    defaultOptions: {
+        title: 'Molar Concentration Triangle',
+        showTriangleFormula: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 900,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'primaryStandardVolumetricFlaskPreparationDiagram': {
+    name: 'Primary Standard Volumetric Flask Preparation Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Step-by-step preparation of a primary standard solution using a volumetric flask',
+    type: 'primary_standard_volumetric_flask_preparation',
+    defaultOptions: {
+        title: 'Primary Standard Solution Preparation',
+        showPreparationSteps: true,
+        showEquipmentLabels: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'titrationApparatusSetupBurettePipetteFlaskDiagram': {
+    name: 'Titration Apparatus Setup Burette Pipette Flask Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Labelled titration apparatus showing burette, pipette and conical flask setup',
+    type: 'titration_apparatus_setup_burette_pipette_flask',
+    defaultOptions: {
+        title: 'Titration Apparatus Setup',
+        showEquipmentLabels: true,
+        showTechniqueTips: true,
+        showLabels: true,
+        width: 900,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'acidBaseTitrationCurveIndicatorRangeDiagram': {
+    name: 'Acid Base Titration Curve Indicator Range Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Acid-base titration curve with indicator pH ranges overlaid for selection',
+    type: 'acid_base_titration_curve_indicator_range',
+    defaultOptions: {
+        title: 'Acid-Base Titration Curve with Indicator Ranges',
+        showEquivalencePoint: true,
+        showIndicatorRanges: true,
+        showBufferRegion: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'permanganateSelfIndicatingRedoxTitrationColorChangeDiagram': {
+    name: 'Permanganate Self Indicating Redox Titration Color Change Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Permanganate redox titration colour change as self-indicating end-point',
+    type: 'permanganate_self_indicating_redox_titration_color_change',
+    defaultOptions: {
+        title: 'Permanganate Self-Indicating Redox Titration',
+        showColorChange: true,
+        showReactionEquation: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'backTitrationTwoStageReactionFlowchartDiagram': {
+    name: 'Back Titration Two Stage Reaction Flowchart Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Two-stage flowchart for back titration calculations',
+    type: 'back_titration_two_stage_reaction_flowchart',
+    defaultOptions: {
+        title: 'Back Titration Flowchart',
+        showTwoStages: true,
+        showCalculationSteps: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'ionicDissociationSubscriptMultiplierConcentrationDiagram': {
+    name: 'Ionic Dissociation Subscript Multiplier Concentration Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Ionic dissociation with subscript multiplier effect on ion concentrations',
+    type: 'ionic_dissociation_subscript_multiplier_concentration',
+    defaultOptions: {
+        title: 'Ionic Dissociation and Concentration Multipliers',
+        showDissociationEquation: true,
+        showConcentrationMultipliers: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'precipitationFiltrationDryingWeighingGravimetricDiagram': {
+    name: 'Precipitation Filtration Drying Weighing Gravimetric Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Gravimetric analysis steps: precipitation, filtration, drying and weighing',
+    type: 'precipitation_filtration_drying_weighing_gravimetric',
+    defaultOptions: {
+        title: 'Gravimetric Analysis Steps',
+        showStepSequence: true,
+        showEquipment: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'edtaMetalComplexOneToOneBindingDiagram': {
+    name: 'EDTA Metal Complex One To One Binding Diagram',
+    category: 'Volumetric Analysis',
+    description: 'EDTA complexometric titration showing 1:1 metal-EDTA binding complex',
+    type: 'edta_metal_complex_one_to_one_binding',
+    defaultOptions: {
+        title: 'EDTA Metal Complex Binding (1:1)',
+        showComplexStructure: true,
+        showBindingSites: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'commercialProductAnalysisTitrationWorkflowDiagram': {
+    name: 'Commercial Product Analysis Titration Workflow Diagram',
+    category: 'Volumetric Analysis',
+    description: 'Full workflow for analysing a commercial product using titration methods',
+    type: 'commercial_product_analysis_titration_workflow',
+    defaultOptions: {
+        title: 'Commercial Product Titration Analysis Workflow',
+        showWorkflowSteps: true,
+        showCalculationPath: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== GASES (EXTENDED) =====
+'gasVariablesPressureVolumeTemperatureMolsDiagram': {
+    name: 'Gas Variables Pressure Volume Temperature Mols Diagram',
+    category: 'Gases',
+    description: 'Overview of the four gas variables: pressure, volume, temperature and moles',
+    type: 'gas_variables_pressure_volume_temperature_mols',
+    defaultOptions: {
+        title: 'Gas Variables: P, V, T, n',
+        showAllVariables: true,
+        showRelationships: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'idealGasLawPVnRTVariableRelationshipDiagram': {
+    name: 'Ideal Gas Law PVnRT Variable Relationship Diagram',
+    category: 'Gases',
+    description: 'Annotated ideal gas law PV=nRT with variable relationships and units',
+    type: 'ideal_gas_law_pvnrt_variable_relationship',
+    defaultOptions: {
+        title: 'Ideal Gas Law: PV = nRT',
+        showVariableAnnotations: true,
+        showUnits: true,
+        showRearrangements: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'boylesCharlesGayLussacCombinedLawGraphsDiagram': {
+    name: 'Boyles Charles Gay Lussac Combined Law Graphs Diagram',
+    category: 'Gases',
+    description: 'Graphical representations of Boyle\'s, Charles\'s, Gay-Lussac\'s and combined gas laws',
+    type: 'boyles_charles_gaylussac_combined_law_graphs',
+    defaultOptions: {
+        title: 'Gas Laws Graphical Representations',
+        showAllFourGraphs: true,
+        showEquations: true,
+        showLabels: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'partialPressureMoleFractionGasMixtureDiagram': {
+    name: 'Partial Pressure Mole Fraction Gas Mixture Diagram',
+    category: 'Gases',
+    description: "Dalton's law: partial pressure from mole fractions in a gas mixture",
+    type: 'partial_pressure_mole_fraction_gas_mixture',
+    defaultOptions: {
+        title: 'Partial Pressure and Mole Fraction',
+        showDaltonsLaw: true,
+        showMoleFractionCalculation: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'avogadrosLawEqualVolumesEqualMolesSTPDiagram': {
+    name: 'Avogadros Law Equal Volumes Equal Moles STP Diagram',
+    category: 'Gases',
+    description: "Avogadro's law showing equal volumes contain equal moles at STP",
+    type: 'avogadros_law_equal_volumes_equal_moles_stp',
+    defaultOptions: {
+        title: "Avogadro's Law: Equal Volumes, Equal Moles at STP",
+        showVolumeComparison: true,
+        showMoleEquality: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'solidLiquidGasPhaseConversionMoleHubDiagram': {
+    name: 'Solid Liquid Gas Phase Conversion Mole Hub Diagram',
+    category: 'Gases',
+    description: 'Mole as central hub for converting between solid mass, liquid volume and gas volume',
+    type: 'solid_liquid_gas_phase_conversion_mole_hub',
+    defaultOptions: {
+        title: 'Mole Hub: Phase Conversion Diagram',
+        showPhaseConversions: true,
+        showConversionFactors: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'gasVolumeLimitingReagentDivideByCoefficientsComparisonDiagram': {
+    name: 'Gas Volume Limiting Reagent Divide By Coefficients Comparison Diagram',
+    category: 'Gases',
+    description: 'Limiting reagent identification using gas volume ratios and coefficient division',
+    type: 'gas_volume_limiting_reagent_divide_by_coefficients_comparison',
+    defaultOptions: {
+        title: 'Gas Volume and Limiting Reagent',
+        showCoefficientDivision: true,
+        showVolumeComparison: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'vanDerWaalsCompressibilityFactorZDeviationDiagram': {
+    name: 'Van Der Waals Compressibility Factor Z Deviation Diagram',
+    category: 'Gases',
+    description: 'Compressibility factor Z vs pressure showing deviation from ideal gas behaviour',
+    type: 'van_der_waals_compressibility_factor_z_deviation',
+    defaultOptions: {
+        title: 'Compressibility Factor Z and Real Gas Deviation',
+        showIdealLine: true,
+        showRealGasCurves: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'grahamsLawEffusionRateInverseSqrtMassDiagram': {
+    name: 'Grahams Law Effusion Rate Inverse Sqrt Mass Diagram',
+    category: 'Gases',
+    description: "Graham's law: effusion rate inversely proportional to square root of molar mass",
+    type: 'grahams_law_effusion_rate_inverse_sqrt_mass',
+    defaultOptions: {
+        title: "Graham's Law of Effusion",
+        showEffusionDiagram: true,
+        showFormula: true,
+        showComparison: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'haberProcessGasVolumeRatioFeedStreamDiagram': {
+    name: 'Haber Process Gas Volume Ratio Feed Stream Diagram',
+    category: 'Gases',
+    description: 'Gas volume ratios in the Haber process feed stream at industrial conditions',
+    type: 'haber_process_gas_volume_ratio_feed_stream',
+    defaultOptions: {
+        title: 'Haber Process Gas Volume Ratios',
+        showFeedStreamRatios: true,
+        showProcessDiagram: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== ORGANIC CHEMISTRY (EXTENDED) =====
+'carbonHybridisationOrbitalGeometryDiagram': {
+    name: 'Carbon Hybridisation Orbital Geometry Diagram',
+    category: 'Organic Chemistry',
+    description: 'sp3, sp2 and sp hybridisation of carbon with orbital geometry and bond angles',
+    type: 'carbon_hybridisation_orbital_geometry',
+    defaultOptions: {
+        title: 'Carbon Hybridisation and Orbital Geometry',
+        showSp3: true,
+        showSp2: true,
+        showSp: true,
+        showBondAngles: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'alkaneHomologousSeriesBoilingPointTrendChart': {
+    name: 'Alkane Homologous Series Boiling Point Trend Chart',
+    category: 'Organic Chemistry',
+    description: 'Boiling point trend chart for the alkane homologous series with chain length',
+    type: 'alkane_homologous_series_boiling_point_trend',
+    defaultOptions: {
+        title: 'Alkane Homologous Series: Boiling Point Trend',
+        showBoilingPoints: true,
+        showTrendLine: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'electrophilicAdditionBromoniumIonMechanism': {
+    name: 'Electrophilic Addition Bromonium Ion Mechanism',
+    category: 'Organic Chemistry',
+    description: 'Electrophilic addition mechanism via bromonium ion intermediate',
+    type: 'electrophilic_addition_bromonium_ion_mechanism',
+    defaultOptions: {
+        title: 'Electrophilic Addition: Bromonium Ion Mechanism',
+        showCurvedArrows: true,
+        showIntermediate: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'alkyneSPHybridisationLinearGeometryDiagram': {
+    name: 'Alkyne SP Hybridisation Linear Geometry Diagram',
+    category: 'Organic Chemistry',
+    description: 'sp hybridisation in alkynes with linear geometry and triple bond orbital diagram',
+    type: 'alkyne_sp_hybridisation_linear_geometry',
+    defaultOptions: {
+        title: 'Alkyne sp Hybridisation and Linear Geometry',
+        showOrbitalDiagram: true,
+        showBondAngles: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'benzeneResonanceDelocalisation': {
+    name: 'Benzene Resonance Delocalisation',
+    category: 'Organic Chemistry',
+    description: 'Benzene resonance structures and delocalised pi electron cloud',
+    type: 'benzene_resonance_delocalisation',
+    defaultOptions: {
+        title: 'Benzene Resonance and Delocalisation',
+        showResonanceStructures: true,
+        showPiCloud: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'fractionalDistillationColumnFractionsBpDiagram': {
+    name: 'Fractional Distillation Column Fractions Bp Diagram',
+    category: 'Organic Chemistry',
+    description: 'Fractional distillation column with petroleum fractions and boiling point ranges',
+    type: 'fractional_distillation_column_fractions_bp',
+    defaultOptions: {
+        title: 'Fractional Distillation Column and Fractions',
+        showFractionLabels: true,
+        showBoilingPointRanges: true,
+        showUses: true,
+        width: 900,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'chemicalTestsHydrocarbonIdentificationFlowchart': {
+    name: 'Chemical Tests Hydrocarbon Identification Flowchart',
+    category: 'Organic Chemistry',
+    description: 'Flowchart for identifying hydrocarbons using chemical tests',
+    type: 'chemical_tests_hydrocarbon_identification_flowchart',
+    defaultOptions: {
+        title: 'Hydrocarbon Identification Flowchart',
+        showTestReagents: true,
+        showObservations: true,
+        showDecisionNodes: true,
+        width: 1000,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'chainPositionGeometricIsomerismComparisonDiagram': {
+    name: 'Chain Position Geometric Isomerism Comparison Diagram',
+    category: 'Organic Chemistry',
+    description: 'Comparison of chain, position and geometric isomerism types with examples',
+    type: 'chain_position_geometric_isomerism_comparison',
+    defaultOptions: {
+        title: 'Chain, Position and Geometric Isomerism',
+        showAllIsomerTypes: true,
+        showExamples: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'hydrocarbonReactionTypesCrossReferenceTable': {
+    name: 'Hydrocarbon Reaction Types Cross Reference Table',
+    category: 'Organic Chemistry',
+    description: 'Cross-reference table of hydrocarbon reaction types with conditions and products',
+    type: 'hydrocarbon_reaction_types_cross_reference_table',
+    defaultOptions: {
+        title: 'Hydrocarbon Reaction Types Cross-Reference',
+        showReactionTypes: true,
+        showConditions: true,
+        showProducts: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'petrochemicalFeedstockProductsFlowDiagram': {
+    name: 'Petrochemical Feedstock Products Flow Diagram',
+    category: 'Organic Chemistry',
+    description: 'Flow diagram of petrochemical feedstocks and their downstream products',
+    type: 'petrochemical_feedstock_products_flow',
+    defaultOptions: {
+        title: 'Petrochemical Feedstock and Products Flow',
+        showFeedstocks: true,
+        showProducts: true,
+        showProcessPaths: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'functionalGroupClassificationAndPolarityOverviewDiagram': {
+    name: 'Functional Group Classification And Polarity Overview Diagram',
+    category: 'Organic Chemistry',
+    description: 'Overview of functional group classifications with polarity and reactivity summary',
+    type: 'functional_group_classification_and_polarity_overview',
+    defaultOptions: {
+        title: 'Functional Groups: Classification and Polarity',
+        showFunctionalGroups: true,
+        showPolarityArrows: true,
+        showReactivitySummary: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'sn1SN2MechanismComparisonEnergyProfileDiagram': {
+    name: 'SN1 SN2 Mechanism Comparison Energy Profile Diagram',
+    category: 'Organic Chemistry',
+    description: 'Side-by-side energy profile comparison of SN1 and SN2 mechanisms',
+    type: 'sn1_sn2_mechanism_comparison_energy_profile',
+    defaultOptions: {
+        title: 'SN1 vs SN2 Mechanism Energy Profiles',
+        showEnergyProfiles: true,
+        showMechanismSteps: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'primarySecondaryTertiaryAlcoholOxidationProductsDiagram': {
+    name: 'Primary Secondary Tertiary Alcohol Oxidation Products Diagram',
+    category: 'Organic Chemistry',
+    description: 'Oxidation products of primary, secondary and tertiary alcohols comparison',
+    type: 'primary_secondary_tertiary_alcohol_oxidation_products',
+    defaultOptions: {
+        title: 'Alcohol Oxidation: Primary, Secondary, Tertiary',
+        showOxidationProducts: true,
+        showReagents: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'williamsonEtherSynthesisReactionSchemeDiagram': {
+    name: 'Williamson Ether Synthesis Reaction Scheme Diagram',
+    category: 'Organic Chemistry',
+    description: 'Williamson ether synthesis reaction scheme with nucleophilic substitution mechanism',
+    type: 'williamson_ether_synthesis_reaction_scheme',
+    defaultOptions: {
+        title: 'Williamson Ether Synthesis',
+        showReactionScheme: true,
+        showMechanism: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'nucleophilicAdditionCarbonylMechanismDiagram': {
+    name: 'Nucleophilic Addition Carbonyl Mechanism Diagram',
+    category: 'Organic Chemistry',
+    description: 'Nucleophilic addition mechanism at the carbonyl group with curved arrows',
+    type: 'nucleophilic_addition_carbonyl_mechanism',
+    defaultOptions: {
+        title: 'Nucleophilic Addition to Carbonyl',
+        showCurvedArrows: true,
+        showIntermediate: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'carboxylateResonanceStabilisationAcidityDiagram': {
+    name: 'Carboxylate Resonance Stabilisation Acidity Diagram',
+    category: 'Organic Chemistry',
+    description: 'Carboxylate ion resonance stabilisation and its effect on carboxylic acid acidity',
+    type: 'carboxylate_resonance_stabilisation_acidity',
+    defaultOptions: {
+        title: 'Carboxylate Resonance Stabilisation and Acidity',
+        showResonanceStructures: true,
+        showChargeDelocalisation: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'fischerEsterificationEquilibriumReactionSchemeDiagram': {
+    name: 'Fischer Esterification Equilibrium Reaction Scheme Diagram',
+    category: 'Organic Chemistry',
+    description: 'Fischer esterification equilibrium reaction scheme with conditions',
+    type: 'fischer_esterification_equilibrium_reaction_scheme',
+    defaultOptions: {
+        title: 'Fischer Esterification Equilibrium',
+        showReactionScheme: true,
+        showEquilibriumArrows: true,
+        showConditions: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'amineBasicityComparisonAlkylArylAmidePKbDiagram': {
+    name: 'Amine Basicity Comparison Alkyl Aryl Amide PKb Diagram',
+    category: 'Organic Chemistry',
+    description: 'Basicity comparison of alkyl, aryl amines and amides with pKb values',
+    type: 'amine_basicity_comparison_alkyl_aryl_amide_pkb',
+    defaultOptions: {
+        title: 'Amine Basicity: Alkyl, Aryl, Amide Comparison',
+        showPKbValues: true,
+        showReasoningAnnotations: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'amidePlanarResonanceBondRotationRestrictionDiagram': {
+    name: 'Amide Planar Resonance Bond Rotation Restriction Diagram',
+    category: 'Organic Chemistry',
+    description: 'Amide planarity from resonance stabilisation restricting C-N bond rotation',
+    type: 'amide_planar_resonance_bond_rotation_restriction',
+    defaultOptions: {
+        title: 'Amide Planarity: Resonance and Bond Rotation',
+        showResonanceContributors: true,
+        showPlanarStructure: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'carboxylicAcidDerivativesReactivityOrderDiagram': {
+    name: 'Carboxylic Acid Derivatives Reactivity Order Diagram',
+    category: 'Organic Chemistry',
+    description: 'Reactivity order of carboxylic acid derivatives towards nucleophilic substitution',
+    type: 'carboxylic_acid_derivatives_reactivity_order',
+    defaultOptions: {
+        title: 'Carboxylic Acid Derivatives Reactivity Order',
+        showReactivityLadder: true,
+        showReasoningAnnotations: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'nitrileHydrolysisReductionTransformationFlowDiagram': {
+    name: 'Nitrile Hydrolysis Reduction Transformation Flow Diagram',
+    category: 'Organic Chemistry',
+    description: 'Flow diagram of nitrile hydrolysis to carboxylic acid and reduction to amine',
+    type: 'nitrile_hydrolysis_reduction_transformation_flow',
+    defaultOptions: {
+        title: 'Nitrile Hydrolysis and Reduction Transformations',
+        showFlowPaths: true,
+        showReagents: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'phenolPhenoxideResonanceAcidityComparisonDiagram': {
+    name: 'Phenol Phenoxide Resonance Acidity Comparison Diagram',
+    category: 'Organic Chemistry',
+    description: 'Phenol acidity explained through phenoxide resonance stabilisation comparison',
+    type: 'phenol_phenoxide_resonance_acidity_comparison',
+    defaultOptions: {
+        title: 'Phenol and Phenoxide: Resonance and Acidity',
+        showResonanceStructures: true,
+        showAcidityComparison: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'functionalGroupInterconversionNetworkDiagram': {
+    name: 'Functional Group Interconversion Network Diagram',
+    category: 'Organic Chemistry',
+    description: 'Network diagram of functional group interconversions with reagents and conditions',
+    type: 'functional_group_interconversion_network',
+    defaultOptions: {
+        title: 'Functional Group Interconversion Network',
+        showAllInterconversions: true,
+        showReagents: true,
+        showConditions: true,
+        width: 1300,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'curvedArrowElectronFlowNucleophileElectrophileDiagram': {
+    name: 'Curved Arrow Electron Flow Nucleophile Electrophile Diagram',
+    category: 'Organic Chemistry',
+    description: 'Curved arrow notation for electron flow between nucleophile and electrophile',
+    type: 'curved_arrow_electron_flow_nucleophile_electrophile',
+    defaultOptions: {
+        title: 'Curved Arrow: Nucleophile-Electrophile Electron Flow',
+        showCurvedArrows: true,
+        showChargeChanges: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'sn1SN2EASFreeRadicalSubstitutionMechanismComparisonDiagram': {
+    name: 'SN1 SN2 EAS Free Radical Substitution Mechanism Comparison Diagram',
+    category: 'Organic Chemistry',
+    description: 'Side-by-side comparison of SN1, SN2, EAS and free radical substitution mechanisms',
+    type: 'sn1_sn2_eas_free_radical_substitution_mechanism_comparison',
+    defaultOptions: {
+        title: 'Mechanism Comparison: SN1, SN2, EAS, Free Radical',
+        showAllMechanisms: true,
+        showKeyDifferences: true,
+        showLabels: true,
+        width: 1300,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'e2AntiPeriplanarGeometryZaitsevHofmannRegioselectivityDiagram': {
+    name: 'E2 Anti Periplanar Geometry Zaitsev Hofmann Regioselectivity Diagram',
+    category: 'Organic Chemistry',
+    description: 'E2 elimination anti-periplanar geometry with Zaitsev and Hofmann regioselectivity',
+    type: 'e2_anti_periplanar_geometry_zaitsev_hofmann_regioselectivity',
+    defaultOptions: {
+        title: 'E2: Anti-Periplanar Geometry and Regioselectivity',
+        showAntiPeriplanar: true,
+        showZaitsevHofmann: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'electrophilicNucleophilicRadicalAdditionComparisonDiagram': {
+    name: 'Electrophilic Nucleophilic Radical Addition Comparison Diagram',
+    category: 'Organic Chemistry',
+    description: 'Comparison of electrophilic, nucleophilic and radical addition mechanisms',
+    type: 'electrophilic_nucleophilic_radical_addition_comparison',
+    defaultOptions: {
+        title: 'Addition Mechanism Comparison: Electrophilic, Nucleophilic, Radical',
+        showMechanismComparison: true,
+        showSubstratePreferences: true,
+        showLabels: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'organicOxidationLadderAlkaneToCarboxylicAcidDiagram': {
+    name: 'Organic Oxidation Ladder Alkane To Carboxylic Acid Diagram',
+    category: 'Organic Chemistry',
+    description: 'Oxidation ladder from alkane through alcohol, aldehyde to carboxylic acid',
+    type: 'organic_oxidation_ladder_alkane_to_carboxylic_acid',
+    defaultOptions: {
+        title: 'Organic Oxidation Ladder',
+        showOxidationSteps: true,
+        showReagents: true,
+        showLabels: true,
+        width: 1000,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'aldolCondensationClaisenEsterMechanismSchemeDiagram': {
+    name: 'Aldol Condensation Claisen Ester Mechanism Scheme Diagram',
+    category: 'Organic Chemistry',
+    description: 'Aldol condensation and Claisen ester condensation mechanism schemes',
+    type: 'aldol_condensation_claisen_ester_mechanism_scheme',
+    defaultOptions: {
+        title: 'Aldol and Claisen Condensation Mechanisms',
+        showAldolMechanism: true,
+        showClaisenMechanism: true,
+        showLabels: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'carbocationRearrangementHydrideAlkylShiftEnergyDiagram': {
+    name: 'Carbocation Rearrangement Hydride Alkyl Shift Energy Diagram',
+    category: 'Organic Chemistry',
+    description: 'Carbocation rearrangements via hydride and alkyl shifts with energy diagram',
+    type: 'carbocation_rearrangement_hydride_alkyl_shift_energy',
+    defaultOptions: {
+        title: 'Carbocation Rearrangements: Hydride and Alkyl Shifts',
+        showRearrangementMechanism: true,
+        showEnergyDiagram: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'dielsAlderHOMOLUMOOrbitalSymmetryFrontierDiagram': {
+    name: 'Diels Alder HOMO LUMO Orbital Symmetry Frontier Diagram',
+    category: 'Organic Chemistry',
+    description: 'Diels-Alder reaction with HOMO-LUMO frontier orbital symmetry analysis',
+    type: 'diels_alder_homo_lumo_orbital_symmetry_frontier',
+    defaultOptions: {
+        title: 'Diels-Alder: HOMO-LUMO Orbital Symmetry',
+        showHOMOLUMO: true,
+        showSymmetryMatch: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'namedReactionsMechanismClassificationSummaryTable': {
+    name: 'Named Reactions Mechanism Classification Summary Table',
+    category: 'Organic Chemistry',
+    description: 'Summary table classifying named organic reactions by mechanism type',
+    type: 'named_reactions_mechanism_classification_summary_table',
+    defaultOptions: {
+        title: 'Named Reactions: Mechanism Classification',
+        showReactionNames: true,
+        showMechanismTypes: true,
+        showConditions: true,
+        width: 1300,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'retrosynthesisDisconnectionSynthonArrowNotationDiagram': {
+    name: 'Retrosynthesis Disconnection Synthon Arrow Notation Diagram',
+    category: 'Organic Chemistry',
+    description: 'Retrosynthetic analysis with disconnection approach and synthon arrow notation',
+    type: 'retrosynthesis_disconnection_synthon_arrow_notation',
+    defaultOptions: {
+        title: 'Retrosynthesis: Disconnection and Synthon Notation',
+        showDisconnectionArrows: true,
+        showSynthons: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== STEREOCHEMISTRY =====
+'wedgeDashFischerNewmanProjectionComparisonDiagram': {
+    name: 'Wedge Dash Fischer Newman Projection Comparison Diagram',
+    category: 'Stereochemistry',
+    description: 'Comparison of wedge-dash, Fischer and Newman projection representations',
+    type: 'wedge_dash_fischer_newman_projection_comparison',
+    defaultOptions: {
+        title: 'Projection Comparison: Wedge-Dash, Fischer, Newman',
+        showAllProjections: true,
+        showInterconversions: true,
+        showLabels: true,
+        width: 1200,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'chiralCentreTetrahedralFourDifferentGroupsHandednessDiagram': {
+    name: 'Chiral Centre Tetrahedral Four Different Groups Handedness Diagram',
+    category: 'Stereochemistry',
+    description: 'Chiral centre tetrahedral geometry with four different groups and handedness',
+    type: 'chiral_centre_tetrahedral_four_different_groups_handedness',
+    defaultOptions: {
+        title: 'Chiral Centre: Tetrahedral Geometry and Handedness',
+        showTetrahedralGeometry: true,
+        showHandedness: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'polarimeterPlaneOfPolarisedLightRotationDiagram': {
+    name: 'Polarimeter Plane Of Polarised Light Rotation Diagram',
+    category: 'Stereochemistry',
+    description: 'Polarimeter setup showing rotation of plane-polarised light by chiral compounds',
+    type: 'polarimeter_plane_of_polarised_light_rotation',
+    defaultOptions: {
+        title: 'Polarimeter and Plane-Polarised Light Rotation',
+        showPolarimeterSetup: true,
+        showLightRotation: true,
+        showLabels: true,
+        width: 1100,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'diastereomerEprimerAnomarMesoRelationshipDiagram': {
+    name: 'Diastereomer Eprimer Anomar Meso Relationship Diagram',
+    category: 'Stereochemistry',
+    description: 'Relationships between diastereomers, epimers, anomers and meso compounds',
+    type: 'diastereomer_eprimer_anomar_meso_relationship',
+    defaultOptions: {
+        title: 'Diastereomers, Epimers, Anomers and Meso Compounds',
+        showRelationships: true,
+        showExamples: true,
+        showLabels: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'cyclohexaneChairBoatAxialEquatorialNewmanDiagram': {
+    name: 'Cyclohexane Chair Boat Axial Equatorial Newman Diagram',
+    category: 'Stereochemistry',
+    description: 'Cyclohexane chair and boat conformations with axial/equatorial positions and Newman projections',
+    type: 'cyclohexane_chair_boat_axial_equatorial_newman',
+    defaultOptions: {
+        title: 'Cyclohexane Conformations: Chair, Boat, Newman',
+        showChairConformation: true,
+        showBoatConformation: true,
+        showAxialEquatorial: true,
+        showNewmanProjection: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'sn2InversionSn1RacemisationE2AntiPeriplanarStereoDiagram': {
+    name: 'SN2 Inversion SN1 Racemisation E2 Anti Periplanar Stereo Diagram',
+    category: 'Stereochemistry',
+    description: 'Stereochemical outcomes: SN2 inversion, SN1 racemisation, E2 anti-periplanar',
+    type: 'sn2_inversion_sn1_racemisation_e2_anti_periplanar_stereo',
+    defaultOptions: {
+        title: 'Stereochemical Outcomes: SN2, SN1, E2',
+        showSN2Inversion: true,
+        showSN1Racemisation: true,
+        showE2Geometry: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'prochiralityDiagram': {
+    name: 'Prochirality Diagram',
+    category: 'Stereochemistry',
+    description: 'Prochirality: enantiotopic and diastereotopic faces and groups in prochiral centres',
+    type: 'prochirality',
+    defaultOptions: {
+        title: 'Prochirality: Enantiotopic and Diastereotopic Groups',
+        showProchiralCentre: true,
+        showFaceLabels: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'classicalResolutionDiastereomericSaltCrystallisationFlowDiagram': {
+    name: 'Classical Resolution Diastereomeric Salt Crystallisation Flow Diagram',
+    category: 'Stereochemistry',
+    description: 'Classical resolution of enantiomers via diastereomeric salt formation and crystallisation',
+    type: 'classical_resolution_diastereomeric_salt_crystallisation_flow',
+    defaultOptions: {
+        title: 'Classical Resolution: Diastereomeric Salt Crystallisation',
+        showResolutionFlow: true,
+        showCrystallisationStep: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'laminoAcidDGlucoseNaturalConfigurationFischerProjectionDiagram': {
+    name: 'L Amino Acid D Glucose Natural Configuration Fischer Projection Diagram',
+    category: 'Stereochemistry',
+    description: 'Fischer projections of L-amino acids and D-glucose showing natural configurations',
+    type: 'l_amino_acid_d_glucose_natural_configuration_fischer_projection',
+    defaultOptions: {
+        title: 'L-Amino Acids and D-Glucose: Fischer Projections',
+        showFischerProjections: true,
+        showConfigurationLabels: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'homotopicEnantiotopicDiastereotopicGroupsNMRDistinctionDiagram': {
+    name: 'Homotopic Enantiotopic Diastereotopic Groups NMR Distinction Diagram',
+    category: 'Stereochemistry',
+    description: 'NMR distinction between homotopic, enantiotopic and diastereotopic groups',
+    type: 'homotopic_enantiotopic_diastereotopic_groups_nmr_distinction',
+    defaultOptions: {
+        title: 'Homotopic, Enantiotopic, Diastereotopic Groups in NMR',
+        showGroupTypes: true,
+        showNMRDistinction: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== SPECTROSCOPY =====
+'electromagneticSpectrumEnergyFrequencyWavelengthDiagram': {
+    name: 'Electromagnetic Spectrum Energy Frequency Wavelength Diagram',
+    category: 'Spectroscopy',
+    description: 'Full electromagnetic spectrum with energy, frequency and wavelength scales',
+    type: 'electromagnetic_spectrum_energy_frequency_wavelength',
+    defaultOptions: {
+        title: 'Electromagnetic Spectrum',
+        showEnergyScale: true,
+        showFrequencyScale: true,
+        showWavelengthScale: true,
+        showRegionLabels: true,
+        width: 1300,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'massSpectrumMolecularIonFragmentIsotopePatternAnnotatedDiagram': {
+    name: 'Mass Spectrum Molecular Ion Fragment Isotope Pattern Annotated Diagram',
+    category: 'Spectroscopy',
+    description: 'Annotated mass spectrum showing molecular ion, fragmentation and isotope patterns',
+    type: 'mass_spectrum_molecular_ion_fragment_isotope_pattern_annotated',
+    defaultOptions: {
+        title: 'Mass Spectrum: Molecular Ion, Fragments, Isotope Patterns',
+        showMolecularIon: true,
+        showFragmentPeaks: true,
+        showIsotopePattern: true,
+        showAnnotations: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'irAbsorptionBandsFunctionalGroupWavenumberReferenceChart': {
+    name: 'IR Absorption Bands Functional Group Wavenumber Reference Chart',
+    category: 'Spectroscopy',
+    description: 'Reference chart of IR absorption bands by functional group and wavenumber range',
+    type: 'ir_absorption_bands_functional_group_wavenumber_reference',
+    defaultOptions: {
+        title: 'IR Absorption Bands Reference Chart',
+        showWavenumberRanges: true,
+        showFunctionalGroups: true,
+        showBandStrengths: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'uvVisElectronicTransitionConjugationBathochromicShiftDiagram': {
+    name: 'UV Vis Electronic Transition Conjugation Bathochromic Shift Diagram',
+    category: 'Spectroscopy',
+    description: 'UV-Vis electronic transitions with conjugation length and bathochromic shift',
+    type: 'uv_vis_electronic_transition_conjugation_bathochromic_shift',
+    defaultOptions: {
+        title: 'UV-Vis: Electronic Transitions and Bathochromic Shift',
+        showEnergyLevels: true,
+        showConjugationEffect: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'protonNMRChemicalShiftCouplingMultiplicityIntegrationAnnotatedSpectrum': {
+    name: 'Proton NMR Chemical Shift Coupling Multiplicity Integration Annotated Spectrum',
+    category: 'Spectroscopy',
+    description: 'Annotated 1H NMR spectrum showing chemical shift, coupling, multiplicity and integration',
+    type: 'proton_nmr_chemical_shift_coupling_multiplicity_integration_annotated',
+    defaultOptions: {
+        title: '¹H NMR: Shift, Coupling, Multiplicity, Integration',
+        showChemicalShifts: true,
+        showCouplingPatterns: true,
+        showIntegration: true,
+        showAnnotations: true,
+        width: 1200,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'carbon13ChemicalShiftRangeDEPT135PhaseComparisonDiagram': {
+    name: 'Carbon 13 Chemical Shift Range DEPT 135 Phase Comparison Diagram',
+    category: 'Spectroscopy',
+    description: '13C chemical shift ranges with DEPT-135 phase comparison for CH, CH2, CH3',
+    type: 'carbon13_chemical_shift_range_dept135_phase_comparison',
+    defaultOptions: {
+        title: '¹³C NMR: Chemical Shifts and DEPT-135',
+        showShiftRanges: true,
+        showDEPT135Phases: true,
+        showLabels: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'cosy_hsqc_hmbc_noesy_2dNMRCrosspeakConnectivityMapDiagram': {
+    name: 'COSY HSQC HMBC NOESY 2D NMR Crosspeak Connectivity Map Diagram',
+    category: 'Spectroscopy',
+    description: '2D NMR crosspeak connectivity maps for COSY, HSQC, HMBC and NOESY experiments',
+    type: 'cosy_hsqc_hmbc_noesy_2d_nmr_crosspeak_connectivity_map',
+    defaultOptions: {
+        title: '2D NMR: COSY, HSQC, HMBC, NOESY Connectivity',
+        showCOSY: true,
+        showHSQC: true,
+        showHMBC: true,
+        showNOESY: true,
+        width: 1300,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'structureElucidationStepwiseDecisionTreeFlowchart': {
+    name: 'Structure Elucidation Stepwise Decision Tree Flowchart',
+    category: 'Spectroscopy',
+    description: 'Stepwise decision tree flowchart for organic structure elucidation using spectroscopy',
+    type: 'structure_elucidation_stepwise_decision_tree_flowchart',
+    defaultOptions: {
+        title: 'Structure Elucidation Decision Tree',
+        showDecisionNodes: true,
+        showSpectralData: true,
+        showLabels: true,
+        width: 1200,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'xrayCrystallographyFluorescenceRamanCircularDichroismTechniqueOverviewDiagram': {
+    name: 'XRay Crystallography Fluorescence Raman Circular Dichroism Technique Overview Diagram',
+    category: 'Spectroscopy',
+    description: 'Overview of X-ray crystallography, fluorescence, Raman and circular dichroism techniques',
+    type: 'xray_crystallography_fluorescence_raman_circular_dichroism_overview',
+    defaultOptions: {
+        title: 'Advanced Spectroscopic Techniques Overview',
+        showTechniqueComparison: true,
+        showApplications: true,
+        showLabels: true,
+        width: 1300,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+'spectroscopicFingerprintFunctionalGroupCrossReferenceTable': {
+    name: 'Spectroscopic Fingerprint Functional Group Cross Reference Table',
+    category: 'Spectroscopy',
+    description: 'Cross-reference table of spectroscopic fingerprints for functional group identification',
+    type: 'spectroscopic_fingerprint_functional_group_cross_reference',
+    defaultOptions: {
+        title: 'Spectroscopic Fingerprint Cross-Reference',
+        showIRData: true,
+        showNMRData: true,
+        showMSData: true,
+        width: 1300,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== POLYMERS =====
+'polymerClassificationMolecularWeightDistributionDispersityDiagram': {
+    name: 'Polymer Classification Molecular Weight Distribution Dispersity Diagram',
+    category: 'Polymers',
+    description: 'Polymer classification with molecular weight distribution and dispersity index',
+    type: 'polymer_classification_molecular_weight_distribution_dispersity',
+    defaultOptions: {
+        title: 'Polymer Classification and Molecular Weight Distribution',
+        showDistributionCurve: true,
+        showDispersityIndex: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'freeRadicalChainGrowthInitiationPropagationTerminationDiagram': {
+    name: 'Free Radical Chain Growth Initiation Propagation Termination Diagram',
+    category: 'Polymers',
+    description: 'Free radical chain growth polymerisation stages: initiation, propagation, termination',
+    type: 'free_radical_chain_growth_initiation_propagation_termination',
+    defaultOptions: {
+        title: 'Free Radical Polymerisation: Initiation, Propagation, Termination',
+        showAllStages: true,
+        showMechanismArrows: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'carothersEquationConversionVsMolecularWeightStepGrowthDiagram': {
+    name: 'Carothers Equation Conversion Vs Molecular Weight Step Growth Diagram',
+    category: 'Polymers',
+    description: "Carothers equation: conversion vs molecular weight relationship in step-growth polymerisation",
+    type: 'carothers_equation_conversion_vs_molecular_weight_step_growth',
+    defaultOptions: {
+        title: "Carothers Equation: Conversion vs Molecular Weight",
+        showCarothersEquation: true,
+        showGraph: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'tgTmCrystallinityAmorphousMechanicalPropertyRelationshipDiagram': {
+    name: 'Tg Tm Crystallinity Amorphous Mechanical Property Relationship Diagram',
+    category: 'Polymers',
+    description: 'Relationship between Tg, Tm, crystallinity and mechanical properties of polymers',
+    type: 'tg_tm_crystallinity_amorphous_mechanical_property_relationship',
+    defaultOptions: {
+        title: 'Tg, Tm and Crystallinity Effects on Mechanical Properties',
+        showThermalTransitions: true,
+        showPropertyChanges: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'vulcanisationSulfurCrosslinkingNaturalRubberNetworkDiagram': {
+    name: 'Vulcanisation Sulfur Crosslinking Natural Rubber Network Diagram',
+    category: 'Polymers',
+    description: 'Vulcanisation of natural rubber via sulfur crosslinking to form a polymer network',
+    type: 'vulcanisation_sulfur_crosslinking_natural_rubber_network',
+    defaultOptions: {
+        title: 'Vulcanisation: Sulfur Crosslinking in Natural Rubber',
+        showCrosslinkingDiagram: true,
+        showNetworkStructure: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'celluloseStarchAlpha_betaGlycosidicLinkageComparisonDiagram': {
+    name: 'Cellulose Starch Alpha Beta Glycosidic Linkage Comparison Diagram',
+    category: 'Polymers',
+    description: 'Comparison of alpha and beta glycosidic linkages in starch and cellulose',
+    type: 'cellulose_starch_alpha_beta_glycosidic_linkage_comparison',
+    defaultOptions: {
+        title: 'Starch vs Cellulose: Alpha/Beta Glycosidic Linkages',
+        showLinkageComparison: true,
+        showStructuralConsequences: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'pla_phaDegradationPathwayCompostingConditionsDiagram': {
+    name: 'PLA PHA Degradation Pathway Composting Conditions Diagram',
+    category: 'Polymers',
+    description: 'Degradation pathways and composting conditions for PLA and PHA biopolymers',
+    type: 'pla_pha_degradation_pathway_composting_conditions',
+    defaultOptions: {
+        title: 'PLA and PHA Degradation Pathways',
+        showDegradationSteps: true,
+        showCompostingConditions: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'gpcMolecularWeightDistributionChromatogramDispersityDiagram': {
+    name: 'GPC Molecular Weight Distribution Chromatogram Dispersity Diagram',
+    category: 'Polymers',
+    description: 'GPC chromatogram with molecular weight distribution and dispersity index annotation',
+    type: 'gpc_molecular_weight_distribution_chromatogram_dispersity',
+    defaultOptions: {
+        title: 'GPC: Molecular Weight Distribution and Dispersity',
+        showChromatogram: true,
+        showDispersityAnnotation: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'plasticRecyclingHierarchyMechanicalChemicalLifecycleDiagram': {
+    name: 'Plastic Recycling Hierarchy Mechanical Chemical Lifecycle Diagram',
+    category: 'Polymers',
+    description: 'Plastic recycling hierarchy comparing mechanical and chemical recycling lifecycles',
+    type: 'plastic_recycling_hierarchy_mechanical_chemical_lifecycle',
+    defaultOptions: {
+        title: 'Plastic Recycling Hierarchy and Lifecycle',
+        showRecyclingHierarchy: true,
+        showLifecycleComparison: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'conductingPolymerBlockCopolymerSelfAssemblyHydrogelSmartMaterialOverviewDiagram': {
+    name: 'Conducting Polymer Block Copolymer Self Assembly Hydrogel Smart Material Overview Diagram',
+    category: 'Polymers',
+    description: 'Overview of advanced polymer materials: conducting polymers, block copolymers, hydrogels',
+    type: 'conducting_polymer_block_copolymer_self_assembly_hydrogel_smart_material_overview',
+    defaultOptions: {
+        title: 'Advanced Polymer Materials Overview',
+        showMaterialTypes: true,
+        showStructureApplications: true,
+        showLabels: true,
+        width: 1300,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== KINETICS =====
+'reactionRateConcentrationTimeAnnotatedCurveDiagram': {
+    name: 'Reaction Rate Concentration Time Annotated Curve Diagram',
+    category: 'Kinetics',
+    description: 'Annotated concentration-time curve showing reaction rate as gradient',
+    type: 'reaction_rate_concentration_time_annotated_curve',
+    defaultOptions: {
+        title: 'Reaction Rate: Concentration-Time Annotated Curve',
+        showGradientAnnotations: true,
+        showRateCalculation: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'maxwellBoltzmannDistributionActivationEnergyShadeAreaDiagram': {
+    name: 'Maxwell Boltzmann Distribution Activation Energy Shade Area Diagram',
+    category: 'Kinetics',
+    description: 'Maxwell-Boltzmann distribution with shaded area above activation energy threshold',
+    type: 'maxwell_boltzmann_distribution_activation_energy_shade_area',
+    defaultOptions: {
+        title: 'Maxwell-Boltzmann Distribution and Activation Energy',
+        showShadedArea: true,
+        showEaMarker: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'fiveFactorsRateSummaryComparisonDiagram': {
+    name: 'Five Factors Rate Summary Comparison Diagram',
+    category: 'Kinetics',
+    description: 'Summary comparison of five factors affecting reaction rate with explanations',
+    type: 'five_factors_rate_summary_comparison',
+    defaultOptions: {
+        title: 'Five Factors Affecting Reaction Rate',
+        showAllFactors: true,
+        showExplanations: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'gasCollectionSyringeColorimetrySetupDiagram': {
+    name: 'Gas Collection Syringe Colorimetry Setup Diagram',
+    category: 'Kinetics',
+    description: 'Experimental setup for measuring reaction rate using gas collection and colorimetry',
+    type: 'gas_collection_syringe_colorimetry_setup',
+    defaultOptions: {
+        title: 'Rate Measurement: Gas Collection and Colorimetry',
+        showGasCollectionSetup: true,
+        showColorimetrySetup: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'reactionOrderRateLawComparisonTable': {
+    name: 'Reaction Order Rate Law Comparison Table',
+    category: 'Kinetics',
+    description: 'Comparison table of zero, first and second order rate laws and their characteristics',
+    type: 'reaction_order_rate_law_comparison_table',
+    defaultOptions: {
+        title: 'Reaction Order and Rate Law Comparison',
+        showAllOrders: true,
+        showRateLaws: true,
+        showGraphShapes: true,
+        width: 1200,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'firstOrderConstantHalfLifeConcentrationTimeDiagram': {
+    name: 'First Order Constant Half Life Concentration Time Diagram',
+    category: 'Kinetics',
+    description: 'First-order reaction showing constant half-life on a concentration-time curve',
+    type: 'first_order_constant_half_life_concentration_time',
+    defaultOptions: {
+        title: 'First-Order Kinetics: Constant Half-Life',
+        showHalfLifeMarkers: true,
+        showConcentrationCurve: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'zeroFirstSecondOrderLinearisedPlotComparisonDiagram': {
+    name: 'Zero First Second Order Linearised Plot Comparison Diagram',
+    category: 'Kinetics',
+    description: 'Linearised plots for zero, first and second order kinetics side by side',
+    type: 'zero_first_second_order_linearised_plot_comparison',
+    defaultOptions: {
+        title: 'Linearised Plots: Zero, First and Second Order',
+        showAllOrderPlots: true,
+        showLinearisedEquations: true,
+        showLabels: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'arrheniusLnKVsOneOverTLinearPlotDiagram': {
+    name: 'Arrhenius Ln K Vs One Over T Linear Plot Diagram',
+    category: 'Kinetics',
+    description: 'Arrhenius plot of ln(k) vs 1/T for determining activation energy from gradient',
+    type: 'arrhenius_ln_k_vs_one_over_t_linear_plot',
+    defaultOptions: {
+        title: 'Arrhenius Plot: ln(k) vs 1/T',
+        showGradientAnnotation: true,
+        showEaCalculation: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'rateDeterminingStepMultiStepEnergyProfileDiagram': {
+    name: 'Rate Determining Step Multi Step Energy Profile Diagram',
+    category: 'Kinetics',
+    description: 'Multi-step reaction energy profile with rate-determining step identified',
+    type: 'rate_determining_step_multi_step_energy_profile',
+    defaultOptions: {
+        title: 'Rate-Determining Step in Multi-Step Energy Profile',
+        showAllSteps: true,
+        showRDSAnnotation: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'industrialBiologicalEnvironmentalRateApplicationsInfographic': {
+    name: 'Industrial Biological Environmental Rate Applications Infographic',
+    category: 'Kinetics',
+    description: 'Infographic of industrial, biological and environmental applications of reaction rate',
+    type: 'industrial_biological_environmental_rate_applications',
+    defaultOptions: {
+        title: 'Rate Applications: Industrial, Biological, Environmental',
+        showIndustrialExamples: true,
+        showBiologicalExamples: true,
+        showEnvironmentalExamples: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'rateLawComponentsAnnotatedExpressionDiagram': {
+    name: 'Rate Law Components Annotated Expression Diagram',
+    category: 'Kinetics',
+    description: 'Annotated rate law expression identifying rate constant, concentrations and orders',
+    type: 'rate_law_components_annotated_expression',
+    defaultOptions: {
+        title: 'Rate Law Components Annotated',
+        showAnnotations: true,
+        showComponentDefinitions: true,
+        showLabels: true,
+        width: 1000,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'zeroOrderConcentrationTimeLinearDecayDiagram': {
+    name: 'Zero Order Concentration Time Linear Decay Diagram',
+    category: 'Kinetics',
+    description: 'Zero-order kinetics: linear concentration-time decay graph with gradient = -k',
+    type: 'zero_order_concentration_time_linear_decay',
+    defaultOptions: {
+        title: 'Zero-Order Kinetics: Linear Concentration-Time Decay',
+        showLinearDecay: true,
+        showGradientAnnotation: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'firstOrderExponentialDecayAndLnLinearisationDiagram': {
+    name: 'First Order Exponential Decay And Ln Linearisation Diagram',
+    category: 'Kinetics',
+    description: 'First-order exponential decay curve and its ln[A] vs time linearisation',
+    type: 'first_order_exponential_decay_and_ln_linearisation',
+    defaultOptions: {
+        title: 'First-Order: Exponential Decay and ln Linearisation',
+        showExponentialCurve: true,
+        showLnLinearisation: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'secondOrderOneOverConcentrationLinearisationDiagram': {
+    name: 'Second Order One Over Concentration Linearisation Diagram',
+    category: 'Kinetics',
+    description: 'Second-order kinetics: 1/[A] vs time linearisation for rate constant determination',
+    type: 'second_order_one_over_concentration_linearisation',
+    defaultOptions: {
+        title: 'Second-Order: 1/[A] vs Time Linearisation',
+        showLinearisedPlot: true,
+        showGradientAnnotation: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'initialRatesMethodDataTableOrderDeterminationDiagram': {
+    name: 'Initial Rates Method Data Table Order Determination Diagram',
+    category: 'Kinetics',
+    description: 'Initial rates method data table for determining reaction orders experimentally',
+    type: 'initial_rates_method_data_table_order_determination',
+    defaultOptions: {
+        title: 'Initial Rates Method: Order Determination',
+        showDataTable: true,
+        showCalculationSteps: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'arrheniusTwoPointCalculationAnnotatedWorkingDiagram': {
+    name: 'Arrhenius Two Point Calculation Annotated Working Diagram',
+    category: 'Kinetics',
+    description: 'Annotated two-point Arrhenius calculation for activation energy from two temperatures',
+    type: 'arrhenius_two_point_calculation_annotated_working',
+    defaultOptions: {
+        title: 'Arrhenius Two-Point Calculation',
+        showAnnotatedWorking: true,
+        showFormula: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'rateDeterminingStepMechanismRateLawDerivationFlowchart': {
+    name: 'Rate Determining Step Mechanism Rate Law Derivation Flowchart',
+    category: 'Kinetics',
+    description: 'Flowchart for deriving the rate law from a multi-step mechanism and rate-determining step',
+    type: 'rate_determining_step_mechanism_rate_law_derivation_flowchart',
+    defaultOptions: {
+        title: 'Rate Law Derivation from Mechanism Flowchart',
+        showDecisionNodes: true,
+        showRateLawDerivation: true,
+        showLabels: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'michaelisMentenHyperbolicCurveAndLineweaverBurkDiagram': {
+    name: 'Michaelis Menten Hyperbolic Curve And Lineweaver Burk Diagram',
+    category: 'Kinetics',
+    description: 'Michaelis-Menten hyperbolic curve and Lineweaver-Burk double reciprocal plot',
+    type: 'michaelis_menten_hyperbolic_curve_and_lineweaver_burk',
+    defaultOptions: {
+        title: 'Michaelis-Menten and Lineweaver-Burk Plot',
+        showHyperbolicCurve: true,
+        showLineweaverBurk: true,
+        showKmVmax: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'integratedRateLawFormulaApplicationDecisionTreeDiagram': {
+    name: 'Integrated Rate Law Formula Application Decision Tree Diagram',
+    category: 'Kinetics',
+    description: 'Decision tree for selecting and applying the correct integrated rate law',
+    type: 'integrated_rate_law_formula_application_decision_tree',
+    defaultOptions: {
+        title: 'Integrated Rate Law Application Decision Tree',
+        showDecisionTree: true,
+        showFormulas: true,
+        showLabels: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'pharmacokineticsDrugPlasmaConcentrationTimeProfileDiagram': {
+    name: 'Pharmacokinetics Drug Plasma Concentration Time Profile Diagram',
+    category: 'Kinetics',
+    description: 'Pharmacokinetic drug plasma concentration-time profile with dosing intervals',
+    type: 'pharmacokinetics_drug_plasma_concentration_time_profile',
+    defaultOptions: {
+        title: 'Pharmacokinetics: Drug Plasma Concentration Profile',
+        showAbsorptionPhase: true,
+        showEliminationPhase: true,
+        showTherapeuticWindow: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== TRANSITION STATE THEORY =====
+'activatedComplexReactionCoordinateAnnotatedDiagram': {
+    name: 'Activated Complex Reaction Coordinate Annotated Diagram',
+    category: 'Transition State Theory',
+    description: 'Annotated reaction coordinate diagram showing the activated complex at the transition state',
+    type: 'activated_complex_reaction_coordinate_annotated',
+    defaultOptions: {
+        title: 'Activated Complex on Reaction Coordinate Diagram',
+        showTransitionState: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'exothermicEndothermicMultiStepEnergyProfileComparisonDiagram': {
+    name: 'Exothermic Endothermic Multi Step Energy Profile Comparison Diagram',
+    category: 'Transition State Theory',
+    description: 'Comparison of exothermic and endothermic energy profiles for multi-step reactions',
+    type: 'exothermic_endothermic_multi_step_energy_profile_comparison',
+    defaultOptions: {
+        title: 'Exothermic vs Endothermic Multi-Step Energy Profiles',
+        showExothermicProfile: true,
+        showEndothermicProfile: true,
+        showLabels: true,
+        width: 1200,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'maxwellBoltzmannTemperatureShiftEaThresholdShadedAreaDiagram': {
+    name: 'Maxwell Boltzmann Temperature Shift Ea Threshold Shaded Area Diagram',
+    category: 'Transition State Theory',
+    description: 'Maxwell-Boltzmann curves at two temperatures with Ea threshold and shaded area comparison',
+    type: 'maxwell_boltzmann_temperature_shift_ea_threshold_shaded_area',
+    defaultOptions: {
+        title: 'Maxwell-Boltzmann Temperature Shift and Ea Threshold',
+        showTwoTemperatureCurves: true,
+        showShadedAreas: true,
+        showEaMarker: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'arrheniusEquationComponentsAnnotatedFormulaAndLinearPlotDiagram': {
+    name: 'Arrhenius Equation Components Annotated Formula And Linear Plot Diagram',
+    category: 'Transition State Theory',
+    description: 'Annotated Arrhenius equation components alongside the linearised Arrhenius plot',
+    type: 'arrhenius_equation_components_annotated_formula_and_linear_plot',
+    defaultOptions: {
+        title: 'Arrhenius Equation: Annotated Formula and Linear Plot',
+        showAnnotatedFormula: true,
+        showLinearPlot: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'eyringEquationPotentialEnergySaddlePointSurfaceDiagram': {
+    name: 'Eyring Equation Potential Energy Saddle Point Surface Diagram',
+    category: 'Transition State Theory',
+    description: 'Eyring equation with potential energy surface showing saddle point',
+    type: 'eyring_equation_potential_energy_saddle_point_surface',
+    defaultOptions: {
+        title: 'Eyring Equation and Potential Energy Saddle Point',
+        showPotentialEnergySurface: true,
+        showSaddlePoint: true,
+        showEyringEquation: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'arrheniusPlotDataTableAndBestFitLineDiagram': {
+    name: 'Arrhenius Plot Data Table And Best Fit Line Diagram',
+    category: 'Transition State Theory',
+    description: 'Arrhenius plot with data table and best-fit line for activation energy determination',
+    type: 'arrhenius_plot_data_table_and_best_fit_line',
+    defaultOptions: {
+        title: 'Arrhenius Plot: Data Table and Best-Fit Line',
+        showDataTable: true,
+        showBestFitLine: true,
+        showGradientCalculation: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'catalysedUncatalysedEnergyProfileOverlayDiagram': {
+    name: 'Catalysed Uncatalysed Energy Profile Overlay Diagram',
+    category: 'Transition State Theory',
+    description: 'Overlaid energy profiles comparing catalysed and uncatalysed reaction pathways',
+    type: 'catalysed_uncatalysed_energy_profile_overlay',
+    defaultOptions: {
+        title: 'Catalysed vs Uncatalysed Energy Profile Overlay',
+        showOverlayProfiles: true,
+        showEaReduction: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'photonAbsorptionExcitedStateReactionPathwayDiagram': {
+    name: 'Photon Absorption Excited State Reaction Pathway Diagram',
+    category: 'Transition State Theory',
+    description: 'Photon absorption producing excited state and its photochemical reaction pathway',
+    type: 'photon_absorption_excited_state_reaction_pathway',
+    defaultOptions: {
+        title: 'Photon Absorption and Excited State Pathways',
+        showExcitedState: true,
+        showReactionPathways: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'enzymeTemperatureOptimumRateVsTemperatureBellCurveDiagram': {
+    name: 'Enzyme Temperature Optimum Rate Vs Temperature Bell Curve Diagram',
+    category: 'Transition State Theory',
+    description: 'Enzyme rate vs temperature bell curve showing optimum temperature and denaturation',
+    type: 'enzyme_temperature_optimum_rate_vs_temperature_bell_curve',
+    defaultOptions: {
+        title: 'Enzyme Activity: Rate vs Temperature Bell Curve',
+        showOptimumTemperature: true,
+        showDenaturationAnnotation: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'industrialActivationEnergyTradeoffTemperatureYieldRateDiagram': {
+    name: 'Industrial Activation Energy Tradeoff Temperature Yield Rate Diagram',
+    category: 'Transition State Theory',
+    description: 'Industrial trade-off between temperature, reaction rate and equilibrium yield',
+    type: 'industrial_activation_energy_tradeoff_temperature_yield_rate',
+    defaultOptions: {
+        title: 'Industrial Temperature: Rate vs Yield Trade-off',
+        showTradeoffCurves: true,
+        showOptimalConditions: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'catalyticCycleTurnoverNumberRegenerationAnnotatedDiagram': {
+    name: 'Catalytic Cycle Turnover Number Regeneration Annotated Diagram',
+    category: 'Transition State Theory',
+    description: 'Catalytic cycle with turnover number and catalyst regeneration annotated',
+    type: 'catalytic_cycle_turnover_number_regeneration_annotated',
+    defaultOptions: {
+        title: 'Catalytic Cycle and Turnover Number',
+        showCycleDiagram: true,
+        showTurnoverNumber: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'homogeneousCatalyticCycleIntermediateFormationDiagram': {
+    name: 'Homogeneous Catalytic Cycle Intermediate Formation Diagram',
+    category: 'Transition State Theory',
+    description: 'Homogeneous catalytic cycle showing intermediate formation and catalyst recovery',
+    type: 'homogeneous_catalytic_cycle_intermediate_formation',
+    defaultOptions: {
+        title: 'Homogeneous Catalytic Cycle: Intermediate Formation',
+        showCycleDiagram: true,
+        showIntermediates: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'adsorptionActiveSiteChemisorptionSurfaceReactionDesorptionDiagram': {
+    name: 'Adsorption Active Site Chemisorption Surface Reaction Desorption Diagram',
+    category: 'Transition State Theory',
+    description: 'Heterogeneous catalysis: adsorption, active site, chemisorption, reaction and desorption',
+    type: 'adsorption_active_site_chemisorption_surface_reaction_desorption',
+    defaultOptions: {
+        title: 'Heterogeneous Catalysis: Surface Reaction Steps',
+        showAdsorptionStep: true,
+        showSurfaceReaction: true,
+        showDesorption: true,
+        width: 1200,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'michaelisMentenMechanismLineweaverBurkInhibitionComparisonDiagram': {
+    name: 'Michaelis Menten Mechanism Lineweaver Burk Inhibition Comparison Diagram',
+    category: 'Transition State Theory',
+    description: 'Michaelis-Menten mechanism with Lineweaver-Burk plots comparing inhibition types',
+    type: 'michaelis_menten_mechanism_lineweaver_burk_inhibition_comparison',
+    defaultOptions: {
+        title: 'Michaelis-Menten Inhibition: Lineweaver-Burk Comparison',
+        showCompetitiveInhibition: true,
+        showNonCompetitiveInhibition: true,
+        showLineweaverBurk: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'haberProcessContactProcessCatalyticConverterConditionsDiagram': {
+    name: 'Haber Process Contact Process Catalytic Converter Conditions Diagram',
+    category: 'Transition State Theory',
+    description: 'Conditions and catalysts for Haber process, Contact process and catalytic converters',
+    type: 'haber_process_contact_process_catalytic_converter_conditions',
+    defaultOptions: {
+        title: 'Industrial Catalysts: Haber, Contact, Catalytic Converter',
+        showProcessConditions: true,
+        showCatalysts: true,
+        showLabels: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'tio2BandGapElectronHolePairOhRadicalFormationDiagram': {
+    name: 'TiO2 Band Gap Electron Hole Pair OH Radical Formation Diagram',
+    category: 'Transition State Theory',
+    description: 'TiO2 photocatalysis: band gap, electron-hole pair generation and OH radical formation',
+    type: 'tio2_band_gap_electron_hole_pair_oh_radical_formation',
+    defaultOptions: {
+        title: 'TiO₂ Photocatalysis: Band Gap and OH Radical Formation',
+        showBandGap: true,
+        showElectronHolePair: true,
+        showRadicalFormation: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'prolineEnamineIntermediateCovalentOrganocatalysisDiagram': {
+    name: 'Proline Enamine Intermediate Covalent Organocatalysis Diagram',
+    category: 'Transition State Theory',
+    description: 'Proline organocatalysis via enamine intermediate in covalent catalytic cycle',
+    type: 'proline_enamine_intermediate_covalent_organocatalysis',
+    defaultOptions: {
+        title: 'Proline Organocatalysis: Enamine Intermediate',
+        showCatalyticCycle: true,
+        showEnamineIntermediate: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'atomEconomyEFactorGreenCatalysisBiocatalysisComparisonDiagram': {
+    name: 'Atom Economy E Factor Green Catalysis Biocatalysis Comparison Diagram',
+    category: 'Transition State Theory',
+    description: 'Comparison of atom economy, E-factor, green catalysis and biocatalysis metrics',
+    type: 'atom_economy_e_factor_green_catalysis_biocatalysis_comparison',
+    defaultOptions: {
+        title: 'Green Chemistry Metrics: Atom Economy, E-Factor',
+        showAtomEconomy: true,
+        showEFactor: true,
+        showGreenMetrics: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'homogeneousHeterogeneousEnzymeOrganocatalysisComparisonTableDiagram': {
+    name: 'Homogeneous Heterogeneous Enzyme Organocatalysis Comparison Table Diagram',
+    category: 'Transition State Theory',
+    description: 'Comparison table of homogeneous, heterogeneous, enzyme and organocatalysis',
+    type: 'homogeneous_heterogeneous_enzyme_organocatalysis_comparison_table',
+    defaultOptions: {
+        title: 'Catalysis Types Comparison Table',
+        showComparisonTable: true,
+        showAdvantagesDisadvantages: true,
+        showLabels: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'catalyticConverterFuelCellHaberEnzymeDrugRealWorldApplicationsDiagram': {
+    name: 'Catalytic Converter Fuel Cell Haber Enzyme Drug Real World Applications Diagram',
+    category: 'Transition State Theory',
+    description: 'Real-world catalysis applications: catalytic converter, fuel cell, Haber, enzymes, drugs',
+    type: 'catalytic_converter_fuel_cell_haber_enzyme_drug_real_world_applications',
+    defaultOptions: {
+        title: 'Real-World Catalysis Applications',
+        showApplicationExamples: true,
+        showCatalystDetails: true,
+        showLabels: true,
+        width: 1300,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== THERMODYNAMICS =====
+'microsateMacrostateEnergyDispersalDiagram': {
+    name: 'Microstate Macrostate Energy Dispersal Diagram',
+    category: 'Thermodynamics',
+    description: 'Microstates and macrostates illustrating energy and matter dispersal',
+    type: 'microstate_macrostate_energy_dispersal',
+    defaultOptions: {
+        title: 'Microstates, Macrostates and Energy Dispersal',
+        showMicrostates: true,
+        showEnergyDispersal: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'threeThermodynamicLawsEntropyRelationshipChart': {
+    name: 'Three Thermodynamic Laws Entropy Relationship Chart',
+    category: 'Thermodynamics',
+    description: 'Chart summarising the three laws of thermodynamics and their entropy relationships',
+    type: 'three_thermodynamic_laws_entropy_relationship',
+    defaultOptions: {
+        title: 'Three Laws of Thermodynamics and Entropy',
+        showAllThreeLaws: true,
+        showEntropyRelationships: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'standardMolarEntropyComparisonBarChart': {
+    name: 'Standard Molar Entropy Comparison Bar Chart',
+    category: 'Thermodynamics',
+    description: 'Bar chart comparing standard molar entropy values for common substances',
+    type: 'standard_molar_entropy_comparison_bar_chart',
+    defaultOptions: {
+        title: 'Standard Molar Entropy Comparison',
+        showBarChart: true,
+        showSubstanceLabels: true,
+        showTrendAnnotations: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'spontaneityUniverseEntropyDecisionFlowchart': {
+    name: 'Spontaneity Universe Entropy Decision Flowchart',
+    category: 'Thermodynamics',
+    description: 'Flowchart for predicting spontaneity based on total universe entropy change',
+    type: 'spontaneity_universe_entropy_decision_flowchart',
+    defaultOptions: {
+        title: 'Spontaneity: Universe Entropy Decision Flowchart',
+        showDecisionNodes: true,
+        showEntropyComponents: true,
+        showLabels: true,
+        width: 1000,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'solidLiquidGasEntropyOrderingDiagram': {
+    name: 'Solid Liquid Gas Entropy Ordering Diagram',
+    category: 'Thermodynamics',
+    description: 'Entropy ordering across solid, liquid and gas phases with molecular disorder',
+    type: 'solid_liquid_gas_entropy_ordering',
+    defaultOptions: {
+        title: 'Entropy Ordering: Solid, Liquid, Gas',
+        showPhaseStates: true,
+        showEntropyOrder: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'molecularComplexityMolarMassEntropyTrendChart': {
+    name: 'Molecular Complexity Molar Mass Entropy Trend Chart',
+    category: 'Thermodynamics',
+    description: 'Entropy trend with molecular complexity and molar mass for related compounds',
+    type: 'molecular_complexity_molar_mass_entropy_trend',
+    defaultOptions: {
+        title: 'Molecular Complexity and Molar Mass: Entropy Trends',
+        showComplexityTrend: true,
+        showMolarMassTrend: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'boltzmannEquationMicrostateCountingDiagram': {
+    name: 'Boltzmann Equation Microstate Counting Diagram',
+    category: 'Thermodynamics',
+    description: 'Boltzmann equation S = k ln(W) with microstate counting visualisation',
+    type: 'boltzmann_equation_microstate_counting',
+    defaultOptions: {
+        title: 'Boltzmann Equation: S = k ln(W)',
+        showMicrostateCount: true,
+        showAnnotatedEquation: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'deltaGasMolesEntropyChangeReactionDiagram': {
+    name: 'Delta Gas Moles Entropy Change Reaction Diagram',
+    category: 'Thermodynamics',
+    description: 'Entropy change prediction based on change in moles of gas during reaction',
+    type: 'delta_gas_moles_entropy_change_reaction',
+    defaultOptions: {
+        title: 'Gas Mole Change and Reaction Entropy',
+        showGasMoleChange: true,
+        showEntropyPrediction: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'shannonBoltzmannEntropyAnalogyComparisonDiagram': {
+    name: 'Shannon Boltzmann Entropy Analogy Comparison Diagram',
+    category: 'Thermodynamics',
+    description: 'Analogy and comparison between Shannon information entropy and Boltzmann entropy',
+    type: 'shannon_boltzmann_entropy_analogy_comparison',
+    defaultOptions: {
+        title: 'Shannon vs Boltzmann Entropy Analogy',
+        showAnalogyComparison: true,
+        showFormulas: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'biologicalSystemsEntropyExportOpenSystemDiagram': {
+    name: 'Biological Systems Entropy Export Open System Diagram',
+    category: 'Thermodynamics',
+    description: 'Biological systems as open systems that export entropy to maintain order',
+    type: 'biological_systems_entropy_export_open_system',
+    defaultOptions: {
+        title: 'Biological Systems: Entropy Export as Open Systems',
+        showOpenSystemDiagram: true,
+        showEntropyExport: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'enthalpyInternalEnergyPVTermRelationshipDiagram': {
+    name: 'Enthalpy Internal Energy PV Term Relationship Diagram',
+    category: 'Thermodynamics',
+    description: 'Relationship between enthalpy H, internal energy U and PV work term',
+    type: 'enthalpy_internal_energy_pv_term_relationship',
+    defaultOptions: {
+        title: 'Enthalpy, Internal Energy and PV Relationship',
+        showHEquation: true,
+        showPVTerm: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'exothermicEndothermicEnergyProfileDiagram': {
+    name: 'Exothermic Endothermic Energy Profile Diagram',
+    category: 'Thermodynamics',
+    description: 'Energy profile diagrams for exothermic and endothermic reactions comparison',
+    type: 'exothermic_endothermic_energy_profile',
+    defaultOptions: {
+        title: 'Exothermic and Endothermic Energy Profiles',
+        showBothProfiles: true,
+        showDeltaHAnnotations: true,
+        showLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'standardEnthalpyTypesComparisonTable': {
+    name: 'Standard Enthalpy Types Comparison Table',
+    category: 'Thermodynamics',
+    description: 'Comparison table of standard enthalpy types: formation, combustion, neutralisation, etc.',
+    type: 'standard_enthalpy_types_comparison_table',
+    defaultOptions: {
+        title: 'Standard Enthalpy Types Comparison',
+        showAllEnthalpyTypes: true,
+        showDefinitions: true,
+        showExamples: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'hessLawEnergyLevelCycleRouteDiagram': {
+    name: 'Hess Law Energy Level Cycle Route Diagram',
+    category: 'Thermodynamics',
+    description: "Hess's law energy level cycle showing direct and indirect routes",
+    type: 'hess_law_energy_level_cycle_route',
+    defaultOptions: {
+        title: "Hess's Law: Energy Level Cycle",
+        showDirectRoute: true,
+        showIndirectRoute: true,
+        showEnergyLevels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'bondBreakingFormingEnergyBudgetDiagram': {
+    name: 'Bond Breaking Forming Energy Budget Diagram',
+    category: 'Thermodynamics',
+    description: 'Energy budget diagram showing bond breaking (endothermic) and forming (exothermic)',
+    type: 'bond_breaking_forming_energy_budget',
+    defaultOptions: {
+        title: 'Bond Breaking and Forming: Energy Budget',
+        showBondBreaking: true,
+        showBondForming: true,
+        showNetEnthalpy: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'bornHaberCycleNaClEnergyLevelDiagram': {
+    name: 'Born Haber Cycle NaCl Energy Level Diagram',
+    category: 'Thermodynamics',
+    description: 'Born-Haber cycle for NaCl with all energy level steps annotated',
+    type: 'born_haber_cycle_nacl_energy_level',
+    defaultOptions: {
+        title: 'Born-Haber Cycle for NaCl',
+        showAllSteps: true,
+        showEnergyLevels: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'kirchhoffHeatCapacityDeltaHTemperatureCorrectionDiagram': {
+    name: 'Kirchhoff Heat Capacity Delta H Temperature Correction Diagram',
+    category: 'Thermodynamics',
+    description: "Kirchhoff's law: heat capacity correction for ΔH at different temperatures",
+    type: 'kirchhoff_heat_capacity_delta_h_temperature_correction',
+    defaultOptions: {
+        title: "Kirchhoff's Law: ΔH Temperature Correction",
+        showKirchhoffEquation: true,
+        showHeatCapacityGraph: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'hydrogenationResonanceEnergyBenzeneDelocalisationDiagram': {
+    name: 'Hydrogenation Resonance Energy Benzene Delocalisation Diagram',
+    category: 'Thermodynamics',
+    description: 'Resonance energy of benzene from hydrogenation enthalpy comparison',
+    type: 'hydrogenation_resonance_energy_benzene_delocalisation',
+    defaultOptions: {
+        title: 'Benzene Resonance Energy from Hydrogenation',
+        showExpectedVsActual: true,
+        showResonanceEnergy: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'atwaterFuelValueMacronutrientComparisonChart': {
+    name: 'Atwater Fuel Value Macronutrient Comparison Chart',
+    category: 'Thermodynamics',
+    description: 'Atwater fuel values for macronutrients: carbohydrates, fats and proteins',
+    type: 'atwater_fuel_value_macronutrient_comparison',
+    defaultOptions: {
+        title: 'Atwater Fuel Values: Macronutrient Comparison',
+        showFuelValues: true,
+        showBarChart: true,
+        showLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+'haberProcessTemperaturePressureEquilibriumYieldDiagram': {
+    name: 'Haber Process Temperature Pressure Equilibrium Yield Diagram',
+    category: 'Thermodynamics',
+    description: 'Haber process equilibrium yield as a function of temperature and pressure',
+    type: 'haber_process_temperature_pressure_equilibrium_yield',
+    defaultOptions: {
+        title: 'Haber Process: Equilibrium Yield vs T and P',
+        showYieldContours: true,
+        showOptimalConditions: true,
+        showLabels: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'gibbsEnergyEnthalpyEntropyRelationshipTriangleDiagram': {
+    name: 'Gibbs Energy Enthalpy Entropy Relationship Triangle Diagram',
+    category: 'Thermodynamics',
+    description: 'Triangle relationship diagram for Gibbs energy, enthalpy and entropy (ΔG = ΔH - TΔS)',
+    type: 'gibbs_energy_enthalpy_entropy_relationship_triangle',
+    defaultOptions: {
+        title: 'Gibbs Energy: ΔG = ΔH - TΔS Triangle',
+        showTriangleDiagram: true,
+        showEquation: true,
+        showLabels: true,
+        width: 900,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'deltaGvsTemperatureFourSignCombinationsGraph': {
+    name: 'Delta G Vs Temperature Four Sign Combinations Graph',
+    category: 'Thermodynamics',
+    description: 'ΔG vs temperature graph showing four sign combination scenarios for spontaneity',
+    type: 'delta_g_vs_temperature_four_sign_combinations',
+    defaultOptions: {
+        title: 'ΔG vs Temperature: Four Sign Combinations',
+        showAllFourScenarios: true,
+        showSpontaneityRegions: true,
+        showLabels: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'standardGibbsFormationEnergyStabilityLadderDiagram': {
+    name: 'Standard Gibbs Formation Energy Stability Ladder Diagram',
+    category: 'Thermodynamics',
+    description: 'Stability ladder of standard Gibbs formation energies for common compounds',
+    type: 'standard_gibbs_formation_energy_stability_ladder',
+    defaultOptions: {
+        title: 'Standard Gibbs Formation Energy Stability Ladder',
+        showStabilityLadder: true,
+        showFormationValues: true,
+        showLabels: true,
+        width: 900,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+'gibbsEnergyReactionProgressMinimumEquilibriumCurve': {
+    name: 'Gibbs Energy Reaction Progress Minimum Equilibrium Curve',
+    category: 'Thermodynamics',
+    description: 'Gibbs energy vs reaction progress curve showing minimum at equilibrium',
+    type: 'gibbs_energy_reaction_progress_minimum_equilibrium',
+    defaultOptions: {
+        title: 'Gibbs Energy vs Reaction Progress at Equilibrium',
+        showMinimumPoint: true,
+        showEquilibriumAnnotation: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'nernstEquationCellPotentialConcentrationDependenceDiagram': {
+    name: 'Nernst Equation Cell Potential Concentration Dependence Diagram',
+    category: 'Thermodynamics',
+    description: 'Nernst equation showing cell potential dependence on ion concentrations',
+    type: 'nernst_equation_cell_potential_concentration_dependence',
+    defaultOptions: {
+        title: 'Nernst Equation: Cell Potential vs Concentration',
+        showNernstEquation: true,
+        showConcentrationEffect: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'coupledReactionGibbsEnergyTransferDiagram': {
+    name: 'Coupled Reaction Gibbs Energy Transfer Diagram',
+    category: 'Thermodynamics',
+    description: 'Coupled reactions where Gibbs energy from spontaneous reaction drives non-spontaneous',
+    type: 'coupled_reaction_gibbs_energy_transfer',
+    defaultOptions: {
+        title: 'Coupled Reactions: Gibbs Energy Transfer',
+        showCoupledDiagram: true,
+        showEnergyTransfer: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'reactionQuotientQvsKGibbsEnergyDirectionDiagram': {
+    name: 'Reaction Quotient Q Vs K Gibbs Energy Direction Diagram',
+    category: 'Thermodynamics',
+    description: 'Q vs K comparison to predict reaction direction from Gibbs energy',
+    type: 'reaction_quotient_q_vs_k_gibbs_energy_direction',
+    defaultOptions: {
+        title: 'Q vs K: Reaction Direction from Gibbs Energy',
+        showQvsKComparison: true,
+        showDirectionPrediction: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'clausiusClapeyronSlopePhaseTransitionPressureTemperatureDiagram': {
+    name: 'Clausius Clapeyron Slope Phase Transition Pressure Temperature Diagram',
+    category: 'Thermodynamics',
+    description: 'Clausius-Clapeyron equation: slope of phase transition lines on P-T phase diagram',
+    type: 'clausius_clapeyron_slope_phase_transition_pressure_temperature',
+    defaultOptions: {
+        title: 'Clausius-Clapeyron: Phase Transition P-T Diagram',
+        showPhaseDiagram: true,
+        showClausiusClapeyronEquation: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'atpHydrolysisGibbsEnergyBiologicalCouplingDiagram': {
+    name: 'ATP Hydrolysis Gibbs Energy Biological Coupling Diagram',
+    category: 'Thermodynamics',
+    description: 'ATP hydrolysis Gibbs energy release and biological coupling to drive reactions',
+    type: 'atp_hydrolysis_gibbs_energy_biological_coupling',
+    defaultOptions: {
+        title: 'ATP Hydrolysis: Gibbs Energy and Biological Coupling',
+        showATPHydrolysis: true,
+        showCouplingMechanism: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'ellinghamDiagramMetalOxideReductionTemperaturePlot': {
+    name: 'Ellingham Diagram Metal Oxide Reduction Temperature Plot',
+    category: 'Thermodynamics',
+    description: 'Ellingham diagram: ΔG vs temperature for metal oxide reduction reactions',
+    type: 'ellingham_diagram_metal_oxide_reduction_temperature',
+    defaultOptions: {
+        title: 'Ellingham Diagram: Metal Oxide Reduction',
+        showMultipleMetals: true,
+        showReductionTemperatures: true,
+        showLabels: true,
+        width: 1200,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== CALORIMETRY =====
+'specificHeatCapacityMassTemperatureHeatTriangleDiagram': {
+    name: 'Specific Heat Capacity Mass Temperature Heat Triangle Diagram',
+    category: 'Calorimetry',
+    description: 'Triangle relationship for specific heat capacity, mass, temperature change and heat',
+    type: 'specific_heat_capacity_mass_temperature_heat_triangle',
+    defaultOptions: {
+        title: 'Specific Heat Capacity Triangle: q = mcΔT',
+        showTriangleFormula: true,
+        showWorkedExample: true,
+        showLabels: true,
+        width: 900,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'qMcDeltaTVariableRelationshipDiagram': {
+    name: 'q Mc Delta T Variable Relationship Diagram',
+    category: 'Calorimetry',
+    description: 'Annotated q = mcΔT equation with variable definitions and unit relationships',
+    type: 'q_mc_delta_t_variable_relationship',
+    defaultOptions: {
+        title: 'q = mcΔT: Variable Relationships',
+        showAnnotatedEquation: true,
+        showUnits: true,
+        showLabels: true,
+        width: 1000,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+'calorimetryTypesDesignComparisonAnnotatedDiagram': {
+    name: 'Calorimetry Types Design Comparison Annotated Diagram',
+    category: 'Calorimetry',
+    description: 'Annotated comparison of different calorimeter designs and their applications',
+    type: 'calorimetry_types_design_comparison_annotated',
+    defaultOptions: {
+        title: 'Calorimetry Types: Design Comparison',
+        showDesignComparison: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'constantPressurePolystyreneCupSetupAnnotatedDiagram': {
+    name: 'Constant Pressure Polystyrene Cup Setup Annotated Diagram',
+    category: 'Calorimetry',
+    description: 'Annotated setup of a constant pressure polystyrene cup calorimeter',
+    type: 'constant_pressure_polystyrene_cup_setup_annotated',
+    defaultOptions: {
+        title: 'Polystyrene Cup Calorimeter Setup',
+        showEquipmentLabels: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 900,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+'bombCalorimeterCrossSectionAnnotatedDiagram': {
+    name: 'Bomb Calorimeter Cross Section Annotated Diagram',
+    category: 'Calorimetry',
+    description: 'Cross-section diagram of a bomb calorimeter with all components annotated',
+    type: 'bomb_calorimeter_cross_section_annotated',
+    defaultOptions: {
+        title: 'Bomb Calorimeter Cross-Section',
+        showCrossSectionLabels: true,
+        showAnnotations: true,
+        showLabels: true,
+        width: 900,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+'hessLawIndirectRouteEnergyLevelCycleCalorimetryDiagram': {
+    name: 'Hess Law Indirect Route Energy Level Cycle Calorimetry Diagram',
+    category: 'Calorimetry',
+    description: "Hess's law applied to calorimetry via indirect energy level cycle route",
+    type: 'hess_law_indirect_route_energy_level_cycle_calorimetry',
+    defaultOptions: {
+        title: "Hess's Law: Indirect Route in Calorimetry",
+        showEnergyCycle: true,
+        showIndirectRoute: true,
+        showLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'temperatureTimeExtrapolationHeatLossCorrectionGraph': {
+    name: 'Temperature Time Extrapolation Heat Loss Correction Graph',
+    category: 'Calorimetry',
+    description: 'Temperature-time graph with extrapolation correction for heat loss in calorimetry',
+    type: 'temperature_time_extrapolation_heat_loss_correction',
+    defaultOptions: {
+        title: 'Temperature-Time Extrapolation: Heat Loss Correction',
+        showExtrapolation: true,
+        showHeatLossAnnotation: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'calorimetryErrorSourcesSystematicRandomComparisonChart': {
+    name: 'Calorimetry Error Sources Systematic Random Comparison Chart',
+    category: 'Calorimetry',
+    description: 'Comparison chart of systematic and random error sources in calorimetry experiments',
+    type: 'calorimetry_error_sources_systematic_random_comparison',
+    defaultOptions: {
+        title: 'Calorimetry Error Sources: Systematic vs Random',
+        showSystematicErrors: true,
+        showRandomErrors: true,
+        showLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+'atwaterFactorMacronutrientCaloricDensityComparisonChart': {
+    name: 'Atwater Factor Macronutrient Caloric Density Comparison Chart',
+    category: 'Calorimetry',
+    description: 'Atwater factors with macronutrient caloric density comparison chart',
+    type: 'atwater_factor_macronutrient_caloric_density_comparison',
+    defaultOptions: {
+        title: 'Atwater Factors: Macronutrient Caloric Density',
+        showAtwaterFactors: true,
+        showBarComparison: true,
+        showLabels: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+'differentialScanningCalorimeterHeatFlowPeakAnnotatedDiagram': {
+    name: 'Differential Scanning Calorimeter Heat Flow Peak Annotated Diagram',
+    category: 'Calorimetry',
+    description: 'DSC heat flow curve with annotated peaks for thermal transitions',
+    type: 'differential_scanning_calorimeter_heat_flow_peak_annotated',
+    defaultOptions: {
+        title: 'DSC: Heat Flow Peaks Annotated',
+        showHeatFlowCurve: true,
+        showPeakAnnotations: true,
+        showPhaseTransitions: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+
+
+// ===== ACID-BASE CHEMISTRY =====
+'acidBaseVocabularyConceptMap': {
+    name: 'Acid-Base Vocabulary Concept Map',
+    category: 'Acid-Base Chemistry',
+    description: 'Concept map linking key acid-base vocabulary and definitions',
+    type: 'acid_base_vocabulary_concept_map',
+    defaultOptions: {
+        title: 'Acid-Base Vocabulary Concept Map',
+        showDefinitions: true,
+        showConnections: true,
+        showExamples: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'arrheniusIonDissociationInWaterDiagram': {
+    name: 'Arrhenius Ion Dissociation in Water',
+    category: 'Acid-Base Chemistry',
+    description: 'Arrhenius acid/base dissociation producing H⁺ and OH⁻ ions in water',
+    type: 'arrhenius_ion_dissociation_water',
+    defaultOptions: {
+        title: 'Arrhenius Ion Dissociation in Water',
+        showDissociationEquations: true,
+        showIonLabels: true,
+        showWaterMolecules: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'protonTransferConjugatePairArrowDiagram': {
+    name: 'Proton Transfer Conjugate Pair Arrow Diagram',
+    category: 'Acid-Base Chemistry',
+    description: 'Brønsted-Lowry proton transfer showing conjugate acid-base pairs with curved arrows',
+    type: 'proton_transfer_conjugate_pair_arrow',
+    defaultOptions: {
+        title: 'Proton Transfer & Conjugate Pairs',
+        showConjugatePairs: true,
+        showCurvedArrows: true,
+        showCharges: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lewisAcidBaseElectronPairDonationDiagram': {
+    name: 'Lewis Acid-Base Electron Pair Donation',
+    category: 'Acid-Base Chemistry',
+    description: 'Lewis acid-base theory showing electron pair donor and acceptor interactions',
+    type: 'lewis_acid_base_electron_pair_donation',
+    defaultOptions: {
+        title: 'Lewis Acid-Base Electron Pair Donation',
+        showElectronPairs: true,
+        showDonorAcceptorLabels: true,
+        showCurvedArrows: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'strongWeakAcidDissociationComparisonDiagram': {
+    name: 'Strong vs Weak Acid Dissociation Comparison',
+    category: 'Acid-Base Chemistry',
+    description: 'Side-by-side comparison of complete vs partial dissociation of strong and weak acids',
+    type: 'strong_weak_acid_dissociation_comparison',
+    defaultOptions: {
+        title: 'Strong vs Weak Acid Dissociation',
+        showDissociationExtent: true,
+        showEquilibriumArrows: true,
+        showIonConcentrations: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'waterAutoionisationEquilibriumDiagram': {
+    name: 'Water Autoionisation Equilibrium',
+    category: 'Acid-Base Chemistry',
+    description: 'Self-ionisation of water producing H₃O⁺ and OH⁻ with Kw expression',
+    type: 'water_autoionisation_equilibrium',
+    defaultOptions: {
+        title: 'Water Autoionisation Equilibrium',
+        showKwExpression: true,
+        showEquilibriumArrows: true,
+        showIonConcentrations: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'polyproticAcidStepwiseIonisationDiagram': {
+    name: 'Polyprotic Acid Stepwise Ionisation',
+    category: 'Acid-Base Chemistry',
+    description: 'Sequential proton loss steps for polyprotic acids with Ka values at each stage',
+    type: 'polyprotic_acid_stepwise_ionisation',
+    defaultOptions: {
+        title: 'Polyprotic Acid Stepwise Ionisation',
+        showKaValues: true,
+        showStepLabels: true,
+        showChargeChanges: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'molecularCompleteNetIonicEquationComparisonDiagram': {
+    name: 'Molecular, Complete & Net Ionic Equation Comparison',
+    category: 'Acid-Base Chemistry',
+    description: 'Three-level comparison of molecular, complete ionic, and net ionic equations',
+    type: 'molecular_complete_net_ionic_equation_comparison',
+    defaultOptions: {
+        title: 'Molecular vs Complete vs Net Ionic Equations',
+        showSpectatorIons: true,
+        showCancellationSteps: true,
+        showLabels: true,
+        width: 1050,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'saltHydrolysisPhOutcomeSummaryTable': {
+    name: 'Salt Hydrolysis pH Outcome Summary Table',
+    category: 'Acid-Base Chemistry',
+    description: 'Table summarising pH outcomes for salts of strong/weak acid and base combinations',
+    type: 'salt_hydrolysis_ph_outcome_summary_table',
+    defaultOptions: {
+        title: 'Salt Hydrolysis pH Outcome Summary',
+        showExamples: true,
+        showHydrolysisReactions: true,
+        showPhOutcomes: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'indicatorColorChangePhRangeChart': {
+    name: 'Indicator Colour Change pH Range Chart',
+    category: 'Acid-Base Chemistry',
+    description: 'Chart showing colour transitions and pH ranges for common acid-base indicators',
+    type: 'indicator_color_change_ph_range_chart',
+    defaultOptions: {
+        title: 'Indicator Colour Change pH Ranges',
+        showColourBands: true,
+        showPhScale: true,
+        showIndicatorNames: true,
+        width: 1100,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'acidRainFormationAndOceanAcidificationDiagram': {
+    name: 'Acid Rain Formation & Ocean Acidification',
+    category: 'Acid-Base Chemistry',
+    description: 'Formation of acid rain from pollutants and CO₂-driven ocean acidification',
+    type: 'acid_rain_formation_ocean_acidification',
+    defaultOptions: {
+        title: 'Acid Rain & Ocean Acidification',
+        showChemicalEquations: true,
+        showEnvironmentalImpacts: true,
+        showSourceLabels: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'logarithmBaseConceptAndAntilogDiagram': {
+    name: 'Logarithm Base Concept & Antilog',
+    category: 'Acid-Base Chemistry',
+    description: 'Visual explanation of logarithm base 10 and antilog operations for pH calculations',
+    type: 'logarithm_base_concept_antilog',
+    defaultOptions: {
+        title: 'Logarithm & Antilog Concept',
+        showNumberLine: true,
+        showExamples: true,
+        showInverseRelationship: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phScaleCommonSubstancesNumberLineDiagram': {
+    name: 'pH Scale Common Substances Number Line',
+    category: 'Acid-Base Chemistry',
+    description: 'Number line pH scale annotated with common household and biological substances',
+    type: 'ph_scale_common_substances_number_line',
+    defaultOptions: {
+        title: 'pH Scale with Common Substances',
+        showSubstanceLabels: true,
+        showAcidBaseZones: true,
+        showNeutralPoint: true,
+        width: 1100,
+        height: 500,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'strongAcidFullDissociationPhCalculationFlowchart': {
+    name: 'Strong Acid Full Dissociation pH Calculation Flowchart',
+    category: 'Acid-Base Chemistry',
+    description: 'Step-by-step flowchart for calculating pH of strong acid solutions assuming full dissociation',
+    type: 'strong_acid_full_dissociation_ph_calculation_flowchart',
+    defaultOptions: {
+        title: 'Strong Acid pH Calculation Flowchart',
+        showSteps: true,
+        showExampleValues: true,
+        showFormulas: true,
+        width: 900,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'strongBasePoHToPhConversionDiagram': {
+    name: 'Strong Base pOH to pH Conversion',
+    category: 'Acid-Base Chemistry',
+    description: 'Diagram showing conversion pathway from strong base concentration through pOH to pH',
+    type: 'strong_base_poh_to_ph_conversion',
+    defaultOptions: {
+        title: 'Strong Base pOH to pH Conversion',
+        showConversionSteps: true,
+        showKwRelationship: true,
+        showExampleValues: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'weakAcidICETableEquilibriumDiagram': {
+    name: 'Weak Acid ICE Table Equilibrium',
+    category: 'Acid-Base Chemistry',
+    description: 'ICE table method for weak acid equilibrium with Ka expression and pH calculation',
+    type: 'weak_acid_ice_table_equilibrium',
+    defaultOptions: {
+        title: 'Weak Acid ICE Table Equilibrium',
+        showICERows: true,
+        showKaExpression: true,
+        showApproximation: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'weakBaseICETableOHMinusToPhDiagram': {
+    name: 'Weak Base ICE Table OH⁻ to pH',
+    category: 'Acid-Base Chemistry',
+    description: 'ICE table for weak base equilibrium calculating [OH⁻], pOH, and converting to pH',
+    type: 'weak_base_ice_table_oh_to_ph',
+    defaultOptions: {
+        title: 'Weak Base ICE Table to pH',
+        showICERows: true,
+        showKbExpression: true,
+        showPohToPhConversion: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phPohHConcentrationInterconversionCycleDiagram': {
+    name: 'pH, pOH, [H⁺] Concentration Interconversion Cycle',
+    category: 'Acid-Base Chemistry',
+    description: 'Cycle diagram showing all mathematical interconversion pathways between pH, pOH, [H⁺], and [OH⁻]',
+    type: 'ph_poh_h_concentration_interconversion_cycle',
+    defaultOptions: {
+        title: 'pH/pOH/[H⁺]/[OH⁻] Interconversion Cycle',
+        showFormulas: true,
+        showDirectionArrows: true,
+        showKwRelationship: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'saltHydrolysisPhPredictionDecisionTree': {
+    name: 'Salt Hydrolysis pH Prediction Decision Tree',
+    category: 'Acid-Base Chemistry',
+    description: 'Decision tree for predicting whether a salt solution will be acidic, basic, or neutral',
+    type: 'salt_hydrolysis_ph_prediction_decision_tree',
+    defaultOptions: {
+        title: 'Salt Hydrolysis pH Prediction Decision Tree',
+        showDecisionNodes: true,
+        showExamples: true,
+        showOutcomeLabels: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phVsDilutionCurveStrongWeakAcidComparisonGraph': {
+    name: 'pH vs Dilution Curve: Strong vs Weak Acid Comparison',
+    category: 'Acid-Base Chemistry',
+    description: 'Graph comparing pH change upon dilution for strong and weak acids',
+    type: 'ph_vs_dilution_curve_strong_weak_acid_comparison',
+    defaultOptions: {
+        title: 'pH vs Dilution: Strong vs Weak Acid',
+        showBothCurves: true,
+        showAxisLabels: true,
+        showLimitingBehaviour: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'excessReagentMixingPhCalculationFlowchart': {
+    name: 'Excess Reagent Mixing pH Calculation Flowchart',
+    category: 'Acid-Base Chemistry',
+    description: 'Flowchart for calculating pH after mixing acid and base with one reagent in excess',
+    type: 'excess_reagent_mixing_ph_calculation_flowchart',
+    defaultOptions: {
+        title: 'Excess Reagent Mixing pH Calculation',
+        showMolesCalculation: true,
+        showExcessDetermination: true,
+        showPhCalculationStep: true,
+        width: 950,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'physiologicalPhRangesOrganSystemsDiagram': {
+    name: 'Physiological pH Ranges: Organ Systems',
+    category: 'Acid-Base Chemistry',
+    description: 'Diagram of human body organ systems annotated with their normal physiological pH ranges',
+    type: 'physiological_ph_ranges_organ_systems',
+    defaultOptions: {
+        title: 'Physiological pH Ranges by Organ System',
+        showPhValues: true,
+        showOrganLabels: true,
+        showNormalRanges: true,
+        width: 900,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'partialIonisationEquilibriumArrowDiagram': {
+    name: 'Partial Ionisation Equilibrium Arrow Diagram',
+    category: 'Acid-Base Chemistry',
+    description: 'Equilibrium arrow diagram illustrating partial ionisation of weak acids and bases',
+    type: 'partial_ionisation_equilibrium_arrow',
+    defaultOptions: {
+        title: 'Partial Ionisation Equilibrium Arrows',
+        showForwardReverseArrows: true,
+        showConcentrationRatio: true,
+        showWeakAcidExample: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kaExpressionEquilibriumPositionDiagram': {
+    name: 'Ka Expression & Equilibrium Position',
+    category: 'Acid-Base Chemistry',
+    description: 'Annotated Ka expression linked to equilibrium position and degree of dissociation',
+    type: 'ka_expression_equilibrium_position',
+    defaultOptions: {
+        title: 'Ka Expression & Equilibrium Position',
+        showKaFormula: true,
+        showEquilibriumPosition: true,
+        showStrengthRanking: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kbExpressionKaKbKwRelationshipDiagram': {
+    name: 'Kb Expression & Ka·Kb = Kw Relationship',
+    category: 'Acid-Base Chemistry',
+    description: 'Kb expression with annotated Ka × Kb = Kw conjugate pair relationship',
+    type: 'kb_expression_ka_kb_kw_relationship',
+    defaultOptions: {
+        title: 'Kb Expression & Ka·Kb·Kw Relationship',
+        showKbFormula: true,
+        showKaKbKwTriangle: true,
+        showConjugatePairLink: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'iceTableWeakAcidSolvedStepByStepDiagram': {
+    name: 'ICE Table Weak Acid Solved Step-by-Step',
+    category: 'Acid-Base Chemistry',
+    description: 'Fully worked ICE table solution for weak acid pH with each algebraic step annotated',
+    type: 'ice_table_weak_acid_solved_step_by_step',
+    defaultOptions: {
+        title: 'ICE Table Weak Acid Step-by-Step Solution',
+        showAllSteps: true,
+        showApproximationCheck: true,
+        showFinalPhCalculation: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'periodicTrendsAcidStrengthBondPolarityDiagram': {
+    name: 'Periodic Trends: Acid Strength & Bond Polarity',
+    category: 'Acid-Base Chemistry',
+    description: 'Periodic table trends linking bond polarity, bond strength, and acid strength across periods and groups',
+    type: 'periodic_trends_acid_strength_bond_polarity',
+    defaultOptions: {
+        title: 'Periodic Trends: Acid Strength & Bond Polarity',
+        showGroupTrends: true,
+        showPeriodTrends: true,
+        showBondStrengthAnnotations: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hendersonHasselbalchDerivationAndRatioInterpretationDiagram': {
+    name: 'Henderson-Hasselbalch Derivation & Ratio Interpretation',
+    category: 'Acid-Base Chemistry',
+    description: 'Derivation of Henderson-Hasselbalch equation with ratio interpretation and buffer pH prediction',
+    type: 'henderson_hasselbalch_derivation_ratio_interpretation',
+    defaultOptions: {
+        title: 'Henderson-Hasselbalch Derivation & Interpretation',
+        showDerivationSteps: true,
+        showRatioInterpretation: true,
+        showExampleCalculation: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'polyproticAcidKaStepwiseLadderDiagram': {
+    name: 'Polyprotic Acid Ka Stepwise Ladder',
+    category: 'Acid-Base Chemistry',
+    description: 'Ladder diagram showing decreasing Ka values at each successive deprotonation step',
+    type: 'polyprotic_acid_ka_stepwise_ladder',
+    defaultOptions: {
+        title: 'Polyprotic Acid Ka Stepwise Ladder',
+        showKaValues: true,
+        showChargeStates: true,
+        showRelativeMagnitude: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'commonIonEquilibriumShiftLeChatelierDiagram': {
+    name: 'Common Ion Equilibrium Shift (Le Chatelier)',
+    category: 'Acid-Base Chemistry',
+    description: 'Common ion effect on weak acid/base equilibrium explained via Le Chatelier\'s principle',
+    type: 'common_ion_equilibrium_shift_le_chatelier',
+    defaultOptions: {
+        title: 'Common Ion Effect & Le Chatelier Shift',
+        showEquilibriumShift: true,
+        showIonConcentrationChange: true,
+        showPhEffect: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'aminoAcidZwitterionIsoelectricPointDiagram': {
+    name: 'Amino Acid Zwitterion & Isoelectric Point',
+    category: 'Acid-Base Chemistry',
+    description: 'pH-dependent protonation states of amino acids including zwitterion form and isoelectric point',
+    type: 'amino_acid_zwitterion_isoelectric_point',
+    defaultOptions: {
+        title: 'Amino Acid Zwitterion & Isoelectric Point',
+        showProtonationStates: true,
+        showPhScale: true,
+        showIsoelectricPoint: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'drugIonisationPhAbsorptionDiagram': {
+    name: 'Drug Ionisation, pH & Absorption',
+    category: 'Acid-Base Chemistry',
+    description: 'Relationship between drug ionisation state, pH environment, and membrane absorption',
+    type: 'drug_ionisation_ph_absorption',
+    defaultOptions: {
+        title: 'Drug Ionisation, pH & Absorption',
+        showIonisationStates: true,
+        showMembranePermeability: true,
+        showPhEnvironments: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'acidStrengthRankingKaScaleDiagram': {
+    name: 'Acid Strength Ranking Ka Scale',
+    category: 'Acid-Base Chemistry',
+    description: 'Ranked scale of common acids by Ka value with pKa annotations',
+    type: 'acid_strength_ranking_ka_scale',
+    defaultOptions: {
+        title: 'Acid Strength Ranking by Ka',
+        showKaValues: true,
+        showPkaValues: true,
+        showStrongWeakDivision: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== BUFFERS =====
+
+'bufferConceptShockAbsorberAnalogyDiagram': {
+    name: 'Buffer Concept: Shock Absorber Analogy',
+    category: 'Buffers',
+    description: 'Conceptual analogy comparing buffer action to a shock absorber resisting pH change',
+    type: 'buffer_concept_shock_absorber_analogy',
+    defaultOptions: {
+        title: 'Buffer Concept: Shock Absorber Analogy',
+        showAnalogyComparison: true,
+        showPhResistance: true,
+        showLabels: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'acidBaseBufferPairComponentsDiagram': {
+    name: 'Acid-Base Buffer Pair Components',
+    category: 'Buffers',
+    description: 'Diagram showing weak acid/conjugate base and weak base/conjugate acid buffer pair components',
+    type: 'acid_base_buffer_pair_components',
+    defaultOptions: {
+        title: 'Buffer Pair Components',
+        showConjugatePairs: true,
+        showEquilibrium: true,
+        showExamples: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bufferResponseToAcidBaseAdditionMolecularDiagram': {
+    name: 'Buffer Response to Acid/Base Addition (Molecular)',
+    category: 'Buffers',
+    description: 'Molecular-level diagram showing how buffer components neutralise added acid or base',
+    type: 'buffer_response_acid_base_addition_molecular',
+    defaultOptions: {
+        title: 'Buffer Response to Acid & Base Addition',
+        showMolecularReactions: true,
+        showBeforeAfter: true,
+        showEquations: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hhEquationRatioPhRelationshipBufferDiagram': {
+    name: 'Henderson-Hasselbalch Ratio–pH Relationship',
+    category: 'Buffers',
+    description: 'Graphical relationship between [A⁻]/[HA] ratio and buffer pH relative to pKa',
+    type: 'hh_equation_ratio_ph_relationship_buffer',
+    defaultOptions: {
+        title: 'H-H Equation: Ratio vs pH',
+        showRatioScale: true,
+        showPkaReference: true,
+        showPhCalculation: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bufferCapacityVsPhBellCurveDiagram': {
+    name: 'Buffer Capacity vs pH Bell Curve',
+    category: 'Buffers',
+    description: 'Bell-shaped curve showing maximum buffer capacity at pKa with flanking decline',
+    type: 'buffer_capacity_vs_ph_bell_curve',
+    defaultOptions: {
+        title: 'Buffer Capacity vs pH Bell Curve',
+        showPkaMaximum: true,
+        showCapacityFalloff: true,
+        showAxisLabels: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bufferPreparationDirectMixingFlowchart': {
+    name: 'Buffer Preparation: Direct Mixing Flowchart',
+    category: 'Buffers',
+    description: 'Flowchart for preparing a buffer of target pH by direct mixing of weak acid and conjugate base',
+    type: 'buffer_preparation_direct_mixing_flowchart',
+    defaultOptions: {
+        title: 'Buffer Preparation by Direct Mixing',
+        showTargetPhStep: true,
+        showMolesCalculation: true,
+        showVolumeAdjustment: true,
+        width: 950,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bloodBicarbonateCO2BufferSystemDiagram': {
+    name: 'Blood Bicarbonate–CO₂ Buffer System',
+    category: 'Buffers',
+    description: 'Physiological bicarbonate/carbonic acid buffer system in blood with respiratory and renal regulation',
+    type: 'blood_bicarbonate_co2_buffer_system',
+    defaultOptions: {
+        title: 'Blood Bicarbonate–CO₂ Buffer System',
+        showEquilibriumEquations: true,
+        showRespiratoryLink: true,
+        showRenalLink: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bufferEffectiveRangePkaTargetPhMatchingChart': {
+    name: 'Buffer Effective Range & pKa–Target pH Matching',
+    category: 'Buffers',
+    description: 'Chart matching target pH to appropriate buffer system using pKa ± 1 effective range rule',
+    type: 'buffer_effective_range_pka_target_ph_matching',
+    defaultOptions: {
+        title: 'Buffer Effective Range & pKa Matching',
+        showEffectiveRangeBands: true,
+        showCommonBuffers: true,
+        showSelectionGuide: true,
+        width: 1050,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bufferMolesShiftAfterAcidBaseAdditionDiagram': {
+    name: 'Buffer Moles Shift After Acid/Base Addition',
+    category: 'Buffers',
+    description: 'Quantitative before/after moles diagram showing buffer component shift after acid or base addition',
+    type: 'buffer_moles_shift_after_acid_base_addition',
+    defaultOptions: {
+        title: 'Buffer Moles Shift After Acid/Base Addition',
+        showBeforeAfterMoles: true,
+        showPhCalculation: true,
+        showStoichiometry: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phMeterCalibrationStandardBuffersDiagram': {
+    name: 'pH Meter Calibration with Standard Buffers',
+    category: 'Buffers',
+    description: 'Diagram of pH meter calibration procedure using two- or three-point standard buffer solutions',
+    type: 'ph_meter_calibration_standard_buffers',
+    defaultOptions: {
+        title: 'pH Meter Calibration with Standard Buffers',
+        showCalibrationSteps: true,
+        showStandardBufferValues: true,
+        showEquipmentLabels: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'pharmaceuticalBufferPhStabilityShelfLifeDiagram': {
+    name: 'Pharmaceutical Buffer pH Stability & Shelf Life',
+    category: 'Buffers',
+    description: 'Diagram linking buffer pH stability to drug degradation rate and pharmaceutical shelf life',
+    type: 'pharmaceutical_buffer_ph_stability_shelf_life',
+    defaultOptions: {
+        title: 'Pharmaceutical Buffer: pH Stability & Shelf Life',
+        showDegradationCurves: true,
+        showOptimalPhRange: true,
+        showShelfLifeAnnotations: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== TITRATIONS =====
+
+'titrationApparatusLabelledSetupDiagram': {
+    name: 'Titration Apparatus Labelled Setup',
+    category: 'Titrations',
+    description: 'Fully labelled diagram of standard acid-base titration apparatus',
+    type: 'titration_apparatus_labelled_setup',
+    defaultOptions: {
+        title: 'Titration Apparatus Setup',
+        showAllLabels: true,
+        showBurette: true,
+        showConicalFlask: true,
+        width: 800,
+        height: 900,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fourTitrationCurveTypesComparisonDiagram': {
+    name: 'Four Titration Curve Types Comparison',
+    category: 'Titrations',
+    description: 'Comparative graph of strong/strong, strong/weak, weak/strong, and weak/weak titration curves',
+    type: 'four_titration_curve_types_comparison',
+    defaultOptions: {
+        title: 'Four Titration Curve Types Comparison',
+        showAllFourCurves: true,
+        showEquivalencePoints: true,
+        showBufferRegions: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'indicatorTransitionRangeEquivalencePointOverlapDiagram': {
+    name: 'Indicator Transition Range & Equivalence Point Overlap',
+    category: 'Titrations',
+    description: 'Overlay of indicator transition ranges on titration curves to show appropriate indicator selection',
+    type: 'indicator_transition_range_equivalence_point_overlap',
+    defaultOptions: {
+        title: 'Indicator Range & Equivalence Point Overlap',
+        showIndicatorBands: true,
+        showTitrationCurve: true,
+        showSuitabilityAnnotations: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phCalculationRegionsByTitrationStageDiagram': {
+    name: 'pH Calculation Regions by Titration Stage',
+    category: 'Titrations',
+    description: 'Titration curve annotated with the pH calculation method appropriate for each region',
+    type: 'ph_calculation_regions_by_titration_stage',
+    defaultOptions: {
+        title: 'pH Calculation by Titration Stage',
+        showRegionAnnotations: true,
+        showFormulaPerRegion: true,
+        showEquivalencePoint: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'polyproticAcidMultipleEquivalencePointsCurveDiagram': {
+    name: 'Polyprotic Acid Multiple Equivalence Points Curve',
+    category: 'Titrations',
+    description: 'Titration curve for a polyprotic acid showing multiple equivalence points and buffer regions',
+    type: 'polyprotic_acid_multiple_equivalence_points_curve',
+    defaultOptions: {
+        title: 'Polyprotic Acid Titration Curve',
+        showMultipleEquivalencePoints: true,
+        showBufferRegions: true,
+        showHalfEquivalencePoints: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'backTitrationExcessReagentSubtractionFlowchart': {
+    name: 'Back Titration: Excess Reagent Subtraction Flowchart',
+    category: 'Titrations',
+    description: 'Flowchart for back titration calculations subtracting excess reagent moles',
+    type: 'back_titration_excess_reagent_subtraction_flowchart',
+    defaultOptions: {
+        title: 'Back Titration Calculation Flowchart',
+        showMolesSubtraction: true,
+        showStepLabels: true,
+        showExampleValues: true,
+        width: 950,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'redoxTitrationElectronTransferEndpointDiagram': {
+    name: 'Redox Titration Electron Transfer & Endpoint',
+    category: 'Titrations',
+    description: 'Redox titration diagram showing electron transfer half-equations and colour-change endpoint',
+    type: 'redox_titration_electron_transfer_endpoint',
+    defaultOptions: {
+        title: 'Redox Titration: Electron Transfer & Endpoint',
+        showHalfEquations: true,
+        showEndpointColour: true,
+        showElectronTransfer: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'edtaMetalIonChelationComplexDiagram': {
+    name: 'EDTA Metal Ion Chelation Complex',
+    category: 'Titrations',
+    description: 'Diagram of EDTA chelation of metal ions with coordination bonds and complex stability',
+    type: 'edta_metal_ion_chelation_complex',
+    defaultOptions: {
+        title: 'EDTA Metal Ion Chelation Complex',
+        showCoordinationBonds: true,
+        showMetalLabel: true,
+        showEDTAStructure: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'titrationsSystematicRandomErrorSourcesDiagram': {
+    name: 'Titrations: Systematic & Random Error Sources',
+    category: 'Titrations',
+    description: 'Annotated diagram categorising systematic and random error sources in titration experiments',
+    type: 'titrations_systematic_random_error_sources',
+    defaultOptions: {
+        title: 'Titration Error Sources',
+        showSystematicErrors: true,
+        showRandomErrors: true,
+        showMitigationStrategies: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'industrialPharmaceuticalTitrationUseCasesDiagram': {
+    name: 'Industrial & Pharmaceutical Titration Use Cases',
+    category: 'Titrations',
+    description: 'Infographic of real-world titration applications in industrial quality control and pharmaceuticals',
+    type: 'industrial_pharmaceutical_titration_use_cases',
+    defaultOptions: {
+        title: 'Industrial & Pharmaceutical Titration Use Cases',
+        showIndustrialExamples: true,
+        showPharmaceuticalExamples: true,
+        showTitrationTypes: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== IONIC BONDING =====
+
+'atomicStructureShellConfigurationDiagram': {
+    name: 'Atomic Structure Shell Configuration',
+    category: 'Ionic Bonding',
+    description: 'Diagram of atomic shell configuration showing electron arrangement by energy level',
+    type: 'atomic_structure_shell_configuration',
+    defaultOptions: {
+        title: 'Atomic Structure Shell Configuration',
+        showShellNumbers: true,
+        showElectronCounts: true,
+        showNucleusLabel: true,
+        width: 800,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electronTransferCationAnionFormationDiagram': {
+    name: 'Electron Transfer: Cation & Anion Formation',
+    category: 'Ionic Bonding',
+    description: 'Diagram showing electron transfer from metal to non-metal forming cation and anion',
+    type: 'electron_transfer_cation_anion_formation',
+    defaultOptions: {
+        title: 'Electron Transfer: Cation & Anion Formation',
+        showElectronTransferArrow: true,
+        showChargeLabels: true,
+        showShellDiagrams: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dotAndCrossElectronTransferNaClDiagram': {
+    name: 'Dot & Cross Electron Transfer: NaCl',
+    category: 'Ionic Bonding',
+    description: 'Dot-and-cross diagram of electron transfer in NaCl ionic bond formation',
+    type: 'dot_and_cross_electron_transfer_nacl',
+    defaultOptions: {
+        title: 'Dot & Cross: NaCl Electron Transfer',
+        showDotCrossNotation: true,
+        showChargeLabels: true,
+        showTransferArrow: true,
+        width: 900,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chargeBalanceCrossoverMethodDiagram': {
+    name: 'Charge Balance Crossover Method',
+    category: 'Ionic Bonding',
+    description: 'Crossover method for determining ionic compound formulae from ion charges',
+    type: 'charge_balance_crossover_method',
+    defaultOptions: {
+        title: 'Charge Balance Crossover Method',
+        showCrossoverArrows: true,
+        showChargeValues: true,
+        showExamples: true,
+        width: 900,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'naClFccRockSaltLatticeUnitCellDiagram': {
+    name: 'NaCl FCC Rock Salt Lattice Unit Cell',
+    category: 'Ionic Bonding',
+    description: '3D unit cell of NaCl rock salt face-centred cubic lattice structure',
+    type: 'nacl_fcc_rock_salt_lattice_unit_cell',
+    defaultOptions: {
+        title: 'NaCl Rock Salt Lattice Unit Cell',
+        showUnitCell: true,
+        showIonLabels: true,
+        showCoordinationNumbers: true,
+        width: 900,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bornHaberCycleEnthalpyLadderNaClDiagram': {
+    name: 'Born-Haber Cycle Enthalpy Ladder: NaCl',
+    category: 'Ionic Bonding',
+    description: 'Full Born-Haber cycle enthalpy ladder for NaCl with all component steps labelled',
+    type: 'born_haber_cycle_enthalpy_ladder_nacl',
+    defaultOptions: {
+        title: 'Born-Haber Cycle: NaCl',
+        showAllEnthalpySteps: true,
+        showArrowDirections: true,
+        showEnergyValues: true,
+        width: 1000,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ionicCompoundPropertiesStructureExplanationChart': {
+    name: 'Ionic Compound Properties & Structure Explanation',
+    category: 'Ionic Bonding',
+    description: 'Chart linking ionic compound physical properties to lattice structure explanations',
+    type: 'ionic_compound_properties_structure_explanation_chart',
+    defaultOptions: {
+        title: 'Ionic Compound Properties & Structure',
+        showPropertyList: true,
+        showStructuralExplanations: true,
+        showExamples: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fajansRulesCationPolarisationAnionDistortionDiagram': {
+    name: 'Fajans\' Rules: Cation Polarisation & Anion Distortion',
+    category: 'Ionic Bonding',
+    description: 'Diagram illustrating Fajans\' rules for cation polarising power and anion polarisability',
+    type: 'fajans_rules_cation_polarisation_anion_distortion',
+    defaultOptions: {
+        title: 'Fajans\' Rules: Polarisation & Distortion',
+        showPolarisationEffect: true,
+        showAnionDistortion: true,
+        showCovalentCharacterSpectrum: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electrolysisAnodeCathodeIonMigrationDiagram': {
+    name: 'Electrolysis: Anode, Cathode & Ion Migration',
+    category: 'Ionic Bonding',
+    description: 'Diagram of electrolysis cell showing ion migration, anode oxidation, and cathode reduction',
+    type: 'electrolysis_anode_cathode_ion_migration',
+    defaultOptions: {
+        title: 'Electrolysis: Ion Migration & Electrode Reactions',
+        showIonMovement: true,
+        showElectrodeReactions: true,
+        showCurrentDirection: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ionicCompoundsIndustryBiologyApplicationsInfographic': {
+    name: 'Ionic Compounds in Industry & Biology Applications',
+    category: 'Ionic Bonding',
+    description: 'Infographic of industrial and biological applications of ionic compounds',
+    type: 'ionic_compounds_industry_biology_applications_infographic',
+    defaultOptions: {
+        title: 'Ionic Compounds: Industry & Biology Applications',
+        showIndustrialApplications: true,
+        showBiologicalApplications: true,
+        showCompoundExamples: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== COVALENT BONDING =====
+
+'electronSharingBondingPairLonePairFoundationDiagram': {
+    name: 'Electron Sharing: Bonding Pair & Lone Pair Foundation',
+    category: 'Covalent Bonding',
+    description: 'Foundation diagram showing electron sharing to form bonding pairs and lone pairs',
+    type: 'electron_sharing_bonding_pair_lone_pair_foundation',
+    defaultOptions: {
+        title: 'Electron Sharing: Bonding & Lone Pairs',
+        showBondingPairs: true,
+        showLonePairs: true,
+        showSharedElectronNotation: true,
+        width: 900,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'singleDoubleTripleBondOrderLengthStrengthComparisonDiagram': {
+    name: 'Single, Double & Triple Bond Order, Length & Strength Comparison',
+    category: 'Covalent Bonding',
+    description: 'Comparative diagram of single, double, and triple bonds showing order, length, and strength trends',
+    type: 'single_double_triple_bond_order_length_strength_comparison',
+    defaultOptions: {
+        title: 'Bond Order, Length & Strength Comparison',
+        showBondOrderTrend: true,
+        showLengthTrend: true,
+        showStrengthTrend: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electronegativityDifferencePolaritySpectrumDiagram': {
+    name: 'Electronegativity Difference & Polarity Spectrum',
+    category: 'Covalent Bonding',
+    description: 'Spectrum from pure covalent to polar covalent to ionic based on electronegativity difference',
+    type: 'electronegativity_difference_polarity_spectrum',
+    defaultOptions: {
+        title: 'Electronegativity Difference & Bond Polarity Spectrum',
+        showSpectrumScale: true,
+        showBondTypeLabels: true,
+        showExamples: true,
+        width: 1050,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dotCrossDiagramH2ONH3CO2StepByStepDiagram': {
+    name: 'Dot & Cross Diagrams: H₂O, NH₃, CO₂ Step-by-Step',
+    category: 'Covalent Bonding',
+    description: 'Step-by-step dot and cross diagrams for water, ammonia, and carbon dioxide',
+    type: 'dot_cross_diagram_h2o_nh3_co2_step_by_step',
+    defaultOptions: {
+        title: 'Dot & Cross: H₂O, NH₃, CO₂',
+        showConstructionSteps: true,
+        showLonePairs: true,
+        showAllThreeMolecules: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'sigmaHeadOnPiLateralOrbitalOverlapHybridisationDiagram': {
+    name: 'Sigma Head-On & Pi Lateral Orbital Overlap Hybridisation',
+    category: 'Covalent Bonding',
+    description: 'Diagram comparing head-on sigma and lateral pi orbital overlap with hybridisation context',
+    type: 'sigma_head_on_pi_lateral_orbital_overlap_hybridisation',
+    defaultOptions: {
+        title: 'Sigma & Pi Orbital Overlap',
+        showSigmaOverlap: true,
+        showPiOverlap: true,
+        showHybridisationLabels: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resonanceStructuresBenzeneNitrateCarbonateHybridDiagram': {
+    name: 'Resonance Structures: Benzene, Nitrate & Carbonate Hybrid',
+    category: 'Covalent Bonding',
+    description: 'Resonance structures and hybrid representations for benzene, nitrate, and carbonate',
+    type: 'resonance_structures_benzene_nitrate_carbonate_hybrid',
+    defaultOptions: {
+        title: 'Resonance Structures: Benzene, Nitrate, Carbonate',
+        showResonanceForms: true,
+        showHybridStructure: true,
+        showCurvedArrows: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bondEnthalpyBreakingFormingEnergyProfileDiagram': {
+    name: 'Bond Enthalpy: Breaking & Forming Energy Profile',
+    category: 'Covalent Bonding',
+    description: 'Energy profile diagram showing endothermic bond breaking and exothermic bond forming',
+    type: 'bond_enthalpy_breaking_forming_energy_profile',
+    defaultOptions: {
+        title: 'Bond Enthalpy: Breaking & Forming',
+        showEndothermicBreaking: true,
+        showExothermicForming: true,
+        showNetEnthalpyChange: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'simpleDiscretesMoleculeVsGiantLatticeStructureComparisonDiagram': {
+    name: 'Simple Discrete Molecules vs Giant Lattice Structure Comparison',
+    category: 'Covalent Bonding',
+    description: 'Side-by-side structural comparison of simple discrete molecular and giant covalent lattice structures',
+    type: 'simple_discretes_molecule_vs_giant_lattice_structure_comparison',
+    defaultOptions: {
+        title: 'Simple Molecules vs Giant Lattice Structures',
+        showBothStructures: true,
+        showPropertyComparison: true,
+        showExamples: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'diamondGraphiteGrapheneSiliconDioxideStructureComparisonDiagram': {
+    name: 'Diamond, Graphite, Graphene & Silicon Dioxide Structure Comparison',
+    category: 'Covalent Bonding',
+    description: 'Structural comparison of diamond, graphite, graphene, and silicon dioxide giant covalent lattices',
+    type: 'diamond_graphite_graphene_silicon_dioxide_structure_comparison',
+    defaultOptions: {
+        title: 'Diamond, Graphite, Graphene & SiO₂ Structures',
+        showAllFourStructures: true,
+        showBondingAnnotations: true,
+        showPropertyLinks: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'covalentBondingOrganicBiochemistryMaterialsApplicationsInfographic': {
+    name: 'Covalent Bonding: Organic, Biochemistry & Materials Applications',
+    category: 'Covalent Bonding',
+    description: 'Infographic of covalent bonding applications across organic chemistry, biochemistry, and materials science',
+    type: 'covalent_bonding_organic_biochemistry_materials_applications_infographic',
+    defaultOptions: {
+        title: 'Covalent Bonding Applications',
+        showOrganicExamples: true,
+        showBiochemistryExamples: true,
+        showMaterialsExamples: true,
+        width: 1150,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== LEWIS STRUCTURES =====
+
+'valenceElectronGroupPeriodicTableBondingPairLonePairLegendDiagram': {
+    name: 'Valence Electron Group Periodic Table: Bonding & Lone Pair Legend',
+    category: 'Lewis Structures',
+    description: 'Periodic table annotated with valence electron group counts and bonding/lone pair legend',
+    type: 'valence_electron_group_periodic_table_bonding_pair_lone_pair_legend',
+    defaultOptions: {
+        title: 'Valence Electron Groups & Bonding Pairs',
+        showValenceElectronGroups: true,
+        showBondingPairLegend: true,
+        showLonePairLegend: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lewisStructureSixStepFlowchartDrawingProcedureDiagram': {
+    name: 'Lewis Structure Six-Step Drawing Procedure Flowchart',
+    category: 'Lewis Structures',
+    description: 'Six-step flowchart procedure for drawing Lewis structures systematically',
+    type: 'lewis_structure_six_step_flowchart_drawing_procedure',
+    defaultOptions: {
+        title: 'Lewis Structure Drawing Procedure',
+        showAllSixSteps: true,
+        showDecisionPoints: true,
+        showExampleApplication: true,
+        width: 950,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'formalChargeCalculationElectronAllocationDiagram': {
+    name: 'Formal Charge Calculation & Electron Allocation',
+    category: 'Lewis Structures',
+    description: 'Step-by-step formal charge calculation with electron allocation method annotated',
+    type: 'formal_charge_calculation_electron_allocation',
+    defaultOptions: {
+        title: 'Formal Charge Calculation',
+        showFormula: true,
+        showElectronAllocation: true,
+        showWorkedExample: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resonanceHybridCurvedArrowElectronMovementOzoneBenzeneDiagram': {
+    name: 'Resonance Hybrid: Curved Arrow Electron Movement (Ozone & Benzene)',
+    category: 'Lewis Structures',
+    description: 'Curved arrow electron movement diagrams for ozone and benzene resonance hybrid structures',
+    type: 'resonance_hybrid_curved_arrow_electron_movement_ozone_benzene',
+    defaultOptions: {
+        title: 'Resonance Hybrid: Ozone & Benzene',
+        showCurvedArrows: true,
+        showResonanceForms: true,
+        showHybridOverlay: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'octetExceptionsElectronDeficientRadicalExpandedOctetComparisonDiagram': {
+    name: 'Octet Exceptions: Electron-Deficient, Radical & Expanded Octet Comparison',
+    category: 'Lewis Structures',
+    description: 'Comparison of three types of octet exceptions with examples of each',
+    type: 'octet_exceptions_electron_deficient_radical_expanded_octet_comparison',
+    defaultOptions: {
+        title: 'Octet Exceptions: Deficient, Radical & Expanded',
+        showElectronDeficientExamples: true,
+        showRadicalExamples: true,
+        showExpandedOctetExamples: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'polyatomicIonBracketChargeNotationNH4SO4CO3Diagram': {
+    name: 'Polyatomic Ion Bracket & Charge Notation: NH₄⁺, SO₄²⁻, CO₃²⁻',
+    category: 'Lewis Structures',
+    description: 'Lewis structures with bracket and charge notation for common polyatomic ions',
+    type: 'polyatomic_ion_bracket_charge_notation_nh4_so4_co3',
+    defaultOptions: {
+        title: 'Polyatomic Ion Notation: NH₄⁺, SO₄²⁻, CO₃²⁻',
+        showBracketNotation: true,
+        showFormalCharges: true,
+        showAllThreeIons: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lewisAcidBaseCoordinateBondAdductFormationDiagram': {
+    name: 'Lewis Acid-Base Coordinate Bond & Adduct Formation',
+    category: 'Lewis Structures',
+    description: 'Diagram of Lewis acid-base coordinate bond formation producing an adduct',
+    type: 'lewis_acid_base_coordinate_bond_adduct_formation',
+    defaultOptions: {
+        title: 'Lewis Acid-Base Coordinate Bond & Adduct',
+        showElectronPairDonation: true,
+        showAdductFormation: true,
+        showCurvedArrow: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bondOrderLengthStrengthInverseTrendComparisonTableDiagram': {
+    name: 'Bond Order, Length & Strength Inverse Trend Comparison Table',
+    category: 'Lewis Structures',
+    description: 'Table and visual comparison of inverse trend between bond order, length, and strength',
+    type: 'bond_order_length_strength_inverse_trend_comparison_table',
+    defaultOptions: {
+        title: 'Bond Order, Length & Strength Inverse Trends',
+        showComparisonTable: true,
+        showTrendArrows: true,
+        showExampleData: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hypervalentXeF4SF4OrganicMoleculeAdvancedLewisStructuresDiagram': {
+    name: 'Hypervalent XeF₄, SF₄ & Organic Molecule Advanced Lewis Structures',
+    category: 'Lewis Structures',
+    description: 'Advanced Lewis structures for hypervalent XeF₄, SF₄, and selected organic molecules',
+    type: 'hypervalent_xef4_sf4_organic_molecule_advanced_lewis_structures',
+    defaultOptions: {
+        title: 'Hypervalent & Advanced Lewis Structures',
+        showXeF4Structure: true,
+        showSF4Structure: true,
+        showOrganicExamples: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== VSEPR =====
+
+'electronDomainCountToVSEPRGeometryBridgingFlowchartDiagram': {
+    name: 'Electron Domain Count to VSEPR Geometry Bridging Flowchart',
+    category: 'VSEPR',
+    description: 'Flowchart bridging electron domain count to predicted VSEPR molecular geometry',
+    type: 'electron_domain_count_to_vsepr_geometry_bridging_flowchart',
+    defaultOptions: {
+        title: 'Electron Domain Count to VSEPR Geometry',
+        showElectronDomainSteps: true,
+        showGeometryOutcomes: true,
+        showDecisionBranches: true,
+        width: 1000,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electronDomainVsMolecularGeometryDistinctionFoundationDiagram': {
+    name: 'Electron Domain vs Molecular Geometry Distinction',
+    category: 'VSEPR',
+    description: 'Foundation diagram distinguishing electron domain geometry from molecular geometry',
+    type: 'electron_domain_vs_molecular_geometry_distinction_foundation',
+    defaultOptions: {
+        title: 'Electron Domain vs Molecular Geometry',
+        showElectronGeometry: true,
+        showMolecularGeometry: true,
+        showLonePairEffect: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'vsepRRepulsionHierarchyElectronPairArrangementDiagram': {
+    name: 'VSEPR Repulsion Hierarchy & Electron Pair Arrangement',
+    category: 'VSEPR',
+    description: 'Diagram of VSEPR repulsion hierarchy: lone-lone > lone-bond > bond-bond',
+    type: 'vsepr_repulsion_hierarchy_electron_pair_arrangement',
+    defaultOptions: {
+        title: 'VSEPR Repulsion Hierarchy',
+        showRepulsionRanking: true,
+        showAngleDeviations: true,
+        showPairArrangements: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'allThirteenVSEPRShapesElectronBondingGeometryCompleteCatalogueDiagram': {
+    name: 'All Thirteen VSEPR Shapes: Complete Catalogue',
+    category: 'VSEPR',
+    description: 'Complete catalogue of all thirteen VSEPR electron and molecular geometry shapes',
+    type: 'all_thirteen_vsepr_shapes_complete_catalogue',
+    defaultOptions: {
+        title: 'All Thirteen VSEPR Shapes',
+        showAllShapes: true,
+        showElectronGeometryLabels: true,
+        showMolecularGeometryLabels: true,
+        width: 1400,
+        height: 1000,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lonePairCompressionBondAngleCH4NH3H2ODeviationComparisonDiagram': {
+    name: 'Lone Pair Compression Bond Angle: CH₄, NH₃, H₂O Deviation Comparison',
+    category: 'VSEPR',
+    description: 'Comparison of bond angle deviation in CH₄, NH₃, and H₂O due to lone pair compression',
+    type: 'lone_pair_compression_bond_angle_ch4_nh3_h2o_deviation_comparison',
+    defaultOptions: {
+        title: 'Lone Pair Bond Angle Compression: CH₄, NH₃, H₂O',
+        showAllThreeMolecules: true,
+        showBondAngles: true,
+        showDeviationAnnotations: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dipoleMomentVectorSumCancellationPolarNonpolarMoleculesDiagram': {
+    name: 'Dipole Moment Vector Sum & Cancellation: Polar vs Nonpolar',
+    category: 'VSEPR',
+    description: 'Vector sum and cancellation of bond dipoles determining overall molecular polarity',
+    type: 'dipole_moment_vector_sum_cancellation_polar_nonpolar',
+    defaultOptions: {
+        title: 'Dipole Moment Vectors: Polar vs Nonpolar',
+        showDipoleVectors: true,
+        showVectorSumResult: true,
+        showPolarNonpolarExamples: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'multipleBondSingleDomainCO2H2COVSEPRTreatmentDiagram': {
+    name: 'Multiple Bond as Single Domain: CO₂ & H₂CO VSEPR Treatment',
+    category: 'VSEPR',
+    description: 'VSEPR treatment of multiple bonds as single electron domains for CO₂ and H₂CO',
+    type: 'multiple_bond_single_domain_co2_h2co_vsepr_treatment',
+    defaultOptions: {
+        title: 'Multiple Bond Single Domain: CO₂ & H₂CO',
+        showDomainCounting: true,
+        showGeometryPrediction: true,
+        showBothMolecules: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'wedgeDashSolidDashedBondNotation3dStructureDiagram': {
+    name: 'Wedge-Dash & Solid-Dashed Bond Notation: 3D Structure',
+    category: 'VSEPR',
+    description: 'Explanation of wedge-dash and solid-dashed bond notation for representing 3D molecular structures',
+    type: 'wedge_dash_solid_dashed_bond_notation_3d_structure',
+    defaultOptions: {
+        title: 'Wedge-Dash Bond Notation: 3D Structures',
+        showNotationKey: true,
+        showExampleMolecules: true,
+        showPerspectiveDiagrams: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'geometryPolarityBoilingPointSolubilityPropertyLinksDiagram': {
+    name: 'Geometry, Polarity, Boiling Point & Solubility Property Links',
+    category: 'VSEPR',
+    description: 'Diagram linking molecular geometry and polarity to boiling point and solubility properties',
+    type: 'geometry_polarity_boiling_point_solubility_property_links',
+    defaultOptions: {
+        title: 'Geometry → Polarity → Properties',
+        showGeometryLinks: true,
+        showPropertyOutcomes: true,
+        showExamples: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hybridisationSp3Sp2SpOrbitalGeometryBondAngleSummaryDiagram': {
+    name: 'Hybridisation: sp³, sp², sp Orbital Geometry & Bond Angle Summary',
+    category: 'VSEPR',
+    description: 'Summary diagram of sp³, sp², and sp hybridisation geometries and bond angles',
+    type: 'hybridisation_sp3_sp2_sp_orbital_geometry_bond_angle_summary',
+    defaultOptions: {
+        title: 'Hybridisation: sp³, sp², sp Summary',
+        showAllThreeHybridisations: true,
+        showOrbitalShapes: true,
+        showBondAngles: true,
+        width: 1150,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bondingAntibondingMOEnergyDiagramH2O2N2DiatomicsDiagram': {
+    name: 'Bonding & Antibonding MO Energy Diagram: H₂, O₂, N₂',
+    category: 'VSEPR',
+    description: 'Molecular orbital energy diagrams showing bonding and antibonding orbitals for H₂, O₂, and N₂',
+    type: 'bonding_antibonding_mo_energy_diagram_h2_o2_n2_diatomics',
+    defaultOptions: {
+        title: 'MO Energy Diagrams: H₂, O₂, N₂',
+        showBondingOrbitals: true,
+        showAntibondingOrbitals: true,
+        showAllThreeMolecules: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== METALLIC BONDING =====
+
+'metalLocationPeriodicTableLowIELowENCharacteristicsDiagram': {
+    name: 'Metal Location on Periodic Table: Low IE & Low EN Characteristics',
+    category: 'Metallic Bonding',
+    description: 'Periodic table highlighting metal location with low ionisation energy and electronegativity characteristics',
+    type: 'metal_location_periodic_table_low_ie_low_en_characteristics',
+    defaultOptions: {
+        title: 'Metals: Location, Low IE & Low EN',
+        showMetalRegion: true,
+        showIETrend: true,
+        showENTrend: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'metalCationLatticeDelocalizedElectronSeaModelDiagram': {
+    name: 'Metal Cation Lattice & Delocalised Electron Sea Model',
+    category: 'Metallic Bonding',
+    description: 'Diagram of metallic bonding sea-of-electrons model with cation lattice and delocalised electrons',
+    type: 'metal_cation_lattice_delocalized_electron_sea_model',
+    defaultOptions: {
+        title: 'Metallic Bonding: Electron Sea Model',
+        showCationLattice: true,
+        showDelocalizedElectrons: true,
+        showElectronFlow: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fccHcpBccUnitCellPackingEfficiencyComparisonDiagram': {
+    name: 'FCC, HCP & BCC Unit Cell Packing Efficiency Comparison',
+    category: 'Metallic Bonding',
+    description: 'Comparison of face-centred cubic, hexagonal close-packed, and body-centred cubic unit cells and packing efficiencies',
+    type: 'fcc_hcp_bcc_unit_cell_packing_efficiency_comparison',
+    defaultOptions: {
+        title: 'FCC, HCP & BCC Unit Cell Comparison',
+        showAllThreeStructures: true,
+        showPackingEfficiency: true,
+        showCoordinationNumbers: true,
+        width: 1200,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'conductorSemiconductorInsulatorBandGapEnergyDiagram': {
+    name: 'Conductor, Semiconductor & Insulator Band Gap Energy Diagram',
+    category: 'Metallic Bonding',
+    description: 'Energy band diagrams comparing conductors, semiconductors, and insulators by band gap',
+    type: 'conductor_semiconductor_insulator_band_gap_energy',
+    defaultOptions: {
+        title: 'Band Gap: Conductor, Semiconductor & Insulator',
+        showAllThreeTypes: true,
+        showBandGapEnergies: true,
+        showElectronPopulation: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'metalPropertiesSeaOfElectronsStructuralExplanationSummaryDiagram': {
+    name: 'Metal Properties: Sea-of-Electrons Structural Explanation Summary',
+    category: 'Metallic Bonding',
+    description: 'Summary diagram explaining metallic properties (conductivity, malleability, lustre) via electron sea model',
+    type: 'metal_properties_sea_of_electrons_structural_explanation_summary',
+    defaultOptions: {
+        title: 'Metal Properties: Electron Sea Explanations',
+        showPropertyList: true,
+        showStructuralExplanations: true,
+        showElectronSeaModel: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'substitutionalInterstitialAlloyLatticeDistortionDislocationPinningDiagram': {
+    name: 'Substitutional & Interstitial Alloy: Lattice Distortion & Dislocation Pinning',
+    category: 'Metallic Bonding',
+    description: 'Diagram of substitutional and interstitial alloy types with lattice distortion and dislocation pinning mechanism',
+    type: 'substitutional_interstitial_alloy_lattice_distortion_dislocation_pinning',
+    defaultOptions: {
+        title: 'Alloy Types: Lattice Distortion & Dislocation Pinning',
+        showSubstitutionalAlloy: true,
+        showInterstitialAlloy: true,
+        showDislocationPinning: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dBlockMeltingPointTrendPeriod4dElectronBondingContributionDiagram': {
+    name: 'd-Block Melting Point Trend: Period 4 d-Electron Bonding Contribution',
+    category: 'Metallic Bonding',
+    description: 'Graph of d-block melting point trend across Period 4 with d-electron bonding contribution explanation',
+    type: 'd_block_melting_point_trend_period4_d_electron_bonding_contribution',
+    defaultOptions: {
+        title: 'd-Block Melting Point Trend: Period 4',
+        showMeltingPointGraph: true,
+        showDElectronAnnotations: true,
+        showPeakExplanation: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ironRustingElectrochemicalCellAnodeCathodeCorrosionMechanismDiagram': {
+    name: 'Iron Rusting: Electrochemical Cell Anode, Cathode & Corrosion Mechanism',
+    category: 'Metallic Bonding',
+    description: 'Electrochemical mechanism of iron rusting with anode and cathode half-reactions',
+    type: 'iron_rusting_electrochemical_cell_anode_cathode_corrosion_mechanism',
+    defaultOptions: {
+        title: 'Iron Rusting: Electrochemical Mechanism',
+        showAnodeReaction: true,
+        showCathodeReaction: true,
+        showCorrosionProducts: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'goldNanoparticleSurfacePlasmonResonanceColourSizeRelationshipDiagram': {
+    name: 'Gold Nanoparticle Surface Plasmon Resonance: Colour–Size Relationship',
+    category: 'Metallic Bonding',
+    description: 'Diagram of gold nanoparticle surface plasmon resonance and colour change with particle size',
+    type: 'gold_nanoparticle_surface_plasmon_resonance_colour_size_relationship',
+    defaultOptions: {
+        title: 'Gold Nanoparticle: Plasmon Resonance & Colour',
+        showSizeColourRelationship: true,
+        showPlasmonResonanceDiagram: true,
+        showAbsorptionSpectra: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'metallicBondingIndustrialBiologicalTechnologyApplicationsInfographic': {
+    name: 'Metallic Bonding: Industrial, Biological & Technology Applications',
+    category: 'Metallic Bonding',
+    description: 'Infographic of metallic bonding applications across industrial, biological, and technology contexts',
+    type: 'metallic_bonding_industrial_biological_technology_applications_infographic',
+    defaultOptions: {
+        title: 'Metallic Bonding Applications',
+        showIndustrialExamples: true,
+        showBiologicalExamples: true,
+        showTechnologyExamples: true,
+        width: 1150,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== INTERMOLECULAR FORCES =====
+
+'intramolecularVsIntermolecularForceStrengthScaleComparisonDiagram': {
+    name: 'Intramolecular vs Intermolecular Force Strength Scale Comparison',
+    category: 'Intermolecular Forces',
+    description: 'Scale comparison of intramolecular bond strengths versus intermolecular force strengths',
+    type: 'intramolecular_vs_intermolecular_force_strength_scale_comparison',
+    defaultOptions: {
+        title: 'Intramolecular vs Intermolecular Force Strength',
+        showStrengthScale: true,
+        showExamplesForEach: true,
+        showRelativeMagnitudes: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'instantaneousInducedDipolePolarisabilityElectronFluctuationLDFDiagram': {
+    name: 'Instantaneous-Induced Dipole, Polarisability & Electron Fluctuation (LDF)',
+    category: 'Intermolecular Forces',
+    description: 'Mechanism of London dispersion forces via instantaneous and induced dipoles and electron cloud fluctuation',
+    type: 'instantaneous_induced_dipole_polarisability_electron_fluctuation_ldf',
+    defaultOptions: {
+        title: 'London Dispersion Forces: Electron Fluctuation',
+        showElectronFluctuation: true,
+        showInducedDipoles: true,
+        showPolarisabilityTrend: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'permanentDipoleDeltaPlusDeltaMinusOrientationAttractionDiagram': {
+    name: 'Permanent Dipole: δ⁺/δ⁻ Orientation & Attraction',
+    category: 'Intermolecular Forces',
+    description: 'Diagram of permanent dipole-dipole interactions showing δ⁺/δ⁻ orientation and attraction',
+    type: 'permanent_dipole_delta_plus_delta_minus_orientation_attraction',
+    defaultOptions: {
+        title: 'Permanent Dipole-Dipole Attraction',
+        showDeltaCharges: true,
+        showOrientationArrangement: true,
+        showAttractionAnnotation: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hydrogenBondDonorAcceptorNOFAnomalousBoilingPointGroupTrendDiagram': {
+    name: 'Hydrogen Bond: Donor/Acceptor, N/O/F & Anomalous Boiling Point Group Trend',
+    category: 'Intermolecular Forces',
+    description: 'Hydrogen bonding diagram with donor/acceptor roles, N/O/F requirement, and anomalous group boiling point trend',
+    type: 'hydrogen_bond_donor_acceptor_nof_anomalous_boiling_point_group_trend',
+    defaultOptions: {
+        title: 'Hydrogen Bonding & Anomalous Boiling Points',
+        showDonorAcceptorRoles: true,
+        showNOFRequirement: true,
+        showBoilingPointAnomaly: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ionHydrationShellWaterOrientationCationAnionSolvationDiagram': {
+    name: 'Ion Hydration Shell: Water Orientation & Cation/Anion Solvation',
+    category: 'Intermolecular Forces',
+    description: 'Diagram of water orientation in hydration shells around cations and anions',
+    type: 'ion_hydration_shell_water_orientation_cation_anion_solvation',
+    defaultOptions: {
+        title: 'Ion Hydration Shells: Cation & Anion Solvation',
+        showCationHydration: true,
+        showAnionHydration: true,
+        showWaterOrientation: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'imfTypeStrengthRankingDecisionFlowchartBoilingPointPredictionDiagram': {
+    name: 'IMF Type & Strength Ranking Decision Flowchart for Boiling Point Prediction',
+    category: 'Intermolecular Forces',
+    description: 'Decision flowchart for identifying dominant IMF type and predicting relative boiling points',
+    type: 'imf_type_strength_ranking_decision_flowchart_boiling_point_prediction',
+    defaultOptions: {
+        title: 'IMF Decision Flowchart: Boiling Point Prediction',
+        showDecisionSteps: true,
+        showIMFRanking: true,
+        showBoilingPointOutcome: true,
+        width: 1000,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'imfStrengthBoilingPointViscositySurfaceTensionSolubilityCorrelationDiagram': {
+    name: 'IMF Strength, Boiling Point, Viscosity, Surface Tension & Solubility Correlation',
+    category: 'Intermolecular Forces',
+    description: 'Correlation diagram linking IMF strength to bulk physical properties including boiling point, viscosity, surface tension, and solubility',
+    type: 'imf_strength_boiling_point_viscosity_surface_tension_solubility_correlation',
+    defaultOptions: {
+        title: 'IMF Strength vs Physical Properties',
+        showAllFourProperties: true,
+        showIMFStrengthAxis: true,
+        showCorrelationArrows: true,
+        width: 1150,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'proteinFoldingHydrogenBondingDNABaseStackingLipidBilayerIMFDiagram': {
+    name: 'Protein Folding (H-bonding), DNA Base Stacking & Lipid Bilayer IMF',
+    category: 'Intermolecular Forces',
+    description: 'Biological IMF applications: protein folding hydrogen bonds, DNA base stacking, and lipid bilayer forces',
+    type: 'protein_folding_hydrogen_bonding_dna_base_stacking_lipid_bilayer_imf',
+    defaultOptions: {
+        title: 'Biological IMF: Proteins, DNA & Lipid Bilayers',
+        showProteinFolding: true,
+        showDNAStacking: true,
+        showLipidBilayer: true,
+        width: 1200,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'piPiStackingHalogenBondingCationPiMetallophilicInteractionsDiagram': {
+    name: 'π-π Stacking, Halogen Bonding, Cation-π & Metallophilic Interactions',
+    category: 'Intermolecular Forces',
+    description: 'Advanced intermolecular interactions: π-π stacking, halogen bonding, cation-π, and metallophilic interactions',
+    type: 'pi_pi_stacking_halogen_bonding_cation_pi_metallophilic_interactions',
+    defaultOptions: {
+        title: 'Advanced IMF: π-π, Halogen, Cation-π & Metallophilic',
+        showPiPiStacking: true,
+        showHalogenBonding: true,
+        showCationPiInteraction: true,
+        showMetallophilicInteraction: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'heatingCurvePhaseChangePlateauEnthalpyFusionVapourisationIMFDiagram': {
+    name: 'Heating Curve: Phase Change Plateau, Enthalpy of Fusion & Vaporisation (IMF)',
+    category: 'Intermolecular Forces',
+    description: 'Heating curve with phase change plateaus annotated with ΔHfus and ΔHvap linked to IMF strength',
+    type: 'heating_curve_phase_change_plateau_enthalpy_fusion_vapourisation_imf',
+    defaultOptions: {
+        title: 'Heating Curve: Phase Changes & IMF Enthalpy',
+        showHeatingCurve: true,
+        showPlateauAnnotations: true,
+        showIMFStrengthLink: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== OXIDATION STATES =====
+
+'electronBookkeepingBondPolarityDiagram': {
+    name: 'Electron Bookkeeping & Bond Polarity',
+    category: 'Oxidation States',
+    description: 'Diagram illustrating electron bookkeeping in polar bonds for oxidation state assignment',
+    type: 'electron_bookkeeping_bond_polarity',
+    defaultOptions: {
+        title: 'Electron Bookkeeping & Bond Polarity',
+        showElectronAllocation: true,
+        showBondPolarity: true,
+        showOxidationStateResult: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'oxidationStateRulePriorityFlowchart': {
+    name: 'Oxidation State Rule Priority Flowchart',
+    category: 'Oxidation States',
+    description: 'Priority-ordered flowchart for assigning oxidation states using standard rules',
+    type: 'oxidation_state_rule_priority_flowchart',
+    defaultOptions: {
+        title: 'Oxidation State Rule Priority Flowchart',
+        showPriorityOrder: true,
+        showRuleExamples: true,
+        showDecisionNodes: true,
+        width: 950,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'oxidationStateAlgebraicWorkingDiagram': {
+    name: 'Oxidation State Algebraic Working',
+    category: 'Oxidation States',
+    description: 'Step-by-step algebraic working for calculating unknown oxidation states in compounds',
+    type: 'oxidation_state_algebraic_working',
+    defaultOptions: {
+        title: 'Oxidation State Algebraic Working',
+        showAlgebraicSteps: true,
+        showWorkedExamples: true,
+        showChargeSumCheck: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'transitionMetalVariableOxidationStatesPeriodicTable': {
+    name: 'Transition Metal Variable Oxidation States Periodic Table',
+    category: 'Oxidation States',
+    description: 'Periodic table of d-block transition metals annotated with their variable oxidation states',
+    type: 'transition_metal_variable_oxidation_states_periodic_table',
+    defaultOptions: {
+        title: 'Transition Metal Variable Oxidation States',
+        showDBlockOnly: true,
+        showAllOxidationStates: true,
+        showCommonStatesHighlighted: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'oxidationStateChangeArrowTrackingDiagram': {
+    name: 'Oxidation State Change Arrow Tracking',
+    category: 'Oxidation States',
+    description: 'Diagram tracking oxidation state changes with arrows across a redox reaction',
+    type: 'oxidation_state_change_arrow_tracking',
+    defaultOptions: {
+        title: 'Oxidation State Change Tracking',
+        showOxidationArrows: true,
+        showReductionArrows: true,
+        showStateChanges: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'oxidisingReducingAgentElectronTransferDiagram': {
+    name: 'Oxidising & Reducing Agent Electron Transfer',
+    category: 'Oxidation States',
+    description: 'Diagram identifying oxidising and reducing agents via electron transfer in redox reactions',
+    type: 'oxidising_reducing_agent_electron_transfer',
+    defaultOptions: {
+        title: 'Oxidising & Reducing Agents: Electron Transfer',
+        showElectronTransfer: true,
+        showAgentLabels: true,
+        showOxidationStateChanges: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'disproportionationSingleSpeciesSplitOxidationDiagram': {
+    name: 'Disproportionation: Single Species Split Oxidation',
+    category: 'Oxidation States',
+    description: 'Diagram of disproportionation where a single species simultaneously oxidises and reduces',
+    type: 'disproportionation_single_species_split_oxidation',
+    defaultOptions: {
+        title: 'Disproportionation: Single Species Redox Split',
+        showSimultaneousOxidationReduction: true,
+        showOxidationStateArrows: true,
+        showExample: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'maxOxidationStatePeriod3PeriodicTrendChart': {
+    name: 'Maximum Oxidation State: Period 3 Periodic Trend Chart',
+    category: 'Oxidation States',
+    description: 'Chart of maximum oxidation states across Period 3 elements with periodic trend explanation',
+    type: 'max_oxidation_state_period3_periodic_trend_chart',
+    defaultOptions: {
+        title: 'Maximum Oxidation States: Period 3 Trend',
+        showPeriod3Elements: true,
+        showMaxOxStates: true,
+        showGroupNumberLink: true,
+        width: 1050,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'stockNomenclatureRomanNumeralNamingFlowchart': {
+    name: 'Stock Nomenclature: Roman Numeral Naming Flowchart',
+    category: 'Oxidation States',
+    description: 'Flowchart for naming ionic compounds using Stock system Roman numeral notation',
+    type: 'stock_nomenclature_roman_numeral_naming_flowchart',
+    defaultOptions: {
+        title: 'Stock Nomenclature: Roman Numeral Naming',
+        showNamingSteps: true,
+        showRomanNumeralRule: true,
+        showExamples: true,
+        width: 950,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'permanganateDichromateTitrationOxidationStateApplicationDiagram': {
+    name: 'Permanganate & Dichromate Titration: Oxidation State Application',
+    category: 'Oxidation States',
+    description: 'Oxidation state application in permanganate and dichromate redox titrations',
+    type: 'permanganate_dichromate_titration_oxidation_state_application',
+    defaultOptions: {
+        title: 'Permanganate & Dichromate Titration: Oxidation States',
+        showHalfEquations: true,
+        showOxidationStateChanges: true,
+        showColourChanges: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== REDOX REACTIONS =====
+
+'oilRigElectronTransferRedoxDefinitionDiagram': {
+    name: 'OIL RIG Electron Transfer Redox Definition',
+    category: 'Redox Reactions',
+    description: 'OIL RIG mnemonic diagram defining oxidation and reduction in terms of electron transfer',
+    type: 'oil_rig_electron_transfer_redox_definition',
+    defaultOptions: {
+        title: 'OIL RIG: Redox Electron Transfer',
+        showOILRIGMnemonic: true,
+        showElectronTransferArrows: true,
+        showDefinitionLabels: true,
+        width: 900,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'halfEquationAcidicBasicBalancingStepsDiagram': {
+    name: 'Half Equation: Acidic & Basic Balancing Steps',
+    category: 'Redox Reactions',
+    description: 'Step-by-step balancing procedure for half equations in acidic and basic conditions',
+    type: 'half_equation_acidic_basic_balancing_steps',
+    defaultOptions: {
+        title: 'Half Equation Balancing: Acidic & Basic',
+        showAcidicSteps: true,
+        showBasicSteps: true,
+        showWorkedExample: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'halfEquationCombinationElectronCancellationDiagram': {
+    name: 'Half Equation Combination & Electron Cancellation',
+    category: 'Redox Reactions',
+    description: 'Diagram combining oxidation and reduction half equations with electron cancellation',
+    type: 'half_equation_combination_electron_cancellation',
+    defaultOptions: {
+        title: 'Half Equation Combination & Electron Cancellation',
+        showHalfEquations: true,
+        showElectronCancellation: true,
+        showOverallEquation: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'redoxReactionTypesClassificationTreeDiagram': {
+    name: 'Redox Reaction Types Classification Tree',
+    category: 'Redox Reactions',
+    description: 'Classification tree of redox reaction types including combination, decomposition, displacement, and disproportionation',
+    type: 'redox_reaction_types_classification_tree',
+    defaultOptions: {
+        title: 'Redox Reaction Types Classification Tree',
+        showAllTypes: true,
+        showExamplesPerType: true,
+        showClassificationCriteria: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'metalActivitySeriesDisplacementReactionDiagram': {
+    name: 'Metal Activity Series & Displacement Reaction',
+    category: 'Redox Reactions',
+    description: 'Metal activity series with displacement reaction examples showing more active metal displacing less active',
+    type: 'metal_activity_series_displacement_reaction',
+    defaultOptions: {
+        title: 'Metal Activity Series & Displacement',
+        showActivitySeries: true,
+        showDisplacementExamples: true,
+        showElectronTransfer: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'manganateDichromateTitrationEndpointColourChangeDiagram': {
+    name: 'Manganate & Dichromate Titration Endpoint Colour Change',
+    category: 'Redox Reactions',
+    description: 'Colour change diagrams for manganate(VII) and dichromate(VI) titration endpoints',
+    type: 'manganate_dichromate_titration_endpoint_colour_change',
+    defaultOptions: {
+        title: 'Manganate & Dichromate Endpoint Colour Changes',
+        showColourChangeDiagrams: true,
+        showEndpointAnnotations: true,
+        showBothTitrants: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'permanganateProductsAcidicNeutralAlkalineMediumComparisonDiagram': {
+    name: 'Permanganate Products: Acidic, Neutral & Alkaline Medium Comparison',
+    category: 'Redox Reactions',
+    description: 'Comparison of KMnO₄ reduction products in acidic, neutral, and alkaline media',
+    type: 'permanganate_products_acidic_neutral_alkaline_medium_comparison',
+    defaultOptions: {
+        title: 'Permanganate Products by Medium',
+        showAllThreeMedia: true,
+        showProductFormulas: true,
+        showColourChanges: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'blastFurnaceIronReductionOxidationStateFlowDiagram': {
+    name: 'Blast Furnace: Iron Reduction & Oxidation State Flow',
+    category: 'Redox Reactions',
+    description: 'Diagram of blast furnace iron reduction with oxidation state changes tracked through the process',
+    type: 'blast_furnace_iron_reduction_oxidation_state_flow',
+    defaultOptions: {
+        title: 'Blast Furnace: Iron Reduction & Oxidation States',
+        showFurnaceZones: true,
+        showOxidationStateChanges: true,
+        showReactionEquations: true,
+        width: 1000,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'cellularRespirationElectronTransportChainRedoxDiagram': {
+    name: 'Cellular Respiration: Electron Transport Chain Redox',
+    category: 'Redox Reactions',
+    description: 'Redox diagram of the mitochondrial electron transport chain in cellular respiration',
+    type: 'cellular_respiration_electron_transport_chain_redox',
+    defaultOptions: {
+        title: 'Electron Transport Chain: Cellular Respiration Redox',
+        showElectronCarriers: true,
+        showRedoxSteps: true,
+        showATPSynthesis: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'redoxIndicatorColourChangeTestSummaryDiagram': {
+    name: 'Redox Indicator Colour Change Test Summary',
+    category: 'Redox Reactions',
+    description: 'Summary of common redox indicators and their colour change tests for oxidising and reducing agents',
+    type: 'redox_indicator_colour_change_test_summary',
+    defaultOptions: {
+        title: 'Redox Indicator Colour Change Tests',
+        showIndicatorList: true,
+        showColourChanges: true,
+        showTestConditions: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== ELECTROCHEMISTRY =====
+
+'electrochemicalCellAnodeCathodeElectronFlowDiagram': {
+    name: 'Electrochemical Cell: Anode, Cathode & Electron Flow',
+    category: 'Electrochemistry',
+    description: 'Diagram of electrochemical cell labelling anode, cathode, and electron flow direction',
+    type: 'electrochemical_cell_anode_cathode_electron_flow',
+    defaultOptions: {
+        title: 'Electrochemical Cell: Anode, Cathode & Electron Flow',
+        showAnodeCathodeLabels: true,
+        showElectronFlowArrows: true,
+        showHalfReactions: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'daniellCellSaltBridgeElectronIonFlowDiagram': {
+    name: 'Daniell Cell: Salt Bridge, Electron & Ion Flow',
+    category: 'Electrochemistry',
+    description: 'Fully labelled Daniell cell showing salt bridge function, electron flow, and ion migration',
+    type: 'daniell_cell_salt_bridge_electron_ion_flow',
+    defaultOptions: {
+        title: 'Daniell Cell: Salt Bridge & Ion/Electron Flow',
+        showSaltBridge: true,
+        showElectronFlow: true,
+        showIonMigration: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electrochemicalSeriesStandardReductionPotentialLadderDiagram': {
+    name: 'Electrochemical Series: Standard Reduction Potential Ladder',
+    category: 'Electrochemistry',
+    description: 'Ladder diagram of standard electrode reduction potentials with spontaneity prediction',
+    type: 'electrochemical_series_standard_reduction_potential_ladder',
+    defaultOptions: {
+        title: 'Electrochemical Series: Standard Reduction Potentials',
+        showReductionPotentials: true,
+        showSpontaneityPrediction: true,
+        showSelectedHalfReactions: true,
+        width: 1000,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nernstEquationConcentrationVsEmfGraphDiagram': {
+    name: 'Nernst Equation: Concentration vs EMF Graph',
+    category: 'Electrochemistry',
+    description: 'Graph of cell EMF versus concentration ratio using the Nernst equation',
+    type: 'nernst_equation_concentration_vs_emf_graph',
+    defaultOptions: {
+        title: 'Nernst Equation: Concentration vs EMF',
+        showNernstFormula: true,
+        showEmfConcentrationGraph: true,
+        showStandardPotentialReference: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electrolyticCellProductSelectionAnodeCathodeComparisonDiagram': {
+    name: 'Electrolytic Cell Product Selection: Anode & Cathode Comparison',
+    category: 'Electrochemistry',
+    description: 'Diagram for predicting products at anode and cathode in electrolytic cells based on electrode potential',
+    type: 'electrolytic_cell_product_selection_anode_cathode_comparison',
+    defaultOptions: {
+        title: 'Electrolytic Cell Product Selection',
+        showProductSelectionRules: true,
+        showAnodeCathodeComparison: true,
+        showExamples: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'faradayChargeToMassQuantitativeRelationshipDiagram': {
+    name: 'Faraday: Charge to Mass Quantitative Relationship',
+    category: 'Electrochemistry',
+    description: 'Diagram of Faraday\'s laws relating charge, moles of electrons, and mass deposited',
+    type: 'faraday_charge_to_mass_quantitative_relationship',
+    defaultOptions: {
+        title: 'Faraday: Charge to Mass Relationship',
+        showFaradayFormula: true,
+        showCalculationSteps: true,
+        showWorkedExample: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'primarySecondaryFuelCellComparativeStructureDiagram': {
+    name: 'Primary, Secondary & Fuel Cell Comparative Structure',
+    category: 'Electrochemistry',
+    description: 'Comparative structural diagrams of primary cells, secondary (rechargeable) cells, and fuel cells',
+    type: 'primary_secondary_fuel_cell_comparative_structure',
+    defaultOptions: {
+        title: 'Primary, Secondary & Fuel Cell Comparison',
+        showAllThreeTypes: true,
+        showStructuralDifferences: true,
+        showAdvantagesDisadvantages: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hallHeroultChlorAlkaliIndustrialElectrolysisCellDiagram': {
+    name: 'Hall-Héroult & Chlor-Alkali Industrial Electrolysis Cells',
+    category: 'Electrochemistry',
+    description: 'Diagrams of Hall-Héroult aluminium smelting and chlor-alkali industrial electrolysis cells',
+    type: 'hall_heroult_chlor_alkali_industrial_electrolysis_cell',
+    defaultOptions: {
+        title: 'Hall-Héroult & Chlor-Alkali Electrolysis',
+        showBothCells: true,
+        showElectrodeReactions: true,
+        showIndustrialContext: true,
+        width: 1200,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'concentrationCellGlassElectrodePHMeasurementDiagram': {
+    name: 'Concentration Cell & Glass Electrode pH Measurement',
+    category: 'Electrochemistry',
+    description: 'Diagram of glass electrode pH measurement cell and concentration cell principle',
+    type: 'concentration_cell_glass_electrode_ph_measurement',
+    defaultOptions: {
+        title: 'Glass Electrode & pH Measurement Cell',
+        showGlassElectrode: true,
+        showConcentrationCellPrinciple: true,
+        showPhMeasurementSetup: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'gibbsEnergyEmfEquilibriumConstantTriangleRelationshipDiagram': {
+    name: 'Gibbs Energy, EMF & Equilibrium Constant Triangle Relationship',
+    category: 'Electrochemistry',
+    description: 'Triangle relationship diagram linking ΔG°, E°cell, and equilibrium constant K',
+    type: 'gibbs_energy_emf_equilibrium_constant_triangle_relationship',
+    defaultOptions: {
+        title: 'ΔG°, EMF & K Triangle Relationship',
+        showThreeWayRelationship: true,
+        showConversionFormulas: true,
+        showSignConventions: true,
+        width: 950,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== CORROSION =====
+
+'corrosionElectrochemicalCellAnodeCathodeSurfaceDiagram': {
+    name: 'Corrosion Electrochemical Cell: Anode & Cathode Surface',
+    category: 'Corrosion',
+    description: 'Electrochemical cell model of corrosion showing anodic and cathodic surface regions',
+    type: 'corrosion_electrochemical_cell_anode_cathode_surface',
+    defaultOptions: {
+        title: 'Corrosion: Electrochemical Cell Model',
+        showAnodeSurface: true,
+        showCathodeSurface: true,
+        showElectronIonFlow: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'corrosionTypesClassificationMorphologyComparisonDiagram': {
+    name: 'Corrosion Types Classification & Morphology Comparison',
+    category: 'Corrosion',
+    description: 'Classification and morphology comparison of common corrosion types',
+    type: 'corrosion_types_classification_morphology_comparison',
+    defaultOptions: {
+        title: 'Corrosion Types: Classification & Morphology',
+        showCorrosionTypes: true,
+        showMorphologyDiagrams: true,
+        showClassificationCriteria: true,
+        width: 1150,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ironRustingElectrochemicalMechanismAnodeCathodeHalfReactionDiagram': {
+    name: 'Iron Rusting: Electrochemical Mechanism, Anode & Cathode Half-Reactions',
+    category: 'Corrosion',
+    description: 'Detailed electrochemical mechanism of iron rusting with anode and cathode half-reactions',
+    type: 'iron_rusting_electrochemical_mechanism_anode_cathode_half_reaction',
+    defaultOptions: {
+        title: 'Iron Rusting: Electrochemical Half-Reactions',
+        showAnodeHalfReaction: true,
+        showCathodeHalfReaction: true,
+        showRustFormation: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'corrosionRateEnvironmentalFactorsInfluenceChart': {
+    name: 'Corrosion Rate Environmental Factors Influence Chart',
+    category: 'Corrosion',
+    description: 'Chart showing how environmental factors (humidity, pH, temperature, chloride) influence corrosion rate',
+    type: 'corrosion_rate_environmental_factors_influence_chart',
+    defaultOptions: {
+        title: 'Corrosion Rate: Environmental Factors',
+        showAllFactors: true,
+        showInfluenceDirection: true,
+        showQuantitativeEffect: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'metalPassivationActiveCorrosionComparisonGalvanicSeriesDiagram': {
+    name: 'Metal Passivation vs Active Corrosion: Galvanic Series Comparison',
+    category: 'Corrosion',
+    description: 'Comparison of passivation and active corrosion behaviour on the galvanic series',
+    type: 'metal_passivation_active_corrosion_comparison_galvanic_series',
+    defaultOptions: {
+        title: 'Passivation vs Active Corrosion: Galvanic Series',
+        showGalvanicSeries: true,
+        showPassivationRegions: true,
+        showActiveCorrosionRegions: true,
+        width: 1050,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'protectiveCoatingTypesBarrierGalvanicConversionLayerDiagram': {
+    name: 'Protective Coating Types: Barrier, Galvanic & Conversion Layer',
+    category: 'Corrosion',
+    description: 'Diagram of corrosion protection coating types including barrier, galvanic, and conversion layer coatings',
+    type: 'protective_coating_types_barrier_galvanic_conversion_layer',
+    defaultOptions: {
+        title: 'Protective Coatings: Barrier, Galvanic & Conversion',
+        showAllThreeTypes: true,
+        showMechanismAnnotations: true,
+        showExamples: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'sacrificialAnodeImpressedCurrentCathodicProtectionComparisonDiagram': {
+    name: 'Sacrificial Anode vs Impressed Current Cathodic Protection Comparison',
+    category: 'Corrosion',
+    description: 'Comparative diagram of sacrificial anode and impressed current cathodic protection methods',
+    type: 'sacrificial_anode_impressed_current_cathodic_protection_comparison',
+    defaultOptions: {
+        title: 'Cathodic Protection: Sacrificial Anode vs Impressed Current',
+        showBothMethods: true,
+        showCircuitDiagrams: true,
+        showAdvantagesComparison: true,
+        width: 1150,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'anodicCathodicMixedInhibitorAdsorptionMechanismDiagram': {
+    name: 'Anodic, Cathodic & Mixed Inhibitor Adsorption Mechanism',
+    category: 'Corrosion',
+    description: 'Mechanism diagrams for anodic, cathodic, and mixed corrosion inhibitor adsorption',
+    type: 'anodic_cathodic_mixed_inhibitor_adsorption_mechanism',
+    defaultOptions: {
+        title: 'Corrosion Inhibitor Adsorption Mechanisms',
+        showAnodicInhibitor: true,
+        showCathodicInhibitor: true,
+        showMixedInhibitor: true,
+        width: 1150,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'corrosionControlDesignPrinciplesCreviceDissimilarMetalDiagram': {
+    name: 'Corrosion Control Design Principles: Crevice & Dissimilar Metal',
+    category: 'Corrosion',
+    description: 'Design principles for corrosion control addressing crevice corrosion and dissimilar metal contact',
+    type: 'corrosion_control_design_principles_crevice_dissimilar_metal',
+    defaultOptions: {
+        title: 'Corrosion Control Design Principles',
+        showCreviceCorrosionDesign: true,
+        showDissimilarMetalDesign: true,
+        showBestPracticeAnnotations: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'globalCorrosionCostBreakdownDirectIndirectPieChartDiagram': {
+    name: 'Global Corrosion Cost Breakdown: Direct & Indirect Pie Chart',
+    category: 'Corrosion',
+    description: 'Pie chart of global corrosion economic cost broken down by direct and indirect components',
+    type: 'global_corrosion_cost_breakdown_direct_indirect_pie_chart',
+    defaultOptions: {
+        title: 'Global Corrosion Cost: Direct & Indirect Breakdown',
+        showPieChart: true,
+        showSectorLabels: true,
+        showTotalCostAnnotation: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== CHEMICAL EQUILIBRIUM =====
+
+'reversibleVsIrreversibleReactionArrowDiagram': {
+    name: 'Reversible vs Irreversible Reaction Arrow Diagram',
+    category: 'Chemical Equilibrium',
+    description: 'Comparison of single-headed and double-headed equilibrium arrows for reversible and irreversible reactions',
+    type: 'reversible_vs_irreversible_reaction_arrow',
+    defaultOptions: {
+        title: 'Reversible vs Irreversible Reaction Arrows',
+        showArrowTypes: true,
+        showExamples: true,
+        showCompletionCriteria: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'equalForwardReverseRateEquilibriumDiagram': {
+    name: 'Equal Forward & Reverse Rate at Equilibrium',
+    category: 'Chemical Equilibrium',
+    description: 'Diagram showing equal forward and reverse reaction rates defining dynamic equilibrium',
+    type: 'equal_forward_reverse_rate_equilibrium',
+    defaultOptions: {
+        title: 'Dynamic Equilibrium: Equal Forward & Reverse Rates',
+        showRateDiagram: true,
+        showEquilibriumDefinition: true,
+        showTimeGraph: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'equilibriumPositionReactantsProductsSpectrumDiagram': {
+    name: 'Equilibrium Position: Reactants–Products Spectrum',
+    category: 'Chemical Equilibrium',
+    description: 'Spectrum diagram showing equilibrium position from reactant-favoured to product-favoured',
+    type: 'equilibrium_position_reactants_products_spectrum',
+    defaultOptions: {
+        title: 'Equilibrium Position Spectrum',
+        showSpectrum: true,
+        showKRelationship: true,
+        showExamples: true,
+        width: 1000,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'rateTimeAndConcentrationTimeEquilibriumGraphs': {
+    name: 'Rate-Time & Concentration-Time Equilibrium Graphs',
+    category: 'Chemical Equilibrium',
+    description: 'Paired rate-time and concentration-time graphs showing approach to equilibrium',
+    type: 'rate_time_and_concentration_time_equilibrium_graphs',
+    defaultOptions: {
+        title: 'Rate-Time & Concentration-Time Equilibrium Graphs',
+        showBothGraphs: true,
+        showEquilibriumAnnotations: true,
+        showAxisLabels: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'homogeneousVsHeterogeneousEquilibriumPhasesDiagram': {
+    name: 'Homogeneous vs Heterogeneous Equilibrium Phases',
+    category: 'Chemical Equilibrium',
+    description: 'Comparison of homogeneous and heterogeneous equilibria with phase notation',
+    type: 'homogeneous_vs_heterogeneous_equilibrium_phases',
+    defaultOptions: {
+        title: 'Homogeneous vs Heterogeneous Equilibrium',
+        showPhaseNotation: true,
+        showKExpressionDifference: true,
+        showExamples: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'reactionQuotientQVersusKEquilibriumApproachDiagram': {
+    name: 'Reaction Quotient Q versus K Equilibrium Approach',
+    category: 'Chemical Equilibrium',
+    description: 'Diagram comparing Q and K values to predict direction of reaction shift to reach equilibrium',
+    type: 'reaction_quotient_q_versus_k_equilibrium_approach',
+    defaultOptions: {
+        title: 'Q vs K: Predicting Equilibrium Shift',
+        showQKComparison: true,
+        showShiftDirections: true,
+        showNumberLine: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'activationEnergyProfileForwardReverseReactionDiagram': {
+    name: 'Activation Energy Profile: Forward & Reverse Reaction',
+    category: 'Chemical Equilibrium',
+    description: 'Energy profile diagram labelling activation energies for forward and reverse reactions at equilibrium',
+    type: 'activation_energy_profile_forward_reverse_reaction',
+    defaultOptions: {
+        title: 'Activation Energy Profile: Forward & Reverse',
+        showBothActivationEnergies: true,
+        showEnthalpyChange: true,
+        showTransitionState: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'haberProcessFlowDiagramEquilibriumConditions': {
+    name: 'Haber Process Flow Diagram & Equilibrium Conditions',
+    category: 'Chemical Equilibrium',
+    description: 'Industrial flow diagram of the Haber process annotated with equilibrium and kinetic compromise conditions',
+    type: 'haber_process_flow_diagram_equilibrium_conditions',
+    defaultOptions: {
+        title: 'Haber Process: Flow Diagram & Conditions',
+        showProcessFlow: true,
+        showEquilibriumConditions: true,
+        showYieldAnnotations: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'no2N2o4ColourChangeEquilibriumTubeDiagram': {
+    name: 'NO₂/N₂O₄ Colour Change Equilibrium Tube',
+    category: 'Chemical Equilibrium',
+    description: 'Equilibrium tube diagram showing NO₂/N₂O₄ colour change with temperature and pressure changes',
+    type: 'no2_n2o4_colour_change_equilibrium_tube',
+    defaultOptions: {
+        title: 'NO₂/N₂O₄ Colour Change Equilibrium',
+        showColourChange: true,
+        showTemperatureEffect: true,
+        showPressureEffect: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dynamicEquilibriumCommonMisconceptionsAnnotatedDiagram': {
+    name: 'Dynamic Equilibrium Common Misconceptions Annotated',
+    category: 'Chemical Equilibrium',
+    description: 'Annotated diagram correcting common misconceptions about dynamic equilibrium',
+    type: 'dynamic_equilibrium_common_misconceptions_annotated',
+    defaultOptions: {
+        title: 'Dynamic Equilibrium: Correcting Misconceptions',
+        showMisconceptions: true,
+        showCorrections: true,
+        showAnnotations: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lawOfMassActionExpressionAnnotatedDiagram': {
+    name: 'Law of Mass Action Expression Annotated',
+    category: 'Chemical Equilibrium',
+    description: 'Annotated law of mass action Kc expression with stoichiometry, numerator/denominator, and units',
+    type: 'law_of_mass_action_expression_annotated',
+    defaultOptions: {
+        title: 'Law of Mass Action: Kc Expression',
+        showKcFormula: true,
+        showStoichiometryAnnotation: true,
+        showUnitsNote: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kcExpressionNumeratorDenominatorStoichiometryDiagram': {
+    name: 'Kc Expression: Numerator, Denominator & Stoichiometry',
+    category: 'Chemical Equilibrium',
+    description: 'Detailed diagram of Kc expression numerator/denominator structure with stoichiometric exponents',
+    type: 'kc_expression_numerator_denominator_stoichiometry',
+    defaultOptions: {
+        title: 'Kc Expression: Stoichiometry & Structure',
+        showNumeratorDenominator: true,
+        showExponentAnnotations: true,
+        showWorkedExample: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'partialPressureMoleFractionKpDiagram': {
+    name: 'Partial Pressure, Mole Fraction & Kp',
+    category: 'Chemical Equilibrium',
+    description: 'Diagram linking partial pressure, mole fraction, and Kp equilibrium constant for gas phase equilibria',
+    type: 'partial_pressure_mole_fraction_kp',
+    defaultOptions: {
+        title: 'Partial Pressure, Mole Fraction & Kp',
+        showPartialPressureFormula: true,
+        showMoleFractionCalculation: true,
+        showKpExpression: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'iceTableInitialChangeEquilibriumRowsDiagram': {
+    name: 'ICE Table: Initial, Change & Equilibrium Rows',
+    category: 'Chemical Equilibrium',
+    description: 'Template ICE table with annotated Initial, Change, and Equilibrium rows for equilibrium calculations',
+    type: 'ice_table_initial_change_equilibrium_rows',
+    defaultOptions: {
+        title: 'ICE Table Structure & Method',
+        showAllThreeRows: true,
+        showRowAnnotations: true,
+        showWorkedExample: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'qVersusKDirectionOfShiftNumberLineDiagram': {
+    name: 'Q versus K Direction of Shift Number Line',
+    category: 'Chemical Equilibrium',
+    description: 'Number line diagram showing Q vs K comparison and resulting direction of equilibrium shift',
+    type: 'q_versus_k_direction_of_shift_number_line',
+    defaultOptions: {
+        title: 'Q vs K: Direction of Shift',
+        showNumberLine: true,
+        showShiftArrows: true,
+        showQKRegions: true,
+        width: 1000,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'vanTHoffPlotLnKVersusOneOverTDiagram': {
+    name: "Van 't Hoff Plot: ln K versus 1/T",
+    category: 'Chemical Equilibrium',
+    description: "Van 't Hoff plot of ln K versus 1/T for determining ΔH° and ΔS° from equilibrium data",
+    type: 'van_t_hoff_plot_ln_k_versus_one_over_t',
+    defaultOptions: {
+        title: "Van 't Hoff Plot: ln K vs 1/T",
+        showGraph: true,
+        showSlopeIntercept: true,
+        showThermodynamicLink: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'reversalMultiplicationAdditionKRulesSummaryDiagram': {
+    name: 'Reversal, Multiplication & Addition K Rules Summary',
+    category: 'Chemical Equilibrium',
+    description: 'Summary of rules for K manipulation: reversal (1/K), multiplication (Kⁿ), and addition (K₁×K₂)',
+    type: 'reversal_multiplication_addition_k_rules_summary',
+    defaultOptions: {
+        title: 'K Manipulation Rules: Reversal, Multiplication & Addition',
+        showAllThreeRules: true,
+        showFormulaAnnotations: true,
+        showWorkedExamples: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'degreeOfDissociationAlphaKspRelationshipDiagram': {
+    name: 'Degree of Dissociation (α) & Ksp Relationship',
+    category: 'Chemical Equilibrium',
+    description: 'Diagram linking degree of dissociation α to Ka or Ksp with algebraic derivation',
+    type: 'degree_of_dissociation_alpha_ksp_relationship',
+    defaultOptions: {
+        title: 'Degree of Dissociation α & K Relationship',
+        showAlphaDefinition: true,
+        showKRelationship: true,
+        showAlgebraicDerivation: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'equilibriumCalculationProblemTypeDecisionTreeDiagram': {
+    name: 'Equilibrium Calculation Problem Type Decision Tree',
+    category: 'Chemical Equilibrium',
+    description: 'Decision tree for identifying and solving different types of equilibrium calculation problems',
+    type: 'equilibrium_calculation_problem_type_decision_tree',
+    defaultOptions: {
+        title: 'Equilibrium Calculation Decision Tree',
+        showDecisionNodes: true,
+        showProblemTypes: true,
+        showSolutionMethods: true,
+        width: 1050,
+        height: 850,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'activityVsConcentrationIdealRealBehaviourDiagram': {
+    name: 'Activity vs Concentration: Ideal & Real Behaviour',
+    category: 'Chemical Equilibrium',
+    description: 'Diagram comparing thermodynamic activity to concentration for ideal and real solution behaviour',
+    type: 'activity_vs_concentration_ideal_real_behaviour',
+    defaultOptions: {
+        title: 'Activity vs Concentration: Ideal & Real Behaviour',
+        showIdealLine: true,
+        showRealCurve: true,
+        showActivityCoefficient: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== LE CHATELIER'S PRINCIPLE =====
+
+'leChatelierStressResponseEquilibriumShiftDiagram': {
+    name: "Le Chatelier's Stress-Response Equilibrium Shift",
+    category: "Le Chatelier's Principle",
+    description: "Overview diagram of Le Chatelier's principle with stress types and equilibrium shift responses",
+    type: 'le_chatelier_stress_response_equilibrium_shift',
+    defaultOptions: {
+        title: "Le Chatelier's Principle: Stress & Response",
+        showStressTypes: true,
+        showShiftDirections: true,
+        showPrincipleStatement: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'concentrationAddRemoveEquilibriumShiftArrowDiagram': {
+    name: 'Concentration Add/Remove Equilibrium Shift Arrow Diagram',
+    category: "Le Chatelier's Principle",
+    description: 'Arrow diagram showing equilibrium shift upon adding or removing reactant/product concentration',
+    type: 'concentration_add_remove_equilibrium_shift_arrow',
+    defaultOptions: {
+        title: 'Concentration Change: Equilibrium Shift',
+        showAdditionShift: true,
+        showRemovalShift: true,
+        showArrowDirections: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'gasMolesEitherSidePressureShiftDeltaNDiagram': {
+    name: 'Gas Moles Either Side & Pressure Shift (ΔN)',
+    category: "Le Chatelier's Principle",
+    description: 'Diagram predicting pressure shift direction from mole count difference (ΔN) across equilibrium',
+    type: 'gas_moles_either_side_pressure_shift_delta_n',
+    defaultOptions: {
+        title: 'Pressure Shift: Gas Moles & ΔN',
+        showMoleCountComparison: true,
+        showPressureShiftPrediction: true,
+        showDeltaNAnnotation: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'exothermicEndothermicTemperatureKShiftSummaryDiagram': {
+    name: 'Exothermic & Endothermic Temperature K Shift Summary',
+    category: "Le Chatelier's Principle",
+    description: 'Summary diagram of temperature effects on K for exothermic and endothermic equilibria',
+    type: 'exothermic_endothermic_temperature_k_shift_summary',
+    defaultOptions: {
+        title: 'Temperature Effect on K: Exothermic & Endothermic',
+        showExothermicCase: true,
+        showEndothermicCase: true,
+        showKChangeAnnotation: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'catalystLowersActivationEnergyBothDirectionsEnergyProfileDiagram': {
+    name: 'Catalyst Lowers Activation Energy Both Directions: Energy Profile',
+    category: "Le Chatelier's Principle",
+    description: 'Energy profile showing catalyst lowering activation energy equally for forward and reverse reactions',
+    type: 'catalyst_lowers_activation_energy_both_directions_energy_profile',
+    defaultOptions: {
+        title: 'Catalyst: Equal Ea Reduction Both Directions',
+        showCatalysedProfile: true,
+        showUncatalysedProfile: true,
+        showEqualReductionAnnotation: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'qVersusKPostPerturbationShiftCalculationDiagram': {
+    name: 'Q versus K Post-Perturbation Shift Calculation',
+    category: "Le Chatelier's Principle",
+    description: 'Calculation diagram using Q vs K comparison after a perturbation to quantify equilibrium shift',
+    type: 'q_versus_k_post_perturbation_shift_calculation',
+    defaultOptions: {
+        title: 'Q vs K: Post-Perturbation Shift Calculation',
+        showPerturbationStep: true,
+        showQCalculation: true,
+        showShiftDetermination: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'haberContactProcessConditionsCompromiseSummaryDiagram': {
+    name: 'Haber & Contact Process Conditions Compromise Summary',
+    category: "Le Chatelier's Principle",
+    description: 'Summary of industrial compromise conditions for Haber and Contact processes balancing yield and rate',
+    type: 'haber_contact_process_conditions_compromise_summary',
+    defaultOptions: {
+        title: 'Haber & Contact Process: Conditions Compromise',
+        showHaberConditions: true,
+        showContactConditions: true,
+        showYieldRateCompromise: true,
+        width: 1150,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bufferSystemLeChatelierAcidBaseShiftDiagram': {
+    name: "Buffer System & Le Chatelier Acid/Base Shift",
+    category: "Le Chatelier's Principle",
+    description: "Le Chatelier's explanation of buffer system response to acid and base addition",
+    type: 'buffer_system_le_chatelier_acid_base_shift',
+    defaultOptions: {
+        title: "Buffer System: Le Chatelier's Acid/Base Shift",
+        showAcidAdditionShift: true,
+        showBaseAdditionShift: true,
+        showEquilibriumEquations: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'concentrationTimeGraphPerturbationNewEquilibriumDiagram': {
+    name: 'Concentration-Time Graph: Perturbation & New Equilibrium',
+    category: "Le Chatelier's Principle",
+    description: 'Concentration-time graph showing system response to perturbation and re-establishment of new equilibrium',
+    type: 'concentration_time_graph_perturbation_new_equilibrium',
+    defaultOptions: {
+        title: 'Concentration-Time: Perturbation & New Equilibrium',
+        showPerturbationEvent: true,
+        showNewEquilibriumLine: true,
+        showConcentrationCurves: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'leChatelierMisconceptionAnnotatedCorrectionsDiagram': {
+    name: "Le Chatelier Misconception Annotated Corrections",
+    category: "Le Chatelier's Principle",
+    description: "Annotated corrections to common Le Chatelier's principle misconceptions",
+    type: 'le_chatelier_misconception_annotated_corrections',
+    defaultOptions: {
+        title: "Le Chatelier's Principle: Correcting Misconceptions",
+        showMisconceptions: true,
+        showCorrections: true,
+        showAnnotationBoxes: true,
+        width: 1100,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== SOLUBILITY EQUILIBRIA =====
+
+'dissolutionSolidIonsAqueousHeterogeneousEquilibriumDiagram': {
+    name: 'Dissolution: Solid to Ions Aqueous Heterogeneous Equilibrium',
+    category: 'Solubility Equilibria',
+    description: 'Diagram of heterogeneous dissolution equilibrium of ionic solid producing aqueous ions',
+    type: 'dissolution_solid_ions_aqueous_heterogeneous_equilibrium',
+    defaultOptions: {
+        title: 'Dissolution: Solid to Aqueous Ions',
+        showSolidPhase: true,
+        showIonisation: true,
+        showHeterogeneousEquilibrium: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kspExpressionStoichiometricPowersSilverChlorideAnnotatedDiagram': {
+    name: 'Ksp Expression: Stoichiometric Powers, Silver Chloride Annotated',
+    category: 'Solubility Equilibria',
+    description: 'Annotated Ksp expression for silver chloride showing stoichiometric powers and units',
+    type: 'ksp_expression_stoichiometric_powers_silver_chloride_annotated',
+    defaultOptions: {
+        title: 'Ksp Expression: AgCl Annotated',
+        showKspFormula: true,
+        showStoichiometricPowers: true,
+        showAnnotations: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kspToMolarSolubilityStoichiometryTypeComparisonDiagram': {
+    name: 'Ksp to Molar Solubility: Stoichiometry Type Comparison',
+    category: 'Solubility Equilibria',
+    description: 'Comparison of Ksp to molar solubility calculation for different stoichiometry types (AB, AB₂, A₂B)',
+    type: 'ksp_to_molar_solubility_stoichiometry_type_comparison',
+    defaultOptions: {
+        title: 'Ksp to Molar Solubility: Stoichiometry Comparison',
+        showABType: true,
+        showAB2Type: true,
+        showA2BType: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'qspVersusKspPrecipitationNoPrecipitationDecisionDiagram': {
+    name: 'Qsp versus Ksp: Precipitation/No-Precipitation Decision',
+    category: 'Solubility Equilibria',
+    description: 'Decision diagram using Qsp vs Ksp comparison to predict whether precipitation will occur',
+    type: 'qsp_versus_ksp_precipitation_no_precipitation_decision',
+    defaultOptions: {
+        title: 'Qsp vs Ksp: Precipitation Decision',
+        showQspKspComparison: true,
+        showDecisionOutcomes: true,
+        showNumberLine: true,
+        width: 1000,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'commonIonSolubilitySuppressionLeChatelierShiftDiagram': {
+    name: 'Common Ion Solubility Suppression & Le Chatelier Shift',
+    category: 'Solubility Equilibria',
+    description: 'Common ion effect on solubility explained via Le Chatelier\'s principle equilibrium shift',
+    type: 'common_ion_solubility_suppression_le_chatelier_shift',
+    defaultOptions: {
+        title: 'Common Ion: Solubility Suppression',
+        showCommonIonAddition: true,
+        showEquilibriumShift: true,
+        showSolubilityReduction: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hydroxideSolubilityVspHAcidicBasicConditionsDiagram': {
+    name: 'Hydroxide Solubility vs pH: Acidic & Basic Conditions',
+    category: 'Solubility Equilibria',
+    description: 'Graph of metal hydroxide solubility versus pH in acidic and basic conditions',
+    type: 'hydroxide_solubility_vs_ph_acidic_basic_conditions',
+    defaultOptions: {
+        title: 'Hydroxide Solubility vs pH',
+        showSolubilityPhGraph: true,
+        showAcidicBasicRegions: true,
+        showExampleHydroxides: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'complexIonFormationMetalLigandKfSolubilityEnhancementDiagram': {
+    name: 'Complex Ion Formation: Metal-Ligand Kf & Solubility Enhancement',
+    category: 'Solubility Equilibria',
+    description: 'Diagram of complex ion formation with metal-ligand Kf expression and solubility enhancement effect',
+    type: 'complex_ion_formation_metal_ligand_kf_solubility_enhancement',
+    defaultOptions: {
+        title: 'Complex Ion Formation & Solubility Enhancement',
+        showKfExpression: true,
+        showLigandCoordination: true,
+        showSolubilityEnhancement: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kspVsTemperatureSolubilityCurveEndothermicExothermicDiagram': {
+    name: 'Ksp vs Temperature Solubility Curve: Endothermic & Exothermic',
+    category: 'Solubility Equilibria',
+    description: 'Solubility-temperature curves for endothermic and exothermic dissolution processes',
+    type: 'ksp_vs_temperature_solubility_curve_endothermic_exothermic',
+    defaultOptions: {
+        title: 'Ksp vs Temperature: Endothermic & Exothermic',
+        showEndothermicCurve: true,
+        showExothermicCurve: true,
+        showTemperatureEffect: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kidneyStoneCalciumOxalatePrecipitationFormationDiagram': {
+    name: 'Kidney Stone: Calcium Oxalate Precipitation Formation',
+    category: 'Solubility Equilibria',
+    description: 'Diagram of kidney stone formation via calcium oxalate precipitation when Qsp exceeds Ksp',
+    type: 'kidney_stone_calcium_oxalate_precipitation_formation',
+    defaultOptions: {
+        title: 'Kidney Stone: Calcium Oxalate Precipitation',
+        showQspKspExceedance: true,
+        showPrecipitationMechanism: true,
+        showBiologicalContext: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kspSolubilityComparisonStoichiometryTypePitfallsDiagram': {
+    name: 'Ksp Solubility Comparison: Stoichiometry Type Pitfalls',
+    category: 'Solubility Equilibria',
+    description: 'Diagram highlighting pitfalls in comparing solubility using Ksp alone across different stoichiometry types',
+    type: 'ksp_solubility_comparison_stoichiometry_type_pitfalls',
+    defaultOptions: {
+        title: 'Ksp Solubility Comparison Pitfalls',
+        showPitfallExamples: true,
+        showCorrectComparison: true,
+        showStoichiometryTypeEffect: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== ATOMIC STRUCTURE =====
+
+'atomNucleusElectronCloudScaleDiagram': {
+    name: 'Atom Nucleus & Electron Cloud Scale Diagram',
+    category: 'Atomic Structure',
+    description: 'Scale diagram of atom showing nucleus and electron cloud relative sizes',
+    type: 'atom_nucleus_electron_cloud_scale',
+    defaultOptions: {
+        title: 'Atom: Nucleus & Electron Cloud Scale',
+        showScaleAnnotation: true,
+        showNucleusLabel: true,
+        showElectronCloud: true,
+        width: 800,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'protonNeutronElectronPropertiesComparisonChart': {
+    name: 'Proton, Neutron & Electron Properties Comparison Chart',
+    category: 'Atomic Structure',
+    description: 'Comparison chart of mass, charge, and location of protons, neutrons, and electrons',
+    type: 'proton_neutron_electron_properties_comparison_chart',
+    defaultOptions: {
+        title: 'Subatomic Particle Properties Comparison',
+        showMassComparison: true,
+        showChargeComparison: true,
+        showLocationComparison: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nuclearSymbolNotationAnnotatedDiagram': {
+    name: 'Nuclear Symbol Notation Annotated',
+    category: 'Atomic Structure',
+    description: 'Annotated nuclear symbol notation showing mass number, atomic number, and element symbol',
+    type: 'nuclear_symbol_notation_annotated',
+    defaultOptions: {
+        title: 'Nuclear Symbol Notation',
+        showMassNumber: true,
+        showAtomicNumber: true,
+        showAnnotationArrows: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'hydrogenIsotopeStructureComparisonDiagram': {
+    name: 'Hydrogen Isotope Structure Comparison',
+    category: 'Atomic Structure',
+    description: 'Structural comparison of hydrogen, deuterium, and tritium isotopes',
+    type: 'hydrogen_isotope_structure_comparison',
+    defaultOptions: {
+        title: 'Hydrogen Isotopes: Structure Comparison',
+        showAllThreeIsotopes: true,
+        showNeutronDifference: true,
+        showMassNumbers: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'cationAnionElectronLossGainDiagram': {
+    name: 'Cation & Anion: Electron Loss & Gain',
+    category: 'Atomic Structure',
+    description: 'Diagram showing cation formation by electron loss and anion formation by electron gain',
+    type: 'cation_anion_electron_loss_gain',
+    defaultOptions: {
+        title: 'Cation & Anion: Electron Loss & Gain',
+        showElectronLoss: true,
+        showElectronGain: true,
+        showChargeResults: true,
+        width: 950,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bindingEnergyPerNucleonCurveGraph': {
+    name: 'Binding Energy per Nucleon Curve Graph',
+    category: 'Atomic Structure',
+    description: 'Graph of binding energy per nucleon versus mass number showing nuclear stability curve',
+    type: 'binding_energy_per_nucleon_curve_graph',
+    defaultOptions: {
+        title: 'Binding Energy per Nucleon Curve',
+        showStabilityCurve: true,
+        showIronPeak: true,
+        showFusionFissionRegions: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'standardModelParticleClassificationChart': {
+    name: 'Standard Model Particle Classification Chart',
+    category: 'Atomic Structure',
+    description: 'Classification chart of Standard Model particles including quarks, leptons, and bosons',
+    type: 'standard_model_particle_classification_chart',
+    defaultOptions: {
+        title: 'Standard Model Particle Classification',
+        showQuarks: true,
+        showLeptons: true,
+        showBosons: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'subatomicParticlePropertySummaryTable': {
+    name: 'Subatomic Particle Property Summary Table',
+    category: 'Atomic Structure',
+    description: 'Summary table of subatomic particle properties including relative mass, charge, and location',
+    type: 'subatomic_particle_property_summary_table',
+    defaultOptions: {
+        title: 'Subatomic Particle Property Summary',
+        showRelativeMass: true,
+        showRelativeCharge: true,
+        showLocation: true,
+        width: 950,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'relativeAtomicMassWeightedAverageCalculationDiagram': {
+    name: 'Relative Atomic Mass: Weighted Average Calculation',
+    category: 'Atomic Structure',
+    description: 'Step-by-step diagram of relative atomic mass calculation as isotope abundance weighted average',
+    type: 'relative_atomic_mass_weighted_average_calculation',
+    defaultOptions: {
+        title: 'Relative Atomic Mass: Weighted Average',
+        showIsotopeAbundances: true,
+        showWeightingCalculation: true,
+        showWorkedExample: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'subatomicParticleConceptualErrorAnnotationDiagram': {
+    name: 'Subatomic Particle Conceptual Error Annotation',
+    category: 'Atomic Structure',
+    description: 'Annotated diagram correcting common conceptual errors about subatomic particles',
+    type: 'subatomic_particle_conceptual_error_annotation',
+    defaultOptions: {
+        title: 'Subatomic Particle: Correcting Misconceptions',
+        showCommonErrors: true,
+        showCorrections: true,
+        showAnnotations: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== ATOMIC MODELS =====
+
+'hydrogenEmissionAbsorptionSpectrumDiagram': {
+    name: 'Hydrogen Emission & Absorption Spectrum',
+    category: 'Atomic Models',
+    description: 'Hydrogen emission and absorption spectra showing spectral lines and energy transitions',
+    type: 'hydrogen_emission_absorption_spectrum',
+    defaultOptions: {
+        title: 'Hydrogen Emission & Absorption Spectra',
+        showEmissionSpectrum: true,
+        showAbsorptionSpectrum: true,
+        showEnergyTransitions: true,
+        width: 1100,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'daltonSolidSphereAtomDiagram': {
+    name: "Dalton's Solid Sphere Atom Model",
+    category: 'Atomic Models',
+    description: "Diagram of Dalton's solid sphere atomic model with key postulates",
+    type: 'dalton_solid_sphere_atom',
+    defaultOptions: {
+        title: "Dalton's Solid Sphere Atom Model",
+        showSphereModel: true,
+        showPostulates: true,
+        showHistoricalContext: true,
+        width: 800,
+        height: 650,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thomsonPlumPuddingModelAnnotatedDiagram': {
+    name: "Thomson's Plum Pudding Model Annotated",
+    category: 'Atomic Models',
+    description: "Annotated diagram of Thomson's plum pudding atomic model with electron positions",
+    type: 'thomson_plum_pudding_model_annotated',
+    defaultOptions: {
+        title: "Thomson's Plum Pudding Model",
+        showElectronPositions: true,
+        showPositiveMatrix: true,
+        showAnnotations: true,
+        width: 850,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'goldFoilExperimentScatteringResultsDiagram': {
+    name: 'Gold Foil Experiment Scattering Results',
+    category: 'Atomic Models',
+    description: "Rutherford's gold foil experiment setup and alpha particle scattering results",
+    type: 'gold_foil_experiment_scattering_results',
+    defaultOptions: {
+        title: 'Gold Foil Experiment: Scattering Results',
+        showExperimentSetup: true,
+        showScatteringPattern: true,
+        showNucleusDiscovery: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bohrEnergyLevelTransitionDiagram': {
+    name: 'Bohr Energy Level Transition Diagram',
+    category: 'Atomic Models',
+    description: "Bohr model showing electron energy level transitions and photon emission/absorption",
+    type: 'bohr_energy_level_transition',
+    defaultOptions: {
+        title: 'Bohr Model: Energy Level Transitions',
+        showEnergyLevels: true,
+        showTransitionArrows: true,
+        showPhotonEmission: true,
+        width: 950,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'sommerfeldEllipticalOrbitSubshellDiagram': {
+    name: 'Sommerfeld Elliptical Orbit & Subshell Diagram',
+    category: 'Atomic Models',
+    description: "Sommerfeld's extension of Bohr model with elliptical orbits and subshell introduction",
+    type: 'sommerfeld_elliptical_orbit_subshell',
+    defaultOptions: {
+        title: "Sommerfeld's Elliptical Orbits & Subshells",
+        showEllipticalOrbits: true,
+        showSubshellLabels: true,
+        showQuantumNumberLink: true,
+        width: 950,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electronProbabilityCloudOrbitalShapesDiagram': {
+    name: 'Electron Probability Cloud & Orbital Shapes',
+    category: 'Atomic Models',
+    description: 'Quantum mechanical electron probability cloud and s, p, d orbital shapes',
+    type: 'electron_probability_cloud_orbital_shapes',
+    defaultOptions: {
+        title: 'Electron Probability Cloud & Orbital Shapes',
+        showSOrbitals: true,
+        showPOrbitals: true,
+        showDOrbitals: true,
+        width: 1100,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'atomicModelEvolutionTimelineDiagram': {
+    name: 'Atomic Model Evolution Timeline',
+    category: 'Atomic Models',
+    description: 'Timeline diagram of atomic model evolution from Dalton through quantum mechanical model',
+    type: 'atomic_model_evolution_timeline',
+    defaultOptions: {
+        title: 'Atomic Model Evolution Timeline',
+        showAllModels: true,
+        showDates: true,
+        showKeyFeatures: true,
+        width: 1400,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'milliканOilDropExperimentSetupDiagram': {
+    name: "Millikan Oil Drop Experiment Setup",
+    category: 'Atomic Models',
+    description: "Millikan's oil drop experiment apparatus and electron charge determination method",
+    type: 'millikan_oil_drop_experiment_setup',
+    defaultOptions: {
+        title: "Millikan's Oil Drop Experiment",
+        showApparatusSetup: true,
+        showForceBalance: true,
+        showChargeCalculation: true,
+        width: 1000,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'orbitVsOrbitalConceptualDifferenceDiagram': {
+    name: 'Orbit vs Orbital Conceptual Difference',
+    category: 'Atomic Models',
+    description: 'Diagram clarifying the conceptual difference between Bohr orbit and quantum mechanical orbital',
+    type: 'orbit_vs_orbital_conceptual_difference',
+    defaultOptions: {
+        title: 'Orbit vs Orbital: Conceptual Difference',
+        showOrbitDiagram: true,
+        showOrbitalDiagram: true,
+        showConceptualDistinction: true,
+        width: 1000,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ===== ELECTRON CONFIGURATION =====
+
+'subshellEnergyOrderingDiagonalRuleDiagram': {
+    name: 'Subshell Energy Ordering Diagonal Rule',
+    category: 'Electron Configuration',
+    description: 'Diagonal rule (Madelung rule) for subshell filling order by energy',
+    type: 'subshell_energy_ordering_diagonal_rule',
+    defaultOptions: {
+        title: 'Subshell Energy Ordering: Diagonal Rule',
+        showDiagonalArrows: true,
+        showSubshellLabels: true,
+        showFillingOrder: true,
+        width: 950,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'aufbauPauliHundRuleOrbitalBoxDiagram': {
+    name: 'Aufbau, Pauli & Hund\'s Rule Orbital Box Diagram',
+    category: 'Electron Configuration',
+    description: "Orbital box diagram illustrating Aufbau principle, Pauli exclusion principle, and Hund's rule",
+    type: 'aufbau_pauli_hund_rule_orbital_box',
+    defaultOptions: {
+        title: "Aufbau, Pauli & Hund's Rule Orbital Boxes",
+        showAufbauPrinciple: true,
+        showPauliExclusion: true,
+        showHundsRule: true,
+        width: 1050,
+        height: 750,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'spdfNotationNobleGasShorthandComparisonDiagram': {
+    name: 'spdf Notation & Noble Gas Shorthand Comparison',
+    category: 'Electron Configuration',
+    description: 'Comparison of full spdf electron configuration notation and noble gas shorthand notation',
+    type: 'spdf_notation_noble_gas_shorthand_comparison',
+    defaultOptions: {
+        title: 'spdf vs Noble Gas Shorthand Notation',
+        showFullNotation: true,
+        showNobleGasShorthand: true,
+        showComparisonExamples: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'cationAnionElectronRemovalAdditionConfigDiagram': {
+    name: 'Cation & Anion Electron Removal/Addition Configuration',
+    category: 'Electron Configuration',
+    description: 'Electron configuration changes when forming cations (electron removal) and anions (electron addition)',
+    type: 'cation_anion_electron_removal_addition_config',
+    defaultOptions: {
+        title: 'Ion Formation: Electron Config Changes',
+        showCationRemoval: true,
+        showAnionAddition: true,
+        showConfigurationChanges: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chromiumCopperAnomalousConfigurationStabilityDiagram': {
+    name: 'Chromium & Copper Anomalous Configuration Stability',
+    category: 'Electron Configuration',
+    description: 'Explanation of anomalous electron configurations of Cr and Cu via half-filled and fully-filled d-orbital stability',
+    type: 'chromium_copper_anomalous_configuration_stability',
+    defaultOptions: {
+        title: 'Cr & Cu Anomalous Configurations',
+        showExpectedConfig: true,
+        showActualConfig: true,
+        showStabilityExplanation: true,
+        width: 1050,
+        height: 700,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'periodicTableSPDFBlockAnnotatedDiagram': {
+    name: 'Periodic Table spdf Block Annotated Diagram',
+    category: 'Electron Configuration',
+    description: 'Periodic table annotated with s, p, d, and f block regions and corresponding electron subshells',
+    type: 'periodic_table_spdf_block_annotated',
+    defaultOptions: {
+        title: 'Periodic Table: s, p, d, f Block Annotations',
+        showSBlock: true,
+        showPBlock: true,
+        showDBlock: true,
+        showFBlock: true,
+        width: 1300,
+        height: 800,
+        backgroundColor: '#ffffff'
+    }
+},
+
+
+
+
 // ===== 2. ORGANIC CHEMISTRY =====
 'organicStructuralFormula': {
     name: 'Organic Structural Formula',

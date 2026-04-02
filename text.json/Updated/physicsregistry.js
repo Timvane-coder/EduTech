@@ -3,7 +3,6223 @@ class PhysicsDiagramsRegistry {
 
 
 
-    static diagrams = {
+
+// ============================================================
+        // ===== ELECTRICITY & MAGNETISM — CAPACITORS =================
+        // ============================================================
+
+        'capacitorEnergyTriangleAreaUnderQVGraphDiagram': {
+            name: 'Capacitor Energy Triangle Area Under Q-V Graph',
+            category: 'Electricity & Magnetism',
+            subcategory: 'Capacitance',
+            description: 'Triangular area under Q-V graph representing energy stored in a capacitor',
+            type: 'capacitor_energy_qv_graph',
+            defaultOptions: {
+                title: 'Capacitor Energy: Area Under Q-V Graph',
+                showTriangle: true,
+                showAxesLabels: true,
+                showEnergyLabel: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'seriesParallelCapacitorCombinationEquivalentDiagram': {
+            name: 'Series and Parallel Capacitor Combination Equivalent',
+            category: 'Electricity & Magnetism',
+            subcategory: 'Capacitance',
+            description: 'Circuit diagrams showing series and parallel capacitor combinations with equivalent capacitance',
+            type: 'series_parallel_capacitor_combination',
+            defaultOptions: {
+                title: 'Series & Parallel Capacitor Combinations',
+                showSeries: true,
+                showParallel: true,
+                showEquivalent: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'rcCircuitChargingDischargingExponentialCurveTimeConstantDiagram': {
+            name: 'RC Circuit Charging and Discharging Exponential Curve with Time Constant',
+            category: 'Electricity & Magnetism',
+            subcategory: 'Capacitance',
+            description: 'Exponential charge/discharge curves for an RC circuit with time constant τ = RC labelled',
+            type: 'rc_circuit_charging_discharging',
+            defaultOptions: {
+                title: 'RC Circuit Charging & Discharging',
+                showCharging: true,
+                showDischarging: true,
+                showTimeConstant: true,
+                showAsymptote: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'lnVvsTimeLinearGraphGradientTimeConstantDiagram': {
+            name: 'ln V vs Time Linear Graph — Gradient Gives Time Constant',
+            category: 'Electricity & Magnetism',
+            subcategory: 'Capacitance',
+            description: 'Linearised ln V vs t graph for RC discharge with gradient equal to −1/RC',
+            type: 'ln_v_vs_time_linear_graph',
+            defaultOptions: {
+                title: 'ln V vs Time — Gradient = −1/RC',
+                showBestFitLine: true,
+                showGradientAnnotation: true,
+                showAxesLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'capacitorApplicationsFlashSmoothingTimingFilterDiagram': {
+            name: 'Capacitor Applications — Flash, Smoothing, Timing, Filter',
+            category: 'Electricity & Magnetism',
+            subcategory: 'Capacitance',
+            description: 'Four-panel diagram illustrating capacitor applications: camera flash, power smoothing, timing circuits, and signal filtering',
+            type: 'capacitor_applications_panel',
+            defaultOptions: {
+                title: 'Capacitor Applications',
+                showFlash: true,
+                showSmoothing: true,
+                showTiming: true,
+                showFilter: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== OPTICS — REFLECTION ==================================
+        // ============================================================
+
+        'incidentReflectedRayNormalLabelledDiagram': {
+            name: 'Incident and Reflected Ray with Normal Labelled',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Flat mirror surface with incident ray, reflected ray, normal line, and angle labels',
+            type: 'incident_reflected_ray_normal',
+            defaultOptions: {
+                title: 'Incident & Reflected Ray at a Plane Mirror',
+                showNormal: true,
+                showAngles: true,
+                showLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'angleOfIncidenceEqualsAngleOfReflectionProofDiagram': {
+            name: 'Angle of Incidence Equals Angle of Reflection Proof',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Diagram demonstrating that angle of incidence equals angle of reflection using wavefront or geometric argument',
+            type: 'angle_incidence_equals_reflection_proof',
+            defaultOptions: {
+                title: 'Law of Reflection: θᵢ = θᵣ',
+                showWavefronts: true,
+                showAngles: true,
+                showProofAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'planeMirrorVirtualImageLocationRayDiagram': {
+            name: 'Plane Mirror Virtual Image Location Ray Diagram',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Ray diagram locating the virtual image behind a plane mirror at equal distance to the object',
+            type: 'plane_mirror_virtual_image_location',
+            objectDistance: 80,
+            objectHeight: 40,
+            defaultOptions: {
+                title: 'Plane Mirror — Virtual Image Location',
+                showObject: true,
+                showImage: true,
+                showRays: true,
+                showVirtualRays: true,
+                showDistanceAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'concaveMirrorFocalPointCentreOfCurvatureRayDiagram': {
+            name: 'Concave Mirror Focal Point and Centre of Curvature Ray Diagram',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Concave mirror showing principal axis, focal point F, and centre of curvature C with convergent rays',
+            type: 'concave_mirror_focal_centre',
+            focalLength: 100,
+            defaultOptions: {
+                title: 'Concave Mirror — F and C',
+                showFocalPoint: true,
+                showCentreOfCurvature: true,
+                showRays: true,
+                showPrincipalAxis: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'convexMirrorVirtualDiminishedImageFieldOfViewDiagram': {
+            name: 'Convex Mirror Virtual Diminished Image and Field of View',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Convex mirror ray diagram showing virtual, upright, diminished image and wide field of view',
+            type: 'convex_mirror_virtual_image_fov',
+            focalLength: -100,
+            defaultOptions: {
+                title: 'Convex Mirror — Virtual Image & Field of View',
+                showImage: true,
+                showFieldOfView: true,
+                showRays: true,
+                showPrincipalAxis: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'criticalAngleTotalInternalReflectionGlassAirDiagram': {
+            name: 'Critical Angle and Total Internal Reflection at Glass-Air Boundary',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Three-panel diagram showing refraction below critical angle, ray along boundary at critical angle, and total internal reflection above it',
+            type: 'critical_angle_tir_glass_air',
+            criticalAngle: 42,
+            defaultOptions: {
+                title: 'Critical Angle & Total Internal Reflection',
+                showSubCritical: true,
+                showCritical: true,
+                showTIR: true,
+                showAngles: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'threeStandardRaysMirrorConstructionStepDiagram': {
+            name: 'Three Standard Rays for Mirror Construction — Step Diagram',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Step-by-step diagram showing the three standard construction rays for curved mirror image location',
+            type: 'three_standard_rays_mirror_construction',
+            defaultOptions: {
+                title: 'Three Standard Rays — Mirror Construction',
+                showParallelRay: true,
+                showFocalRay: true,
+                showCentreRay: true,
+                showStepLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'sphericalAberrationParaxialMarginalRayFocusDiagram': {
+            name: 'Spherical Aberration — Paraxial and Marginal Ray Focus Comparison',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Diagram showing paraxial rays focusing at a different point to marginal rays, illustrating spherical aberration',
+            type: 'spherical_aberration_paraxial_marginal',
+            defaultOptions: {
+                title: 'Spherical Aberration',
+                showParaxialRays: true,
+                showMarginalRays: true,
+                showFocusPoints: true,
+                showCaustic: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'newtonianReflectingTelescopeMirrorLayoutDiagram': {
+            name: 'Newtonian Reflecting Telescope Mirror Layout',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Cross-section of a Newtonian reflector showing primary parabolic mirror, flat secondary mirror, and eyepiece position',
+            type: 'newtonian_reflecting_telescope_layout',
+            defaultOptions: {
+                title: 'Newtonian Reflecting Telescope',
+                showPrimaryMirror: true,
+                showSecondaryMirror: true,
+                showEyepiece: true,
+                showRayPath: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'selectiveReflectionObjectColourAbsorptionSpectrumDiagram': {
+            name: 'Selective Reflection — Object Colour and Absorption Spectrum',
+            category: 'Optics',
+            subcategory: 'Reflection',
+            description: 'Diagram linking white light incident on a coloured object, absorbed wavelengths, and the reflected colour perceived',
+            type: 'selective_reflection_colour_absorption',
+            defaultOptions: {
+                title: 'Selective Reflection & Object Colour',
+                showIncidentSpectrum: true,
+                showAbsorptionBands: true,
+                showReflectedColour: true,
+                showLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== OPTICS — REFRACTION ==================================
+        // ============================================================
+
+        'refractionBendingTowardNormalAirGlassBoundaryDiagram': {
+            name: 'Refraction — Bending Toward Normal at Air-Glass Boundary',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Ray bending toward the normal as it crosses from air into glass, with angles and normal labelled',
+            type: 'refraction_air_glass_boundary',
+            defaultOptions: {
+                title: 'Refraction at Air-Glass Boundary',
+                showNormal: true,
+                showAngles: true,
+                showMediaLabels: true,
+                showBending: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'refractiveIndexSpeedOfLightMediumComparisonChart': {
+            name: 'Refractive Index and Speed of Light in Different Media — Comparison Chart',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Table or bar chart comparing refractive index and corresponding speed of light for common optical media',
+            type: 'refractive_index_speed_comparison_chart',
+            media: [
+                { name: 'Vacuum', n: 1.000, speed: 3.00e8 },
+                { name: 'Air', n: 1.003, speed: 2.99e8 },
+                { name: 'Water', n: 1.333, speed: 2.25e8 },
+                { name: 'Glass', n: 1.500, speed: 2.00e8 },
+                { name: 'Diamond', n: 2.417, speed: 1.24e8 }
+            ],
+            defaultOptions: {
+                title: 'Refractive Index vs Speed of Light',
+                showTable: true,
+                showBarChart: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'snellsLawSinRatioAngleBoundaryProofDiagram': {
+            name: "Snell's Law — Sin Ratio Angle at Boundary Proof Diagram",
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: "Geometric proof of Snell's law showing wavefronts, boundary, and the sine ratio n₁sinθ₁ = n₂sinθ₂",
+            type: 'snells_law_sin_ratio_proof',
+            defaultOptions: {
+                title: "Snell's Law: n₁sinθ₁ = n₂sinθ₂",
+                showWavefronts: true,
+                showAngles: true,
+                showSineAnnotation: true,
+                showBoundary: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'opticalFibreCoreCladdingTotalInternalReflectionPathDiagram': {
+            name: 'Optical Fibre — Core, Cladding, and Total Internal Reflection Path',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Cross-section of an optical fibre showing light zigzagging by total internal reflection between core and cladding',
+            type: 'optical_fibre_core_cladding_tir',
+            defaultOptions: {
+                title: 'Optical Fibre — TIR Ray Path',
+                showCore: true,
+                showCladding: true,
+                showRayPath: true,
+                showAngles: true,
+                showRefractiveIndices: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'realApparentDepthObserverRayTracingPoolDiagram': {
+            name: 'Real and Apparent Depth — Observer Ray Tracing Pool Diagram',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Ray tracing diagram showing an observer perceiving a pool object at a shallower apparent depth than its real depth',
+            type: 'real_apparent_depth_pool',
+            defaultOptions: {
+                title: 'Real vs Apparent Depth',
+                showRealObject: true,
+                showApparentImage: true,
+                showRays: true,
+                showDepthAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'prismMinimumDeviationSymmetricRayPathDiagram': {
+            name: 'Prism Minimum Deviation — Symmetric Ray Path Diagram',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Equilateral prism with a ray traversing symmetrically at minimum deviation, showing deviation angle D',
+            type: 'prism_minimum_deviation_symmetric',
+            defaultOptions: {
+                title: 'Prism — Minimum Deviation',
+                showPrism: true,
+                showSymmetricRay: true,
+                showDeviationAngle: true,
+                showAngles: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'atmosphericLayersGradualRayBendingSunrisePositionDiagram': {
+            name: 'Atmospheric Layers — Gradual Ray Bending and Sunrise Position Diagram',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Diagram showing gradual ray bending through atmospheric density layers causing the apparent sunrise position to differ from the geometric position',
+            type: 'atmospheric_refraction_sunrise',
+            defaultOptions: {
+                title: 'Atmospheric Refraction — Sunrise',
+                showAtmosphericLayers: true,
+                showRayPath: true,
+                showApparentPosition: true,
+                showGeometricPosition: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'frequencyWavelengthSpeedChangeBoundaryComparisonDiagram': {
+            name: 'Frequency, Wavelength, and Speed Change at Boundary — Comparison Diagram',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Side-by-side comparison showing which wave properties change (speed, wavelength) and which remain constant (frequency) at a refractive boundary',
+            type: 'frequency_wavelength_speed_boundary',
+            defaultOptions: {
+                title: 'Wave Properties at a Refractive Boundary',
+                showFrequencyConstant: true,
+                showWavelengthChange: true,
+                showSpeedChange: true,
+                showAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'myopiaHyperopiaCornetingLensRayDiagramCorrections': {
+            name: 'Myopia and Hyperopia — Correcting Lens Ray Diagram',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Side-by-side ray diagrams showing uncorrected and corrected focal points for myopia (concave lens) and hyperopia (convex lens)',
+            type: 'myopia_hyperopia_lens_correction',
+            defaultOptions: {
+                title: 'Myopia & Hyperopia — Lens Corrections',
+                showMyopia: true,
+                showHyperopia: true,
+                showCorrectedRays: true,
+                showRetina: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'glassBlockExperimentTracingPinsNormalIncidentRefractedRaySetupDiagram': {
+            name: 'Glass Block Experiment — Tracing Pins, Normal, Incident and Refracted Ray Setup',
+            category: 'Optics',
+            subcategory: 'Refraction',
+            description: 'Practical setup diagram for the glass block experiment showing pin positions, incident and refracted rays, normal, and block outline',
+            type: 'glass_block_experiment_setup',
+            defaultOptions: {
+                title: 'Glass Block Experiment Setup',
+                showBlock: true,
+                showPins: true,
+                showIncidentRay: true,
+                showRefractedRay: true,
+                showNormal: true,
+                showAngles: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== OPTICS — LENSES ======================================
+        // ============================================================
+
+        'convexConcaveLensShapeFocalPointPrincipalAxisLabelledDiagram': {
+            name: 'Convex and Concave Lens Shape — Focal Point and Principal Axis Labelled',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Side-by-side diagrams of a converging convex lens and diverging concave lens with focal points and principal axis labelled',
+            type: 'convex_concave_lens_shape_focal',
+            defaultOptions: {
+                title: 'Convex & Concave Lens Shapes',
+                showConvex: true,
+                showConcave: true,
+                showFocalPoints: true,
+                showPrincipalAxis: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'thinLensFormulaSignConventionObjectImageDistanceDiagram': {
+            name: 'Thin Lens Formula — Sign Convention, Object and Image Distance Diagram',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Diagram illustrating the thin lens formula 1/f = 1/v − 1/u with sign convention arrows for u, v, and f',
+            type: 'thin_lens_formula_sign_convention',
+            defaultOptions: {
+                title: 'Thin Lens Formula: 1/f = 1/v − 1/u',
+                showSignConvention: true,
+                showObjectDistance: true,
+                showImageDistance: true,
+                showFocalLength: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'linearMagnificationImageHeightObjectHeightRatioDiagram': {
+            name: 'Linear Magnification — Image Height to Object Height Ratio Diagram',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Diagram defining linear magnification m = hᵢ/h₀ = v/u with labelled object and image heights',
+            type: 'linear_magnification_height_ratio',
+            defaultOptions: {
+                title: 'Linear Magnification: m = hᵢ/h₀',
+                showObjectHeight: true,
+                showImageHeight: true,
+                showRatioAnnotation: true,
+                showLens: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'threeStandardRaysConvexLensAllObjectPositionsImageTableDiagram': {
+            name: 'Three Standard Rays for Convex Lens — All Object Positions Image Table Diagram',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Composite diagram showing three standard construction rays for a convex lens across all object positions with an image characteristics summary table',
+            type: 'three_standard_rays_convex_lens_table',
+            defaultOptions: {
+                title: 'Convex Lens — All Object Positions',
+                showRays: true,
+                showAllPositions: true,
+                showImageTable: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'lensesInContactCombinedPowerDioptresAdditionDiagram': {
+            name: 'Lenses in Contact — Combined Power in Dioptres Addition Diagram',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Diagram showing two thin lenses in contact with combined power P = P₁ + P₂',
+            type: 'lenses_in_contact_combined_power',
+            defaultOptions: {
+                title: 'Lenses in Contact: P = P₁ + P₂',
+                showTwoLenses: true,
+                showCombinedPower: true,
+                showRays: true,
+                showAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'chromaticAberrationAchromaticDoubletCrownFlintGlassDiagram': {
+            name: 'Chromatic Aberration and Achromatic Doublet — Crown and Flint Glass',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Side-by-side showing chromatic aberration in a single lens and its correction using a crown-flint glass achromatic doublet',
+            type: 'chromatic_aberration_achromatic_doublet',
+            defaultOptions: {
+                title: 'Chromatic Aberration & Achromatic Doublet',
+                showAberration: true,
+                showDoublet: true,
+                showColourRays: true,
+                showGlassLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'compoundMicroscopeObjectiveEyepieceMagnificationRayPathDiagram': {
+            name: 'Compound Microscope — Objective, Eyepiece, Magnification and Ray Path',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Ray path diagram through a compound microscope showing objective lens, intermediate image, and eyepiece with magnification annotations',
+            type: 'compound_microscope_ray_path',
+            defaultOptions: {
+                title: 'Compound Microscope Ray Path',
+                showObjectiveLens: true,
+                showEyepieceLens: true,
+                showIntermediateImage: true,
+                showFinalImage: true,
+                showMagnificationAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'twoLensSeparatedSystemIntermediateImageRayTracingDiagram': {
+            name: 'Two-Lens Separated System — Intermediate Image Ray Tracing',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Ray tracing through two separated thin lenses showing the intermediate image formed by the first lens acting as the object for the second',
+            type: 'two_lens_separated_system_ray_tracing',
+            defaultOptions: {
+                title: 'Two-Lens Separated System',
+                showFirstLens: true,
+                showSecondLens: true,
+                showIntermediateImage: true,
+                showRayTracing: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'fresnelLensConcentriRingsEquivalentConvexLensComparisonDiagram': {
+            name: 'Fresnel Lens — Concentric Rings and Equivalent Convex Lens Comparison',
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: 'Comparison diagram showing a conventional thick convex lens alongside its thin Fresnel lens equivalent with concentric stepped rings',
+            type: 'fresnel_lens_concentric_rings_comparison',
+            defaultOptions: {
+                title: 'Fresnel Lens vs Conventional Convex Lens',
+                showConvexLens: true,
+                showFresnelLens: true,
+                showRings: true,
+                showRayPaths: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'besselMethodDisplacementTwoPositionsFocalLengthSetupDiagram': {
+            name: "Bessel's Method — Two Lens Positions, Displacement, and Focal Length Setup",
+            category: 'Optics',
+            subcategory: 'Lenses',
+            description: "Optical bench diagram showing two lens positions that produce a sharp image, with displacement d and fixed object-image distance D used to calculate focal length",
+            type: 'bessel_method_focal_length_setup',
+            defaultOptions: {
+                title: "Bessel's Method — Focal Length",
+                showObjectScreen: true,
+                showTwoPositions: true,
+                showDisplacement: true,
+                showFormula: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== OPTICS — WAVE OPTICS =================================
+        // ============================================================
+
+        'huygensWaveletSecondarySourcesNewWavefrontConstructionDiagram': {
+            name: "Huygens' Wavelet — Secondary Sources and New Wavefront Construction",
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: "Diagram showing Huygens' construction: each point on a wavefront acts as a secondary source, and the envelope of the wavelets forms the new wavefront",
+            type: 'huygens_wavelet_construction',
+            defaultOptions: {
+                title: "Huygens' Wavelet Construction",
+                showPrimaryWavefront: true,
+                showSecondarySources: true,
+                showWavelets: true,
+                showNewWavefront: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'youngDoubleSlitPathDifferenceConstructiveDestructiveFringeDiagram': {
+            name: "Young's Double Slit — Path Difference, Constructive and Destructive Fringe Diagram",
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: "Young's double slit setup showing path difference geometry, conditions for bright and dark fringes, and fringe pattern",
+            type: 'young_double_slit_path_difference',
+            slitSeparation: 0.5,
+            slitToScreen: 1000,
+            wavelength: 550,
+            defaultOptions: {
+                title: "Young's Double Slit Experiment",
+                showSlits: true,
+                showPathDifference: true,
+                showFringePattern: true,
+                showConditions: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'singleSlitCentralMaximaSecondaryMaximaDarkFringesDiffractionPatternDiagram': {
+            name: 'Single Slit Diffraction — Central Maxima, Secondary Maxima, and Dark Fringes Pattern',
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: 'Intensity vs angle plot and aperture diagram for single slit diffraction showing wide central maximum and narrower secondary maxima',
+            type: 'single_slit_diffraction_pattern',
+            defaultOptions: {
+                title: 'Single Slit Diffraction Pattern',
+                showAperture: true,
+                showIntensityPattern: true,
+                showDarkFringes: true,
+                showSecondaryMaxima: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'malussLawPolariserAnalyserAngleIntensityCosineDiagram': {
+            name: "Malus's Law — Polariser, Analyser, Angle and Intensity Cosine² Diagram",
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: "Diagram illustrating Malus's law with a polariser and analyser, showing intensity I = I₀cos²θ as angle θ between transmission axes varies",
+            type: 'malus_law_polariser_analyser',
+            defaultOptions: {
+                title: "Malus's Law: I = I₀cos²θ",
+                showPolariser: true,
+                showAnalyser: true,
+                showAngle: true,
+                showIntensityCurve: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'laserCoherentVsIncoherentSourceWavefrontComparisonDiagram': {
+            name: 'Laser Coherent vs Incoherent Source — Wavefront Comparison Diagram',
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: 'Side-by-side comparison of ordered, coherent wavefronts from a laser versus disordered, incoherent wavefronts from a conventional source',
+            type: 'laser_coherent_vs_incoherent_wavefront',
+            defaultOptions: {
+                title: 'Coherent vs Incoherent Light Sources',
+                showCoherent: true,
+                showIncoherent: true,
+                showWavefronts: true,
+                showPhaseAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'rayleighCriterionTwoPointSourcesDiffractionPatternOverlapDiagram': {
+            name: 'Rayleigh Criterion — Two Point Sources Diffraction Pattern Overlap Diagram',
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: 'Three-panel diagram showing resolved, just-resolved (Rayleigh criterion), and unresolved pairs of point sources via their overlapping diffraction patterns',
+            type: 'rayleigh_criterion_resolution',
+            defaultOptions: {
+                title: 'Rayleigh Criterion for Resolution',
+                showResolved: true,
+                showJustResolved: true,
+                showUnresolved: true,
+                showIntensityCurves: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'hologramRecordingReconstructionObjectReferenceBeamInterferenceDiagram': {
+            name: 'Hologram — Recording and Reconstruction with Object and Reference Beam Interference',
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: 'Two-panel diagram: recording phase showing object beam and reference beam interfering on photographic plate, and reconstruction phase showing wavefront replay',
+            type: 'hologram_recording_reconstruction',
+            defaultOptions: {
+                title: 'Hologram: Recording & Reconstruction',
+                showRecording: true,
+                showReconstruction: true,
+                showInterferencePattern: true,
+                showBeamLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== OPTICS — ELECTROMAGNETIC SPECTRUM ====================
+        // ============================================================
+
+        'electromagneticSpectrumWavelengthFrequencyEnergyScaleDiagram': {
+            name: 'Electromagnetic Spectrum — Wavelength, Frequency, and Energy Scale',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Horizontal scale diagram of the electromagnetic spectrum from radio waves to gamma rays with wavelength, frequency, and energy axes',
+            type: 'em_spectrum_scale',
+            defaultOptions: {
+                title: 'Electromagnetic Spectrum',
+                showWavelengthScale: true,
+                showFrequencyScale: true,
+                showEnergyScale: true,
+                showRegionLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'xrayDiffractionBraggPlanesCrystalLatticeSpacingDiagram': {
+            name: "X-Ray Diffraction — Bragg Planes, Crystal Lattice Spacing Diagram",
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: "Diagram showing X-rays reflecting from parallel crystal planes with Bragg's law path difference 2d sinθ = nλ labelled",
+            type: 'xray_diffraction_bragg_planes',
+            defaultOptions: {
+                title: "X-Ray Diffraction: Bragg's Law",
+                showCrystalPlanes: true,
+                showIncidentRays: true,
+                showReflectedRays: true,
+                showPathDifference: true,
+                showBraggAngle: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'photoelectricEffectThresholdFrequencyMaxKineticEnergyGraphDiagram': {
+            name: 'Photoelectric Effect — Threshold Frequency and Max Kinetic Energy Graph',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Graph of maximum kinetic energy vs frequency for the photoelectric effect showing threshold frequency f₀ and gradient equal to Planck\'s constant h',
+            type: 'photoelectric_effect_ke_frequency_graph',
+            defaultOptions: {
+                title: 'Photoelectric Effect: KE_max vs Frequency',
+                showThresholdFrequency: true,
+                showGradient: true,
+                showWorkFunctionAnnotation: true,
+                showAxesLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'cauchyEquationRefractiveIndexWavelengthNormalDispersionCurveDiagram': {
+            name: 'Cauchy Equation — Refractive Index vs Wavelength Normal Dispersion Curve',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Graph of refractive index n vs wavelength λ showing a decreasing normal dispersion curve described by the Cauchy equation',
+            type: 'cauchy_equation_dispersion_curve',
+            defaultOptions: {
+                title: 'Cauchy Equation: n vs λ (Normal Dispersion)',
+                showDispersionCurve: true,
+                showCauchyAnnotation: true,
+                showVisibleRegion: true,
+                showAxesLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'prismWhiteLightDispersionAngularSpreadVioletRedDiagram': {
+            name: 'Prism White Light Dispersion — Angular Spread of Violet and Red',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Prism splitting white light into a spectrum with violet deviated most and red least, showing angular spread',
+            type: 'prism_white_light_dispersion',
+            defaultOptions: {
+                title: 'Prism Dispersion of White Light',
+                showPrism: true,
+                showWhiteRay: true,
+                showSpectrum: true,
+                showAngularSpread: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'primaryRainbowRaindropRefractionInternalReflectionAngles42DegreeDiagram': {
+            name: 'Primary Rainbow — Raindrop Refraction and Internal Reflection at 42°',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Single raindrop cross-section showing two refractions and one internal reflection producing the primary rainbow at approximately 42°',
+            type: 'primary_rainbow_raindrop_42deg',
+            defaultOptions: {
+                title: 'Primary Rainbow Formation (~42°)',
+                showRaindrop: true,
+                showRefractionEntrance: true,
+                showInternalReflection: true,
+                showRefractionExit: true,
+                showDeviationAngle: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'continuousEmissionAbsorptionBlackbodySpectraComparisonDiagram': {
+            name: 'Continuous, Emission, Absorption, and Blackbody Spectra Comparison',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Four-row comparison diagram showing a continuous spectrum, bright-line emission spectrum, dark-line absorption spectrum, and blackbody spectrum',
+            type: 'spectra_comparison_four_panel',
+            defaultOptions: {
+                title: 'Spectra Comparison',
+                showContinuous: true,
+                showEmission: true,
+                showAbsorption: true,
+                showBlackbody: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'hydrogenBohrModelEnergyLevelTransitionsBalmerSeriesDiagram': {
+            name: 'Hydrogen Bohr Model — Energy Level Transitions and Balmer Series',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Energy level diagram for hydrogen showing transitions to n=2 (Balmer series) with corresponding wavelengths',
+            type: 'hydrogen_bohr_energy_levels_balmer',
+            energyLevels: [-13.6, -3.4, -1.51, -0.85, -0.54],
+            defaultOptions: {
+                title: 'Hydrogen Energy Levels — Balmer Series',
+                showEnergyLevels: true,
+                showBalmerTransitions: true,
+                showLymanTransitions: false,
+                showWavelengthLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'obafgkmSpectralClassTemperatureColourAbsorptionLineSummaryDiagram': {
+            name: 'OBAFGKM Spectral Classification — Temperature, Colour, and Absorption Line Summary',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Table or diagram summarising the OBAFGKM stellar spectral classes with temperature range, star colour, and characteristic absorption lines',
+            type: 'obafgkm_spectral_class_summary',
+            spectralClasses: ['O', 'B', 'A', 'F', 'G', 'K', 'M'],
+            defaultOptions: {
+                title: 'OBAFGKM Spectral Classification',
+                showTemperature: true,
+                showColour: true,
+                showAbsorptionLines: true,
+                showExamples: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'diffractionGratingOrdersSpectrumAngularPositionWavelengthDiagram': {
+            name: 'Diffraction Grating — Orders, Spectrum, Angular Position, and Wavelength',
+            category: 'Optics',
+            subcategory: 'Wave Optics',
+            description: 'Diagram showing a diffraction grating producing zeroth and higher-order spectra with angular positions determined by d sinθ = nλ',
+            type: 'diffraction_grating_orders_spectrum',
+            defaultOptions: {
+                title: 'Diffraction Grating — Orders',
+                showGrating: true,
+                showZerothOrder: true,
+                showFirstOrder: true,
+                showSecondOrder: true,
+                showAngleAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'additiveSubtractiveColourMixingRGBCMYPrimarysDiagram': {
+            name: 'Additive and Subtractive Colour Mixing — RGB and CMY Primaries',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Two-panel diagram: additive mixing of red, green, blue light producing white at overlap; subtractive mixing of cyan, magenta, yellow producing black at overlap',
+            type: 'additive_subtractive_colour_mixing',
+            defaultOptions: {
+                title: 'Additive & Subtractive Colour Mixing',
+                showAdditive: true,
+                showSubtractive: true,
+                showOverlapColours: true,
+                showLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'beerLambertLawAbsorbanceConcentrationPathLengthSetupDiagram': {
+            name: 'Beer-Lambert Law — Absorbance, Concentration, and Path Length Setup',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Diagram showing a light beam passing through a cuvette of path length l with concentration c, illustrating A = εcl',
+            type: 'beer_lambert_law_setup',
+            defaultOptions: {
+                title: 'Beer-Lambert Law: A = εcl',
+                showCuvette: true,
+                showIncidentBeam: true,
+                showTransmittedBeam: true,
+                showPathLength: true,
+                showFormula: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'redshiftBlueshiftSpectralLineDisplacementRecessingApproachingSourceDiagram': {
+            name: 'Redshift and Blueshift — Spectral Line Displacement for Receding and Approaching Source',
+            category: 'Optics',
+            subcategory: 'Electromagnetic Spectrum',
+            description: 'Spectral line comparison diagram showing rest wavelength alongside redshifted lines for a receding source and blueshifted lines for an approaching source',
+            type: 'redshift_blueshift_spectral_lines',
+            defaultOptions: {
+                title: 'Redshift & Blueshift of Spectral Lines',
+                showRestLines: true,
+                showRedshift: true,
+                showBlueshift: true,
+                showDisplacementAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== MECHANICS — KINEMATICS ===============================
+        // ============================================================
+
+        'displacementVsDistanceVectorScalarDiagram': {
+            name: 'Displacement vs Distance — Vector and Scalar Comparison',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Diagram contrasting the scalar distance (total path length) with the vector displacement (straight-line separation) for a curved path',
+            type: 'displacement_vs_distance_vector_scalar',
+            defaultOptions: {
+                title: 'Displacement vs Distance',
+                showPath: true,
+                showDisplacementVector: true,
+                showDistanceLabel: true,
+                showAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'averageVsInstantaneousVelocityTangentDiagram': {
+            name: 'Average vs Instantaneous Velocity — Tangent Diagram',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Displacement-time curve showing a secant chord for average velocity and a tangent at a point for instantaneous velocity',
+            type: 'average_vs_instantaneous_velocity_tangent',
+            defaultOptions: {
+                title: 'Average vs Instantaneous Velocity',
+                showCurve: true,
+                showSecant: true,
+                showTangent: true,
+                showAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'uniformNonUniformAccelerationVelocityTimeGraph': {
+            name: 'Uniform and Non-Uniform Acceleration — Velocity-Time Graph',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Velocity-time graph comparing a straight line (constant acceleration) with a curve (non-uniform acceleration)',
+            type: 'uniform_nonuniform_acceleration_vt_graph',
+            defaultOptions: {
+                title: 'Uniform vs Non-Uniform Acceleration',
+                showUniform: true,
+                showNonUniform: true,
+                showGradientAnnotation: true,
+                showAreaAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'suvatEquationSelectionFlowchart': {
+            name: 'SUVAT Equation Selection Flowchart',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Decision flowchart guiding selection of the appropriate SUVAT equation based on the known and unknown variables',
+            type: 'suvat_equation_selection_flowchart',
+            defaultOptions: {
+                title: 'SUVAT Equation Selection',
+                showAllEquations: true,
+                showDecisionNodes: true,
+                showVariableKey: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'freeFallTerminalVelocityVelocityTimeGraph': {
+            name: 'Free Fall and Terminal Velocity — Velocity-Time Graph',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Velocity-time graph showing initial free fall acceleration at g transitioning to constant terminal velocity as drag equals weight',
+            type: 'free_fall_terminal_velocity_vt_graph',
+            defaultOptions: {
+                title: 'Free Fall to Terminal Velocity',
+                showAccelerationPhase: true,
+                showTerminalPhase: true,
+                showDragForceAnnotation: true,
+                showTerminalVelocityLine: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'projectileParabolicTrajectoryComponentsDiagram': {
+            name: 'Projectile Parabolic Trajectory — Components Diagram',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Parabolic trajectory diagram decomposing horizontal (constant) and vertical (accelerating) velocity components at multiple points',
+            type: 'projectile_parabolic_trajectory_components',
+            defaultOptions: {
+                title: 'Projectile Motion — Component Decomposition',
+                showTrajectory: true,
+                showHorizontalComponent: true,
+                showVerticalComponent: true,
+                showVelocityVectors: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'displacementVelocityAccelerationTimeGraphsTrioDiagram': {
+            name: 'Displacement, Velocity, and Acceleration vs Time — Trio Graph Diagram',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Three vertically aligned graphs (s-t, v-t, a-t) showing the relationships between gradient and area for a uniformly accelerating body',
+            type: 'displacement_velocity_acceleration_trio_graphs',
+            defaultOptions: {
+                title: 's-t, v-t, a-t Graph Relationships',
+                showDisplacementGraph: true,
+                showVelocityGraph: true,
+                showAccelerationGraph: true,
+                showLinkAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'relativeVelocityVectorSubtractionRiverCrossingDiagram': {
+            name: 'Relative Velocity — Vector Subtraction and River Crossing Diagram',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'River crossing diagram showing boat velocity, river current velocity, and resultant velocity, illustrating relative velocity via vector subtraction',
+            type: 'relative_velocity_river_crossing',
+            defaultOptions: {
+                title: 'Relative Velocity — River Crossing',
+                showBoatVelocity: true,
+                showCurrentVelocity: true,
+                showResultantVelocity: true,
+                showVectorTriangle: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'twoDimensionalVectorComponentsResolutionDiagram': {
+            name: 'Two-Dimensional Vector Components — Resolution Diagram',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Diagram resolving a 2D vector into horizontal and vertical components with trigonometric labels',
+            type: 'two_dimensional_vector_components_resolution',
+            defaultOptions: {
+                title: '2D Vector Resolution',
+                showVector: true,
+                showHorizontalComponent: true,
+                showVerticalComponent: true,
+                showAngle: true,
+                showTrigLabels: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'differentiationIntegrationKinematicLinksDiagram': {
+            name: 'Differentiation and Integration — Kinematic Links Diagram',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Diagram showing the calculus links between displacement, velocity, and acceleration via differentiation (downward) and integration (upward)',
+            type: 'differentiation_integration_kinematic_links',
+            defaultOptions: {
+                title: 'Calculus Links: s ↔ v ↔ a',
+                showDisplacement: true,
+                showVelocity: true,
+                showAcceleration: true,
+                showDifferentiationArrows: true,
+                showIntegrationArrows: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'uniformUniformlyAcceleratedNonUniformGraphComparisonDiagram': {
+            name: 'Uniform, Uniformly Accelerated, and Non-Uniform Motion — Graph Comparison',
+            category: 'Mechanics',
+            subcategory: 'Kinematics',
+            description: 'Three-column comparison of s-t, v-t, and a-t graphs for uniform motion, uniformly accelerated motion, and non-uniform motion',
+            type: 'motion_graph_three_way_comparison',
+            defaultOptions: {
+                title: 'Motion Graph Comparison',
+                showUniform: true,
+                showUniformlyAccelerated: true,
+                showNonUniform: true,
+                showAllThreeGraphTypes: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== MECHANICS — DYNAMICS =================================
+        // ============================================================
+
+        'freeBodyDiagramForceLabellingTemplate': {
+            name: 'Free Body Diagram Force Labelling Template',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Blank or annotated template free body diagram showing standard force arrow conventions for weight, normal, tension, friction, and applied force',
+            type: 'free_body_diagram_labelling_template',
+            defaultOptions: {
+                title: 'Free Body Diagram — Force Labels',
+                showWeight: true,
+                showNormal: true,
+                showTension: true,
+                showFriction: true,
+                showApplied: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'newtonThreeLawsActionReactionPairsDiagram': {
+            name: "Newton's Three Laws — Action-Reaction Pairs Diagram",
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: "Three-panel diagram illustrating Newton's first (inertia), second (F=ma), and third (action-reaction pairs) laws with labelled examples",
+            type: 'newton_three_laws_action_reaction',
+            defaultOptions: {
+                title: "Newton's Three Laws",
+                showFirstLaw: true,
+                showSecondLaw: true,
+                showThirdLaw: true,
+                showActionReactionPairs: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'contactNonContactForcesClassificationDiagram': {
+            name: 'Contact and Non-Contact Forces — Classification Diagram',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Classification diagram separating contact forces (normal, friction, tension, air resistance) from non-contact forces (gravity, electrostatic, magnetic)',
+            type: 'contact_non_contact_forces_classification',
+            defaultOptions: {
+                title: 'Contact vs Non-Contact Forces',
+                showContactForces: true,
+                showNonContactForces: true,
+                showExamples: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'atwoodMachineConnectedBodyFreeBodyDiagram': {
+            name: "Atwood's Machine — Connected Body Free Body Diagram",
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: "Free body diagram of an Atwood machine showing two masses over a pulley with tension and weight forces labelled",
+            type: 'atwood_machine_connected_body_fbd',
+            defaultOptions: {
+                title: "Atwood's Machine",
+                showPulley: true,
+                showMasses: true,
+                showTension: true,
+                showWeight: true,
+                showAcceleration: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'inverseSquearedGravitationalFieldLinesDistanceDiagram': {
+            name: 'Inverse Square Gravitational Field — Field Lines and Distance Diagram',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Diagram showing radial gravitational field lines around a planet with a graph of field strength g vs distance r following an inverse square law',
+            type: 'inverse_square_gravitational_field_lines',
+            defaultOptions: {
+                title: 'Gravitational Field: g ∝ 1/r²',
+                showFieldLines: true,
+                showInverseSquareCurve: true,
+                showDistanceAxis: true,
+                showAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'staticEquilibriumForceTriangleConcurrentForcesDiagram': {
+            name: 'Static Equilibrium — Force Triangle and Concurrent Forces Diagram',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Diagram showing three concurrent forces in equilibrium forming a closed triangle, with components resolved',
+            type: 'static_equilibrium_force_triangle',
+            defaultOptions: {
+                title: 'Static Equilibrium — Force Triangle',
+                showConcurrentForces: true,
+                showForceTriangle: true,
+                showResolution: true,
+                showEquilibriumCondition: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'staticKineticFrictionForceAppliedForceComparisonGraph': {
+            name: 'Static and Kinetic Friction vs Applied Force — Comparison Graph',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Graph of friction force vs applied force showing static friction increasing to a maximum then dropping to the lower constant kinetic friction value',
+            type: 'static_kinetic_friction_comparison_graph',
+            defaultOptions: {
+                title: 'Static & Kinetic Friction vs Applied Force',
+                showStaticRegion: true,
+                showKineticRegion: true,
+                showMaxStaticFriction: true,
+                showAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'pseudoForceCentrifugalCoriolisRotatingFrameDiagram': {
+            name: 'Pseudo-Forces — Centrifugal and Coriolis in a Rotating Frame Diagram',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Rotating reference frame diagram showing apparent centrifugal and Coriolis pseudo-forces compared to inertial frame view',
+            type: 'pseudo_force_centrifugal_coriolis_rotating_frame',
+            defaultOptions: {
+                title: 'Pseudo-Forces in Rotating Frame',
+                showInertialFrame: true,
+                showRotatingFrame: true,
+                showCentrifugal: true,
+                showCoriolis: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'forceTimeGraphImpulseAreaVariableForceDiagram': {
+            name: 'Force-Time Graph — Impulse as Area Under Variable Force Curve',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Force-time graph with a variable force curve, shaded area representing impulse J = ∫F dt, with average force line shown',
+            type: 'force_time_graph_impulse_area_variable',
+            defaultOptions: {
+                title: 'Impulse: Area Under F-t Graph',
+                showVariableForceCurve: true,
+                showShadedArea: true,
+                showAverageForce: true,
+                showImpulseLabel: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'tensionVariationAlongMassiveStringDiagram': {
+            name: 'Tension Variation Along a Massive String Diagram',
+            category: 'Mechanics',
+            subcategory: 'Dynamics',
+            description: 'Diagram showing how tension varies linearly along a heavy string being accelerated, with free body diagram of a string element',
+            type: 'tension_variation_massive_string',
+            defaultOptions: {
+                title: 'Tension Variation Along a Massive String',
+                showString: true,
+                showTensionProfile: true,
+                showElementFBD: true,
+                showAnnotations: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== MECHANICS — ENERGY ===================================
+        // ============================================================
+
+        'energyFormsTransformationFlowDiagram': {
+            name: 'Energy Forms and Transformation Flow Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Flow diagram showing the main forms of energy (kinetic, potential, thermal, electrical, chemical, nuclear) and possible transformations between them',
+            type: 'energy_forms_transformation_flow',
+            defaultOptions: {
+                title: 'Energy Forms & Transformations',
+                showAllForms: true,
+                showTransformationArrows: true,
+                showExamples: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'workDoneForceDisplacementAngleDiagram': {
+            name: 'Work Done — Force, Displacement, and Angle Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Diagram showing an object displaced at angle θ to an applied force, illustrating W = Fd cosθ',
+            type: 'work_done_force_displacement_angle',
+            defaultOptions: {
+                title: 'Work Done: W = Fd cosθ',
+                showForceVector: true,
+                showDisplacement: true,
+                showAngle: true,
+                showComponentAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'kineticEnergyVelocitySquaredProportionalityGraph': {
+            name: 'Kinetic Energy vs Velocity Squared — Proportionality Graph',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Graph of kinetic energy vs v² showing a straight line through the origin with gradient ½m, confirming Ek ∝ v²',
+            type: 'kinetic_energy_velocity_squared_graph',
+            defaultOptions: {
+                title: 'Ek vs v²: Gradient = ½m',
+                showDataPoints: true,
+                showBestFitLine: true,
+                showGradientAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'netWorkKineticEnergyChangeRelationshipDiagram': {
+            name: 'Net Work — Kinetic Energy Change Relationship Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Diagram illustrating the work-energy theorem: net work done on an object equals the change in its kinetic energy',
+            type: 'net_work_kinetic_energy_change',
+            defaultOptions: {
+                title: 'Work-Energy Theorem: W_net = ΔEk',
+                showNetForce: true,
+                showDisplacement: true,
+                showKEChange: true,
+                showAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'gravitationalElasticPotentialEnergyComparisonDiagram': {
+            name: 'Gravitational and Elastic Potential Energy — Comparison Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Side-by-side comparison of gravitational PE (Ep = mgh, linear in h) and elastic PE (Ee = ½kx², quadratic in x) with corresponding graphs',
+            type: 'gravitational_elastic_potential_energy_comparison',
+            defaultOptions: {
+                title: 'Gravitational vs Elastic PE',
+                showGravitational: true,
+                showElastic: true,
+                showEnergyGraphs: true,
+                showFormulas: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'pendulumKineticPotentialEnergyExchangeDiagram': {
+            name: 'Pendulum — Kinetic and Potential Energy Exchange Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Pendulum diagram showing maximum PE at the extremes, maximum KE at the bottom, and energy exchange throughout the swing',
+            type: 'pendulum_ke_pe_energy_exchange',
+            defaultOptions: {
+                title: 'Pendulum: KE ↔ PE Exchange',
+                showPendulum: true,
+                showEnergyBars: true,
+                showMaxKE: true,
+                showMaxPE: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'mechanicalEnergyLossFrictionThermalDissipationDiagram': {
+            name: 'Mechanical Energy Loss — Friction and Thermal Dissipation Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Energy flow diagram showing input mechanical energy, energy lost to friction as heat, and reduced output mechanical energy',
+            type: 'mechanical_energy_loss_friction_thermal',
+            defaultOptions: {
+                title: 'Energy Loss to Friction',
+                showInputEnergy: true,
+                showFrictionLoss: true,
+                showOutputEnergy: true,
+                showSankeyStyle: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'powerVelocityRelationshipEngineOutputDiagram': {
+            name: 'Power-Velocity Relationship — Engine Output Diagram',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Diagram illustrating P = Fv for constant engine output power, showing the inverse relationship between driving force and velocity',
+            type: 'power_velocity_engine_output',
+            defaultOptions: {
+                title: 'Power-Velocity: P = Fv',
+                showPowerCurve: true,
+                showForceVelocityGraph: true,
+                showConstantPowerLine: true,
+                showAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'springMassKineticElasticPotentialEnergyPositionGraph': {
+            name: 'Spring-Mass — Kinetic and Elastic Potential Energy vs Position Graph',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Graph showing KE and elastic PE as functions of displacement for a spring-mass system, with total energy constant',
+            type: 'spring_mass_ke_epe_position_graph',
+            defaultOptions: {
+                title: 'Spring-Mass: KE & EPE vs Position',
+                showKECurve: true,
+                showEPECurve: true,
+                showTotalEnergy: true,
+                showEquilibriumMark: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'renewableEnergyConversionChainHydroWindSolarDiagram': {
+            name: 'Renewable Energy Conversion Chain — Hydro, Wind, and Solar',
+            category: 'Mechanics',
+            subcategory: 'Energy',
+            description: 'Three energy conversion chain diagrams for hydroelectric, wind, and solar energy showing each transformation stage and efficiency losses',
+            type: 'renewable_energy_conversion_chain',
+            defaultOptions: {
+                title: 'Renewable Energy Conversion Chains',
+                showHydro: true,
+                showWind: true,
+                showSolar: true,
+                showConversionStages: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== MECHANICS — MOMENTUM =================================
+        // ============================================================
+
+        'linearMomentumMassVelocityVectorDiagram': {
+            name: 'Linear Momentum — Mass, Velocity, and Vector Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Diagram defining linear momentum p = mv as a vector quantity, showing direction aligned with velocity',
+            type: 'linear_momentum_mass_velocity_vector',
+            defaultOptions: {
+                title: 'Linear Momentum: p = mv',
+                showObject: true,
+                showVelocityVector: true,
+                showMomentumVector: true,
+                showAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'forceTimeGraphImpulseAreaAverageForceDiagram': {
+            name: 'Force-Time Graph — Impulse Area and Average Force Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Force-time graph with shaded impulse area and a horizontal average force line, illustrating J = FΔt = Δp',
+            type: 'force_time_graph_impulse_average_force',
+            defaultOptions: {
+                title: 'Impulse: J = F_avg · Δt = Δp',
+                showForceCurve: true,
+                showShadedImpulse: true,
+                showAverageForceLine: true,
+                showAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'beforeAfterCollisionMomentumVectorsDiagram': {
+            name: 'Before and After Collision — Momentum Vectors Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Side-by-side before and after snapshots of a collision showing individual momentum vectors and conservation of total momentum',
+            type: 'before_after_collision_momentum_vectors',
+            defaultOptions: {
+                title: 'Collision: Conservation of Momentum',
+                showBeforeState: true,
+                showAfterState: true,
+                showMomentumVectors: true,
+                showTotalMomentum: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'elasticInelasticPerfectlyInelasticKineticEnergyComparisonDiagram': {
+            name: 'Elastic, Inelastic, and Perfectly Inelastic Collision — Kinetic Energy Comparison',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Three-panel diagram comparing kinetic energy before and after elastic (KE conserved), inelastic (partial KE loss), and perfectly inelastic (maximum KE loss) collisions',
+            type: 'elastic_inelastic_ke_comparison',
+            defaultOptions: {
+                title: 'Elastic vs Inelastic Collisions',
+                showElastic: true,
+                showInelastic: true,
+                showPerfectlyInelastic: true,
+                showKEComparison: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'bouncingBallDropHeightRestitutionCoefficientDiagram': {
+            name: 'Bouncing Ball — Drop Height and Coefficient of Restitution Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Diagram showing successive bounce heights for a dropped ball with coefficient of restitution e = √(h_bounce/h_drop) labelled',
+            type: 'bouncing_ball_restitution_coefficient',
+            defaultOptions: {
+                title: 'Coefficient of Restitution',
+                showDropHeight: true,
+                showBounceHeights: true,
+                showRestitutionAnnotation: true,
+                showDecayPattern: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'explosionRecoilMomentumConservationVectorDiagram': {
+            name: 'Explosion and Recoil — Momentum Conservation Vector Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Before-and-after diagram of an explosion from rest showing equal and opposite momentum vectors summing to zero total momentum',
+            type: 'explosion_recoil_momentum_conservation',
+            defaultOptions: {
+                title: 'Explosion & Recoil: Σp = 0',
+                showBeforeExplosion: true,
+                showAfterExplosion: true,
+                showMomentumVectors: true,
+                showZeroTotalAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'centreOfMassDiscreteAndContinuousSystemsDiagram': {
+            name: 'Centre of Mass — Discrete and Continuous Systems Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Two-panel diagram: discrete point masses with centre of mass calculation and a continuous uniform rod/shape with geometric centre of mass',
+            type: 'centre_of_mass_discrete_continuous',
+            defaultOptions: {
+                title: 'Centre of Mass',
+                showDiscrete: true,
+                showContinuous: true,
+                showCOMMarker: true,
+                showCalculation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'twoDimensionalGlancingCollisionComponentVectorsDiagram': {
+            name: 'Two-Dimensional Glancing Collision — Component Vectors Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: '2D collision diagram showing incident and scattered particles with momentum component vectors in both x and y directions',
+            type: 'two_dimensional_glancing_collision',
+            defaultOptions: {
+                title: '2D Glancing Collision — Momentum Components',
+                showIncidentParticle: true,
+                showScatteredParticles: true,
+                showXComponents: true,
+                showYComponents: true,
+                showConservationAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'angularMomentumConservationSpinnerArmExtensionDiagram': {
+            name: 'Angular Momentum Conservation — Spinner Arm Extension Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Diagram of a spinning figure pulling arms in vs extending them, showing increased and decreased angular velocity with constant angular momentum',
+            type: 'angular_momentum_conservation_spinner',
+            defaultOptions: {
+                title: 'Angular Momentum: L = Iω = const.',
+                showArmsIn: true,
+                showArmsOut: true,
+                showAngularVelocityComparison: true,
+                showAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'ballisticPendulumMomentumEnergyTwoStageDiagram': {
+            name: 'Ballistic Pendulum — Momentum and Energy Two-Stage Diagram',
+            category: 'Mechanics',
+            subcategory: 'Momentum',
+            description: 'Two-stage ballistic pendulum diagram: stage 1 uses momentum conservation (bullet embeds in block), stage 2 uses energy conservation (block swings up)',
+            type: 'ballistic_pendulum_two_stage',
+            defaultOptions: {
+                title: 'Ballistic Pendulum',
+                showStageOne: true,
+                showStageTwo: true,
+                showMomentumConservation: true,
+                showEnergyConservation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== MECHANICS — CIRCULAR MOTION ==========================
+        // ============================================================
+
+        'angularDisplacementRadiansDegreesRevolutionsDiagram': {
+            name: 'Angular Displacement — Radians, Degrees, and Revolutions Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Circle diagram showing angular displacement with radian arc-length definition and conversion table for radians, degrees, and revolutions',
+            type: 'angular_displacement_radians_degrees_revolutions',
+            defaultOptions: {
+                title: 'Angular Displacement: rad, °, rev',
+                showCircle: true,
+                showArcLength: true,
+                showConversionTable: true,
+                showRadianDefinition: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'angularLinearVelocityRelationshipRotatingDiscDiagram': {
+            name: 'Angular and Linear Velocity Relationship — Rotating Disc Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Rotating disc showing points at different radii with tangential velocity v = rω increasing with radius',
+            type: 'angular_linear_velocity_rotating_disc',
+            defaultOptions: {
+                title: 'v = rω: Angular & Linear Velocity',
+                showDisc: true,
+                showTangentialVectors: true,
+                showRadiusLabels: true,
+                showOmegaAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'centripetalAccelerationInwardVelocityTangentDiagram': {
+            name: 'Centripetal Acceleration — Inward Acceleration and Tangential Velocity Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Circular motion diagram showing centripetal acceleration directed toward the centre and velocity tangent to the circle at each point',
+            type: 'centripetal_acceleration_inward_velocity_tangent',
+            defaultOptions: {
+                title: 'Centripetal Acceleration: a = v²/r',
+                showCircle: true,
+                showCentripetalAcceleration: true,
+                showTangentialVelocity: true,
+                showCentreLabel: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'conicalPendulumBankedRoadSatelliteOrbitForcesDiagram': {
+            name: 'Conical Pendulum, Banked Road, and Satellite Orbit — Forces Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Three-panel diagram showing the forces providing centripetal force in a conical pendulum (tension component), banked road (normal force component), and satellite orbit (gravity)',
+            type: 'conical_pendulum_banked_road_satellite_forces',
+            defaultOptions: {
+                title: 'Centripetal Force Sources',
+                showConicalPendulum: true,
+                showBankedRoad: true,
+                showSatelliteOrbit: true,
+                showForceComponents: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'verticalCircleTopBottomTensionWeightForcesDiagram': {
+            name: 'Vertical Circle — Top and Bottom Tension and Weight Forces Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Vertical circle diagram comparing forces on an object at the top (T + W provide centripetal) and bottom (T − W provides centripetal) of the loop',
+            type: 'vertical_circle_top_bottom_tension_weight',
+            defaultOptions: {
+                title: 'Vertical Circle — Forces at Top & Bottom',
+                showTopPosition: true,
+                showBottomPosition: true,
+                showTensionArrow: true,
+                showWeightArrow: true,
+                showCentripetalAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'torqueLeverArmPerpendicularForceDistanceDiagram': {
+            name: 'Torque — Lever Arm and Perpendicular Force-Distance Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Diagram defining torque τ = F × d⊥ showing the perpendicular lever arm from the pivot to the line of action of the force',
+            type: 'torque_lever_arm_perpendicular',
+            defaultOptions: {
+                title: 'Torque: τ = F × d⊥',
+                showPivot: true,
+                showForce: true,
+                showLeverArm: true,
+                showPerpendicularAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'momentOfInertiaMassDistributionAxisComparisonDiagram': {
+            name: 'Moment of Inertia — Mass Distribution and Axis Comparison Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Diagram comparing moments of inertia for different mass distributions (ring, solid disc, sphere) and rotation axis positions',
+            type: 'moment_of_inertia_mass_distribution_comparison',
+            defaultOptions: {
+                title: 'Moment of Inertia Comparison',
+                showRing: true,
+                showSolidDisc: true,
+                showSphere: true,
+                showAxisVariation: true,
+                showFormulas: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'rollingObjectTranslationalRotationalKineticEnergySplitDiagram': {
+            name: 'Rolling Object — Translational and Rotational Kinetic Energy Split Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Diagram showing a rolling object with total KE split into translational (½mv²) and rotational (½Iω²) components',
+            type: 'rolling_object_ke_split',
+            defaultOptions: {
+                title: 'Rolling KE: ½mv² + ½Iω²',
+                showObject: true,
+                showTranslationalKE: true,
+                showRotationalKE: true,
+                showEnergySplit: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'angularMomentumConservationMomentOfInertiaOmegaProductDiagram': {
+            name: 'Angular Momentum Conservation — Moment of Inertia and Omega Product Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Diagram illustrating L = Iω = constant for an isolated rotating system, showing how changing I causes inverse change in ω',
+            type: 'angular_momentum_conservation_I_omega',
+            defaultOptions: {
+                title: 'Angular Momentum: L = Iω',
+                showInitialState: true,
+                showFinalState: true,
+                showIomegaProduct: true,
+                showConservationAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'gyroscopePrecessionTorqueAngularMomentumVectorDiagram': {
+            name: 'Gyroscope Precession — Torque and Angular Momentum Vector Diagram',
+            category: 'Mechanics',
+            subcategory: 'Circular Motion',
+            description: 'Vector diagram showing a spinning gyroscope with torque τ = dL/dt causing precession of the angular momentum vector L',
+            type: 'gyroscope_precession_torque_angular_momentum',
+            defaultOptions: {
+                title: 'Gyroscope Precession',
+                showGyroscope: true,
+                showAngularMomentumVector: true,
+                showTorqueVector: true,
+                showPrecessionCircle: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        // ============================================================
+        // ===== MECHANICS — OSCILLATIONS & WAVES =====================
+        // ============================================================
+
+        'oscillationAmplitudePeriodFrequencyPhaseLabelledDiagram': {
+            name: 'Oscillation — Amplitude, Period, Frequency, and Phase Labelled Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Displacement-time graph of an oscillation with amplitude A, period T, frequency f, and phase angle φ clearly labelled',
+            type: 'oscillation_amplitude_period_frequency_phase',
+            defaultOptions: {
+                title: 'Oscillation Parameters',
+                showAmplitude: true,
+                showPeriod: true,
+                showFrequency: true,
+                showPhase: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'shmDisplacementVelocityAccelerationPhaseRelationshipGraph': {
+            name: 'SHM — Displacement, Velocity, and Acceleration Phase Relationship Graph',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Three overlaid sinusoidal graphs for displacement, velocity, and acceleration in SHM showing the 90° and 180° phase differences',
+            type: 'shm_displacement_velocity_acceleration_phase',
+            defaultOptions: {
+                title: 'SHM Phase Relationships: x, v, a',
+                showDisplacement: true,
+                showVelocity: true,
+                showAcceleration: true,
+                showPhaseAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'shmKineticPotentialTotalEnergyVsDisplacementGraph': {
+            name: 'SHM — Kinetic, Potential, and Total Energy vs Displacement Graph',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Graph of KE (parabolic), PE (parabolic), and constant total mechanical energy vs displacement for simple harmonic motion',
+            type: 'shm_ke_pe_total_energy_displacement',
+            defaultOptions: {
+                title: 'SHM Energy vs Displacement',
+                showKECurve: true,
+                showPECurve: true,
+                showTotalEnergy: true,
+                showDisplacementAxis: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'springMassHorizontalVerticalEquilibriumOscillationDiagram': {
+            name: 'Spring-Mass — Horizontal and Vertical Equilibrium Oscillation Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Side-by-side diagrams of horizontal and vertical spring-mass systems showing equilibrium position and oscillation about it',
+            type: 'spring_mass_horizontal_vertical_equilibrium',
+            defaultOptions: {
+                title: 'Spring-Mass Oscillation',
+                showHorizontal: true,
+                showVertical: true,
+                showEquilibriumPosition: true,
+                showOscillationArrow: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'simplePendulumLengthAngleRestoringForceDiagram': {
+            name: 'Simple Pendulum — Length, Angle, and Restoring Force Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Pendulum diagram showing length L, angular displacement θ, restoring force component mg sinθ, and the small-angle approximation',
+            type: 'simple_pendulum_length_angle_restoring_force',
+            defaultOptions: {
+                title: 'Simple Pendulum — Restoring Force',
+                showPendulum: true,
+                showLength: true,
+                showAngle: true,
+                showRestoringForce: true,
+                showSmallAngleApproximation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'compoundTorsionalPendulumLCCircuitSHMAnalogiesDiagram': {
+            name: 'Compound and Torsional Pendulum, LC Circuit — SHM Analogies Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Three-panel analogy diagram showing compound pendulum, torsional pendulum, and LC circuit as mechanical and electrical SHM systems with equivalent quantities',
+            type: 'shm_analogies_compound_torsional_lc',
+            defaultOptions: {
+                title: 'SHM Analogies: Mechanical & Electrical',
+                showCompoundPendulum: true,
+                showTorsionalPendulum: true,
+                showLCCircuit: true,
+                showAnalogTable: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'underdampedCriticallyDampedOverdampedDisplacementTimeComparison': {
+            name: 'Underdamped, Critically Damped, and Overdamped — Displacement-Time Comparison',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Three displacement-time curves on one graph comparing underdamped oscillation, critically damped fast return, and overdamped slow return to equilibrium',
+            type: 'damping_comparison_displacement_time',
+            defaultOptions: {
+                title: 'Damping: Under, Critical & Over',
+                showUnderdamped: true,
+                showCriticallyDamped: true,
+                showOverdamped: true,
+                showEquilibriumLine: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'resonanceFrequencyResponseAmplitudeCurveQFactorDiagram': {
+            name: 'Resonance — Frequency Response, Amplitude Curve, and Q Factor Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Amplitude vs driving frequency graph showing resonance peak at natural frequency, with multiple curves for different damping levels and Q factor indicated',
+            type: 'resonance_frequency_response_amplitude_q_factor',
+            defaultOptions: {
+                title: 'Resonance Amplitude Response',
+                showMultipleDampingCurves: true,
+                showResonancePeak: true,
+                showNaturalFrequencyMark: true,
+                showQFactor: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'coupledPendulumNormalModesSymmetricAntisymmetricDiagram': {
+            name: 'Coupled Pendulum — Normal Modes, Symmetric and Antisymmetric Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Diagram showing two coupled pendulums in their two normal modes: symmetric (both swinging together) and antisymmetric (swinging in opposition)',
+            type: 'coupled_pendulum_normal_modes',
+            defaultOptions: {
+                title: 'Coupled Pendulum Normal Modes',
+                showSymmetricMode: true,
+                showAntisymmetricMode: true,
+                showCouplingSpring: true,
+                showFrequencyAnnotation: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+        'standingWaveNodesAntinodesParticlesSHMDiagram': {
+            name: 'Standing Wave — Nodes, Antinodes, and Particles in SHM Diagram',
+            category: 'Mechanics',
+            subcategory: 'Oscillations & Waves',
+            description: 'Standing wave diagram labelling nodes (zero amplitude) and antinodes (maximum amplitude) with particles at each position shown executing SHM',
+            type: 'standing_wave_nodes_antinodes_shm',
+            defaultOptions: {
+                title: 'Standing Wave — Nodes & Antinodes',
+                showStandingWave: true,
+                showNodes: true,
+                showAntinodes: true,
+                showParticleSHM: true,
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            }
+        },
+
+// ============================================================
+// ===== THERMAL PHYSICS & HEAT TRANSFER ======================
+// ============================================================
+
+'thermalEnergyVsTemperatureVsHeatConceptMap': {
+    name: 'Thermal Energy vs Temperature vs Heat Concept Map',
+    category: 'Thermal Physics',
+    subcategory: 'Heat & Temperature',
+    description: 'Concept map distinguishing thermal energy, temperature, and heat',
+    type: 'thermal_energy_vs_temperature_vs_heat_concept_map',
+    defaultOptions: {
+        title: 'Thermal Energy vs Temperature vs Heat',
+        showLabels: true,
+        showConnections: true,
+        showDefinitions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'celsiusFahrenheitKelvinTripleScaleComparisonDiagram': {
+    name: 'Celsius Fahrenheit Kelvin Triple Scale Comparison',
+    category: 'Thermal Physics',
+    subcategory: 'Heat & Temperature',
+    description: 'Side-by-side comparison of Celsius, Fahrenheit, and Kelvin temperature scales',
+    type: 'celsius_fahrenheit_kelvin_triple_scale_comparison',
+    referencePoints: [
+        { label: 'Absolute Zero', celsius: -273.15, fahrenheit: -459.67, kelvin: 0 },
+        { label: 'Water Freezing', celsius: 0, fahrenheit: 32, kelvin: 273.15 },
+        { label: 'Body Temperature', celsius: 37, fahrenheit: 98.6, kelvin: 310.15 },
+        { label: 'Water Boiling', celsius: 100, fahrenheit: 212, kelvin: 373.15 }
+    ],
+    defaultOptions: {
+        title: 'Temperature Scale Comparison',
+        showReferencePoints: true,
+        showConversionFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'specificHeatCapacityMaterialsComparisonBarChart': {
+    name: 'Specific Heat Capacity Materials Comparison Bar Chart',
+    category: 'Thermal Physics',
+    subcategory: 'Heat & Temperature',
+    description: 'Bar chart comparing specific heat capacities of common materials',
+    type: 'specific_heat_capacity_materials_comparison_bar_chart',
+    materials: [
+        { name: 'Water', value: 4186, unit: 'J/kg·K', color: '#3498DB' },
+        { name: 'Aluminium', value: 897, unit: 'J/kg·K', color: '#95A5A6' },
+        { name: 'Iron', value: 449, unit: 'J/kg·K', color: '#7F8C8D' },
+        { name: 'Copper', value: 385, unit: 'J/kg·K', color: '#E67E22' },
+        { name: 'Lead', value: 128, unit: 'J/kg·K', color: '#BDC3C7' }
+    ],
+    defaultOptions: {
+        title: 'Specific Heat Capacity Comparison',
+        showValues: true,
+        showUnits: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'heatingCoolingCurveWaterAllPhasesAnnotatedDiagram': {
+    name: 'Heating Cooling Curve Water All Phases Annotated',
+    category: 'Thermal Physics',
+    subcategory: 'Heat & Temperature',
+    description: 'Full heating and cooling curve for water showing all phase transitions annotated',
+    type: 'heating_cooling_curve_water_all_phases_annotated',
+    phases: [
+        { name: 'Ice', tempStart: -20, tempEnd: 0, slope: 'rising' },
+        { name: 'Melting', tempStart: 0, tempEnd: 0, slope: 'flat' },
+        { name: 'Water', tempStart: 0, tempEnd: 100, slope: 'rising' },
+        { name: 'Boiling', tempStart: 100, tempEnd: 100, slope: 'flat' },
+        { name: 'Steam', tempStart: 100, tempEnd: 140, slope: 'rising' }
+    ],
+    defaultOptions: {
+        title: 'Heating Curve of Water',
+        showPhaseLabels: true,
+        showLatentHeat: true,
+        showTemperatureAxis: true,
+        showHeatAxis: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'coffeeCupCalorimeterSetupCrossSectionDiagram': {
+    name: 'Coffee Cup Calorimeter Setup Cross Section',
+    category: 'Thermal Physics',
+    subcategory: 'Calorimetry',
+    description: 'Cross-section diagram of a coffee cup calorimeter experimental setup',
+    type: 'coffee_cup_calorimeter_setup_cross_section',
+    components: ['styrofoam_cup', 'thermometer', 'stirrer', 'lid', 'solution', 'reactants'],
+    defaultOptions: {
+        title: 'Coffee Cup Calorimeter',
+        showLabels: true,
+        showHeatFlow: true,
+        showThermometer: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'linearAreaVolumeExpansionCoefficientsAnnotatedDiagram': {
+    name: 'Linear Area Volume Expansion Coefficients Annotated',
+    category: 'Thermal Physics',
+    subcategory: 'Thermal Expansion',
+    description: 'Annotated diagram showing linear, area, and volume thermal expansion with coefficients',
+    type: 'linear_area_volume_expansion_coefficients_annotated',
+    expansionTypes: [
+        { type: 'Linear', symbol: 'α', formula: 'ΔL = αL₀ΔT', dimension: '1D' },
+        { type: 'Area', symbol: 'β', formula: 'ΔA = βA₀ΔT', relation: 'β = 2α', dimension: '2D' },
+        { type: 'Volume', symbol: 'γ', formula: 'ΔV = γV₀ΔT', relation: 'γ = 3α', dimension: '3D' }
+    ],
+    defaultOptions: {
+        title: 'Thermal Expansion Types',
+        showFormulas: true,
+        showRelationships: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'threeModesHeatTransferConductionConvectionRadiationSideBySideDiagram': {
+    name: 'Three Modes Heat Transfer Conduction Convection Radiation Side By Side',
+    category: 'Thermal Physics',
+    subcategory: 'Heat Transfer',
+    description: 'Side-by-side diagram comparing conduction, convection, and radiation heat transfer modes',
+    type: 'three_modes_heat_transfer_side_by_side',
+    modes: [
+        { name: 'Conduction', medium: 'solid', mechanism: 'particle_vibration', example: 'metal rod' },
+        { name: 'Convection', medium: 'fluid', mechanism: 'bulk_flow', example: 'boiling water' },
+        { name: 'Radiation', medium: 'vacuum', mechanism: 'em_waves', example: 'sunlight' }
+    ],
+    defaultOptions: {
+        title: 'Modes of Heat Transfer',
+        showMechanism: true,
+        showExamples: true,
+        showArrows: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thermalEnergyApplicationsCookingClimateEngineeringInfographic': {
+    name: 'Thermal Energy Applications Cooking Climate Engineering Infographic',
+    category: 'Thermal Physics',
+    subcategory: 'Applications',
+    description: 'Infographic of thermal energy applications in cooking, climate, and engineering',
+    type: 'thermal_energy_applications_infographic',
+    applications: [
+        { domain: 'Cooking', examples: ['induction hob', 'microwave', 'oven'] },
+        { domain: 'Climate', examples: ['greenhouse effect', 'ocean heat capacity', 'thermohaline circulation'] },
+        { domain: 'Engineering', examples: ['heat exchangers', 'thermal insulation', 'engine cooling'] }
+    ],
+    defaultOptions: {
+        title: 'Thermal Energy Applications',
+        showIcons: true,
+        showDescriptions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== GAS LAWS =============================================
+// ============================================================
+
+'gasStateVariablesPVnTRelationshipConceptDiagram': {
+    name: 'Gas State Variables PVnT Relationship Concept Diagram',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'Concept diagram showing relationships between gas state variables P, V, n, and T',
+    type: 'gas_state_variables_pvnt_relationship_concept',
+    variables: [
+        { symbol: 'P', name: 'Pressure', unit: 'Pa' },
+        { symbol: 'V', name: 'Volume', unit: 'm³' },
+        { symbol: 'n', name: 'Moles', unit: 'mol' },
+        { symbol: 'T', name: 'Temperature', unit: 'K' }
+    ],
+    defaultOptions: {
+        title: 'Gas State Variables',
+        showRelationships: true,
+        showUnits: true,
+        showIdealGasLaw: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'boylesLawPVHyperbolaAndLinearisedGraphs': {
+    name: 'Boyles Law PV Hyperbola And Linearised Graphs',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'P vs V hyperbola and linearised P vs 1/V graph illustrating Boyle\'s Law',
+    type: 'boyles_law_pv_hyperbola_linearised',
+    isotherms: [
+        { temperature: 200, color: '#3498DB' },
+        { temperature: 300, color: '#E74C3C' },
+        { temperature: 400, color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Boyle\'s Law',
+        showHyperbola: true,
+        showLinearised: true,
+        showIsotherms: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'charlesLawVolumeTemperatureLinearGraphAbsoluteZeroExtrapolationDiagram': {
+    name: 'Charles Law Volume Temperature Linear Graph Absolute Zero Extrapolation',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'V vs T linear graph with extrapolation to absolute zero illustrating Charles\'s Law',
+    type: 'charles_law_volume_temperature_linear_absolute_zero',
+    isobars: [
+        { pressure: 100, color: '#3498DB' },
+        { pressure: 200, color: '#E74C3C' },
+        { pressure: 300, color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Charles\'s Law',
+        showLinearGraph: true,
+        showExtrapolation: true,
+        showAbsoluteZero: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'gayLussacsLawPressureTemperatureLinearGraphConstantVolumeDiagram': {
+    name: 'Gay-Lussacs Law Pressure Temperature Linear Graph Constant Volume',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'P vs T linear graph at constant volume illustrating Gay-Lussac\'s Law',
+    type: 'gay_lussacs_law_pressure_temperature_linear',
+    isochores: [
+        { volume: 1.0, color: '#3498DB' },
+        { volume: 2.0, color: '#E74C3C' },
+        { volume: 3.0, color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Gay-Lussac\'s Law',
+        showLinearGraph: true,
+        showConstantVolume: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'avogadrosLawVolumeVsMolesEqualVolumesEqualMoleculesDiagram': {
+    name: 'Avogadros Law Volume vs Moles Equal Volumes Equal Molecules',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'V vs n graph and equal volumes equal molecules illustration for Avogadro\'s Law',
+    type: 'avogadros_law_volume_vs_moles_equal_volumes',
+    defaultOptions: {
+        title: 'Avogadro\'s Law',
+        showVnGraph: true,
+        showMoleculeComparison: true,
+        showFormula: true,
+        showMolarVolume: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'combinedGasLawThreeVariableVennDiagramSpecialCases': {
+    name: 'Combined Gas Law Three Variable Venn Diagram Special Cases',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'Venn diagram showing combined gas law and its special case sub-laws',
+    type: 'combined_gas_law_venn_diagram_special_cases',
+    specialCases: [
+        { name: 'Boyle\'s Law', constant: 'T', relation: 'PV = const' },
+        { name: 'Charles\'s Law', constant: 'P', relation: 'V/T = const' },
+        { name: 'Gay-Lussac\'s Law', constant: 'V', relation: 'P/T = const' }
+    ],
+    defaultOptions: {
+        title: 'Combined Gas Law',
+        showVennDiagram: true,
+        showSpecialCases: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'idealGasLawPVnRTVariableRelationshipAnnotatedDiagram': {
+    name: 'Ideal Gas Law PVnRT Variable Relationship Annotated Diagram',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'Annotated diagram showing all variable relationships in the ideal gas law PV=nRT',
+    type: 'ideal_gas_law_pvnrt_variable_relationship_annotated',
+    defaultOptions: {
+        title: 'Ideal Gas Law PV = nRT',
+        showVariableRelationships: true,
+        showUnits: true,
+        showAnnotations: true,
+        showRValue: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'daltonsLawPartialPressureMoleFractionMixtureStackedBarDiagram': {
+    name: 'Daltons Law Partial Pressure Mole Fraction Mixture Stacked Bar',
+    category: 'Gas Laws',
+    subcategory: 'Ideal Gases',
+    description: 'Stacked bar diagram showing partial pressures and mole fractions in a gas mixture',
+    type: 'daltons_law_partial_pressure_mole_fraction_stacked_bar',
+    gasMixture: [
+        { name: 'N₂', moleFraction: 0.78, color: '#3498DB' },
+        { name: 'O₂', moleFraction: 0.21, color: '#E74C3C' },
+        { name: 'Ar', moleFraction: 0.01, color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Dalton\'s Law of Partial Pressures',
+        showStackedBar: true,
+        showMoleFractions: true,
+        showPartialPressures: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'compressibilityFactorZVsPressureRealVsIdealGasDeviationGraph': {
+    name: 'Compressibility Factor Z vs Pressure Real vs Ideal Gas Deviation Graph',
+    category: 'Gas Laws',
+    subcategory: 'Real Gases',
+    description: 'Z vs P graph comparing real gas deviation from ideal gas behaviour',
+    type: 'compressibility_factor_z_vs_pressure_real_vs_ideal',
+    gases: [
+        { name: 'Ideal Gas', color: '#95A5A6', z: 1 },
+        { name: 'H₂', color: '#3498DB' },
+        { name: 'N₂', color: '#E74C3C' },
+        { name: 'CO₂', color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Compressibility Factor Z vs Pressure',
+        showIdealLine: true,
+        showRealGases: true,
+        showDeviations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'gasLawsApplicationsBreathingTyreHotAirBalloonIndustrialInfographic': {
+    name: 'Gas Laws Applications Breathing Tyre Hot Air Balloon Industrial Infographic',
+    category: 'Gas Laws',
+    subcategory: 'Applications',
+    description: 'Infographic of real-world gas law applications including breathing, tyres, and hot air balloons',
+    type: 'gas_laws_applications_infographic',
+    applications: [
+        { name: 'Breathing', law: 'Boyle\'s Law', description: 'lung volume and pressure changes' },
+        { name: 'Tyre Pressure', law: 'Gay-Lussac\'s Law', description: 'pressure increase with temperature' },
+        { name: 'Hot Air Balloon', law: 'Charles\'s Law', description: 'volume increase with temperature' },
+        { name: 'Industrial Gas Storage', law: 'Ideal Gas Law', description: 'high pressure cylinders' }
+    ],
+    defaultOptions: {
+        title: 'Gas Laws Applications',
+        showIcons: true,
+        showLawLinks: true,
+        showDescriptions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== KINETIC THEORY =======================================
+// ============================================================
+
+'kineticTheoryPostulatesGasMoleculeRandomMotionAnnotatedDiagram': {
+    name: 'Kinetic Theory Postulates Gas Molecule Random Motion Annotated',
+    category: 'Kinetic Theory',
+    subcategory: 'Kinetic Model',
+    description: 'Annotated diagram of gas molecules in random motion illustrating kinetic theory postulates',
+    type: 'kinetic_theory_postulates_random_motion_annotated',
+    postulates: [
+        'Large number of identical molecules',
+        'Molecules in continuous random motion',
+        'Negligible intermolecular forces except during collision',
+        'Elastic collisions',
+        'Negligible molecular volume compared to container'
+    ],
+    defaultOptions: {
+        title: 'Kinetic Theory Postulates',
+        showMolecules: true,
+        showMotionArrows: true,
+        showPostulates: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'moleculeCollisionCubicBoxMomentumTransferPressureDerivationDiagram': {
+    name: 'Molecule Collision Cubic Box Momentum Transfer Pressure Derivation',
+    category: 'Kinetic Theory',
+    subcategory: 'Kinetic Model',
+    description: 'Diagram of a molecule colliding with a wall in a cubic box for pressure derivation',
+    type: 'molecule_collision_cubic_box_pressure_derivation',
+    defaultOptions: {
+        title: 'Pressure Derivation from Kinetic Theory',
+        showCubicBox: true,
+        showMolecule: true,
+        showMomentumChange: true,
+        showDerivationSteps: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'averageKineticEnergyTemperatureProportionalityGraphWithBoltzmannAnnotation': {
+    name: 'Average Kinetic Energy Temperature Proportionality Graph With Boltzmann Annotation',
+    category: 'Kinetic Theory',
+    subcategory: 'Kinetic Model',
+    description: 'Graph showing proportionality between average kinetic energy and temperature with Boltzmann constant annotation',
+    type: 'average_kinetic_energy_temperature_proportionality_boltzmann',
+    defaultOptions: {
+        title: 'Average KE vs Temperature',
+        showProportionalityGraph: true,
+        showBoltzmannAnnotation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'maxwellBoltzmannDistributionVmpVmeanVrmsAnnotatedCurveTemperatureEffect': {
+    name: 'Maxwell Boltzmann Distribution Vmp Vmean Vrms Annotated Curve Temperature Effect',
+    category: 'Kinetic Theory',
+    subcategory: 'Speed Distribution',
+    description: 'Maxwell-Boltzmann speed distribution curve annotated with vmp, vmean, vrms and temperature effect',
+    type: 'maxwell_boltzmann_distribution_annotated',
+    temperatures: [
+        { value: 300, color: '#3498DB', label: '300 K' },
+        { value: 600, color: '#E74C3C', label: '600 K' },
+        { value: 1200, color: '#E67E22', label: '1200 K' }
+    ],
+    defaultOptions: {
+        title: 'Maxwell-Boltzmann Distribution',
+        showVmp: true,
+        showVmean: true,
+        showVrms: true,
+        showTemperatureEffect: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'degreesOfFreedomMonatomicDiatomicNonlinearMoleculeRotationalTranslationalVibrationalDiagram': {
+    name: 'Degrees Of Freedom Monatomic Diatomic Nonlinear Molecule Rotational Translational Vibrational',
+    category: 'Kinetic Theory',
+    subcategory: 'Equipartition',
+    description: 'Diagram comparing translational, rotational, and vibrational degrees of freedom for different molecule types',
+    type: 'degrees_of_freedom_molecule_types',
+    moleculeTypes: [
+        { type: 'Monatomic', translational: 3, rotational: 0, vibrational: 0, example: 'He, Ar' },
+        { type: 'Diatomic', translational: 3, rotational: 2, vibrational: 1, example: 'N₂, O₂' },
+        { type: 'Nonlinear', translational: 3, rotational: 3, vibrational: 'multiple', example: 'H₂O' }
+    ],
+    defaultOptions: {
+        title: 'Degrees of Freedom',
+        showMoleculeModels: true,
+        showDOFBreakdown: true,
+        showEquipartitionFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'internalEnergyTemperatureOnlyDependenceIdealGasJouleExpansionDiagram': {
+    name: 'Internal Energy Temperature Only Dependence Ideal Gas Joule Expansion',
+    category: 'Kinetic Theory',
+    subcategory: 'Internal Energy',
+    description: 'Diagram illustrating that ideal gas internal energy depends only on temperature via Joule expansion experiment',
+    type: 'internal_energy_temperature_dependence_joule_expansion',
+    defaultOptions: {
+        title: 'Internal Energy of an Ideal Gas',
+        showJouleExpansion: true,
+        showTemperatureDependence: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'meanFreePathCollisionCrossSectionMolecularDiameterZigzagPathDiagram': {
+    name: 'Mean Free Path Collision Cross Section Molecular Diameter Zigzag Path',
+    category: 'Kinetic Theory',
+    subcategory: 'Transport Properties',
+    description: 'Zigzag path diagram illustrating mean free path, collision cross section, and molecular diameter',
+    type: 'mean_free_path_collision_cross_section_zigzag',
+    defaultOptions: {
+        title: 'Mean Free Path',
+        showZigzagPath: true,
+        showCollisionCrossSection: true,
+        showFormula: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'diffusionViscosityThermalConductivityMolecularTransportComparisonDiagram': {
+    name: 'Diffusion Viscosity Thermal Conductivity Molecular Transport Comparison',
+    category: 'Kinetic Theory',
+    subcategory: 'Transport Properties',
+    description: 'Comparison diagram of molecular transport phenomena: diffusion, viscosity, and thermal conductivity',
+    type: 'molecular_transport_diffusion_viscosity_conductivity_comparison',
+    transportProperties: [
+        { name: 'Diffusion', quantity: 'mass', gradient: 'concentration', law: 'Fick\'s Law' },
+        { name: 'Viscosity', quantity: 'momentum', gradient: 'velocity', law: 'Newton\'s Law' },
+        { name: 'Thermal Conductivity', quantity: 'energy', gradient: 'temperature', law: 'Fourier\'s Law' }
+    ],
+    defaultOptions: {
+        title: 'Molecular Transport Properties',
+        showComparison: true,
+        showLaws: true,
+        showGradients: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kineticTheoryDerivationGasLawsFamilyTreeFlowchartDiagram': {
+    name: 'Kinetic Theory Derivation Gas Laws Family Tree Flowchart',
+    category: 'Kinetic Theory',
+    subcategory: 'Kinetic Model',
+    description: 'Flowchart family tree showing how kinetic theory derives the gas laws',
+    type: 'kinetic_theory_gas_laws_family_tree_flowchart',
+    defaultOptions: {
+        title: 'Gas Laws from Kinetic Theory',
+        showFlowchart: true,
+        showDerivationSteps: true,
+        showGasLaws: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'grahamsLawEffusionAtmosphericEscapeSpeedOfSoundKineticTheoryApplicationsInfographic': {
+    name: 'Grahams Law Effusion Atmospheric Escape Speed Of Sound Kinetic Theory Applications Infographic',
+    category: 'Kinetic Theory',
+    subcategory: 'Applications',
+    description: 'Infographic of kinetic theory applications including Graham\'s law, effusion, atmospheric escape, and speed of sound',
+    type: 'kinetic_theory_applications_infographic',
+    applications: [
+        { name: 'Graham\'s Law', description: 'rate of effusion inversely proportional to √M' },
+        { name: 'Atmospheric Escape', description: 'escape velocity vs molecular speeds' },
+        { name: 'Speed of Sound', description: 'depends on rms speed of molecules' }
+    ],
+    defaultOptions: {
+        title: 'Kinetic Theory Applications',
+        showIcons: true,
+        showFormulas: true,
+        showDescriptions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== THERMODYNAMICS =======================================
+// ============================================================
+
+'openClosedIsolatedSystemBoundaryHeatWorkMassFlowDiagram': {
+    name: 'Open Closed Isolated System Boundary Heat Work Mass Flow',
+    category: 'Thermodynamics',
+    subcategory: 'Thermodynamic Systems',
+    description: 'Diagram comparing open, closed, and isolated thermodynamic systems with boundary interactions',
+    type: 'open_closed_isolated_system_boundary',
+    systemTypes: [
+        { type: 'Open', heatTransfer: true, workTransfer: true, massTransfer: true, example: 'boiling pot' },
+        { type: 'Closed', heatTransfer: true, workTransfer: true, massTransfer: false, example: 'piston-cylinder' },
+        { type: 'Isolated', heatTransfer: false, workTransfer: false, massTransfer: false, example: 'thermos flask' }
+    ],
+    defaultOptions: {
+        title: 'Types of Thermodynamic Systems',
+        showBoundaries: true,
+        showInteractions: true,
+        showExamples: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'zerothLawThermalEquilibriumTransitivityABCThermometerDiagram': {
+    name: 'Zeroth Law Thermal Equilibrium Transitivity ABC Thermometer',
+    category: 'Thermodynamics',
+    subcategory: 'Laws of Thermodynamics',
+    description: 'Diagram illustrating the zeroth law via thermal equilibrium transitivity with three bodies A, B, C',
+    type: 'zeroth_law_thermal_equilibrium_transitivity_abc',
+    defaultOptions: {
+        title: 'Zeroth Law of Thermodynamics',
+        showThreeBodies: true,
+        showThermometer: true,
+        showTransitivity: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'firstLawDeltaUQMinusWEnergyFlowSystemSurroundingsDiagram': {
+    name: 'First Law Delta U Q Minus W Energy Flow System Surroundings',
+    category: 'Thermodynamics',
+    subcategory: 'Laws of Thermodynamics',
+    description: 'Energy flow diagram for the first law of thermodynamics ΔU = Q - W',
+    type: 'first_law_delta_u_q_minus_w_energy_flow',
+    defaultOptions: {
+        title: 'First Law of Thermodynamics',
+        showEnergyFlow: true,
+        showSystemBoundary: true,
+        showFormula: true,
+        showSignConventions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'entropyUniverseIncreaseIrreversibleProcessesArrowOfTimeDiagram': {
+    name: 'Entropy Universe Increase Irreversible Processes Arrow Of Time',
+    category: 'Thermodynamics',
+    subcategory: 'Laws of Thermodynamics',
+    description: 'Diagram illustrating entropy increase in irreversible processes and the arrow of time',
+    type: 'entropy_universe_increase_irreversible_arrow_of_time',
+    defaultOptions: {
+        title: 'Entropy and the Second Law',
+        showEntropyIncrease: true,
+        showIrreversibleProcesses: true,
+        showArrowOfTime: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'carnotCycleFourProcessPVDiagramWithEfficiencyAnnotation': {
+    name: 'Carnot Cycle Four Process PV Diagram With Efficiency Annotation',
+    category: 'Thermodynamics',
+    subcategory: 'Thermodynamic Cycles',
+    description: 'P-V diagram of the Carnot cycle with all four processes and efficiency annotation',
+    type: 'carnot_cycle_four_process_pv_diagram',
+    processes: [
+        { name: 'Isothermal Expansion', type: 'isothermal', color: '#E74C3C' },
+        { name: 'Adiabatic Expansion', type: 'adiabatic', color: '#3498DB' },
+        { name: 'Isothermal Compression', type: 'isothermal', color: '#2ECC71' },
+        { name: 'Adiabatic Compression', type: 'adiabatic', color: '#9B59B6' }
+    ],
+    defaultOptions: {
+        title: 'Carnot Cycle',
+        showPVDiagram: true,
+        showEfficiency: true,
+        showTemperatures: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'refrigeratorHeatPumpEnergyFlowQcQhWorkCOPComparisonDiagram': {
+    name: 'Refrigerator Heat Pump Energy Flow Qc Qh Work COP Comparison',
+    category: 'Thermodynamics',
+    subcategory: 'Thermodynamic Cycles',
+    description: 'Energy flow comparison diagram for refrigerator and heat pump with COP annotations',
+    type: 'refrigerator_heat_pump_energy_flow_cop',
+    defaultOptions: {
+        title: 'Refrigerator vs Heat Pump',
+        showEnergyFlow: true,
+        showQcQhW: true,
+        showCOP: true,
+        showComparison: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thirdLawEntropyApproachingZeroAbsoluteZeroTemperatureCurveDiagram': {
+    name: 'Third Law Entropy Approaching Zero Absolute Zero Temperature Curve',
+    category: 'Thermodynamics',
+    subcategory: 'Laws of Thermodynamics',
+    description: 'Entropy vs temperature curve showing entropy approaching zero as temperature approaches absolute zero',
+    type: 'third_law_entropy_approaching_zero_absolute_zero',
+    defaultOptions: {
+        title: 'Third Law of Thermodynamics',
+        showEntropyTemperatureCurve: true,
+        showAbsoluteZero: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thermodynamicPotentialsUFGHNaturalVariablesLegendreTransformationDiagram': {
+    name: 'Thermodynamic Potentials UFGH Natural Variables Legendre Transformation',
+    category: 'Thermodynamics',
+    subcategory: 'Thermodynamic Potentials',
+    description: 'Diagram of thermodynamic potentials U, F, G, H with natural variables and Legendre transformations',
+    type: 'thermodynamic_potentials_ufgh_legendre',
+    potentials: [
+        { symbol: 'U', name: 'Internal Energy', variables: 'S, V' },
+        { symbol: 'F', name: 'Helmholtz Free Energy', variables: 'T, V' },
+        { symbol: 'G', name: 'Gibbs Free Energy', variables: 'T, P' },
+        { symbol: 'H', name: 'Enthalpy', variables: 'S, P' }
+    ],
+    defaultOptions: {
+        title: 'Thermodynamic Potentials',
+        showNaturalVariables: true,
+        showLegendreTransforms: true,
+        showRelationships: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'pvDiagramIsothermalIsobaricIsochoricAdiabaticProcessPathsAnnotatedDiagram': {
+    name: 'PV Diagram Isothermal Isobaric Isochoric Adiabatic Process Paths Annotated',
+    category: 'Thermodynamics',
+    subcategory: 'Thermodynamic Processes',
+    description: 'Annotated P-V diagram showing isothermal, isobaric, isochoric, and adiabatic process paths',
+    type: 'pv_diagram_four_process_paths_annotated',
+    processes: [
+        { name: 'Isothermal', constant: 'T', color: '#E74C3C', formula: 'PV = const' },
+        { name: 'Isobaric', constant: 'P', color: '#3498DB', formula: 'V/T = const' },
+        { name: 'Isochoric', constant: 'V', color: '#2ECC71', formula: 'P/T = const' },
+        { name: 'Adiabatic', constant: 'Q', color: '#9B59B6', formula: 'PVγ = const' }
+    ],
+    defaultOptions: {
+        title: 'Thermodynamic Process Paths',
+        showPVDiagram: true,
+        showAllProcesses: true,
+        showFormulas: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thermodynamicsApplicationsPowerPlantRefrigerationBiologyInformationInfographic': {
+    name: 'Thermodynamics Applications Power Plant Refrigeration Biology Information Infographic',
+    category: 'Thermodynamics',
+    subcategory: 'Applications',
+    description: 'Infographic of thermodynamics applications in power plants, refrigeration, biology, and information theory',
+    type: 'thermodynamics_applications_infographic',
+    applications: [
+        { domain: 'Power Plants', law: 'Second Law', example: 'steam turbine efficiency' },
+        { domain: 'Refrigeration', law: 'First Law', example: 'heat pump cycle' },
+        { domain: 'Biology', law: 'Second Law', example: 'metabolic entropy' },
+        { domain: 'Information Theory', law: 'Second Law', example: 'Maxwell\'s demon' }
+    ],
+    defaultOptions: {
+        title: 'Thermodynamics Applications',
+        showIcons: true,
+        showLawLinks: true,
+        showDescriptions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== HEAT TRANSFER (ADVANCED) =============================
+// ============================================================
+
+'heatFluxThermalResistanceElectricalAnalogyDeltaTCurrentVoltageDiagram': {
+    name: 'Heat Flux Thermal Resistance Electrical Analogy Delta T Current Voltage',
+    category: 'Heat Transfer',
+    subcategory: 'Conduction',
+    description: 'Diagram showing thermal resistance electrical analogy with ΔT as voltage and heat flux as current',
+    type: 'heat_flux_thermal_resistance_electrical_analogy',
+    analogies: [
+        { thermal: 'Heat Flux (Q̇)', electrical: 'Current (I)' },
+        { thermal: 'Temperature Difference (ΔT)', electrical: 'Voltage (V)' },
+        { thermal: 'Thermal Resistance (R)', electrical: 'Electrical Resistance (R)' }
+    ],
+    defaultOptions: {
+        title: 'Thermal-Electrical Analogy',
+        showAnalogy: true,
+        showCircuitDiagram: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fouriersLawTemperatureGradientSlabCrossSectionHeatFlowAnnotatedDiagram': {
+    name: 'Fouriers Law Temperature Gradient Slab Cross Section Heat Flow Annotated',
+    category: 'Heat Transfer',
+    subcategory: 'Conduction',
+    description: 'Cross-section slab diagram annotated with temperature gradient and heat flow for Fourier\'s Law',
+    type: 'fouriers_law_temperature_gradient_slab_cross_section',
+    defaultOptions: {
+        title: 'Fourier\'s Law of Conduction',
+        showSlabCrossSection: true,
+        showTemperatureGradient: true,
+        showHeatFlowArrow: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'naturalForcedConvectionBoundaryLayerVelocityTemperatureProfileDiagram': {
+    name: 'Natural Forced Convection Boundary Layer Velocity Temperature Profile',
+    category: 'Heat Transfer',
+    subcategory: 'Convection',
+    description: 'Boundary layer velocity and temperature profile diagram for natural and forced convection',
+    type: 'natural_forced_convection_boundary_layer_profiles',
+    convectionTypes: [
+        { type: 'Natural', driver: 'buoyancy', profile: 'curved' },
+        { type: 'Forced', driver: 'external flow', profile: 'boundary layer' }
+    ],
+    defaultOptions: {
+        title: 'Convection Boundary Layers',
+        showVelocityProfile: true,
+        showTemperatureProfile: true,
+        showBothTypes: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'blackbodySpectralEmissivePowerPlancksLawWiensDisplacementAnnotatedCurveDiagram': {
+    name: 'Blackbody Spectral Emissive Power Plancks Law Wiens Displacement Annotated Curve',
+    category: 'Heat Transfer',
+    subcategory: 'Radiation',
+    description: 'Annotated blackbody spectral emissive power curves with Planck\'s Law and Wien\'s displacement law',
+    type: 'blackbody_spectral_emissive_power_plancks_wiens',
+    temperatures: [
+        { value: 3000, color: '#E74C3C', label: '3000 K' },
+        { value: 4000, color: '#E67E22', label: '4000 K' },
+        { value: 5000, color: '#F1C40F', label: '5000 K' },
+        { value: 6000, color: '#FFFFFF', label: '6000 K (Sun)' }
+    ],
+    defaultOptions: {
+        title: 'Blackbody Radiation Spectrum',
+        showPlancksLaw: true,
+        showWiensDisplacement: true,
+        showStefanBoltzmann: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thermalResistanceNetworkSeriesParallelConvectionConductionRadiationWallDiagram': {
+    name: 'Thermal Resistance Network Series Parallel Convection Conduction Radiation Wall',
+    category: 'Heat Transfer',
+    subcategory: 'Conduction',
+    description: 'Thermal resistance network diagram for a wall with series and parallel convection, conduction, and radiation',
+    type: 'thermal_resistance_network_series_parallel_wall',
+    defaultOptions: {
+        title: 'Thermal Resistance Network',
+        showSeriesNetwork: true,
+        showParallelNetwork: true,
+        showAllModes: true,
+        showWallCrossSection: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lumpedCapacitanceExponentialCoolingCurveTimeConstantBiotNumberDiagram': {
+    name: 'Lumped Capacitance Exponential Cooling Curve Time Constant Biot Number',
+    category: 'Heat Transfer',
+    subcategory: 'Transient Heat Transfer',
+    description: 'Exponential cooling curve diagram for lumped capacitance method with time constant and Biot number',
+    type: 'lumped_capacitance_exponential_cooling_biot_number',
+    defaultOptions: {
+        title: 'Lumped Capacitance Model',
+        showCoolingCurve: true,
+        showTimeConstant: true,
+        showBiotNumber: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'heatPipeEvaporatorCondensorWickCapillaryActionOperationCrossSectionDiagram': {
+    name: 'Heat Pipe Evaporator Condensor Wick Capillary Action Operation Cross Section',
+    category: 'Heat Transfer',
+    subcategory: 'Advanced Heat Transfer',
+    description: 'Cross-section diagram of a heat pipe showing evaporator, condenser, wick, and capillary action',
+    type: 'heat_pipe_cross_section_operation',
+    components: ['evaporator_section', 'adiabatic_section', 'condenser_section', 'wick', 'vapour_core'],
+    defaultOptions: {
+        title: 'Heat Pipe Operation',
+        showCrossSection: true,
+        showFluidFlow: true,
+        showCapillaryAction: true,
+        showLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'heatTransferApplicationsBuildingElectronicsAerospaceClimateInfographic': {
+    name: 'Heat Transfer Applications Building Electronics Aerospace Climate Infographic',
+    category: 'Heat Transfer',
+    subcategory: 'Applications',
+    description: 'Infographic of heat transfer applications in building, electronics, aerospace, and climate',
+    type: 'heat_transfer_applications_infographic',
+    applications: [
+        { domain: 'Building', examples: ['wall insulation', 'double glazing', 'underfloor heating'] },
+        { domain: 'Electronics', examples: ['CPU heat sinks', 'thermal paste', 'cooling fans'] },
+        { domain: 'Aerospace', examples: ['re-entry heat shields', 'engine cooling', 'thermal blankets'] },
+        { domain: 'Climate', examples: ['ocean heat uptake', 'albedo effect', 'greenhouse gases'] }
+    ],
+    defaultOptions: {
+        title: 'Heat Transfer Applications',
+        showIcons: true,
+        showDescriptions: true,
+        showModes: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== WAVES — GENERAL ======================================
+// ============================================================
+
+'progressiveWaveEnergyTransferNotMatterDiagram': {
+    name: 'Progressive Wave Energy Transfer Not Matter Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Properties',
+    description: 'Diagram showing a progressive wave transferring energy without net matter transfer',
+    type: 'progressive_wave_energy_transfer_not_matter',
+    defaultOptions: {
+        title: 'Progressive Wave Energy Transfer',
+        showWaveProfile: true,
+        showEnergyFlow: true,
+        showParticleMotion: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'waveAnatomyAmplitudeWavelengthPeriodLabelledDiagram': {
+    name: 'Wave Anatomy Amplitude Wavelength Period Labelled Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Properties',
+    description: 'Labelled diagram of a wave showing amplitude, wavelength, period, crest, and trough',
+    type: 'wave_anatomy_labelled',
+    labels: ['amplitude', 'wavelength', 'period', 'crest', 'trough', 'equilibrium'],
+    defaultOptions: {
+        title: 'Wave Anatomy',
+        showLabels: true,
+        showMeasurements: true,
+        showEquilibrium: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'transverseVsLongitudinalParticleMotionDiagram': {
+    name: 'Transverse vs Longitudinal Particle Motion Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Types',
+    description: 'Side-by-side comparison of transverse and longitudinal wave particle motion',
+    type: 'transverse_vs_longitudinal_particle_motion',
+    defaultOptions: {
+        title: 'Transverse vs Longitudinal Waves',
+        showTransverse: true,
+        showLongitudinal: true,
+        showParticleMotion: true,
+        showWaveDirection: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'displacementTimeAndDisplacementPositionGraphComparison': {
+    name: 'Displacement Time And Displacement Position Graph Comparison',
+    category: 'Waves',
+    subcategory: 'Wave Properties',
+    description: 'Side-by-side comparison of displacement-time and displacement-position graphs for a wave',
+    type: 'displacement_time_and_position_graph_comparison',
+    defaultOptions: {
+        title: 'Wave Graphs Comparison',
+        showDisplacementTime: true,
+        showDisplacementPosition: true,
+        showPeriodAndWavelength: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'waveSpeedTensionDensityStringDiagram': {
+    name: 'Wave Speed Tension Density String Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Properties',
+    description: 'Diagram showing wave speed dependence on tension and linear density for a string',
+    type: 'wave_speed_tension_density_string',
+    defaultOptions: {
+        title: 'Wave Speed on a String',
+        showStringDiagram: true,
+        showFormula: true,
+        showTensionArrows: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'inverseSquareLawPointSourceIntensityDiagram': {
+    name: 'Inverse Square Law Point Source Intensity Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Intensity',
+    description: 'Diagram illustrating the inverse square law for intensity from a point source',
+    type: 'inverse_square_law_point_source_intensity',
+    defaultOptions: {
+        title: 'Inverse Square Law',
+        showPointSource: true,
+        showSphericalWavefronts: true,
+        showIntensityAnnotations: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'malussLawPolaroidAnalyserOrientationDiagram': {
+    name: 'Malus\'s Law Polaroid Analyser Orientation Diagram',
+    category: 'Waves',
+    subcategory: 'Polarisation',
+    description: 'Diagram illustrating Malus\'s Law with polariser and analyser at varying orientations',
+    type: 'maluss_law_polaroid_analyser_orientation',
+    defaultOptions: {
+        title: 'Malus\'s Law',
+        showPolariser: true,
+        showAnalyser: true,
+        showIntensityVariation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'reflectionRefractionDiffractionBoundaryComparisonDiagram': {
+    name: 'Reflection Refraction Diffraction Boundary Comparison Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Behaviour',
+    description: 'Side-by-side comparison of reflection, refraction, and diffraction at boundaries',
+    type: 'reflection_refraction_diffraction_boundary_comparison',
+    defaultOptions: {
+        title: 'Wave Behaviour at Boundaries',
+        showReflection: true,
+        showRefraction: true,
+        showDiffraction: true,
+        showAngles: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dopplerWavefrontCompressionRecessionDiagram': {
+    name: 'Doppler Wavefront Compression Recession Diagram',
+    category: 'Waves',
+    subcategory: 'Doppler Effect',
+    description: 'Wavefront diagram showing compression and recession for the Doppler effect',
+    type: 'doppler_wavefront_compression_recession',
+    defaultOptions: {
+        title: 'Doppler Effect',
+        showMovingSource: true,
+        showCompressedWavefronts: true,
+        showRecedingWavefronts: true,
+        showFrequencyChange: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phaseDifferencePathDifferenceWavelengthFractionDiagram': {
+    name: 'Phase Difference Path Difference Wavelength Fraction Diagram',
+    category: 'Waves',
+    subcategory: 'Wave Properties',
+    description: 'Diagram showing relationship between phase difference, path difference, and wavelength fraction',
+    type: 'phase_difference_path_difference_wavelength_fraction',
+    defaultOptions: {
+        title: 'Phase and Path Difference',
+        showPhaseRelationship: true,
+        showPathDifference: true,
+        showWavelengthFraction: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'diffractionGratingSetupAngleMeasurementDiagram': {
+    name: 'Diffraction Grating Setup Angle Measurement Diagram',
+    category: 'Waves',
+    subcategory: 'Diffraction',
+    description: 'Experimental setup diagram for diffraction grating with angle measurement',
+    type: 'diffraction_grating_setup_angle_measurement',
+    defaultOptions: {
+        title: 'Diffraction Grating Setup',
+        showGrating: true,
+        showIncidentBeam: true,
+        showDiffractedOrders: true,
+        showAngleMeasurement: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ultrasoundEchoSonarDistanceCalculationDiagram': {
+    name: 'Ultrasound Echo Sonar Distance Calculation Diagram',
+    category: 'Waves',
+    subcategory: 'Sound & Ultrasound',
+    description: 'Diagram of ultrasound echo/sonar technique for distance calculation',
+    type: 'ultrasound_echo_sonar_distance_calculation',
+    defaultOptions: {
+        title: 'Ultrasound Echo Sonar',
+        showTransmitter: true,
+        showEchoPulse: true,
+        showTimeDelay: true,
+        showDistanceFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== STATIONARY WAVES =====================================
+// ============================================================
+
+'twoOppositeProgressiveWavesSuperposingToFormStationaryDiagram': {
+    name: 'Two Opposite Progressive Waves Superposing To Form Stationary',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram showing two progressive waves travelling in opposite directions superposing to form a stationary wave',
+    type: 'two_progressive_waves_superposing_stationary',
+    defaultOptions: {
+        title: 'Formation of Stationary Waves',
+        showProgressiveWaves: true,
+        showSuperposition: true,
+        showStationaryWave: true,
+        showAnimationSteps: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nodeAntinodeLambdaHalfSpacingLabelledDiagram': {
+    name: 'Node Antinode Lambda Half Spacing Labelled Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Labelled stationary wave diagram showing nodes, antinodes, and λ/2 spacing',
+    type: 'node_antinode_lambda_half_spacing_labelled',
+    defaultOptions: {
+        title: 'Nodes and Antinodes',
+        showNodes: true,
+        showAntinodes: true,
+        showLambdaHalfSpacing: true,
+        showLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'firstSecondThirdHarmonicStringPatternDiagram': {
+    name: 'First Second Third Harmonic String Pattern Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram showing first, second, and third harmonic standing wave patterns on a string',
+    type: 'first_second_third_harmonic_string_pattern',
+    harmonics: [
+        { order: 1, nodes: 2, antinodes: 1, wavelengthRelation: 'λ = 2L' },
+        { order: 2, nodes: 3, antinodes: 2, wavelengthRelation: 'λ = L' },
+        { order: 3, nodes: 4, antinodes: 3, wavelengthRelation: 'λ = 2L/3' }
+    ],
+    defaultOptions: {
+        title: 'Harmonics on a String',
+        showPatterns: true,
+        showWavelengthRelations: true,
+        showFrequencyRelations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'mersennesLawsTensionLengthFrequencyRelationshipDiagram': {
+    name: 'Mersennes Laws Tension Length Frequency Relationship Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram illustrating Mersenne\'s laws relating tension, length, and frequency of string vibration',
+    type: 'mersennes_laws_tension_length_frequency',
+    laws: [
+        { name: 'Length Law', relation: 'f ∝ 1/L', constant: 'T, μ' },
+        { name: 'Tension Law', relation: 'f ∝ √T', constant: 'L, μ' },
+        { name: 'Density Law', relation: 'f ∝ 1/√μ', constant: 'L, T' }
+    ],
+    defaultOptions: {
+        title: 'Mersenne\'s Laws',
+        showStringDiagram: true,
+        showLaws: true,
+        showFormulas: true,
+        showGraphs: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'openClosedPipeHarmonicDisplacementPressureNodeDiagram': {
+    name: 'Open Closed Pipe Harmonic Displacement Pressure Node Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram comparing harmonics in open and closed pipes with displacement and pressure node positions',
+    type: 'open_closed_pipe_harmonic_displacement_pressure_node',
+    pipeTypes: [
+        { type: 'Open Pipe', harmonics: [1, 2, 3], endCondition: 'antinode at both ends' },
+        { type: 'Closed Pipe', harmonics: [1, 3, 5], endCondition: 'node at closed, antinode at open' }
+    ],
+    defaultOptions: {
+        title: 'Harmonics in Open and Closed Pipes',
+        showDisplacementNodes: true,
+        showPressureNodes: true,
+        showBothPipeTypes: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resonanceCurveDrivingFrequencyAmplitudeQFactorDiagram': {
+    name: 'Resonance Curve Driving Frequency Amplitude Q Factor Diagram',
+    category: 'Waves',
+    subcategory: 'Resonance',
+    description: 'Resonance curve showing amplitude vs driving frequency with Q factor annotation',
+    type: 'resonance_curve_driving_frequency_amplitude_q_factor',
+    dampingLevels: [
+        { label: 'Low damping', qFactor: 'high', color: '#E74C3C' },
+        { label: 'Medium damping', qFactor: 'medium', color: '#3498DB' },
+        { label: 'High damping', qFactor: 'low', color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Resonance Curves',
+        showResonancePeak: true,
+        showQFactor: true,
+        showDampingVariation: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'stationaryWaveKineticPotentialEnergyDistributionDiagram': {
+    name: 'Stationary Wave Kinetic Potential Energy Distribution Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram showing kinetic and potential energy distribution along a stationary wave',
+    type: 'stationary_wave_kinetic_potential_energy_distribution',
+    defaultOptions: {
+        title: 'Energy in Stationary Waves',
+        showWaveProfile: true,
+        showKineticEnergy: true,
+        showPotentialEnergy: true,
+        showNodeAntinode: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'stationaryWaveEquationSpatialTemporalFactorDiagram': {
+    name: 'Stationary Wave Equation Spatial Temporal Factor Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram illustrating the spatial and temporal factors of the stationary wave equation',
+    type: 'stationary_wave_equation_spatial_temporal_factors',
+    defaultOptions: {
+        title: 'Stationary Wave Equation',
+        showEquation: true,
+        showSpatialFactor: true,
+        showTemporalFactor: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chladniPatternSandNodal2DPlatesDiagram': {
+    name: 'Chladni Pattern Sand Nodal 2D Plates Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram of Chladni patterns showing sand accumulating at nodal lines on 2D vibrating plates',
+    type: 'chladni_pattern_sand_nodal_2d_plates',
+    modes: [
+        { m: 1, n: 1, pattern: 'cross' },
+        { m: 2, n: 1, pattern: 'triple_lines' },
+        { m: 2, n: 2, pattern: 'grid' }
+    ],
+    defaultOptions: {
+        title: 'Chladni Patterns',
+        showPlate: true,
+        showSandPatterns: true,
+        showNodalLines: true,
+        showMultipleModes: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'harmonicSpectrumTimbreComparisonFluteViolinDiagram': {
+    name: 'Harmonic Spectrum Timbre Comparison Flute Violin Diagram',
+    category: 'Waves',
+    subcategory: 'Sound',
+    description: 'Harmonic spectrum comparison diagram showing how timbre differs between flute and violin',
+    type: 'harmonic_spectrum_timbre_comparison_flute_violin',
+    instruments: [
+        { name: 'Flute', harmonicStrengths: [1.0, 0.3, 0.1, 0.05], color: '#3498DB' },
+        { name: 'Violin', harmonicStrengths: [1.0, 0.8, 0.6, 0.4], color: '#E74C3C' }
+    ],
+    defaultOptions: {
+        title: 'Harmonic Spectra and Timbre',
+        showHarmonicSpectrum: true,
+        showTimbreComparison: true,
+        showWaveforms: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'rectangularMembrane2DModePatternDiagram': {
+    name: 'Rectangular Membrane 2D Mode Pattern Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram of normal mode patterns for a 2D rectangular membrane',
+    type: 'rectangular_membrane_2d_mode_pattern',
+    modes: [
+        { m: 1, n: 1 }, { m: 1, n: 2 }, { m: 2, n: 1 }, { m: 2, n: 2 }
+    ],
+    defaultOptions: {
+        title: '2D Membrane Mode Patterns',
+        showMembraneOutline: true,
+        showNodalLines: true,
+        showMultipleModes: true,
+        showFrequencyRatios: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'laserCavityStandingEMWaveMirrorResonatorDiagram': {
+    name: 'Laser Cavity Standing EM Wave Mirror Resonator Diagram',
+    category: 'Waves',
+    subcategory: 'Stationary Waves',
+    description: 'Diagram of a laser cavity showing standing EM waves between mirror resonators',
+    type: 'laser_cavity_standing_em_wave_mirror_resonator',
+    components: ['fully_reflective_mirror', 'gain_medium', 'partially_transmissive_mirror', 'standing_em_waves'],
+    defaultOptions: {
+        title: 'Laser Cavity Resonator',
+        showMirrors: true,
+        showStandingWaves: true,
+        showGainMedium: true,
+        showOutputBeam: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== SUPERPOSITION & INTERFERENCE =========================
+// ============================================================
+
+'constructiveDestructiveInterferencePathDifferenceConditionDiagram': {
+    name: 'Constructive Destructive Interference Path Difference Condition Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Diagram showing conditions for constructive and destructive interference in terms of path difference',
+    type: 'constructive_destructive_interference_path_difference',
+    defaultOptions: {
+        title: 'Interference Conditions',
+        showConstructive: true,
+        showDestructive: true,
+        showPathDifferenceConditions: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'youngDoubleSlitFringePatternGeometricDerivationDiagram': {
+    name: 'Young Double Slit Fringe Pattern Geometric Derivation Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Geometric derivation diagram of Young\'s double slit fringe pattern',
+    type: 'young_double_slit_fringe_pattern_geometric_derivation',
+    defaultOptions: {
+        title: 'Young\'s Double Slit Experiment',
+        showSlits: true,
+        showFringePattern: true,
+        showGeometricDerivation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'singleSlitDiffractionIntensityProfileCentralMaximumDiagram': {
+    name: 'Single Slit Diffraction Intensity Profile Central Maximum Diagram',
+    category: 'Waves',
+    subcategory: 'Diffraction',
+    description: 'Intensity profile diagram for single slit diffraction showing central maximum',
+    type: 'single_slit_diffraction_intensity_profile_central_maximum',
+    defaultOptions: {
+        title: 'Single Slit Diffraction',
+        showIntensityProfile: true,
+        showCentralMaximum: true,
+        showMinima: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'diffractionGratingPrincipalMaximaOrderAngleDiagram': {
+    name: 'Diffraction Grating Principal Maxima Order Angle Diagram',
+    category: 'Waves',
+    subcategory: 'Diffraction',
+    description: 'Diagram showing principal maxima orders and angles for a diffraction grating',
+    type: 'diffraction_grating_principal_maxima_order_angle',
+    orders: [-2, -1, 0, 1, 2],
+    defaultOptions: {
+        title: 'Diffraction Grating Orders',
+        showGrating: true,
+        showPrincipalMaxima: true,
+        showOrders: true,
+        showAngles: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thinFilmPhaseChangeReflectionOpticalPathDifferenceDiagram': {
+    name: 'Thin Film Phase Change Reflection Optical Path Difference Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Diagram showing thin film interference with phase changes on reflection and optical path difference',
+    type: 'thin_film_phase_change_reflection_optical_path_difference',
+    defaultOptions: {
+        title: 'Thin Film Interference',
+        showFilmCrossSection: true,
+        showPhaseChanges: true,
+        showOpticalPathDifference: true,
+        showConditions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'twoSpeakerSoundInterferenceConstructiveDestructiveRegionDiagram': {
+    name: 'Two Speaker Sound Interference Constructive Destructive Region Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Diagram showing constructive and destructive interference regions from two speaker sources',
+    type: 'two_speaker_sound_interference_regions',
+    defaultOptions: {
+        title: 'Two-Source Sound Interference',
+        showSpeakers: true,
+        showConstructiveLines: true,
+        showDestructiveLines: true,
+        showPathDifferences: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'phasorPolygonNSlitsResultantAmplitudeDiagram': {
+    name: 'Phasor Polygon N Slits Resultant Amplitude Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Phasor polygon diagram for N slits showing resultant amplitude',
+    type: 'phasor_polygon_n_slits_resultant_amplitude',
+    defaultOptions: {
+        title: 'Phasor Polygon for N Slits',
+        showPhasorDiagram: true,
+        showResultantAmplitude: true,
+        showPhaseAngles: true,
+        showNSlits: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'beatPatternAmplitudeModulationTwoFrequencyDiagram': {
+    name: 'Beat Pattern Amplitude Modulation Two Frequency Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Diagram showing beat pattern from superposition of two close frequencies with amplitude modulation',
+    type: 'beat_pattern_amplitude_modulation_two_frequency',
+    defaultOptions: {
+        title: 'Beat Pattern',
+        showTwoFrequencies: true,
+        showResultantBeat: true,
+        showAmplitudeModulation: true,
+        showBeatFrequency: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'michelsonInterferometerBeamSplitterMirrorPathDiagram': {
+    name: 'Michelson Interferometer Beam Splitter Mirror Path Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Optical path diagram of a Michelson interferometer with beam splitter and mirrors',
+    type: 'michelson_interferometer_beam_splitter_mirror_path',
+    components: ['laser_source', 'beam_splitter', 'fixed_mirror', 'movable_mirror', 'detector'],
+    defaultOptions: {
+        title: 'Michelson Interferometer',
+        showOpticalPath: true,
+        showBeamSplitter: true,
+        showInterferencePattern: true,
+        showLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'braggLawCrystalPlaneXRayReflectionPathDifferenceDiagram': {
+    name: 'Bragg Law Crystal Plane X-Ray Reflection Path Difference Diagram',
+    category: 'Waves',
+    subcategory: 'Diffraction',
+    description: 'Diagram showing Bragg\'s Law with crystal planes, X-ray reflection, and path difference',
+    type: 'bragg_law_crystal_plane_xray_reflection_path_difference',
+    defaultOptions: {
+        title: 'Bragg\'s Law',
+        showCrystalPlanes: true,
+        showXRayReflection: true,
+        showPathDifference: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'noiseCancellingHeadphoneAntiphaseDestructiveInterferenceDiagram': {
+    name: 'Noise Cancelling Headphone Antiphase Destructive Interference Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Diagram illustrating noise cancelling headphone operation via antiphase destructive interference',
+    type: 'noise_cancelling_headphone_antiphase_destructive',
+    defaultOptions: {
+        title: 'Noise Cancelling Headphones',
+        showOriginalNoise: true,
+        showInvertedSignal: true,
+        showDestructiveInterference: true,
+        showHeadphoneDiagram: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'youngExperimentMeasurementFringeWidthSlitSeparationSetupDiagram': {
+    name: 'Young Experiment Measurement Fringe Width Slit Separation Setup Diagram',
+    category: 'Waves',
+    subcategory: 'Superposition',
+    description: 'Experimental setup diagram for Young\'s experiment showing fringe width and slit separation measurement',
+    type: 'young_experiment_measurement_setup',
+    defaultOptions: {
+        title: 'Young\'s Experiment Setup',
+        showFullSetup: true,
+        showFringeWidthMeasurement: true,
+        showSlitSeparation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== SOUND =================================================
+// ============================================================
+
+'soundWaveCompressionRarefactionPressureDisplacementDiagram': {
+    name: 'Sound Wave Compression Rarefaction Pressure Displacement Diagram',
+    category: 'Sound',
+    subcategory: 'Wave Properties',
+    description: 'Diagram showing compressions, rarefactions, and the relationship between pressure and displacement in sound waves',
+    type: 'sound_wave_compression_rarefaction_pressure_displacement',
+    defaultOptions: {
+        title: 'Sound Wave Structure',
+        showCompressions: true,
+        showRarefactions: true,
+        showPressureGraph: true,
+        showDisplacementGraph: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'soundFrequencyAmplitudePitchLoudnessRelationshipDiagram': {
+    name: 'Sound Frequency Amplitude Pitch Loudness Relationship Diagram',
+    category: 'Sound',
+    subcategory: 'Wave Properties',
+    description: 'Diagram showing relationships between frequency, amplitude, pitch, and loudness in sound',
+    type: 'sound_frequency_amplitude_pitch_loudness_relationship',
+    defaultOptions: {
+        title: 'Sound Properties',
+        showFrequencyPitchLink: true,
+        showAmplitudeLoudnessLink: true,
+        showWaveformComparisons: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'speedOfSoundTemperatureDependenceAdiabaticCorrectionDiagram': {
+    name: 'Speed Of Sound Temperature Dependence Adiabatic Correction Diagram',
+    category: 'Sound',
+    subcategory: 'Wave Properties',
+    description: 'Diagram showing temperature dependence of the speed of sound with adiabatic correction',
+    type: 'speed_of_sound_temperature_dependence_adiabatic',
+    defaultOptions: {
+        title: 'Speed of Sound vs Temperature',
+        showTemperatureGraph: true,
+        showAdiabaticFormula: true,
+        showLinearApproximation: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'decibelScaleIntensityLevelCommonSourcesTableDiagram': {
+    name: 'Decibel Scale Intensity Level Common Sources Table Diagram',
+    category: 'Sound',
+    subcategory: 'Sound Intensity',
+    description: 'Decibel scale diagram with intensity levels and common sound sources table',
+    type: 'decibel_scale_intensity_level_common_sources',
+    sources: [
+        { name: 'Threshold of Hearing', dB: 0, intensity: '10⁻¹²' },
+        { name: 'Whisper', dB: 30, intensity: '10⁻⁹' },
+        { name: 'Conversation', dB: 60, intensity: '10⁻⁶' },
+        { name: 'Traffic', dB: 80, intensity: '10⁻⁴' },
+        { name: 'Concert', dB: 110, intensity: '10⁻¹' },
+        { name: 'Threshold of Pain', dB: 130, intensity: '10' }
+    ],
+    defaultOptions: {
+        title: 'Decibel Scale',
+        showScale: true,
+        showSources: true,
+        showFormula: true,
+        showLogRelation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'humanEarAnatomyCochleaOssiclesLabelledCrossSectionDiagram': {
+    name: 'Human Ear Anatomy Cochlea Ossicles Labelled Cross Section Diagram',
+    category: 'Sound',
+    subcategory: 'Hearing',
+    description: 'Labelled cross-section diagram of the human ear showing cochlea, ossicles, and other structures',
+    type: 'human_ear_anatomy_cross_section_labelled',
+    structures: ['pinna', 'ear_canal', 'eardrum', 'malleus', 'incus', 'stapes', 'oval_window', 'cochlea', 'auditory_nerve'],
+    defaultOptions: {
+        title: 'Human Ear Anatomy',
+        showCrossSection: true,
+        showLabels: true,
+        showSoundPath: true,
+        showAmplification: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'openClosedPipeFundamentalHarmonicNodeAntiNodeComparisonDiagram': {
+    name: 'Open Closed Pipe Fundamental Harmonic Node AntiNode Comparison Diagram',
+    category: 'Sound',
+    subcategory: 'Resonance',
+    description: 'Comparison of fundamental harmonics in open and closed pipes with node and antinode positions',
+    type: 'open_closed_pipe_fundamental_node_antinode_comparison',
+    defaultOptions: {
+        title: 'Open vs Closed Pipe Harmonics',
+        showOpenPipe: true,
+        showClosedPipe: true,
+        showNodeAntinode: true,
+        showFrequencyComparison: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'dopplerSoundWavefrontCompressionApproachingRecedingDiagram': {
+    name: 'Doppler Sound Wavefront Compression Approaching Receding Diagram',
+    category: 'Sound',
+    subcategory: 'Doppler Effect',
+    description: 'Sound wavefront diagram showing Doppler compression and recession for approaching and receding source',
+    type: 'doppler_sound_wavefront_compression_approaching_receding',
+    defaultOptions: {
+        title: 'Doppler Effect in Sound',
+        showMovingSource: true,
+        showCompressedWavefronts: true,
+        showRecedingWavefronts: true,
+        showFrequencyFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ultrasoundAScanBScanAcousticImpedancePiezoelectricDiagram': {
+    name: 'Ultrasound A-Scan B-Scan Acoustic Impedance Piezoelectric Diagram',
+    category: 'Sound',
+    subcategory: 'Ultrasound',
+    description: 'Diagram of ultrasound A-scan and B-scan techniques with acoustic impedance and piezoelectric transducer',
+    type: 'ultrasound_a_scan_b_scan_acoustic_impedance_piezoelectric',
+    defaultOptions: {
+        title: 'Ultrasound Imaging Techniques',
+        showAScan: true,
+        showBScan: true,
+        showPiezoelectric: true,
+        showAcousticImpedance: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'infrasoundFrequencyRangeLongWavelengthLowAttenuationDiagram': {
+    name: 'Infrasound Frequency Range Long Wavelength Low Attenuation Diagram',
+    category: 'Sound',
+    subcategory: 'Sound Spectrum',
+    description: 'Diagram showing infrasound frequency range with long wavelength and low attenuation properties',
+    type: 'infrasound_frequency_range_long_wavelength_low_attenuation',
+    defaultOptions: {
+        title: 'Infrasound Properties',
+        showFrequencySpectrum: true,
+        showWavelength: true,
+        showAttenuationComparison: true,
+        showNaturalSources: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'reverberationTimeSabineFormulaRoomVolumeAbsorptionDiagram': {
+    name: 'Reverberation Time Sabine Formula Room Volume Absorption Diagram',
+    category: 'Sound',
+    subcategory: 'Acoustics',
+    description: 'Diagram illustrating reverberation time using Sabine\'s formula with room volume and absorption',
+    type: 'reverberation_time_sabine_formula_room',
+    defaultOptions: {
+        title: 'Reverberation and Sabine\'s Formula',
+        showRoomDiagram: true,
+        showSabineFormula: true,
+        showDecayCurve: true,
+        showAbsorptionMaterials: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fourierHarmonicSeriesTimbreWaveformComparisonDiagram': {
+    name: 'Fourier Harmonic Series Timbre Waveform Comparison Diagram',
+    category: 'Sound',
+    subcategory: 'Sound Analysis',
+    description: 'Diagram showing Fourier harmonic series and how timbre determines waveform shape',
+    type: 'fourier_harmonic_series_timbre_waveform_comparison',
+    waveforms: [
+        { name: 'Sine Wave', harmonics: [1] },
+        { name: 'Square Wave', harmonics: [1, 3, 5, 7] },
+        { name: 'Sawtooth Wave', harmonics: [1, 2, 3, 4, 5] }
+    ],
+    defaultOptions: {
+        title: 'Fourier Series and Timbre',
+        showHarmonicSpectrum: true,
+        showWaveforms: true,
+        showComposition: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resonanceTubeExperimentSetupEndCorrectionMeasurementDiagram': {
+    name: 'Resonance Tube Experiment Setup End Correction Measurement Diagram',
+    category: 'Sound',
+    subcategory: 'Resonance',
+    description: 'Experimental setup diagram for the resonance tube with end correction measurement',
+    type: 'resonance_tube_experiment_setup_end_correction',
+    defaultOptions: {
+        title: 'Resonance Tube Experiment',
+        showTubeSetup: true,
+        showWaterLevel: true,
+        showEndCorrection: true,
+        showMeasurements: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== ELECTROMAGNETIC WAVES & OPTICS =======================
+// ============================================================
+
+'emWaveMutuallyPerpendicularEBFieldPropagationDiagram': {
+    name: 'EM Wave Mutually Perpendicular E B Field Propagation Diagram',
+    category: 'Optics',
+    subcategory: 'Electromagnetic Waves',
+    description: 'Diagram of an EM wave showing mutually perpendicular E and B fields propagating in space',
+    type: 'em_wave_mutually_perpendicular_e_b_field_propagation',
+    defaultOptions: {
+        title: 'Electromagnetic Wave',
+        showEField: true,
+        showBField: true,
+        showPropagationDirection: true,
+        show3DPerspective: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'emSpectrumFrequencyWavelengthPhotonEnergyBandsDiagram': {
+    name: 'EM Spectrum Frequency Wavelength Photon Energy Bands Diagram',
+    category: 'Optics',
+    subcategory: 'Electromagnetic Waves',
+    description: 'Complete EM spectrum diagram with frequency, wavelength, and photon energy bands',
+    type: 'em_spectrum_frequency_wavelength_photon_energy_bands',
+    bands: [
+        { name: 'Radio', wavelengthRange: '>1mm', color: '#E74C3C' },
+        { name: 'Microwave', wavelengthRange: '1mm–1m', color: '#E67E22' },
+        { name: 'Infrared', wavelengthRange: '700nm–1mm', color: '#F39C12' },
+        { name: 'Visible', wavelengthRange: '400–700nm', color: '#F1C40F' },
+        { name: 'Ultraviolet', wavelengthRange: '10–400nm', color: '#9B59B6' },
+        { name: 'X-ray', wavelengthRange: '0.01–10nm', color: '#3498DB' },
+        { name: 'Gamma', wavelengthRange: '<0.01nm', color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Electromagnetic Spectrum',
+        showFrequency: true,
+        showWavelength: true,
+        showPhotonEnergy: true,
+        showBands: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'concaveMirrorRayDiagramFocalPointImageFormationDiagram': {
+    name: 'Concave Mirror Ray Diagram Focal Point Image Formation Diagram',
+    category: 'Optics',
+    subcategory: 'Reflection',
+    description: 'Ray diagram for a concave mirror showing focal point and image formation',
+    type: 'concave_mirror_ray_diagram_focal_point_image',
+    objectPositions: [
+        { position: 'beyond C', imageType: 'real, inverted, diminished' },
+        { position: 'at C', imageType: 'real, inverted, same size' },
+        { position: 'between C and F', imageType: 'real, inverted, magnified' },
+        { position: 'at F', imageType: 'at infinity' },
+        { position: 'inside F', imageType: 'virtual, upright, magnified' }
+    ],
+    defaultOptions: {
+        title: 'Concave Mirror Ray Diagram',
+        showMirror: true,
+        showRays: true,
+        showFocalPoint: true,
+        showImageFormation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'snellsLawAngleIncidenceRefractionRefractiveIndexDiagram': {
+    name: 'Snell\'s Law Angle Incidence Refraction Refractive Index Diagram',
+    category: 'Optics',
+    subcategory: 'Refraction',
+    description: 'Diagram illustrating Snell\'s Law with angles of incidence and refraction and refractive indices',
+    type: 'snells_law_angle_incidence_refraction',
+    defaultOptions: {
+        title: 'Snell\'s Law',
+        showInterface: true,
+        showIncidentRay: true,
+        showRefractedRay: true,
+        showNormal: true,
+        showAngles: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'prismWhiteLightDispersionVioletRedDeviationAngleDiagram': {
+    name: 'Prism White Light Dispersion Violet Red Deviation Angle Diagram',
+    category: 'Optics',
+    subcategory: 'Refraction',
+    description: 'Diagram of white light dispersion through a prism showing violet and red deviation angles',
+    type: 'prism_white_light_dispersion_violet_red',
+    defaultOptions: {
+        title: 'Prism Dispersion',
+        showPrism: true,
+        showWhiteLight: true,
+        showSpectrum: true,
+        showDeviationAngles: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'thinLensRayDiagramConvergingDivergingImageTypesDiagram': {
+    name: 'Thin Lens Ray Diagram Converging Diverging Image Types Diagram',
+    category: 'Optics',
+    subcategory: 'Lenses',
+    description: 'Ray diagrams for converging and diverging thin lenses showing image types',
+    type: 'thin_lens_ray_diagram_converging_diverging',
+    lensTypes: [
+        { type: 'Converging', focalLength: 'positive', imageTypes: ['real/virtual depending on object position'] },
+        { type: 'Diverging', focalLength: 'negative', imageTypes: ['always virtual, upright, diminished'] }
+    ],
+    defaultOptions: {
+        title: 'Thin Lens Ray Diagrams',
+        showConverging: true,
+        showDiverging: true,
+        showImageTypes: true,
+        showPrincipalRays: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'compoundMicroscopeObjectiveEyepieceIntermediateImageDiagram': {
+    name: 'Compound Microscope Objective Eyepiece Intermediate Image Diagram',
+    category: 'Optics',
+    subcategory: 'Optical Instruments',
+    description: 'Ray diagram of a compound microscope showing objective, eyepiece, and intermediate image',
+    type: 'compound_microscope_objective_eyepiece_intermediate_image',
+    components: ['objective_lens', 'intermediate_image', 'eyepiece_lens', 'final_image'],
+    defaultOptions: {
+        title: 'Compound Microscope',
+        showObjectiveLens: true,
+        showEyepieceLens: true,
+        showIntermediateImage: true,
+        showRayPaths: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'rayleighCriterionAiryDiskCircularApertureResolutionDiagram': {
+    name: 'Rayleigh Criterion Airy Disk Circular Aperture Resolution Diagram',
+    category: 'Optics',
+    subcategory: 'Diffraction',
+    description: 'Diagram of the Rayleigh criterion for resolution with Airy disk pattern from a circular aperture',
+    type: 'rayleigh_criterion_airy_disk_circular_aperture',
+    defaultOptions: {
+        title: 'Rayleigh Criterion',
+        showAiryDisk: true,
+        showResolutionLimit: true,
+        showCircularAperture: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'brewstersAngleReflectedPolarisedLightOrientationDiagram': {
+    name: 'Brewster\'s Angle Reflected Polarised Light Orientation Diagram',
+    category: 'Optics',
+    subcategory: 'Polarisation',
+    description: 'Diagram showing Brewster\'s angle with polarisation orientation of reflected and refracted light',
+    type: 'brewsters_angle_reflected_polarised_orientation',
+    defaultOptions: {
+        title: 'Brewster\'s Angle',
+        showIncidentRay: true,
+        showReflectedRay: true,
+        showRefractedRay: true,
+        showPolarisationOrientation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'laserStimulatedEmissionPopulationInversionCavityDiagram': {
+    name: 'Laser Stimulated Emission Population Inversion Cavity Diagram',
+    category: 'Optics',
+    subcategory: 'Lasers',
+    description: 'Diagram of laser operation showing stimulated emission, population inversion, and cavity',
+    type: 'laser_stimulated_emission_population_inversion_cavity',
+    processes: ['absorption', 'spontaneous_emission', 'stimulated_emission', 'population_inversion'],
+    defaultOptions: {
+        title: 'Laser Operation',
+        showEnergyLevels: true,
+        showPopulationInversion: true,
+        showCavity: true,
+        showStimulatedEmission: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'opticalFibreCoreCladdingTotalInternalReflectionCriticalAngleDiagram': {
+    name: 'Optical Fibre Core Cladding Total Internal Reflection Critical Angle Diagram',
+    category: 'Optics',
+    subcategory: 'Refraction',
+    description: 'Cross-section diagram of an optical fibre showing core, cladding, total internal reflection, and critical angle',
+    type: 'optical_fibre_core_cladding_tir_critical_angle',
+    defaultOptions: {
+        title: 'Optical Fibre',
+        showCoreCladding: true,
+        showTotalInternalReflection: true,
+        showCriticalAngle: true,
+        showRayPath: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'luminousFluxIlluminanceLuxInverseSquareLawDiagram': {
+    name: 'Luminous Flux Illuminance Lux Inverse Square Law Diagram',
+    category: 'Optics',
+    subcategory: 'Photometry',
+    description: 'Diagram illustrating luminous flux, illuminance, lux units, and the inverse square law',
+    type: 'luminous_flux_illuminance_lux_inverse_square_law',
+    defaultOptions: {
+        title: 'Photometry',
+        showLuminousFlux: true,
+        showIlluminance: true,
+        showInverseSquareLaw: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== NUCLEAR PHYSICS ======================================
+// ============================================================
+
+'atomicModelHistoricalProgressionDiagram': {
+    name: 'Atomic Model Historical Progression Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Atomic Structure',
+    description: 'Historical progression diagram of atomic models from Thomson to quantum mechanical model',
+    type: 'atomic_model_historical_progression',
+    models: [
+        { name: 'Thomson', year: 1897, description: 'plum pudding model' },
+        { name: 'Rutherford', year: 1911, description: 'nuclear model' },
+        { name: 'Bohr', year: 1913, description: 'planetary model with quantised orbits' },
+        { name: 'Quantum Mechanical', year: 1926, description: 'electron cloud probability model' }
+    ],
+    defaultOptions: {
+        title: 'Atomic Model History',
+        showTimeline: true,
+        showModels: true,
+        showKeyEvidence: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'isotopesIsobarsIsotonesNuclideComparisonChart': {
+    name: 'Isotopes Isobars Isotones Nuclide Comparison Chart',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Structure',
+    description: 'Chart comparing isotopes, isobars, and isotones on a nuclide grid',
+    type: 'isotopes_isobars_isotones_nuclide_comparison',
+    definitions: [
+        { name: 'Isotopes', constant: 'Z', variable: 'N', example: 'C-12, C-13, C-14' },
+        { name: 'Isobars', constant: 'A', variable: 'Z and N', example: 'Ar-40, K-40, Ca-40' },
+        { name: 'Isotones', constant: 'N', variable: 'Z', example: 'C-13, N-14' }
+    ],
+    defaultOptions: {
+        title: 'Isotopes, Isobars, and Isotones',
+        showNuclideGrid: true,
+        showDefinitions: true,
+        showExamples: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nuclearRadiusMassNumberCubicRootScalingGraph': {
+    name: 'Nuclear Radius Mass Number Cubic Root Scaling Graph',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Structure',
+    description: 'Graph showing nuclear radius scaling with A^(1/3) and cubic root relationship',
+    type: 'nuclear_radius_mass_number_cubic_root_scaling',
+    defaultOptions: {
+        title: 'Nuclear Radius vs Mass Number',
+        showGraph: true,
+        showCubicRootRelation: true,
+        showFormula: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'strongWeakElectromagneticGravityForceRangeStrengthComparisonChart': {
+    name: 'Strong Weak Electromagnetic Gravity Force Range Strength Comparison Chart',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Forces',
+    description: 'Comparison chart of the four fundamental forces with range and relative strength',
+    type: 'four_forces_range_strength_comparison_chart',
+    forces: [
+        { name: 'Strong Nuclear', range: '~1 fm', relativeStrength: 1, mediator: 'gluons' },
+        { name: 'Electromagnetic', range: 'infinite', relativeStrength: '10⁻²', mediator: 'photon' },
+        { name: 'Weak Nuclear', range: '~0.001 fm', relativeStrength: '10⁻¹³', mediator: 'W±, Z bosons' },
+        { name: 'Gravity', range: 'infinite', relativeStrength: '10⁻³⁸', mediator: 'graviton (theoretical)' }
+    ],
+    defaultOptions: {
+        title: 'Fundamental Forces',
+        showComparisonChart: true,
+        showRange: true,
+        showStrength: true,
+        showMediators: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bindingEnergyPerNucleonVsMassNumberCurve': {
+    name: 'Binding Energy Per Nucleon vs Mass Number Curve',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Stability',
+    description: 'Binding energy per nucleon curve as a function of mass number with key nuclides annotated',
+    type: 'binding_energy_per_nucleon_vs_mass_number',
+    keyNuclides: [
+        { symbol: 'Fe-56', A: 56, BE: 8.79, label: 'most stable' },
+        { symbol: 'He-4', A: 4, BE: 7.07, label: 'alpha stability' },
+        { symbol: 'U-235', A: 235, BE: 7.59, label: 'fission fuel' },
+        { symbol: 'H-2', A: 2, BE: 1.11, label: 'deuterium' }
+    ],
+    defaultOptions: {
+        title: 'Binding Energy per Nucleon',
+        showCurve: true,
+        showKeyNuclides: true,
+        showFissionFusionRegions: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chartOfNuclidesNeutronProtonStabilityValleyDiagram': {
+    name: 'Chart Of Nuclides Neutron Proton Stability Valley Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Stability',
+    description: 'Nuclide chart showing neutron-proton numbers with valley of stability',
+    type: 'chart_of_nuclides_stability_valley',
+    defaultOptions: {
+        title: 'Chart of Nuclides',
+        showStabilityValley: true,
+        showDecayModes: true,
+        showNeutronProtonAxes: true,
+        showMagicNumbers: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'liquidDropModelVsShellModelComparisonDiagram': {
+    name: 'Liquid Drop Model vs Shell Model Comparison Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Models',
+    description: 'Comparison diagram of the liquid drop model and shell model of the nucleus',
+    type: 'liquid_drop_model_vs_shell_model_comparison',
+    models: [
+        { name: 'Liquid Drop', strengths: ['binding energy', 'fission'], weaknesses: ['magic numbers'] },
+        { name: 'Shell Model', strengths: ['magic numbers', 'spin-parity'], weaknesses: ['large deformations'] }
+    ],
+    defaultOptions: {
+        title: 'Nuclear Model Comparison',
+        showBothModels: true,
+        showStrengths: true,
+        showWeaknesses: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nuclearGroundStateExcitedStateGammaTransitionLevelDiagram': {
+    name: 'Nuclear Ground State Excited State Gamma Transition Level Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Structure',
+    description: 'Nuclear energy level diagram showing ground state, excited states, and gamma transitions',
+    type: 'nuclear_ground_excited_state_gamma_transition_levels',
+    defaultOptions: {
+        title: 'Nuclear Energy Levels',
+        showGroundState: true,
+        showExcitedStates: true,
+        showGammaTransitions: true,
+        showEnergies: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'protonNeutronUudUddQuarkCompositionDiagram': {
+    name: 'Proton Neutron Uud Udd Quark Composition Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Particle Physics',
+    description: 'Diagram showing quark composition (uud, udd) of proton and neutron',
+    type: 'proton_neutron_quark_composition_uud_udd',
+    nucleons: [
+        { name: 'Proton', quarks: ['u', 'u', 'd'], charge: '+1', baryon: '+1' },
+        { name: 'Neutron', quarks: ['u', 'd', 'd'], charge: '0', baryon: '+1' }
+    ],
+    defaultOptions: {
+        title: 'Quark Composition',
+        showQuarks: true,
+        showCharges: true,
+        showGluons: true,
+        showLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'energyUnitConversionJoulesToMeVToAtomicMassUnitChart': {
+    name: 'Energy Unit Conversion Joules To MeV To Atomic Mass Unit Chart',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Quantities',
+    description: 'Conversion chart between Joules, MeV, and atomic mass units for nuclear energy calculations',
+    type: 'energy_unit_conversion_joules_mev_amu',
+    conversions: [
+        { from: '1 u', to_joules: '1.661 × 10⁻²⁷ kg', to_MeV: '931.5 MeV/c²' },
+        { from: '1 MeV', to_joules: '1.602 × 10⁻¹³ J' },
+        { from: '1 J', to_MeV: '6.242 × 10¹² MeV' }
+    ],
+    defaultOptions: {
+        title: 'Nuclear Energy Unit Conversions',
+        showConversionChart: true,
+        showFormulas: true,
+        showExamples: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'becquerelDiscoveryBackgroundRadiationSourcesInfographic': {
+    name: 'Becquerel Discovery Background Radiation Sources Infographic',
+    category: 'Nuclear Physics',
+    subcategory: 'Radioactivity',
+    description: 'Infographic of Becquerel\'s discovery of radioactivity and natural background radiation sources',
+    type: 'becquerel_discovery_background_radiation_infographic',
+    sources: [
+        { name: 'Radon Gas', percentage: 50, color: '#E74C3C' },
+        { name: 'Medical', percentage: 14, color: '#3498DB' },
+        { name: 'Cosmic Rays', percentage: 13, color: '#9B59B6' },
+        { name: 'Food/Drink', percentage: 12, color: '#2ECC71' },
+        { name: 'Ground', percentage: 8, color: '#E67E22' },
+        { name: 'Other', percentage: 3, color: '#95A5A6' }
+    ],
+    defaultOptions: {
+        title: 'Background Radiation Sources',
+        showPieChart: true,
+        showBecquerelDiscovery: true,
+        showSources: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'alphaBetaGammaPenetrationAbsorbersComparisonDiagram': {
+    name: 'Alpha Beta Gamma Penetration Absorbers Comparison Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Radioactivity',
+    description: 'Comparison diagram of alpha, beta, and gamma radiation penetration through various absorbers',
+    type: 'alpha_beta_gamma_penetration_absorbers_comparison',
+    radiationTypes: [
+        { type: 'Alpha (α)', stoppedBy: 'paper / few cm air', ionisation: 'high', range: 'short' },
+        { type: 'Beta (β)', stoppedBy: '3–5 mm aluminium', ionisation: 'medium', range: 'medium' },
+        { type: 'Gamma (γ)', stoppedBy: 'several cm lead', ionisation: 'low', range: 'long' }
+    ],
+    defaultOptions: {
+        title: 'Radiation Penetration',
+        showPenetrationDiagram: true,
+        showAbsorbers: true,
+        showIonisationComparison: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'exponentialDecayCurveNVsTimeWithHalfLifeMarkings': {
+    name: 'Exponential Decay Curve N vs Time With Half Life Markings',
+    category: 'Nuclear Physics',
+    subcategory: 'Radioactive Decay',
+    description: 'Exponential decay curve of N vs time with half-life markings',
+    type: 'exponential_decay_curve_n_vs_time_half_life',
+    defaultOptions: {
+        title: 'Radioactive Decay',
+        showDecayCurve: true,
+        showHalfLifeMarkings: true,
+        showFormula: true,
+        showActivityCurve: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'uranium238DecaySeriesNZChartPathDiagram': {
+    name: 'Uranium 238 Decay Series N-Z Chart Path Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Radioactive Decay',
+    description: 'N-Z chart showing the uranium-238 decay series path to lead-206',
+    type: 'uranium_238_decay_series_nz_chart_path',
+    decayChain: [
+        { symbol: 'U-238', Z: 92, N: 146, decayType: 'α' },
+        { symbol: 'Th-234', Z: 90, N: 144, decayType: 'β⁻' },
+        { symbol: 'Pa-234', Z: 91, N: 143, decayType: 'β⁻' },
+        { symbol: 'U-234', Z: 92, N: 142, decayType: 'α' },
+        { symbol: 'Pb-206', Z: 82, N: 124, decayType: 'stable' }
+    ],
+    defaultOptions: {
+        title: 'Uranium-238 Decay Series',
+        showNZChart: true,
+        showDecayPath: true,
+        showDecayTypes: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'geigerMullerTubeInternalStructureCrossSectionDiagram': {
+    name: 'Geiger Muller Tube Internal Structure Cross Section Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Radiation Detection',
+    description: 'Cross-section diagram of a Geiger-Muller tube showing internal structure and operation',
+    type: 'geiger_muller_tube_internal_cross_section',
+    components: ['cathode_cylinder', 'anode_wire', 'fill_gas', 'mica_window', 'high_voltage_connection'],
+    defaultOptions: {
+        title: 'Geiger-Müller Tube',
+        showCrossSection: true,
+        showComponents: true,
+        showIonisationProcess: true,
+        showLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'deterministicVsStochasticRadiationDoseEffectCurvesDiagram': {
+    name: 'Deterministic vs Stochastic Radiation Dose Effect Curves Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Radiation Biology',
+    description: 'Dose-effect curves comparing deterministic and stochastic radiation effects',
+    type: 'deterministic_vs_stochastic_radiation_dose_effect',
+    effectTypes: [
+        { type: 'Deterministic', threshold: true, examples: 'hair loss, acute radiation syndrome' },
+        { type: 'Stochastic', threshold: false, examples: 'cancer, hereditary effects' }
+    ],
+    defaultOptions: {
+        title: 'Radiation Dose-Effect Relationships',
+        showDeterministicCurve: true,
+        showStochasticCurve: true,
+        showThreshold: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'carbon14AtmosphericProductionDecayEquilibriumCycleDiagram': {
+    name: 'Carbon 14 Atmospheric Production Decay Equilibrium Cycle Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Applications',
+    description: 'Cycle diagram showing carbon-14 atmospheric production, decay, and equilibrium for radiocarbon dating',
+    type: 'carbon_14_atmospheric_production_decay_cycle',
+    defaultOptions: {
+        title: 'Carbon-14 Cycle',
+        showProduction: true,
+        showDecay: true,
+        showEquilibrium: true,
+        showDatingApplication: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'petScanTechnetiumSpectGammaCameraImagingDiagram': {
+    name: 'PET Scan Technetium SPECT Gamma Camera Imaging Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Medical Applications',
+    description: 'Diagram of PET scan and SPECT gamma camera imaging techniques using technetium',
+    type: 'pet_scan_technetium_spect_gamma_camera_imaging',
+    techniques: [
+        { name: 'PET', tracer: 'FDG (F-18)', emission: 'positron annihilation γ pairs' },
+        { name: 'SPECT', tracer: 'Tc-99m', emission: 'single γ' }
+    ],
+    defaultOptions: {
+        title: 'Nuclear Medicine Imaging',
+        showPETSetup: true,
+        showSPECTSetup: true,
+        showGammaCamera: true,
+        showComparison: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'betaThicknessGaugingSourceDetectorProductionLineDiagram': {
+    name: 'Beta Thickness Gauging Source Detector Production Line Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Industrial Applications',
+    description: 'Diagram of beta thickness gauging on a production line with source and detector',
+    type: 'beta_thickness_gauging_source_detector_production_line',
+    defaultOptions: {
+        title: 'Beta Thickness Gauging',
+        showProductionLine: true,
+        showSource: true,
+        showDetector: true,
+        showFeedbackControl: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'lowIntermediateHighLevelWasteClassificationMultiBarrierDisposalDiagram': {
+    name: 'Low Intermediate High Level Waste Classification Multi Barrier Disposal Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Waste',
+    description: 'Diagram classifying low, intermediate, and high-level nuclear waste with multi-barrier disposal strategy',
+    type: 'nuclear_waste_classification_multi_barrier_disposal',
+    wasteClasses: [
+        { level: 'Low', example: 'protective clothing', disposal: 'near-surface burial' },
+        { level: 'Intermediate', example: 'reactor components', disposal: 'deep disposal' },
+        { level: 'High', example: 'spent fuel', disposal: 'deep geological repository' }
+    ],
+    defaultOptions: {
+        title: 'Nuclear Waste Classification',
+        showClassification: true,
+        showMultiBarrier: true,
+        showDisposalMethods: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nuclearReactionGeneralFormXAYBQValueConservationDiagram': {
+    name: 'Nuclear Reaction General Form X A Y B Q Value Conservation Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Diagram showing general form of nuclear reaction X(a,b)Y with Q value and conservation laws',
+    type: 'nuclear_reaction_general_form_q_value_conservation',
+    conservationLaws: ['mass-energy', 'momentum', 'charge', 'baryon number', 'lepton number'],
+    defaultOptions: {
+        title: 'Nuclear Reaction Notation',
+        showGeneralForm: true,
+        showQValue: true,
+        showConservationLaws: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'elasticInelasticCaptureSpallationReactionTypeClassificationChart': {
+    name: 'Elastic Inelastic Capture Spallation Reaction Type Classification Chart',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Classification chart of nuclear reaction types: elastic, inelastic, capture, and spallation',
+    type: 'nuclear_reaction_type_classification_chart',
+    reactionTypes: [
+        { name: 'Elastic Scattering', energyTransfer: 'kinetic only', nucleusChange: 'none' },
+        { name: 'Inelastic Scattering', energyTransfer: 'some to excitation', nucleusChange: 'excited state' },
+        { name: 'Capture', energyTransfer: 'absorbed', nucleusChange: 'compound nucleus formed' },
+        { name: 'Spallation', energyTransfer: 'large', nucleusChange: 'fragmentation' }
+    ],
+    defaultOptions: {
+        title: 'Nuclear Reaction Types',
+        showClassificationChart: true,
+        showExamples: true,
+        showEnergyTransfer: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'reactionCrossSectionEnergyDependenceResonancePeaksDiagram': {
+    name: 'Reaction Cross Section Energy Dependence Resonance Peaks Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Graph of reaction cross section vs energy showing resonance peaks',
+    type: 'reaction_cross_section_energy_resonance_peaks',
+    defaultOptions: {
+        title: 'Reaction Cross Section',
+        showCrossSectionGraph: true,
+        showResonancePeaks: true,
+        showAnnotations: true,
+        showEnergyScale: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bohrCompoundNucleusTwoStageFormationDecayDiagram': {
+    name: 'Bohr Compound Nucleus Two Stage Formation Decay Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Diagram of the Bohr compound nucleus model showing two-stage formation and decay',
+    type: 'bohr_compound_nucleus_two_stage_formation_decay',
+    stages: [
+        { stage: 1, name: 'Formation', process: 'projectile absorbed → compound nucleus' },
+        { stage: 2, name: 'Decay', process: 'compound nucleus → products (independent of formation)' }
+    ],
+    defaultOptions: {
+        title: 'Compound Nucleus Model',
+        showFormationStage: true,
+        showDecayStage: true,
+        showIndependenceHypothesis: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'strippingPickupReactionDeuteronProtonTransferAngularDistributionDiagram': {
+    name: 'Stripping Pickup Reaction Deuteron Proton Transfer Angular Distribution Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Diagram of stripping and pickup reactions with deuteron/proton transfer and angular distribution',
+    type: 'stripping_pickup_reaction_angular_distribution',
+    reactionTypes: [
+        { name: 'Stripping', example: 'd + A → p + B', transfer: 'neutron from deuteron to target' },
+        { name: 'Pickup', example: 'p + A → d + B', transfer: 'neutron from target to projectile' }
+    ],
+    defaultOptions: {
+        title: 'Direct Nuclear Reactions',
+        showReactionDiagram: true,
+        showAngularDistribution: true,
+        showTransferMechanism: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'neutronEnergyClassificationThermalEpithermalFastSpectrumDiagram': {
+    name: 'Neutron Energy Classification Thermal Epithermal Fast Spectrum Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Neutron Physics',
+    description: 'Spectrum diagram classifying neutrons by energy: thermal, epithermal, and fast',
+    type: 'neutron_energy_classification_spectrum',
+    energyClasses: [
+        { name: 'Thermal', energyRange: '<0.025 eV', temperature: '~room temperature' },
+        { name: 'Epithermal', energyRange: '0.025 eV – 1 keV', temperature: 'intermediate' },
+        { name: 'Fast', energyRange: '>1 keV', temperature: 'high' }
+    ],
+    defaultOptions: {
+        title: 'Neutron Energy Classification',
+        showEnergySpectrum: true,
+        showClassifications: true,
+        showCrossSectionVariation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'rutherfordFirstTransmutationNitrogenAlphaOxygenProtonReactionDiagram': {
+    name: 'Rutherford First Transmutation Nitrogen Alpha Oxygen Proton Reaction Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Diagram of Rutherford\'s first artificial transmutation: N-14 + α → O-17 + p',
+    type: 'rutherford_first_transmutation_nitrogen_alpha',
+    reaction: { reactants: ['N-14', 'α (He-4)'], products: ['O-17', 'p'], notation: '¹⁴N(α,p)¹⁷O' },
+    defaultOptions: {
+        title: 'First Artificial Transmutation',
+        showReactionDiagram: true,
+        showConservationCheck: true,
+        showHistoricalContext: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'stellarNucleosynthesisProtonProtonChainCNOCycleTripleAlphaPathwayDiagram': {
+    name: 'Stellar Nucleosynthesis Proton Proton Chain CNO Cycle Triple Alpha Pathway Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Astrophysical Nuclear Physics',
+    description: 'Diagram of stellar nucleosynthesis pathways: pp chain, CNO cycle, and triple-alpha process',
+    type: 'stellar_nucleosynthesis_pp_chain_cno_triple_alpha',
+    pathways: [
+        { name: 'pp Chain', conditions: 'low-mass stars, T < 1.5×10⁷ K', product: 'He-4 from H' },
+        { name: 'CNO Cycle', conditions: 'massive stars, T > 1.5×10⁷ K', product: 'He-4 with C,N,O catalysts' },
+        { name: 'Triple-Alpha', conditions: 'red giants, T > 10⁸ K', product: 'C-12 from He-4' }
+    ],
+    defaultOptions: {
+        title: 'Stellar Nucleosynthesis Pathways',
+        showPPChain: true,
+        showCNOCycle: true,
+        showTripleAlpha: true,
+        showConditions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'cyclotronSynchrotronLinacAcceleratorTypesComparisonDiagram': {
+    name: 'Cyclotron Synchrotron Linac Accelerator Types Comparison Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Particle Accelerators',
+    description: 'Comparison diagram of cyclotron, synchrotron, and linear accelerator (linac) types',
+    type: 'cyclotron_synchrotron_linac_comparison',
+    acceleratorTypes: [
+        { name: 'Cyclotron', path: 'spiral', field: 'constant B', energyLimit: 'classical limit ~20 MeV' },
+        { name: 'Synchrotron', path: 'fixed orbit', field: 'varying B', energyLimit: 'GeV–TeV range' },
+        { name: 'Linac', path: 'linear', field: 'RF fields', energyLimit: 'depends on length' }
+    ],
+    defaultOptions: {
+        title: 'Particle Accelerator Types',
+        showSchematicDiagrams: true,
+        showComparison: true,
+        showEnergyRanges: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'labFrameVersusCentreOfMassFrameKinematicReactionDiagram': {
+    name: 'Lab Frame vs Centre Of Mass Frame Kinematic Reaction Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactions',
+    description: 'Kinematic diagram comparing lab frame and centre-of-mass frame for a nuclear reaction',
+    type: 'lab_frame_vs_centre_of_mass_frame_kinematic',
+    defaultOptions: {
+        title: 'Lab Frame vs CoM Frame',
+        showLabFrame: true,
+        showCoMFrame: true,
+        showVelocityTransformation: true,
+        showThresholdEnergy: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'bindingEnergyPerNucleonFissionFusionEnergyReleaseAnnotatedCurve': {
+    name: 'Binding Energy Per Nucleon Fission Fusion Energy Release Annotated Curve',
+    category: 'Nuclear Physics',
+    subcategory: 'Fission & Fusion',
+    description: 'Annotated binding energy per nucleon curve showing fission and fusion energy release regions',
+    type: 'binding_energy_fission_fusion_annotated_curve',
+    defaultOptions: {
+        title: 'Fission and Fusion on BE Curve',
+        showBECurve: true,
+        showFissionRegion: true,
+        showFusionRegion: true,
+        showEnergyReleaseAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'liquidDropFissionMechanismSaddlePointDeformationSequenceDiagram': {
+    name: 'Liquid Drop Fission Mechanism Saddle Point Deformation Sequence Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Fission',
+    description: 'Sequence diagram of liquid drop fission mechanism showing saddle point and deformation stages',
+    type: 'liquid_drop_fission_saddle_point_deformation',
+    stages: [
+        { stage: 1, shape: 'sphere', description: 'ground state nucleus' },
+        { stage: 2, shape: 'elongated', description: 'deformation begins' },
+        { stage: 3, shape: 'saddle point', description: 'critical deformation' },
+        { stage: 4, shape: 'scission', description: 'nucleus splits' },
+        { stage: 5, shape: 'fragments', description: 'fission products' }
+    ],
+    defaultOptions: {
+        title: 'Liquid Drop Fission Mechanism',
+        showDeformationSequence: true,
+        showPotentialEnergyCurve: true,
+        showSaddlePoint: true,
+        showActivationEnergy: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'subcriticalCriticalSupercriticalChainReactionNeutronMultiplicationDiagram': {
+    name: 'Subcritical Critical Supercritical Chain Reaction Neutron Multiplication Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Fission',
+    description: 'Diagram comparing subcritical, critical, and supercritical neutron chain reactions',
+    type: 'subcritical_critical_supercritical_chain_reaction',
+    conditions: [
+        { name: 'Subcritical', k: '<1', behaviour: 'reaction dies out' },
+        { name: 'Critical', k: '=1', behaviour: 'steady reaction' },
+        { name: 'Supercritical', k: '>1', behaviour: 'exponential growth' }
+    ],
+    defaultOptions: {
+        title: 'Chain Reaction Criticality',
+        showNeutronTrees: true,
+        showMultiplicationFactor: true,
+        showAllConditions: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'pressurizedWaterReactorCoreCoolantSteamGeneratorSchematicDiagram': {
+    name: 'Pressurized Water Reactor Core Coolant Steam Generator Schematic Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Nuclear Reactors',
+    description: 'Schematic diagram of a pressurized water reactor (PWR) with core, coolant loops, and steam generator',
+    type: 'pressurized_water_reactor_schematic',
+    components: ['reactor_core', 'primary_coolant_loop', 'pressurizer', 'steam_generator', 'secondary_loop', 'turbine', 'condenser'],
+    defaultOptions: {
+        title: 'Pressurized Water Reactor (PWR)',
+        showReactorCore: true,
+        showCoolantLoops: true,
+        showSteamGenerator: true,
+        showTurbineGenerator: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'gunTypeVsImplosionFissionWeaponDesignSchematicDiagram': {
+    name: 'Gun Type vs Implosion Fission Weapon Design Schematic Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Weapons Physics',
+    description: 'Schematic comparison of gun-type and implosion fission weapon designs for educational purposes',
+    type: 'gun_type_vs_implosion_fission_weapon_schematic',
+    designTypes: [
+        { name: 'Gun-Type', material: 'U-235', mechanism: 'subcritical masses driven together', efficiency: 'low' },
+        { name: 'Implosion', material: 'Pu-239', mechanism: 'simultaneous inward compression', efficiency: 'high' }
+    ],
+    defaultOptions: {
+        title: 'Fission Weapon Design Types',
+        showGunType: true,
+        showImplosion: true,
+        showCriticalMassConcept: true,
+        educationalContext: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'coulombBarrierQuantumTunnellingGamowPeakFusionCrossSectionDiagram': {
+    name: 'Coulomb Barrier Quantum Tunnelling Gamow Peak Fusion Cross Section Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Fusion',
+    description: 'Diagram showing Coulomb barrier, quantum tunnelling, and the Gamow peak for fusion cross section',
+    type: 'coulomb_barrier_quantum_tunnelling_gamow_peak',
+    defaultOptions: {
+        title: 'Coulomb Barrier and Gamow Peak',
+        showCoulombBarrier: true,
+        showTunnelling: true,
+        showGamowPeak: true,
+        showFusionCrossSection: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'tokamakToroidalPoloidalMagneticFieldPlasmaConfinementCrossSectionDiagram': {
+    name: 'Tokamak Toroidal Poloidal Magnetic Field Plasma Confinement Cross Section Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Fusion',
+    description: 'Cross-section diagram of a tokamak showing toroidal and poloidal magnetic fields and plasma confinement',
+    type: 'tokamak_toroidal_poloidal_field_plasma_confinement',
+    components: ['toroidal_field_coils', 'poloidal_field_coils', 'plasma_torus', 'divertor', 'blanket'],
+    defaultOptions: {
+        title: 'Tokamak Confinement',
+        showToroidalField: true,
+        showPoloidalField: true,
+        showPlasma: true,
+        showCrossSection: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'tellerUlamFissionPrimaryFusionSecondaryTwoStageThermonuclearDiagram': {
+    name: 'Teller Ulam Fission Primary Fusion Secondary Two Stage Thermonuclear Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Weapons Physics',
+    description: 'Two-stage Teller-Ulam thermonuclear device schematic with fission primary and fusion secondary',
+    type: 'teller_ulam_two_stage_thermonuclear_schematic',
+    stages: [
+        { stage: 'Primary', type: 'Fission', role: 'X-ray compression of secondary' },
+        { stage: 'Secondary', type: 'Fusion', role: 'thermonuclear burn' }
+    ],
+    defaultOptions: {
+        title: 'Teller-Ulam Design',
+        showPrimaryStage: true,
+        showSecondaryStage: true,
+        showRadiationImplosion: true,
+        educationalContext: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fissionVsFusionFuelWasteProliferationRiskSafetyComparisonTable': {
+    name: 'Fission vs Fusion Fuel Waste Proliferation Risk Safety Comparison Table',
+    category: 'Nuclear Physics',
+    subcategory: 'Fission & Fusion',
+    description: 'Comparison table of fission vs fusion across fuel, waste, proliferation risk, and safety',
+    type: 'fission_vs_fusion_comparison_table',
+    criteria: ['Fuel', 'Radioactive Waste', 'Proliferation Risk', 'Safety', 'Technology Readiness', 'Energy per Reaction'],
+    defaultOptions: {
+        title: 'Fission vs Fusion Comparison',
+        showComparisonTable: true,
+        showAdvantages: true,
+        showDisadvantages: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nuclearElectricityCarbonFootprintLifecycleComparisonCoalGasWindDiagram': {
+    name: 'Nuclear Electricity Carbon Footprint Lifecycle Comparison Coal Gas Wind Diagram',
+    category: 'Nuclear Physics',
+    subcategory: 'Applications',
+    description: 'Lifecycle carbon footprint comparison of nuclear electricity vs coal, gas, and wind',
+    type: 'nuclear_electricity_carbon_footprint_lifecycle_comparison',
+    sources: [
+        { name: 'Coal', gCO2perKWh: 820, color: '#2C3E50' },
+        { name: 'Natural Gas', gCO2perKWh: 490, color: '#7F8C8D' },
+        { name: 'Nuclear', gCO2perKWh: 12, color: '#E74C3C' },
+        { name: 'Wind', gCO2perKWh: 11, color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'Lifecycle Carbon Emissions',
+        showBarChart: true,
+        showLifecycleStages: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== PARTICLE PHYSICS =====================================
+// ============================================================
+
+'particlePhysicsHistoricalTimelineDiscoveryMilestoneDiagram': {
+    name: 'Particle Physics Historical Timeline Discovery Milestone Diagram',
+    category: 'Particle Physics',
+    subcategory: 'History',
+    description: 'Historical timeline of key particle physics discoveries and milestones',
+    type: 'particle_physics_historical_timeline',
+    milestones: [
+        { year: 1897, event: 'Electron discovered (Thomson)' },
+        { year: 1932, event: 'Positron discovered (Anderson)' },
+        { year: 1964, event: 'Quark model proposed (Gell-Mann)' },
+        { year: 1995, event: 'Top quark discovered (Fermilab)' },
+        { year: 2012, event: 'Higgs boson discovered (CERN)' }
+    ],
+    defaultOptions: {
+        title: 'Particle Physics Timeline',
+        showTimeline: true,
+        showMilestones: true,
+        showImages: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'standardModelThreeGenerationsFermionBosonPeriodicTableDiagram': {
+    name: 'Standard Model Three Generations Fermion Boson Periodic Table Diagram',
+    category: 'Particle Physics',
+    subcategory: 'Standard Model',
+    description: 'Periodic table style diagram of the Standard Model with three generations of fermions and bosons',
+    type: 'standard_model_three_generations_fermion_boson',
+    particles: {
+        quarks: [
+            ['u', 'c', 't'], ['d', 's', 'b']
+        ],
+        leptons: [
+            ['e', 'μ', 'τ'], ['νe', 'νμ', 'ντ']
+        ],
+        bosons: ['γ', 'g', 'W±', 'Z', 'H']
+    },
+    defaultOptions: {
+        title: 'The Standard Model',
+        showFermions: true,
+        showBosons: true,
+        showGenerations: true,
+        showProperties: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'quarkColourChargeConfinementFluxTubeBaryonMesonFormationDiagram': {
+    name: 'Quark Colour Charge Confinement Flux Tube Baryon Meson Formation Diagram',
+    category: 'Particle Physics',
+    subcategory: 'QCD',
+    description: 'Diagram showing quark colour charge, confinement via flux tubes, and baryon/meson formation',
+    type: 'quark_colour_confinement_flux_tube_baryon_meson',
+    hadrons: [
+        { type: 'Baryon', quarks: 3, colourCombination: 'RGB = white' },
+        { type: 'Meson', quarks: 2, colourCombination: 'colour-anticolour = white' }
+    ],
+    defaultOptions: {
+        title: 'Colour Charge and Confinement',
+        showColourCharge: true,
+        showFluxTubes: true,
+        showBaryons: true,
+        showMesons: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'leptonFamilyChargedLeptonNeutrinoMassChargeGenerationDiagram': {
+    name: 'Lepton Family Charged Lepton Neutrino Mass Charge Generation Diagram',
+    category: 'Particle Physics',
+    subcategory: 'Standard Model',
+    description: 'Diagram of the lepton family showing charged leptons, neutrinos, mass, charge, and generation',
+    type: 'lepton_family_charged_neutrino_mass_charge_generation',
+    generations: [
+        { generation: 1, chargedLepton: 'e⁻', neutrino: 'νe', mass: '0.511 MeV/c²' },
+        { generation: 2, chargedLepton: 'μ⁻', neutrino: 'νμ', mass: '105.7 MeV/c²' },
+        { generation: 3, chargedLepton: 'τ⁻', neutrino: 'ντ', mass: '1777 MeV/c²' }
+    ],
+    defaultOptions: {
+        title: 'Lepton Family',
+        showGenerations: true,
+        showMasses: true,
+        showCharges: true,
+        showNeutrinos: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'photonWZGluonHiggsGaugeBosonForceRangeMassSpinComparisonChart': {
+    name: 'Photon W Z Gluon Higgs Gauge Boson Force Range Mass Spin Comparison Chart',
+    category: 'Particle Physics',
+    subcategory: 'Standard Model',
+    description: 'Comparison chart of gauge bosons (photon, W, Z, gluon, Higgs) with force, range, mass, and spin',
+    type: 'gauge_boson_force_range_mass_spin_comparison',
+    bosons: [
+        { name: 'Photon (γ)', force: 'EM', mass: 0, spin: 1, range: 'infinite' },
+        { name: 'W± Boson', force: 'Weak', mass: '80.4 GeV/c²', spin: 1, range: '~10⁻¹⁸ m' },
+        { name: 'Z Boson', force: 'Weak', mass: '91.2 GeV/c²', spin: 1, range: '~10⁻¹⁸ m' },
+        { name: 'Gluon (g)', force: 'Strong', mass: 0, spin: 1, range: '~10⁻¹⁵ m' },
+        { name: 'Higgs (H)', force: 'mass mechanism', mass: '125 GeV/c²', spin: 0, range: 'short' }
+    ],
+    defaultOptions: {
+        title: 'Gauge Bosons',
+        showComparisonChart: true,
+        showForce: true,
+        showRange: true,
+        showMass: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'fourFundamentalForcesStrengthRangeMediatorUnificationEnergyScaleDiagram': {
+    name: 'Four Fundamental Forces Strength Range Mediator Unification Energy Scale Diagram',
+    category: 'Particle Physics',
+    subcategory: 'Fundamental Forces',
+    description: 'Diagram of the four fundamental forces showing strength, range, mediator, and unification energy scale',
+    type: 'four_fundamental_forces_unification_energy_scale',
+    forces: [
+        { name: 'Strong', strength: 1, range: '10⁻¹⁵ m', mediator: 'gluon' },
+        { name: 'Electromagnetic', strength: '10⁻²', range: '∞', mediator: 'photon' },
+        { name: 'Weak', strength: '10⁻⁶', range: '10⁻¹⁸ m', mediator: 'W±, Z' },
+        { name: 'Gravity', strength: '10⁻³⁸', range: '∞', mediator: 'graviton' }
+    ],
+    defaultOptions: {
+        title: 'Four Fundamental Forces',
+        showForceTable: true,
+        showUnificationScale: true,
+        showMediators: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'absoluteVsPartialConservationLawForceApplicabilityComparisonTable': {
+    name: 'Absolute vs Partial Conservation Law Force Applicability Comparison Table',
+    category: 'Particle Physics',
+    subcategory: 'Conservation Laws',
+    description: 'Comparison table of conservation laws showing which are absolute vs partial across the fundamental forces',
+    type: 'conservation_law_force_applicability_table',
+    laws: [
+        { law: 'Energy-Momentum', strong: '✓', em: '✓', weak: '✓', gravity: '✓' },
+        { law: 'Charge', strong: '✓', em: '✓', weak: '✓', gravity: '✓' },
+        { law: 'Baryon Number', strong: '✓', em: '✓', weak: '✓', gravity: '✓' },
+        { law: 'Lepton Number', strong: '✓', em: '✓', weak: '✓', gravity: '✓' },
+        { law: 'Parity (P)', strong: '✓', em: '✓', weak: '✗', gravity: '✓' },
+        { law: 'Strangeness', strong: '✓', em: '✓', weak: '✗', gravity: '-' }
+    ],
+    defaultOptions: {
+        title: 'Conservation Law Applicability',
+        showTable: true,
+        showAbsolute: true,
+        showPartial: true,
+        showViolations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'feynmanDiagramBetaDecayElectronScatteringPairAnnihilationVertexDiagram': {
+    name: 'Feynman Diagram Beta Decay Electron Scattering Pair Annihilation Vertex Diagram',
+    category: 'Particle Physics',
+    subcategory: 'Feynman Diagrams',
+    description: 'Feynman diagrams for beta decay, electron scattering, and pair annihilation with vertex notation',
+    type: 'feynman_diagram_beta_decay_scattering_annihilation',
+    processes: [
+        { name: 'Beta Minus Decay', mediator: 'W⁻', vertices: 2 },
+        { name: 'Electron-Positron Scattering', mediator: 'γ', vertices: 2 },
+        { name: 'Pair Annihilation', mediator: 'γγ', vertices: 2 }
+    ],
+    defaultOptions: {
+        title: 'Feynman Diagrams',
+        showBetaDecay: true,
+        showScattering: true,
+        showPairAnnihilation: true,
+        showVertexLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'particleAntimatterPairProductionAnnihilationTwoPhotonDiagram': {
+    name: 'Particle Antimatter Pair Production Annihilation Two Photon Diagram',
+    category: 'Particle Physics',
+    subcategory: 'Antimatter',
+    description: 'Diagram of particle-antiparticle pair production and annihilation to two photons',
+    type: 'pair_production_annihilation_two_photon',
+    processes: [
+        { name: 'Pair Production', input: 'γ → e⁺ + e⁻', energyCondition: 'hf ≥ 2mec²' },
+        { name: 'Pair Annihilation', input: 'e⁺ + e⁻ → 2γ', energyOutput: '2 × 0.511 MeV γ rays' }
+    ],
+    defaultOptions: {
+        title: 'Pair Production and Annihilation',
+        showPairProduction: true,
+        showAnnihilation: true,
+        showEnergyConditions: true,
+        showConservationCheck: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'supersymmetryDarkMatterCandidateGUTCouplingUnificationEnergyScaleDiagram': {
+    name: 'Supersymmetry Dark Matter Candidate GUT Coupling Unification Energy Scale Diagram',
+    category: 'Particle Physics',
+    subcategory: 'Beyond Standard Model',
+    description: 'Diagram showing SUSY dark matter candidates, GUT coupling constant unification at high energy scales',
+    type: 'susy_dark_matter_gut_coupling_unification',
+    defaultOptions: {
+        title: 'Supersymmetry and GUT Unification',
+        showCouplingRunning: true,
+        showUnificationScale: true,
+        showSUSYParticles: true,
+        showDarkMatterCandidate: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== ELECTRICITY — CURRENT & CHARGE =======================
+// ============================================================
+
+'atomicStructureChargeOriginDiagram': {
+    name: 'Atomic Structure Charge Origin Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Electric Charge',
+    description: 'Diagram showing atomic structure as the origin of electric charge with protons and electrons',
+    type: 'atomic_structure_charge_origin',
+    defaultOptions: {
+        title: 'Atomic Structure and Charge',
+        showAtom: true,
+        showProtons: true,
+        showElectrons: true,
+        showChargeLabels: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'conventionalCurrentVsElectronFlowDiagram': {
+    name: 'Conventional Current vs Electron Flow Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current',
+    description: 'Diagram comparing conventional current direction and actual electron flow direction',
+    type: 'conventional_current_vs_electron_flow',
+    defaultOptions: {
+        title: 'Conventional Current vs Electron Flow',
+        showConventionalCurrent: true,
+        showElectronFlow: true,
+        showWire: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'driftVelocityCarrierSweptVolumeDiagram': {
+    name: 'Drift Velocity Carrier Swept Volume Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current',
+    description: 'Diagram illustrating drift velocity and the swept volume concept for current carriers',
+    type: 'drift_velocity_carrier_swept_volume',
+    defaultOptions: {
+        title: 'Drift Velocity',
+        showConductor: true,
+        showDriftVelocity: true,
+        showSweptVolume: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ammeterSeriesConnectionCircuitDiagram': {
+    name: 'Ammeter Series Connection Circuit Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current',
+    description: 'Circuit diagram showing correct series connection of an ammeter',
+    type: 'ammeter_series_connection_circuit',
+    defaultOptions: {
+        title: 'Ammeter Series Connection',
+        showCircuit: true,
+        showAmmeter: true,
+        showSeriesConnection: true,
+        showCurrentArrows: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chargeCurrentTimeTriangleFormulaDiagram': {
+    name: 'Charge Current Time Triangle Formula Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current',
+    description: 'Formula triangle diagram relating charge, current, and time (Q = It)',
+    type: 'charge_current_time_triangle_formula',
+    defaultOptions: {
+        title: 'Q = It Formula Triangle',
+        showTriangle: true,
+        showFormula: true,
+        showUnits: true,
+        showRearrangements: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kclJunctionCurrentArrowsDiagram': {
+    name: 'KCL Junction Current Arrows Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Laws',
+    description: 'Junction diagram illustrating Kirchhoff\'s Current Law with current arrows',
+    type: 'kcl_junction_current_arrows',
+    defaultOptions: {
+        title: 'Kirchhoff\'s Current Law',
+        showJunction: true,
+        showCurrentArrows: true,
+        showSummation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'currentTimeGraphAreaAsChargeDiagram': {
+    name: 'Current Time Graph Area As Charge Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current',
+    description: 'Current vs time graph showing that the area under the curve represents charge',
+    type: 'current_time_graph_area_as_charge',
+    defaultOptions: {
+        title: 'Current-Time Graph',
+        showITGraph: true,
+        showAreaShading: true,
+        showChargeAnnotation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'currentDensityVectorFieldCrossSectionDiagram': {
+    name: 'Current Density Vector Field Cross Section Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current',
+    description: 'Cross-section diagram of a conductor showing current density as a vector field',
+    type: 'current_density_vector_field_cross_section',
+    defaultOptions: {
+        title: 'Current Density',
+        showConductorCrossSection: true,
+        showVectorField: true,
+        showFormula: true,
+        showUniformDistribution: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'electroplatingElectrolysisCurrentMassDiagram': {
+    name: 'Electroplating Electrolysis Current Mass Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Current Applications',
+    description: 'Diagram of electroplating and electrolysis showing current-mass relationship (Faraday\'s laws)',
+    type: 'electroplating_electrolysis_current_mass',
+    defaultOptions: {
+        title: 'Electroplating and Electrolysis',
+        showElectrolysisSetup: true,
+        showIonMovement: true,
+        showFaradaysLaw: true,
+        showMassCurrentRelation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== ELECTRICITY — POTENTIAL & EMF ========================
+// ============================================================
+
+'electricPotentialEnergyGravitationalAnalogyDiagram': {
+    name: 'Electric Potential Energy Gravitational Analogy Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Electric Potential',
+    description: 'Diagram comparing electric potential energy to gravitational potential energy as an analogy',
+    type: 'electric_potential_energy_gravitational_analogy',
+    defaultOptions: {
+        title: 'Electric vs Gravitational Potential',
+        showGravitationalAnalogy: true,
+        showElectricVersion: true,
+        showEnergyLevels: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'voltmeterParallelConnectionPotentialDividerDiagram': {
+    name: 'Voltmeter Parallel Connection Potential Divider Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Electric Potential',
+    description: 'Circuit diagram showing voltmeter in parallel connection and potential divider arrangement',
+    type: 'voltmeter_parallel_connection_potential_divider',
+    defaultOptions: {
+        title: 'Voltmeter and Potential Divider',
+        showVoltmeter: true,
+        showParallelConnection: true,
+        showPotentialDivider: true,
+        showVoltageAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'emfVsTerminalVoltageBatteryCircuitDiagram': {
+    name: 'EMF vs Terminal Voltage Battery Circuit Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'EMF & Internal Resistance',
+    description: 'Battery circuit diagram comparing EMF and terminal voltage with internal resistance',
+    type: 'emf_vs_terminal_voltage_battery_circuit',
+    defaultOptions: {
+        title: 'EMF and Terminal Voltage',
+        showBatteryCircuit: true,
+        showInternalResistance: true,
+        showEMF: true,
+        showTerminalVoltage: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'terminalVoltageVsCurrentVIGraphInternalResistanceDiagram': {
+    name: 'Terminal Voltage vs Current V-I Graph Internal Resistance Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'EMF & Internal Resistance',
+    description: 'V-I graph showing terminal voltage vs current with gradient as internal resistance',
+    type: 'terminal_voltage_vs_current_vi_internal_resistance',
+    defaultOptions: {
+        title: 'Terminal Voltage vs Current',
+        showVIGraph: true,
+        showGradient: true,
+        showInternalResistance: true,
+        showShortCircuitPoint: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'powerEnergyFormulaeSourceEfficiencyDiagram': {
+    name: 'Power Energy Formulae Source Efficiency Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Diagram showing power and energy formulae for electrical sources with efficiency calculation',
+    type: 'power_energy_formulae_source_efficiency',
+    defaultOptions: {
+        title: 'Power, Energy and Efficiency',
+        showFormulaeSet: true,
+        showEfficiencyFormula: true,
+        showSankeyDiagram: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kvlClosedLoopPotentialRisesDropsDiagram': {
+    name: 'KVL Closed Loop Potential Rises Drops Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Laws',
+    description: 'Closed loop circuit diagram illustrating Kirchhoff\'s Voltage Law with potential rises and drops',
+    type: 'kvl_closed_loop_potential_rises_drops',
+    defaultOptions: {
+        title: 'Kirchhoff\'s Voltage Law',
+        showClosedLoop: true,
+        showPotentialRises: true,
+        showPotentialDrops: true,
+        showSummation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chargedParticleAccelerationThroughPotentialDifferenceDiagram': {
+    name: 'Charged Particle Acceleration Through Potential Difference Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Electric Potential',
+    description: 'Diagram of a charged particle accelerated through a potential difference',
+    type: 'charged_particle_acceleration_potential_difference',
+    defaultOptions: {
+        title: 'Particle Acceleration',
+        showParticle: true,
+        showElectricField: true,
+        showPotentialDifference: true,
+        showEnergyFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== ELECTRICITY — RESISTANCE =============================
+// ============================================================
+
+'ohmsLawVIProportionalityGraphDiagram': {
+    name: 'Ohm\'s Law V-I Proportionality Graph Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Resistance',
+    description: 'V-I proportionality graph illustrating Ohm\'s Law for a resistor',
+    type: 'ohms_law_vi_proportionality_graph',
+    defaultOptions: {
+        title: 'Ohm\'s Law V-I Graph',
+        showVIGraph: true,
+        showProportionality: true,
+        showGradientAsResistance: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ivCharacteristicsCurvesResistorLampDiodeDiagram': {
+    name: 'I-V Characteristics Curves Resistor Lamp Diode Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Resistance',
+    description: 'I-V characteristic curves for a resistor, lamp, and diode on the same axes',
+    type: 'iv_characteristics_resistor_lamp_diode',
+    components: [
+        { name: 'Ohmic Resistor', shape: 'straight line through origin', color: '#3498DB' },
+        { name: 'Filament Lamp', shape: 'decreasing gradient curve', color: '#E74C3C' },
+        { name: 'Diode', shape: 'exponential forward, zero reverse', color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'I-V Characteristics',
+        showResistor: true,
+        showLamp: true,
+        showDiode: true,
+        showComparison: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resistanceLengthAreaTemperatureMaterialFactorsDiagram': {
+    name: 'Resistance Length Area Temperature Material Factors Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Resistance',
+    description: 'Diagram showing how length, cross-sectional area, temperature, and material affect resistance',
+    type: 'resistance_factors_length_area_temperature_material',
+    factors: [
+        { factor: 'Length', relation: 'R ∝ L', direction: 'proportional' },
+        { factor: 'Cross-sectional Area', relation: 'R ∝ 1/A', direction: 'inversely proportional' },
+        { factor: 'Temperature', relation: 'R increases with T (metals)', direction: 'positive for metals' },
+        { factor: 'Material (ρ)', relation: 'R = ρL/A', direction: 'material dependent' }
+    ],
+    defaultOptions: {
+        title: 'Factors Affecting Resistance',
+        showFactorDiagrams: true,
+        showRelationships: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resistivityGeometryDerivationCubeDiagram': {
+    name: 'Resistivity Geometry Derivation Cube Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Resistance',
+    description: 'Cube geometry diagram for deriving the relationship between resistance and resistivity',
+    type: 'resistivity_geometry_derivation_cube',
+    defaultOptions: {
+        title: 'Resistivity Derivation',
+        showCubeGeometry: true,
+        showLengthArea: true,
+        showFormula: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'resistanceTemperatureGraphMetalSemiconductorSuperconductorDiagram': {
+    name: 'Resistance Temperature Graph Metal Semiconductor Superconductor Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Resistance',
+    description: 'R-T graph comparing resistance vs temperature behaviour for metal, semiconductor, and superconductor',
+    type: 'resistance_temperature_graph_metal_semiconductor_superconductor',
+    materials: [
+        { type: 'Metal', behaviour: 'linear increase with T', color: '#3498DB' },
+        { type: 'Semiconductor', behaviour: 'exponential decrease with T', color: '#E74C3C' },
+        { type: 'Superconductor', behaviour: 'drops to zero at Tc', color: '#2ECC71' }
+    ],
+    defaultOptions: {
+        title: 'R-T Behaviour of Materials',
+        showMetalCurve: true,
+        showSemiconductorCurve: true,
+        showSuperconductorCurve: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'seriesParallelResistorNetworkEquivalentDiagram': {
+    name: 'Series Parallel Resistor Network Equivalent Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Diagram of series and parallel resistor networks with equivalent resistance calculation',
+    type: 'series_parallel_resistor_network_equivalent',
+    defaultOptions: {
+        title: 'Series and Parallel Resistors',
+        showSeriesNetwork: true,
+        showParallelNetwork: true,
+        showEquivalentCircuits: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'conductivityResistivityReciprocalRelationshipDiagram': {
+    name: 'Conductivity Resistivity Reciprocal Relationship Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Resistance',
+    description: 'Diagram showing the reciprocal relationship between electrical conductivity and resistivity',
+    type: 'conductivity_resistivity_reciprocal_relationship',
+    defaultOptions: {
+        title: 'Conductivity and Resistivity',
+        showReciprocal: true,
+        showFormula: true,
+        showMaterialComparison: true,
+        showUnits: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'wheatstoneBalanceBridgeCircuitDiagram': {
+    name: 'Wheatstone Balance Bridge Circuit Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Wheatstone bridge circuit diagram at balance condition',
+    type: 'wheatstone_balance_bridge_circuit',
+    defaultOptions: {
+        title: 'Wheatstone Bridge',
+        showDiamondLayout: true,
+        showBalanceCondition: true,
+        showGalvanometer: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'circuitTopologyNodesBranchesLoopsDiagram': {
+    name: 'Circuit Topology Nodes Branches Loops Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Diagram illustrating circuit topology terminology: nodes, branches, and loops',
+    type: 'circuit_topology_nodes_branches_loops',
+    defaultOptions: {
+        title: 'Circuit Topology',
+        showNodes: true,
+        showBranches: true,
+        showLoops: true,
+        showLabelledCircuit: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'seriesCircuitCurrentVoltageSharingDiagram': {
+    name: 'Series Circuit Current Voltage Sharing Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Diagram showing current and voltage sharing in a series circuit',
+    type: 'series_circuit_current_voltage_sharing',
+    defaultOptions: {
+        title: 'Series Circuit',
+        showSeriesCircuit: true,
+        showCurrentSharing: true,
+        showVoltageSharing: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'parallelCircuitCurrentDivisionBranchesDiagram': {
+    name: 'Parallel Circuit Current Division Branches Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Diagram showing current division across branches in a parallel circuit',
+    type: 'parallel_circuit_current_division_branches',
+    defaultOptions: {
+        title: 'Parallel Circuit',
+        showParallelCircuit: true,
+        showCurrentDivision: true,
+        showVoltageSame: true,
+        showAnnotations: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kirchhoffKclKvlTwoLoopLabelledCircuitDiagram': {
+    name: 'Kirchhoff KCL KVL Two Loop Labelled Circuit Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Laws',
+    description: 'Labelled two-loop circuit diagram demonstrating both KCL and KVL',
+    type: 'kirchhoff_kcl_kvl_two_loop_labelled_circuit',
+    defaultOptions: {
+        title: 'Kirchhoff\'s Laws Applied',
+        showTwoLoopCircuit: true,
+        showKCLJunction: true,
+        showKVLLoops: true,
+        showLabelledCurrents: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'potentialDividerLoadedUnloadedOutputVoltageDiagram': {
+    name: 'Potential Divider Loaded Unloaded Output Voltage Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Potential divider circuit diagram comparing loaded and unloaded output voltages',
+    type: 'potential_divider_loaded_unloaded_output',
+    defaultOptions: {
+        title: 'Potential Divider',
+        showUnloadedDivider: true,
+        showLoadedDivider: true,
+        showOutputVoltageComparison: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'wheatstoneBridgeDiamondLayoutBalanceConditionDiagram': {
+    name: 'Wheatstone Bridge Diamond Layout Balance Condition Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Wheatstone bridge in diamond layout with balance condition annotation',
+    type: 'wheatstone_bridge_diamond_layout_balance',
+    defaultOptions: {
+        title: 'Wheatstone Bridge Balance',
+        showDiamondLayout: true,
+        showBalanceCondition: true,
+        showRatioFormula: true,
+        showUnknownResistance: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'ammeterVoltmeterLoadingEffectCircuitDiagram': {
+    name: 'Ammeter Voltmeter Loading Effect Circuit Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Circuit diagram illustrating the loading effect of ammeter and voltmeter in a circuit',
+    type: 'ammeter_voltmeter_loading_effect_circuit',
+    defaultOptions: {
+        title: 'Meter Loading Effects',
+        showAmmeterLoading: true,
+        showVoltmeterLoading: true,
+        showIdealVsReal: true,
+        showImpedanceEffect: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'maximumPowerTransferPvsRCurveDiagram': {
+    name: 'Maximum Power Transfer P vs R Curve Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'P vs R curve showing maximum power transfer theorem with peak at R_load = r',
+    type: 'maximum_power_transfer_p_vs_r_curve',
+    defaultOptions: {
+        title: 'Maximum Power Transfer',
+        showPVsRCurve: true,
+        showMaximumPoint: true,
+        showMatchedCondition: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'theveninNortonEquivalentCircuitTransformationDiagram': {
+    name: 'Thevenin Norton Equivalent Circuit Transformation Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Circuit Analysis',
+    description: 'Diagram showing Thevenin and Norton equivalent circuit transformation',
+    type: 'thevenin_norton_equivalent_circuit_transformation',
+    defaultOptions: {
+        title: 'Thevenin-Norton Equivalents',
+        showTheveninCircuit: true,
+        showNortonCircuit: true,
+        showTransformation: true,
+        showFormulas: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== ELECTRICITY — POWER & ENERGY =========================
+// ============================================================
+
+'workDoneByChargePotentialDifferenceEnergyDiagram': {
+    name: 'Work Done By Charge Potential Difference Energy Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Diagram illustrating work done by charge moving through a potential difference',
+    type: 'work_done_charge_potential_difference_energy',
+    defaultOptions: {
+        title: 'Work Done by Charge',
+        showChargeMovement: true,
+        showPotentialDifference: true,
+        showWorkFormula: true,
+        showEnergyAnnotation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'powerFormulaTriangleIVRI2RV2RDiagram': {
+    name: 'Power Formula Triangle I V R I2R V2R Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Formula triangle and derivations for electrical power: P=IV, P=I²R, P=V²/R',
+    type: 'power_formula_triangle_iv_r_i2r_v2r',
+    defaultOptions: {
+        title: 'Power Formulae',
+        showFormulaeTriangle: true,
+        showAllThreeForms: true,
+        showDerivations: true,
+        showUnits: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'jouleHeatingElectronLatticeCollisionMechanismDiagram': {
+    name: 'Joule Heating Electron Lattice Collision Mechanism Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Microscopic mechanism diagram of Joule heating via electron-lattice collisions',
+    type: 'joule_heating_electron_lattice_collision',
+    defaultOptions: {
+        title: 'Joule Heating Mechanism',
+        showElectrons: true,
+        showLattice: true,
+        showCollisions: true,
+        showHeatGeneration: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'sankeyDiagramUsefulWastedEnergyFlowDiagram': {
+    name: 'Sankey Diagram Useful Wasted Energy Flow Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Sankey diagram showing useful and wasted energy flows for an electrical device',
+    type: 'sankey_diagram_useful_wasted_energy',
+    defaultOptions: {
+        title: 'Energy Flow Sankey Diagram',
+        showInputEnergy: true,
+        showUsefulOutput: true,
+        showWastedHeat: true,
+        showEfficiency: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'kilowattHourElectricityMeterReadingCostDiagram': {
+    name: 'Kilowatt Hour Electricity Meter Reading Cost Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Diagram explaining kilowatt-hour units, electricity meter reading, and cost calculation',
+    type: 'kilowatt_hour_meter_reading_cost',
+    defaultOptions: {
+        title: 'Kilowatt-Hour and Electricity Cost',
+        showKWhDefinition: true,
+        showMeterReading: true,
+        showCostCalculation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'nationalGridStepUpStepDownTransformerVoltageDiagram': {
+    name: 'National Grid Step Up Step Down Transformer Voltage Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'AC & Transformers',
+    description: 'Diagram of the national grid showing step-up and step-down transformers and voltage levels',
+    type: 'national_grid_step_up_step_down_transformer',
+    stages: [
+        { stage: 'Power Station', voltage: '25 kV' },
+        { stage: 'Step-Up Transformer', voltage: '400 kV' },
+        { stage: 'Transmission Lines', voltage: '400 kV', reason: 'low current, low power loss' },
+        { stage: 'Step-Down Transformer', voltage: '33 kV → 230 V' },
+        { stage: 'Consumer', voltage: '230 V' }
+    ],
+    defaultOptions: {
+        title: 'National Grid',
+        showFullGrid: true,
+        showTransformers: true,
+        showVoltages: true,
+        showPowerLossAnnotation: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'acPeakRmsVoltageSinusoidalWaveformDiagram': {
+    name: 'AC Peak Rms Voltage Sinusoidal Waveform Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'AC & Transformers',
+    description: 'Sinusoidal AC waveform diagram annotated with peak and RMS voltage values',
+    type: 'ac_peak_rms_voltage_sinusoidal_waveform',
+    defaultOptions: {
+        title: 'AC Voltage Waveform',
+        showSinusoidalWaveform: true,
+        showPeakVoltage: true,
+        showRMSVoltage: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'renewableVsFossilFuelEfficiencyComparisonSankeyDiagram': {
+    name: 'Renewable vs Fossil Fuel Efficiency Comparison Sankey Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Power & Energy',
+    description: 'Sankey diagram comparing energy efficiency of renewable and fossil fuel electricity generation',
+    type: 'renewable_vs_fossil_fuel_efficiency_sankey',
+    sources: [
+        { name: 'Coal Power Plant', efficiency: 0.35, waste: 0.65 },
+        { name: 'Natural Gas CCGT', efficiency: 0.55, waste: 0.45 },
+        { name: 'Solar PV', efficiency: 0.20, waste: 0.80 },
+        { name: 'Wind Turbine', efficiency: 0.40, waste: 0.60 }
+    ],
+    defaultOptions: {
+        title: 'Energy Source Efficiency',
+        showSankeyDiagram: true,
+        showEfficiencyComparison: true,
+        showWasteHeat: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+// ============================================================
+// ===== CAPACITANCE ==========================================
+// ============================================================
+
+'capacitorPlatesDielectricElectricFieldChargeSeparationDiagram': {
+    name: 'Capacitor Plates Dielectric Electric Field Charge Separation Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Capacitance',
+    description: 'Cross-section diagram of a capacitor with plates, dielectric, electric field, and charge separation',
+    type: 'capacitor_plates_dielectric_electric_field',
+    defaultOptions: {
+        title: 'Capacitor Structure',
+        showPlates: true,
+        showDielectric: true,
+        showElectricField: true,
+        showCharges: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'chargeVoltageQVGraphGradientAsCapacitanceDiagram': {
+    name: 'Charge Voltage Q-V Graph Gradient As Capacitance Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Capacitance',
+    description: 'Q-V graph with gradient equal to capacitance for a capacitor',
+    type: 'charge_voltage_qv_graph_gradient_capacitance',
+    defaultOptions: {
+        title: 'Q-V Graph for Capacitance',
+        showQVGraph: true,
+        showGradient: true,
+        showCapacitanceFormula: true,
+        showAreaAsEnergy: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+'parallelPlateCapacitorPermittivityAreaSeparationDiagram': {
+    name: 'Parallel Plate Capacitor Permittivity Area Separation Diagram',
+    category: 'Electricity & Magnetism',
+    subcategory: 'Capacitance',
+    description: 'Diagram of a parallel plate capacitor showing permittivity, plate area, and separation factors',
+    type: 'parallel_plate_capacitor_permittivity_area_separation',
+    defaultOptions: {
+        title: 'Parallel Plate Capacitor',
+        showPlates: true,
+        showPermittivity: true,
+        showAreaSeparation: true,
+        showFormula: true,
+        width: 800,
+        height: 600,
+        backgroundColor: '#ffffff'
+    }
+},
+
+
 
         // ============================================================
         // ===== MECHANICS — EXISTING ENTRIES (unchanged) =============
