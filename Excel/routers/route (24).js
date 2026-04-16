@@ -1,3 +1,5 @@
+//api/workbook/visualization/gallery/route.js
+
 import { NextResponse } from 'next/server'
 import serverWorkbookManager from '@/lib/workbookManager.server'
 import fs from 'fs'
