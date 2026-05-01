@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Circulatory System - Scientific Interactive Journey</title>
+    <link rel="stylesheet" href="circulatory.css">
+</head>
+<body id="main">
+    <p class="texts" id="text">Scroll slowly to explore the circulatory system...</p>
+    <p class="toptext" id="scroll">Scroll Slowly To Begin Your Journey</p>
+    <div class="section" id="arrow"></div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <button id="toggle-labels" class="control-btn">Toggle Labels</button>
+        <button id="toggle-flow"   class="control-btn">Pause Flow</button>
+        <div id="heart-health-display">Cardiovascular Health: <span id="health-value">100</span>%</div>
+    </div>
+
+    <!-- Disease Scenario Selector -->
+    <div id="disease-selector">
+        <label for="scenario">Scenario:</label>
+        <select id="scenario">
+            <option value="normal">Normal</option>
+            <option value="hypertension">Hypertension</option>
+            <option value="atherosclerosis">Atherosclerosis</option>
+            <option value="anemia">Anaemia</option>
+            <option value="heartFailure">Heart Failure</option>
+        </select>
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top">↑ Back to Start</button>
+
+    <div id="ext">
+        <!-- Main Canvas for organs and vessels -->
+        <canvas id="mainCanvas"></canvas>
+
+        <!-- Overlay canvas for blood cell particles -->
+        <canvas id="particleCanvas"></canvas>
+
+        <!-- Info panels -->
+        <div id="info-panels">
+            <div class="info-panel" id="info-circulatory">
+                <h3>Circulatory System</h3>
+                <div class="circ-info">
+                    <p><strong>~5 litres</strong> of blood in the adult body</p>
+                    <p><strong>Pulmonary:</strong> Heart ↔ Lungs (oxygen exchange)</p>
+                    <p><strong>Systemic:</strong> Heart ↔ Body (nutrient delivery)</p>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-vessels">
+                <h3>Vessel Types</h3>
+                <p><span class="artery-dot">⬤</span> <strong>Arteries:</strong> Carry blood from heart</p>
+                <p><span class="vein-dot">⬤</span> <strong>Veins:</strong> Return blood to heart</p>
+                <p><span class="cap-dot">⬤</span> <strong>Capillaries:</strong> Gas/nutrient exchange</p>
+                <p><span class="pulm-dot">⬤</span> <strong>Pulmonary:</strong> Lung circuit vessels</p>
+            </div>
+
+            <div class="info-panel" id="info-stats">
+                <h3>Blood Cell Count</h3>
+                <p>Red Blood Cells: <span id="rbc-count">0</span></p>
+                <p>White Blood Cells: <span id="wbc-count">0</span></p>
+                <p>Platelets: <span id="platelet-count">0</span></p>
+                <p>Plasma Proteins: <span id="plasma-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits">
+        Scientific Circulatory System Visualization |
+        <span style="color:#c0392b;">❤️</span> Anatomically Accurate
+    </div>
+
+    <script src="circulatory.js"></script>
+</body>
+</html>

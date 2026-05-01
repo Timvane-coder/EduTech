@@ -1,0 +1,289 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #1a0505 0%, #2e0d0d 50%, #200808 100%);
+    transition-duration: 1s;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+}
+
+#main {
+    transition-duration: 0s;
+    opacity: 0;
+}
+
+.texts {
+    color: rgba(255, 255, 255, 0.95);
+    position: fixed;
+    top: 85vh;
+    left: 50vw;
+    transform: translateX(-50%);
+    transition: all 0.5s ease;
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px 30px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    text-align: center;
+    max-width: 80vw;
+    border: 1px solid rgba(192, 57, 43, 0.2);
+}
+
+#ext {
+    height: 6000px;
+    position: relative;
+}
+
+#mainCanvas,
+#particleCanvas {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+#particleCanvas {
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Control Panel */
+#control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.82);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(192, 57, 43, 0.3);
+    z-index: 101;
+    display: none;
+}
+
+.control-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 15px;
+    margin-bottom: 10px;
+    background: rgba(192, 57, 43, 0.15);
+    border: 1px solid rgba(192, 57, 43, 0.45);
+    color: #e8a0a0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.control-btn:hover {
+    background: rgba(192, 57, 43, 0.35);
+    box-shadow: 0 0 10px rgba(192, 57, 43, 0.3);
+}
+
+#heart-health-display {
+    color: #e8a0a0;
+    font-weight: bold;
+    text-align: center;
+    font-size: 15px;
+    margin-top: 5px;
+}
+
+/* Disease Scenario Selector */
+#disease-selector {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.82);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(192, 57, 43, 0.3);
+    z-index: 101;
+    display: none;
+}
+
+#disease-selector label {
+    color: #e8a0a0;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+#scenario {
+    background: rgba(192, 57, 43, 0.12);
+    border: 1px solid rgba(192, 57, 43, 0.35);
+    color: #e8a0a0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#scenario option {
+    background: #2e0d0d;
+    color: #e8a0a0;
+}
+
+/* Info Panels */
+#info-panels {
+    position: fixed;
+    bottom: 100px;
+    left: 20px;
+    z-index: 100;
+    display: none;
+}
+
+.info-panel {
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(192, 57, 43, 0.22);
+    margin-bottom: 15px;
+    max-width: 350px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.5s ease;
+}
+
+.info-panel.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.info-panel h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #e8a0a0;
+    border-bottom: 1px solid rgba(192, 57, 43, 0.35);
+    padding-bottom: 5px;
+}
+
+.info-panel p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 5px 0;
+    line-height: 1.4;
+}
+
+.circ-info p { margin: 8px 0; }
+
+/* Vessel type indicator colors */
+.artery-dot { color: #c0392b; font-size: 18px; }
+.vein-dot   { color: #2471a3; font-size: 18px; }
+.cap-dot    { color: #e74c3c; font-size: 18px; }
+.pulm-dot   { color: #8e44ad; font-size: 18px; }
+
+/* Blood cell stat colors */
+#info-stats span { font-weight: bold; }
+#rbc-count      { color: #e74c3c; }   /* bright red — RBCs */
+#wbc-count      { color: #f0e6c8; }   /* creamy white — WBCs */
+#platelet-count { color: #f7dc6f; }   /* golden — platelets */
+#plasma-count   { color: #fad7a0; }   /* pale yellow — plasma */
+
+/* Back to Top Button */
+#myBtn {
+    display: none;
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+    border: 2px solid rgba(192, 57, 43, 0.4);
+    outline: none;
+    color: rgba(232, 160, 160, 0.9);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+#myBtn:hover {
+    background: rgba(192, 57, 43, 0.25);
+    border-color: #c0392b;
+    color: #fff;
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 5px 15px rgba(192, 57, 43, 0.35);
+}
+
+#credits {
+    margin-top: 40%;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-top: 40px;
+    height: 10vh;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100px;
+}
+
+.section::before {
+    animation: bounce 3s ease infinite;
+    color: #c0392b;
+    content: '↓';
+    font-size: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 1;
+    position: absolute;
+    text-align: center;
+}
+
+@keyframes bounce {
+    50% { transform: translate(-50%, -50%); }
+}
+
+.toptext {
+    margin-top: 40%;
+    color: rgba(232, 160, 160, 0.95);
+    text-align: center;
+    font-size: 20px;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .texts {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+    .info-panel {
+        max-width: 250px;
+        padding: 10px 15px;
+    }
+    .info-panel h3 { font-size: 14px; }
+    .info-panel p  { font-size: 11px; }
+    #control-panel, #disease-selector {
+        top: 10px;
+        padding: 10px;
+    }
+}
+
+/* Heartbeat pulse animation used for loading / glow effects */
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1);    opacity: 1; }
+    14%       { transform: scale(1.08); }
+    28%       { transform: scale(1);    }
+    42%       { transform: scale(1.05); }
+    70%       { transform: scale(1);    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+}
+
+.loading { animation: pulse 1.5s ease-in-out infinite; }
