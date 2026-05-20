@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                <title>three.js webgpu - ice to water</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+                <link type="text/css" rel="stylesheet" href="example.css">
+                <style>
+                        #fade-overlay {
+                                position: fixed;
+                                inset: 0;
+                                background: #000;
+                                opacity: 0;
+                                pointer-events: none;
+                                transition: opacity 2s ease;
+                                z-index: 10;
+                        }
+                        #info {
+                                z-index: 20;
+                                position: relative;
+                        }
+                </style>
+        </head>
+        <body>
+
+                <div id="fade-overlay"></div>
+
+                <div id="info">
+                        <a href="https://threejs.org/" target="_blank" rel="noopener" class="logo-link"></a>
+                        <div class="title-wrapper">
+                                <a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
+                                <span id="scene-title">Parallax UV</span>
+                        </div>
+                </div>
+
+                <script type="importmap">
+                        {
+                                "imports": {
+                                        "three": "../build/three.webgpu.js",
+                                        "three/webgpu": "../build/three.webgpu.js",
+                                        "three/tsl": "../build/three.tsl.js",
+                                        "three/addons/": "./jsm/"
+                                }
+                        }
+                </script>
+
+                <script type="module" src="merged.js"></script>
+        </body>
+</html>

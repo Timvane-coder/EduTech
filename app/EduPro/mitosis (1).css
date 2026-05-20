@@ -1,0 +1,265 @@
+/* ═══════════════════════════════════════════════════════════════════
+   mitosis.css  —  fully scoped under #mitosis-panel
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Panel shell ──────────────────────────────────────────────────── */
+#mitosis-panel {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 300;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s, visibility 0.6s;
+  font-family: 'Courier New', Courier, monospace;
+  background: #000;
+}
+
+#mitosis-panel.mitosis-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ── Starfield background canvas ──────────────────────────────────── */
+#mitosis-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* ── Main animation canvas ────────────────────────────────────────── */
+#mitosis-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ── HUD overlay ──────────────────────────────────────────────────── */
+#mitosis-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────────── */
+#mitosis-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  /* leave left space for the go-back button */
+  padding-left: 120px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
+}
+
+#mitosis-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.65rem, 2.2vw, 0.9rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(120, 220, 255, 0.9);
+  text-shadow: 0 0 12px rgba(80,200,255,0.6);
+}
+
+/* ── Phase name badge ─────────────────────────────────────────────── */
+#mitosis-phase-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+#mitosis-phase-name {
+  font-size: clamp(1rem, 4vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(100,220,255,0.8), 0 0 40px rgba(60,180,255,0.4);
+  transition: all 0.5s ease;
+}
+
+#mitosis-phase-sub {
+  font-size: clamp(0.55rem, 1.8vw, 0.72rem);
+  letter-spacing: 0.28em;
+  color: rgba(180, 240, 255, 0.7);
+  text-transform: uppercase;
+  transition: all 0.5s ease;
+}
+
+/* ── Phase progress dots ──────────────────────────────────────────── */
+#mitosis-phase-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mitosis-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(120,220,255,0.4);
+  transition: all 0.4s ease;
+}
+
+.mitosis-dot.active {
+  background: rgba(100, 220, 255, 0.9);
+  box-shadow: 0 0 8px rgba(80,200,255,0.8);
+  transform: scale(1.3);
+}
+
+.mitosis-dot.done {
+  background: rgba(80, 200, 255, 0.4);
+}
+
+/* ── Bottom info bar ──────────────────────────────────────────────── */
+#mitosis-bottombar {
+  padding: 10px 18px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#mitosis-info-text {
+  font-size: clamp(0.6rem, 2vw, 0.78rem);
+  color: rgba(200, 240, 255, 0.82);
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-align: center;
+  min-height: 2.4em;
+  transition: all 0.4s ease;
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────── */
+#mitosis-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#mitosis-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#mitosis-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #1a8fff, #00ffcc);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px rgba(0,220,200,0.6);
+}
+
+#mitosis-progress-pct {
+  font-size: 0.62rem;
+  color: rgba(150,230,255,0.7);
+  letter-spacing: 0.1em;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ── Go Back button — mirrors Design Now button style ─────────────── */
+#mitosis-back-btn {
+  position: fixed;
+  top: 10px;
+  left: 14px;
+  z-index: 320;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s, visibility 0.5s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#mitosis-back-btn.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* SVG logo inside go-back button */
+#mitosis-back-btn svg {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+#mitosis-back-btn span {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.87);
+  font-family: 'VenusRising-Regular', sans-serif;
+  white-space: nowrap;
+}
+
+/* ── Flash overlay for phase transitions ──────────────────────────── */
+#mitosis-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background: radial-gradient(ellipse at center, rgba(100,220,255,0.18) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#mitosis-flash.flash {
+  opacity: 1;
+}
+
+/* ── Scanline texture overlay ─────────────────────────────────────── */
+#mitosis-panel::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+}
+
+/* ── Keyframe: phase name pulse in ───────────────────────────────── */
+@keyframes mitosisPhaseIn {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.mitosis-phase-animate {
+  animation: mitosisPhaseIn 0.5s ease forwards;
+}
+
+/* ── Keyframe: particle float ─────────────────────────────────────── */
+@keyframes mitosisFloat {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(-6px); }
+}
+
+/* ── Keyframe: glow pulse ─────────────────────────────────────────── */
+@keyframes mitosisGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(100,220,255,0.4); }
+  50%     { box-shadow: 0 0 22px rgba(100,220,255,0.9); }
+}

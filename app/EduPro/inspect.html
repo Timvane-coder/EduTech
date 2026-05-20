@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLB Animation Inspector</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #a0a0a0;
+            font-family: sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 8px;
+            pointer-events: none;
+            display: none;
+        }
+    </style>
+
+    <!-- THE IMPORT MAP: Maps bare module names to CDN URLs -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://esm.sh/three@0.160.0",
+          "three/addons/": "https://esm.sh/three@0.160.0/examples/jsm/",
+          "lil-gui": "https://esm.sh/lil-gui@0.19"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <div id="loading">Loading 3D Model...</div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GUI } from 'lil-gui';
+
+        // --- Core Application Variables ---
+        let scene, camera, renderer, controls;
+        let mixer; 
+        const clock = new THREE.Clock();
+        const animationsMap = {}; 
+        let activeAction;
+        const loadingEl = document.getElementById('loading');
+
+        init();
+        animate();
+
+        function init() {
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xa0a0a0);
+            scene.fog = new THREE.Fog(0xa0a0a0, 10, 50);
+
+            // 2. Camera Setup
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100);
+            camera.position.set(1, 2, 5);
+
+            // 3. Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+
+            // 4. Controls Setup
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 1, 0);
+
+            // 5. Lighting Setup
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3);
+            hemiLight.position.set(0, 20, 0);
+            scene.add(hemiLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 3);
+            dirLight.position.set(3, 10, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.camera.top = 2;
+            dirLight.shadow.camera.bottom = -2;
+            dirLight.shadow.camera.left = -2;
+            dirLight.shadow.camera.right = 2;
+            dirLight.shadow.camera.near = 0.1;
+            dirLight.shadow.camera.far = 40;
+            scene.add(dirLight);
+
+            // 6. Floor Grid (Helps ground the animated model visually)
+            const mesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(100, 100), 
+                new THREE.MeshStandardMaterial({ color: 0xcbcbcb, depthWrite: false })
+            );
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            const grid = new THREE.GridHelper(100, 100, 0x000000, 0x000000);
+            grid.material.opacity = 0.2;
+            grid.material.transparent = true;
+            scene.add(grid);
+
+            // 7. Load GLTF/GLB Model
+            loadingEl.style.display = 'block';
+            const loader = new GLTFLoader();
+            
+            // NOTE: Ensure your 'model.glb' is in the exact same folder as this HTML file
+            loader.load('Michelle.glb', (gltf) => {
+                loadingEl.style.display = 'none';
+                const model = gltf.scene;
+                
+                // Enable shadows on the model parts
+                model.traverse((object) => {
+                    if (object.isMesh) {
+                        object.castShadow = true;
+                        object.receiveShadow = true;
+                    }
+                });
+
+                scene.add(model);
+
+                // Handle Animations if they exist
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(model);
+                    const clipNames = [];
+
+                    gltf.animations.forEach((clip) => {
+                        clipNames.push(clip.name);
+                        animationsMap[clip.name] = mixer.clipAction(clip);
+                    });
+
+                    // Build the lil-gui control menu
+                    setupAnimationGUI(clipNames);
+
+                    // Play the first animation automatically
+                    fadeToAction(clipNames[0]);
+                } else {
+                    alert("Model loaded successfully, but no animation clips were found inside it.");
+                }
+            }, 
+            undefined, 
+            (error) => {
+                loadingEl.style.display = 'none';
+                console.error('An error happened loading the GLB:', error);
+                alert("Failed to load model.glb. Check your console for details.");
+            });
+
+            // 8. Event Listener for resizing
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- GUI Panel Builder ---
+        function setupAnimationGUI(clipNames) {
+            const gui = new GUI({ title: '📦 Animation Inspector' });
+            
+            const settings = {
+                currentAnimation: clipNames[0] || 'None',
+                timeScale: 1.0,
+                stopAll: () => { if (activeAction) activeAction.stop(); }
+            };
+
+            // Dropdown component
+            gui.add(settings, 'currentAnimation', clipNames)
+               .name('Clip Name')
+               .onChange((selectedClipName) => {
+                   fadeToAction(selectedClipName);
+               });
+
+            // Speed Control slider
+            gui.add(settings, 'timeScale', 0.0, 2.0, 0.05)
+               .name('Playback Speed')
+               .onChange((speed) => {
+                   if (mixer) mixer.timeScale = speed;
+               });
+
+            // Emergency Stop Button
+            gui.add(settings, 'stopAll').name('⏹ Stop Playback');
+            
+            gui.open();
+        }
+
+        // --- Crossfade Logic ---
+        function fadeToAction(name) {
+            const nextAction = animationsMap[name];
+            if (nextAction === activeAction) return;
+
+            if (activeAction) {
+                activeAction.fadeOut(0.3);
+            }
+
+            nextAction
+                .reset()
+                .setEffectiveTimeScale(1)
+                .setEffectiveWeight(1)
+                .fadeIn(0.3)
+                .play();
+
+            activeAction = nextAction;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- Main Frame Update Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

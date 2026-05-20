@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic Three.js Mirror Grid Test</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #111;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-family: monospace;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px black;
+        }
+    </style>
+
+    <!-- 1. Animation Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/25.0.0/tween.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <!-- 2. Core Classic WebGL Three.js Engine (r128) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- 3. Classic Reflector Component (Matched to r128) -->
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/objects/Reflector.js"></script>
+</head>
+<body>
+    <div id="info">
+        Classic WebGL Reflector Test<br>
+        Moving boxes reflecting on a real-time mirror floor.
+    </div>
+
+    <script>
+        let camera, scene, renderer;
+        let box1, box2, mirrorFloor;
+
+        init();
+        animate();
+
+        function init() {
+            // 1. Scene & Camera Setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 5, 12);
+            camera.lookAt(0, 1, 0);
+
+            // 2. Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // 3. Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            mainLight.position.set(5, 10, 7);
+            scene.add(mainLight);
+
+            const fillLight = new THREE.PointLight(0x00aaff, 1, 15);
+            fillLight.position.set(-4, 3, -2);
+            scene.add(fillLight);
+
+            // 4. Floating Mesh Objects to Reflect
+            const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+            
+            // Box 1: Smooth red material
+            const mat1 = new THREE.MeshStandardMaterial({ color: 0xff3333, roughness: 0.2 });
+            box1 = new THREE.Mesh(geometry, mat1);
+            box1.position.set(-2, 2, 0);
+            scene.add(box1);
+
+            // Box 2: Smooth green material
+            const mat2 = new THREE.MeshStandardMaterial({ color: 0x33ff33, roughness: 0.2 });
+            box2 = new THREE.Mesh(geometry, mat2);
+            box2.position.set(2, 2, -2);
+            scene.add(box2);
+
+            // 5. Setup the Classic Reflector Mirror Floor
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            
+            mirrorFloor = new THREE.Reflector(floorGeometry, {
+                clipBias: 0.003,
+                textureWidth: window.innerWidth * window.devicePixelRatio,
+                textureHeight: window.innerHeight * window.devicePixelRatio,
+                color: 0x7f7f7f // Tints the reflection slightly darker for realism
+            });
+            
+            // Rotate flat to act as the floor ground plane
+            mirrorFloor.rotation.x = -Math.PI / 2;
+            mirrorFloor.position.y = 0;
+            scene.add(mirrorFloor);
+
+            // 6. Overlay Grid Helper (Renders on top of the mirror)
+            const gridHelper = new THREE.GridHelper(20, 20, 0x00aaff, 0x444444);
+            gridHelper.position.y = 0.005; // Placed marginally above the mirror to avoid visual clipping
+            scene.add(gridHelper);
+
+            // 7. Quick GSAP Animation Loop for the Boxes
+            gsap.to(box1.position, {
+                y: 3,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: "power1.inOut"
+            });
+
+            gsap.to(box2.position, {
+                y: 3,
+                duration: 2.5,
+                repeat: -1,
+                yoyo: true,
+                ease: "power1.inOut",
+                delay: 0.5
+            });
+
+            // Handle window resizing
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Update mirror resolution handling if window dimensions scale
+            if (mirrorFloor) {
+                mirrorFloor.getRenderTarget().setSize(
+                    window.innerWidth * window.devicePixelRatio,
+                    window.innerHeight * window.devicePixelRatio
+                );
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Manual rotation updates in render loop
+            if (box1 && box2) {
+                box1.rotation.x += 0.01;
+                box1.rotation.y += 0.01;
+
+                box2.rotation.x -= 0.005;
+                box2.rotation.z += 0.01;
+            }
+
+            // Fire standard WebGL pipeline frame render
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

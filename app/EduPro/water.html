@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>three.js webgl - backdrop water with blur fix</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0487e2;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-family: monospace;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+            z-index: 100;
+        }
+        a { color: #ff0055; }
+    </style>
+
+    <!-- 1. Core Classic WebGL Engine (r128) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- 2. Addons loaded directly as global scripts via jsDelivr CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <!-- dat.gui for the classic parameters UI -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+</head>
+<body>
+
+    <div id="info">
+        <a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a> - Backdrop Water (Classic Gaussian Blur Pipeline)<br>
+        <small>Water refraction with simulated depth blur effect without TSL / Import Maps</small>
+    </div>
+
+    <!-- 1. Shared Vertex Shader for Water Plane and Screen-Space Quad -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+        varying vec2 vUv;
+        varying vec4 vScreenPos;
+        void main() {
+            vUv = uv;
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            vScreenPos = gl_Position;
+        }
+    </script>
+
+    <!-- 2. Classic 9-Tap Gaussian Blur Fragment Shader -->
+    <script id="blurFragmentShader" type="x-shader/x-fragment">
+        uniform sampler2D tDiffuse;
+        uniform vec2 uResolution;
+        varying vec2 vUv;
+
+        void main() {
+            // Screen pixel step size
+            vec2 h = 1.0 / uResolution;
+            vec4 sum = vec4(0.0);
+            
+            // Standard 1D Gaussian kernel weights distribution
+            sum += texture2D(tDiffuse, vUv - 4.0 * h) * 0.051;
+            sum += texture2D(tDiffuse, vUv - 3.0 * h) * 0.0918;
+            sum += texture2D(tDiffuse, vUv - 2.0 * h) * 0.12245;
+            sum += texture2D(tDiffuse, vUv - 1.0 * h) * 0.1531;
+            sum += texture2D(tDiffuse, vUv) * 0.1633;
+            sum += texture2D(tDiffuse, vUv + 1.0 * h) * 0.1531;
+            sum += texture2D(tDiffuse, vUv + 2.0 * h) * 0.12245;
+            sum += texture2D(tDiffuse, vUv + 3.0 * h) * 0.0918;
+            sum += texture2D(tDiffuse, vUv + 4.0 * h) * 0.051;
+
+            gl_FragColor = sum;
+        }
+    </script>
+
+    <!-- 3. Classic Water Refraction Fragment Shader -->
+    <script id="waterFragmentShader" type="x-shader/x-fragment">
+        uniform sampler2D tBlurredDiffuse;
+        uniform sampler2D tNormal;
+        uniform float uTime;
+        uniform vec3 uWaterColor;
+        varying vec2 vUv;
+        varying vec4 vScreenPos;
+
+        void main() {
+            // Map the screen projection space down to coordinates between [0.0, 1.0]
+            vec2 screenUV = (vScreenPos.xy / vScreenPos.w) * 0.5 + 0.5;
+
+            // Generate offset vectors using moving normal coordinates over time
+            vec2 distortion1 = texture2D(tNormal, vUv * 4.0 + vec2(uTime * 0.02, uTime * 0.03)).rg * 2.0 - 1.0;
+            vec2 distortion2 = texture2D(tNormal, vUv * 2.0 - vec2(uTime * 0.015, uTime * 0.02)).rg * 2.0 - 1.0;
+            vec2 totalDistortion = (distortion1 + distortion2) * 0.012; // Controls ripple intensity
+
+            // Sample the pre-blurred background scene map using the ripple offsets
+            vec3 refractedBackground = texture2D(tBlurredDiffuse, screenUV + totalDistortion).rgb;
+
+            // Mix the water coloring pass over the distorted backdrop texture pass
+            vec3 finalColor = mix(refractedBackground, uWaterColor, 0.45);
+
+            gl_FragColor = vec4(finalColor, 0.9);
+        }
+    </script>
+
+    <script>
+        let camera, scene, renderer;
+        let mixer, objects, clock;
+        let model, floor, waterMesh;
+        let controls;
+        let floorPosition = { y: 0.2 };
+
+        // Render Targets & Utility Blur Processing Pipelines
+        let opaqueRenderTarget, blurRenderTarget;
+        let blurScene, blurCamera, waterMaterial;
+
+        init();
+        animate();
+
+        function init() {
+            clock = new THREE.Clock();
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.25, 30);
+            camera.position.set(3, 2, 4);
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0487e2, 7, 25);
+            scene.background = new THREE.Color(0x0487e2);
+
+            // Lighting Setup
+            const sunLight = new THREE.DirectionalLight(0xFFE499, 2.5);
+            sunLight.position.set(.5, 3, .5);
+            scene.add(sunLight);
+
+            const waterAmbientLight = new THREE.HemisphereLight(0x333366, 0x74ccf4, 2.5);
+            scene.add(waterAmbientLight);
+
+            const skyAmbientLight = new THREE.HemisphereLight(0x74ccf4, 0, 0.5);
+            scene.add(skyAmbientLight);
+
+            // PASS 1 BUFFER: Stores the crisp background layout
+            opaqueRenderTarget = new THREE.WebGLRenderTarget(
+                window.innerWidth * window.devicePixelRatio,
+                window.innerHeight * window.devicePixelRatio,
+                { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat }
+            );
+
+            // PASS 2 BUFFER: Downscaled buffer to render a soft blur map efficiently
+            blurRenderTarget = new THREE.WebGLRenderTarget(
+                window.innerWidth * 0.5,
+                window.innerHeight * 0.5,
+                { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat }
+            );
+
+            // Initialize the full-screen ortho quad setup used to compute the blur pass
+            blurScene = new THREE.Scene();
+            blurCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            
+            const blurMaterial = new THREE.ShaderMaterial({
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('blurFragmentShader').textContent,
+                uniforms: {
+                    tDiffuse: { value: opaqueRenderTarget.texture },
+                    uResolution: { value: new THREE.Vector2(window.innerWidth * 0.5, window.innerHeight * 0.5) }
+                }
+            });
+            
+            const blurQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blurMaterial);
+            blurScene.add(blurQuad);
+
+            // Asset Loading
+            const textureLoader = new THREE.TextureLoader();
+            const waterTexture = textureLoader.load('https://threejs.org/examples/textures/water.jpg');
+            waterTexture.wrapS = THREE.RepeatWrapping;
+            waterTexture.wrapT = THREE.RepeatWrapping;
+
+            const loader = new THREE.GLTFLoader();
+            loader.load('https://threejs.org/examples/models/gltf/Michelle.glb', function (gltf) {
+                model = gltf.scene;
+                mixer = new THREE.AnimationMixer(model);
+                const action = mixer.clipAction(gltf.animations[0]);
+                action.play();
+                scene.add(model);
+            });
+
+            // Scattering Ice Objects
+            const geometry = new THREE.IcosahedronGeometry(1, 3);
+            const material = new THREE.MeshStandardMaterial({
+                color: 0x0066ff,
+                roughness: 0.1,
+                metalness: 0.5,
+                map: waterTexture
+            });
+
+            const count = 100;
+            const scale = 3.5;
+            const column = 10;
+            objects = new THREE.Group();
+
+            for (let i = 0; i < count; i++) {
+                const x = i % column;
+                const y = Math.floor(i / column);
+
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(x * scale, 0, y * scale);
+                mesh.rotation.set(Math.random(), Math.random(), Math.random());
+                objects.add(mesh);
+            }
+
+            objects.position.set(
+                ((column - 1) * scale) * -.5,
+                -1,
+                ((Math.floor(count / column)) * scale) * -.5
+            );
+            scene.add(objects);
+
+            // PASS 3: Setup final water mesh reading from the blurred texture target buffer
+            waterMaterial = new THREE.ShaderMaterial({
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('waterFragmentShader').textContent,
+                uniforms: {
+                    tBlurredDiffuse: { value: blurRenderTarget.texture },
+                    tNormal: { value: waterTexture },
+                    uTime: { value: 0 },
+                    uWaterColor: { value: new THREE.Color(0x0487e2) }
+                },
+                transparent: true
+            });
+
+            waterMesh = new THREE.Mesh(new THREE.BoxGeometry(50, 0.001, 50), waterMaterial);
+            waterMesh.position.set(0, 0, 0);
+            scene.add(waterMesh);
+
+            // Floor Column Base
+            floor = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 10), material);
+            floor.position.set(0, -5, 0);
+            scene.add(floor);
+
+            // Classic WebGL Renderer configuration
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Camera Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.minDistance = 1;
+            controls.maxDistance = 10;
+            controls.maxPolarAngle = Math.PI * 0.9;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1;
+            controls.target.set(0, 0.2, 0);
+            controls.update();
+
+            // Setup Control UI Panels
+            const gui = new dat.GUI();
+            gui.add(floorPosition, 'y', -1, 1, 0.001).name('floor position');
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Adjust framebuffers dynamically
+            opaqueRenderTarget.setSize(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio);
+            blurRenderTarget.setSize(window.innerWidth * 0.5, window.innerHeight * 0.5);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const elapsed = clock.getElapsedTime();
+
+            floor.position.y = floorPosition.y - 5;
+
+            if (model) {
+                mixer.update(delta);
+                model.position.y = floorPosition.y;
+            }
+
+            for (const object of objects.children) {
+                object.position.y = Math.sin(elapsed + object.id) * .3;
+                object.rotation.y += delta * .3;
+            }
+
+            if (waterMaterial) {
+                waterMaterial.uniforms.uTime.value = elapsed;
+            }
+
+            // --- MULTI-PASS COMPOSITING EXECUTION ---
+            
+            // Pass 1: Hide water plane, snapshot crisp foreground directly to opaqueRenderTarget
+            waterMesh.visible = false;
+            renderer.setRenderTarget(opaqueRenderTarget);
+            renderer.render(scene, camera);
+
+            // Pass 2: Process the crisp image through the 9-tap blur filter into blurRenderTarget
+            renderer.setRenderTarget(blurRenderTarget);
+            renderer.render(blurScene, blurCamera);
+
+            // Pass 3: Re-reveal water, sample the blurred target, output composite result to screen
+            waterMesh.visible = true;
+            renderer.setRenderTarget(null);
+            renderer.render(scene, camera);
+
+            controls.update();
+        }
+    </script>
+</body>
+</html>
