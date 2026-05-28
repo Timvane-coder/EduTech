@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Capacitor Laboratory</title>
+    <style>
+        /* ─── reset ─── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ─── intro title ─── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ─── lab UI hidden until transition ─── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left panel */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:290px;
+            background:rgba(15,15,20,.9);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.8;
+        }
+        #sidemenu label { color:#aaa; font-size:11px; display:block; margin-top:10px; }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#c0392b;
+            margin-top:3px; margin-bottom:2px;
+        }
+        #sidemenu select{
+            width:100%; background:#1e1e28; color:#d4d4d4;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:4px; padding:4px 6px;
+            font-size:12px; margin-top:4px;
+        }
+        #sidemenu a { color:#e07070; font-weight:600; }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a { color:#e07070; font-weight:600; }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+
+        /* fraction */
+        .fraction{
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup{ border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn{ padding:0 3px; }
+        .bar{ display:none; }
+
+        /* buttons */
+        #menu button{
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover{ filter:brightness(1.18); }
+        #menu button:disabled{ opacity:.4; cursor:default; }
+        #flow { background:rgb(164,26,26); }
+        #flip { background:#1a4e8f; }
+        #cal  { background:#2a6e3f; }
+
+        #z-el{ font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+    </style>
+</head>
+<body>
+
+<!-- ─── intro overlay ─── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;·&nbsp; Loading Lab…</div>
+
+<!-- ─── lab UI (shown after transition) ─── -->
+<div id="labUI">
+
+    <div id="topmenu">Capacitor — Factors affecting capacitance</div>
+
+    <div id="sidemenu">
+        <label for="area">Area of plates, A = <a id="areaDisplay">1</a> m²</label>
+        <input type="range" id="area" min="5000" max="15000" value="10000" step="1000">
+
+        <label for="dist">Distance between plates, d = <a id="distDisplay">5</a> × 10⁻³ m</label>
+        <input type="range" id="dist" min="1" max="10" value="5" step="1">
+
+        <label for="dielectric-el">Dielectric constant, κ = <a id="dielectricDisplay"></a></label>
+        <select id="dielectric-el"></select>
+    </div>
+
+    <div id="menu">
+        <div id="z-el" style="visibility:hidden;">
+            Impedance Z<sub>C</sub> =
+            <div class="fraction">
+                <span class="fup">1</span>
+                <span class="bar">/</span>
+                <span class="fdn">2πfC</span>
+            </div>
+            = <a id="zDisplay"></a> Ω
+        </div>
+
+        C =
+        <div class="fraction">
+            <span class="fup">Q</span>
+            <span class="bar">/</span>
+            <span class="fdn">V</span>
+        </div>
+        =
+        <div class="fraction">
+            <span class="fup"><a id="factor-el">ε₀</a> A</span>
+            <span class="bar">/</span>
+            <span class="fdn">d</span>
+        </div>
+        = <a id="calDisplay"></a> F
+
+        <button id="flow">OFF</button>
+        <button id="flip">DC VOLTAGE</button>
+        <button id="cal">CAPACITANCE</button>
+
+        <div id="message-el">
+            Click on the 3D model switch (ON) to visualise charging of the capacitor for DC voltage
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* groups */
+let ferrariGroup   = new THREE.Group();
+let capacitorGroup = new THREE.Group();
+
+/* ferrari */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+/* transition state */
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── capacitor lab ── */
+let plate1, plate2;
+let cMaterial;
+let connectorMaterial;
+let connector = new THREE.Group();
+let dMaterial, dSlab;
+
+let redPoints, bluePoints;
+let drawCount  = 0;
+let drawCount1 = 0;
+let reqID, reqAC;
+
+let model, mixer, knob, plus, minus;
+let modelReady = false;
+let flow  = false;
+let acVolt = false;
+const actions = {};
+const clock   = new THREE.Clock();
+
+let A = 1; // used by periodicAction
+
+const params = {
+    dist  : 50,
+    factor: 1,
+    l     : 170,
+    h     : 210,
+    a     : 10000,
+    area  : 10000,
+    k     : 80,
+    i     : 9,
+    j     : 20,
+    points: 9 * 21   // i × 21
+};
+
+const dielectric = {
+    'Air'     : [ 1.0, new THREE.Color(0,    0,    0)    ],
+    'Paper'   : [ 3.5, new THREE.Color(1,    1,    1)    ],
+    'Bakelite': [ 4.8, new THREE.Color(0.75, 0.5,  1)    ],
+    'Mica'    : [ 5.4, new THREE.Color(0.4,  0.7,  0.75) ]
+};
+
+const messages = {
+    1: 'Click on the 3D model switch (OFF) to visualise charging of the capacitor for DC voltage',
+    2: 'Click on the 3D model switch (ON) to visualise discharging of the capacitor for DC voltage',
+    3: 'Click on the 3D model switch (OFF) to visualise the capacitor action for AC voltage',
+    4: 'Charging of the capacitor stops after a while and no current flows through the circuit (open circuit)',
+    5: 'Charging – discharging of the capacitor, depends on the frequency of the AC voltage',
+    6: 'Discharging of the capacitor happens for a while and then returns to its native state'
+};
+
+/* DOM refs – populated in setupLabUI() */
+let buttonFlow, buttonFlip, messageEl;
+let inputDist, inputArea;
+let distDisplay, areaDisplay, calDisplay, dielectricDisplay;
+let selectDielectric, factorElement, impedenceEl;
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+
+init();
+
+function init(){
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createCapacitorScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════════
+   LIGHTS
+════════════════════════════════════════════ */
+
+function createLights(){
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════════
+   FERRARI SHOWROOM
+════════════════════════════════════════════ */
+
+function createFerrariShowroom(){
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function(texture){
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function(gltf){
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color:0xff0000, metalness:1,
+                    roughness:0.35, clearcoat:1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════════
+   CAMERA HELPERS
+════════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration){
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x:tx, y:ty, z:tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar(){
+    return new TWEEN.Tween(car.position)
+        .to({ y:0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════════
+   FERRARI CINEMATIC
+════════════════════════════════════════════ */
+
+function startFerrariSequence(){
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    const transition = moveCamera(1650, 300, 800, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            /* ── swap scenes ── */
+            ferrariGroup.visible   = false;
+            capacitorGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            controls.enabled = true;
+            controls.target.set(80, 130, -30);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════════
+   CAPACITOR LAB
+════════════════════════════════════════════ */
+
+function createCapacitorScene(){
+
+    capacitorGroup.visible = false;
+    scene.add(capacitorGroup);
+
+    const grid2 = new THREE.GridHelper(1000, 50);
+    capacitorGroup.add(grid2);
+
+    /* connector material used throughout */
+    connectorMaterial = new THREE.MeshPhongMaterial({
+        color: 0xb87333,
+        side : THREE.DoubleSide
+    });
+
+    /* add connector group to scene (not capacitorGroup so geometry
+       rebuilds are independent of group visibility) */
+    
+
+    /* build geometry */
+    makeCapacitor(-250, 0, 0, params.l + 10, params.h + 10, params.dist, 5, 0xff7d7a, 'brown');
+    makeConnector(92, 2, -20,  -250, 2, -250,  -params.dist);
+    makeConnector(92, 2,  20,  -250, 2,  250,   params.dist);
+    plusPoints();
+    minusPoints();
+    makeDielectric();
+
+    /* GLTF power supply */
+    createModel();
+
+    /* wire HTML controls */
+    setupLabUI();
+}
+
+/* ─────────────────────────────────────────
+   makeCapacitor
+───────────────────────────────────────── */
+function makeCapacitor(x, y, z, l, h, dist, t, col, col2){
+
+    const capacitor = new THREE.Group();
+
+    /* plate geometry – origin at bottom */
+    const geo = new THREE.BoxGeometry(l, h, t).translate(0, h / 2, 0);
+
+    cMaterial = new THREE.MeshPhongMaterial({
+        color      : col,
+        transparent: false,
+        opacity    : 0.3
+    });
+
+    const baseGeo = new THREE.BoxGeometry(l + 5, 10, t + 4);
+    const baseMat = new THREE.MeshPhongMaterial({ color: col2 });
+    const base1   = new THREE.Mesh(baseGeo, baseMat);
+
+    plate1 = new THREE.Mesh(geo, cMaterial);
+    plate1.add(base1);
+
+    plate2 = plate1.clone();
+    plate2.rotation.y = 3.14;
+
+    capacitor.add(plate1, plate2);
+    plate1.position.z = -dist;
+    plate2.position.z =  dist;
+
+    capacitor.position.set(x, y, z);
+    scene.add(capacitor);
+}
+
+/* ─────────────────────────────────────────
+   makeConnector
+───────────────────────────────────────── */
+function makeConnector(x1, y1, z1, x2, y2, z2, gap){
+
+    const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(x1,      y1,     z1),
+        new THREE.Vector3(x1 - 40, y1 + 5, z2),
+        new THREE.Vector3(x2,      y2 + 1, z2),
+        new THREE.Vector3(x2,      y2,     gap)
+    ]);
+
+    const tube = new THREE.TubeGeometry(curve, 25, 4, 4, false);
+    connector.add(new THREE.Mesh(tube, connectorMaterial));
+}
+
+/* ─────────────────────────────────────────
+   remakeConnection
+───────────────────────────────────────── */
+function remakeConnection(){
+
+    while(connector.children.length > 0){
+        const c = connector.children[0];
+        c.geometry.dispose();
+        c.parent.remove(c);
+    }
+
+    makeConnector(92, 2, -20,  -250, 2, -250,  -params.dist);
+    makeConnector(92, 2,  20,  -250, 2,  250,   params.dist);
+}
+
+/* ─────────────────────────────────────────
+   makeDielectric
+───────────────────────────────────────── */
+function makeDielectric(){
+
+    const geo = new THREE.BoxGeometry(params.l, params.h + 10, 2 * params.dist)
+                    .translate(0, params.h / 2, 0);
+
+    dMaterial = new THREE.MeshPhongMaterial({ color: dielectric['Air'][1] });
+
+    dSlab = new THREE.Mesh(geo, dMaterial);
+    dSlab.position.set(-250, 0, 0);
+    dSlab.visible = false;
+    scene.add(dSlab);
+}
+
+/* ─────────────────────────────────────────
+   plusPoints  – red charge dots on plate2 side
+───────────────────────────────────────── */
+function plusPoints(){
+
+    const geometry  = new THREE.BufferGeometry();
+    const positions = new Float32Array(params.points * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setDrawRange(0, 0);
+
+    redPoints = new THREE.Points(
+        geometry,
+        new THREE.PointsMaterial({ size:20, color:0xff0000 })
+    );
+    redPoints.position.z = params.dist;
+    scene.add(redPoints);
+
+    let idx = 0, row = 0;
+    let x = -250 - params.k, y = 10;
+
+    for(let j = 0; j < params.points; j++){
+        row++;
+        y += (Math.random() - 0.5);
+        positions[idx++] = x;
+        positions[idx++] = y;
+        positions[idx++] = 0;
+        x += params.j;
+        if(row === params.i){ row = 0; x = -250 - params.k; y += 10; }
+    }
+}
+
+/* ─────────────────────────────────────────
+   minusPoints – blue charge dots on plate1 side
+───────────────────────────────────────── */
+function minusPoints(){
+
+    const geometry  = new THREE.BufferGeometry();
+    const positions = new Float32Array(params.points * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setDrawRange(0, 0);
+
+    bluePoints = new THREE.Points(
+        geometry,
+        new THREE.PointsMaterial({ size:20, color:0x0000ff })
+    );
+    bluePoints.position.z = -params.dist;
+    scene.add(bluePoints);
+
+    let idx = 0, row = 0;
+    let x = -250 - params.k, y = 10;
+
+    for(let j = 0; j < params.points; j++){
+        row++;
+        y += (Math.random() - 0.5);
+        positions[idx++] = x;
+        positions[idx++] = y;
+        positions[idx++] = 0;
+        x += params.j;
+        if(row === params.i){ row = 0; x = -250 - params.k; y += 10; }
+    }
+
+    updatePoints();
+}
+
+/* ─────────────────────────────────────────
+   pointsRecreate
+───────────────────────────────────────── */
+function pointsRecreate(){
+
+    scene.remove(redPoints);  redPoints.geometry.dispose();  redPoints.material.dispose();
+    scene.remove(bluePoints); bluePoints.geometry.dispose(); bluePoints.material.dispose();
+
+    plusPoints();
+    minusPoints();
+    updatePoints();
+}
+
+/* ─────────────────────────────────────────
+   updatePoints  – hide all dots
+───────────────────────────────────────── */
+function updatePoints(){
+    redPoints.geometry.setDrawRange(0, 0);
+    bluePoints.geometry.setDrawRange(0, 0);
+}
+
+/* ─────────────────────────────────────────
+   removePoints  – animate dots away
+───────────────────────────────────────── */
+function removePoints(){
+
+    if(drawCount1 >= 0){
+        redPoints.geometry.setDrawRange(0, drawCount1);
+        bluePoints.geometry.setDrawRange(0, drawCount1);
+        reqID = requestAnimationFrame(removePoints);
+    } else {
+        cancelAnimationFrame(reqID);
+    }
+    drawCount1--;
+}
+
+/* ─────────────────────────────────────────
+   addPoints  – animate dots appearing
+───────────────────────────────────────── */
+function addPoints(){
+
+    if(drawCount1 < params.points + 1){
+        redPoints.geometry.setDrawRange(0, drawCount1);
+        bluePoints.geometry.setDrawRange(0, drawCount1);
+        reqID = requestAnimationFrame(addPoints);
+    } else {
+        if(plus)  plus.visible  = false;
+        if(minus) minus.visible = false;
+        cancelAnimationFrame(reqID);
+    }
+    drawCount1++;
+}
+
+/* ─────────────────────────────────────────
+   chargeAction  – master dispatch
+───────────────────────────────────────── */
+function chargeAction(){
+
+    cancelAnimationFrame(reqAC);
+
+    if(flow && acVolt){
+
+        /* AC ON */
+        if(actions['Action']) actions['Action'].play();
+        cMaterial.transparent = true;
+        buttonFlow.innerText            = 'ON';
+        buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
+        buttonFlow.disabled = true;
+
+        setTimeout(() => { if(knob) knob.rotation.y = -1.4; }, 500);
+
+        setTimeout(() => {
+            cMaterial.transparent = true;
+            periodicAction();
+            buttonFlow.disabled = false;
+        }, 1500);
+
+    } else if(flow && !acVolt){
+
+        /* DC ON */
+        flowAction();
+
+    } else if(!flow && !acVolt){
+
+        /* DC OFF */
+        removePoints();
+        messageEl.innerHTML = messages[6];
+        if(actions['Action']) actions['Action'].reset().stop();
+        if(knob)  knob.rotation.y = 0;
+        if(plus)  plus.visible  = false;
+        if(minus) minus.visible = false;
+        cMaterial.transparent = true;
+        buttonFlow.innerText            = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+        setTimeout(() => { cMaterial.transparent = false; }, 5000);
+
+    } else if(!flow && acVolt){
+
+        /* AC OFF */
+        removePoints();
+        messageEl.innerHTML = messages[6];
+        drawCount = 0; A = 1;
+        if(actions['Action']) actions['Action'].reset().stop();
+        if(knob)  knob.rotation.y = 0;
+        if(plus)  plus.visible  = false;
+        if(minus) minus.visible = false;
+        buttonFlow.innerText            = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+        setTimeout(() => { cMaterial.transparent = false; }, 3500);
+    }
+}
+
+/* ─────────────────────────────────────────
+   flowAction  – DC charging sequence
+───────────────────────────────────────── */
+function flowAction(){
+
+    messageEl.innerHTML = messages[4];
+    if(actions['Action']) actions['Action'].play();
+    buttonFlow.innerText            = 'ON';
+    buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
+    buttonFlow.disabled = true;
+
+    setTimeout(() => {
+        if(knob)  knob.rotation.y = -1.4;
+        if(plus)  plus.visible  = true;
+        if(minus) minus.visible = true;
+    }, 500);
+
+    setTimeout(() => {
+        cMaterial.transparent = true;
+        addPoints();
+    }, 1500);
+
+    setTimeout(() => {
+        messageEl.innerHTML = messages[2];
+        buttonFlow.disabled = false;
+    }, 3000);
+}
+
+/* ─────────────────────────────────────────
+   periodicAction  – AC oscillation
+───────────────────────────────────────── */
+function periodicAction(){
+
+    drawCount += A;
+
+    if(drawCount > 0 && drawCount < params.points + 1){
+
+        redPoints.geometry.setDrawRange(0, drawCount);
+        bluePoints.geometry.setDrawRange(0, drawCount);
+        reqAC = requestAnimationFrame(periodicAction);
+
+    } else {
+
+        A *= -1;
+
+        if(A > 0){
+            /* swap red ↔ blue polarity */
+            const r = redPoints.material.color;
+            const b = bluePoints.material.color;
+            const swapR = r.r < 1 ? 1 : 0;
+            const swapB = r.b < 1 ? 1 : 0;
+            r.r = swapR;  r.b = swapB;
+            b.r = swapB;  b.b = swapR;
+        }
+
+        reqAC = requestAnimationFrame(periodicAction);
+    }
+}
+
+/* ─────────────────────────────────────────
+   duringAction  – reset while sliders/buttons change
+───────────────────────────────────────── */
+function duringAction(){
+
+    flow = false;
+    buttonFlow.innerText            = 'OFF';
+    buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+
+    if(actions['Action']) actions['Action'].reset().stop();
+    if(knob)  knob.rotation.y = 0;
+    if(plus)  plus.visible  = false;
+    if(minus) minus.visible = false;
+}
+
+/* ─────────────────────────────────────────
+   createModel  – load GLTF power supply
+───────────────────────────────────────── */
+function createModel(){
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'powersupply.glb',
+        function(gltf){
+
+            model = gltf.scene;
+            model.scale.set(100, 100, 100);
+            scene.add(model);
+
+            knob  = model.getObjectByName('knob');
+            plus  = model.getObjectByName('plus');
+            minus = model.getObjectByName('minus');
+
+            if(knob)  knob.rotation.y = 0;
+            if(plus)  { plus.position.set(1, 0.2, 0.6);   plus.visible  = false; }
+            if(minus) { minus.position.set(1, 0.2, -0.6); minus.visible = false; }
+
+            mixer = new THREE.AnimationMixer(model);
+            modelReady = true;
+
+            const fixedStates = ['polarity','Action','Action_knob','AC_connector','DC_connector'];
+
+            for(const clip of gltf.animations){
+                const action = mixer.clipAction(clip);
+                actions[clip.name] = action;
+                if(fixedStates.includes(clip.name)){
+                    action.clampWhenFinished = true;
+                    action.loop = THREE.LoopOnce;
+                }
+            }
+        },
+        undefined,
+        (e) => console.warn('powersupply.glb not found – continuing without model.', e)
+    );
+}
+
+/* ─────────────────────────────────────────
+   calCapacitance
+───────────────────────────────────────── */
+function calCapacitance(){
+
+    const e0 = 8.854e-12;
+    const k  = params.factor;
+    const a  = params.a;
+    const d  = params.dist;
+    const raw = (e0 * k * a) / d;
+
+    const { num, count } = countPower(raw);
+    return { C: num, exp: count };
+}
+
+/* ─────────────────────────────────────────
+   countPower
+───────────────────────────────────────── */
+function countPower(num){
+    let count = 0;
+    while(num < 1){ num *= 10; count++; }
+    return { num, count };
+}
+
+/* ─────────────────────────────────────────
+   extraSite  – navigate to understanding page
+───────────────────────────────────────── */
+function extraSite(){
+    window.open('Electricity_Understanding_Capacitance.html', '_self');
+}
+
+/* ─────────────────────────────────────────
+   guiControls  – dev helper (call manually if needed)
+───────────────────────────────────────── */
+// function guiControls(){ ... }   // omitted from production; add lil-gui import to use
+
+/* ─────────────────────────────────────────
+   setupLabUI  – DOM event wiring  (= buttonAction in original)
+───────────────────────────────────────── */
+function setupLabUI(){
+
+    /* grab DOM refs */
+    buttonFlow       = document.getElementById('flow');
+    buttonFlip       = document.getElementById('flip');
+    messageEl        = document.getElementById('message-el');
+    inputDist        = document.getElementById('dist');
+    inputArea        = document.getElementById('area');
+    distDisplay      = document.getElementById('distDisplay');
+    areaDisplay      = document.getElementById('areaDisplay');
+    calDisplay       = document.getElementById('calDisplay');
+    dielectricDisplay = document.getElementById('dielectricDisplay');
+    selectDielectric  = document.getElementById('dielectric-el');
+    factorElement     = document.getElementById('factor-el');
+    impedenceEl       = document.getElementById('z-el');
+
+    /* populate dielectric dropdown */
+    for(const key in dielectric){
+        const opt = document.createElement('option');
+        opt.textContent = opt.value = key;
+        selectDielectric.appendChild(opt);
+    }
+    dielectricDisplay.innerHTML = dielectric['Air'][0];
+
+    /* initial capacitance readout */
+    refreshCap();
+
+    /* ── FLOW button ── */
+    buttonFlow.addEventListener('click', () => {
+        flow = !flow;
+        chargeAction();
+    });
+
+    /* ── FLIP (DC / AC) button ── */
+    buttonFlip.addEventListener('click', () => {
+        acVolt = !acVolt;
+        duringAction();
+        buttonFlow.disabled = true;
+
+        if(acVolt){
+            cancelAnimationFrame(reqID);
+            cMaterial.transparent = false;
+            if(actions['DC_connector']) actions['DC_connector'].reset().stop();
+            if(actions['AC_connector']) actions['AC_connector'].setDuration(2).play();
+            buttonFlip.innerText = 'AC VOLTAGE';
+            impedenceEl.style.visibility = 'visible';
+            messageEl.innerHTML = messages[3];
+        } else {
+            cancelAnimationFrame(reqAC);
+            if(actions['AC_connector']) actions['AC_connector'].reset().stop();
+            if(actions['DC_connector']) actions['DC_connector'].setDuration(2).play();
+            buttonFlip.innerText = 'DC VOLTAGE';
+            impedenceEl.style.visibility = 'hidden';
+            messageEl.innerHTML = messages[1];
+        }
+
+        setTimeout(() => { buttonFlow.disabled = false; }, 3000);
+    });
+
+    /* ── CAPACITANCE button ── */
+    document.getElementById('cal').addEventListener('click', extraSite);
+
+    /* ── dielectric select ── */
+    selectDielectric.addEventListener('input', () => {
+        duringAction();
+        const key = selectDielectric.value;
+        dielectricDisplay.innerHTML = dielectric[key][0];
+        params.factor = Number(dielectric[key][0]);
+        factorElement.innerHTML = key === 'Air' ? 'ε₀' : 'ε₀κ';
+        refreshCap();
+        dSlab.visible = key !== 'Air';
+        dSlab.material.color.copy(dielectric[key][1]);
+    });
+
+    /* ── distance slider ── */
+    inputDist.addEventListener('input', () => {
+        const X = Number(inputDist.value);
+        distDisplay.innerHTML = X;
+        params.dist = X * 10;
+
+        plate1.position.z     = -params.dist;
+        plate2.position.z     =  params.dist;
+        redPoints.position.z  =  params.dist;
+        bluePoints.position.z = -params.dist;
+        dSlab.scale.z         =  X / 5;
+
+        duringAction();
+        remakeConnection();
+        pointsRecreate();
+        refreshCap();
+    });
+
+    /* ── area slider ── */
+    inputArea.addEventListener('input', () => {
+        const val = Number(inputArea.value);
+        areaDisplay.innerHTML = val / 1e4;
+
+        const s  = (val - params.area) / 1e4;
+        const sy = 1 + s;
+
+        plate1.scale.x = plate2.scale.x =
+        plate1.scale.y = plate2.scale.y = sy;
+        dSlab.scale.x  = dSlab.scale.y  = sy;
+
+        params.a = val;
+        params.k = sy > 1 ? 81 * sy : 80 * sy;
+        params.i = sy > 0.6 ? Math.floor(9 * sy) : Math.ceil(9 * sy);
+        params.points = params.i * Math.floor(21 * sy);
+
+        duringAction();
+        pointsRecreate();
+        refreshCap();
+    });
+}
+
+/* ─────────────────────────────────────────
+   refreshCap  – update calDisplay
+───────────────────────────────────────── */
+function refreshCap(){
+    const r = calCapacitance();
+    calDisplay.innerHTML = r.C.toFixed(2) + ' × 10 <sup>-' + r.exp + '</sup>';
+}
+
+/* ════════════════════════════════════════════
+   RESIZE
+════════════════════════════════════════════ */
+
+function onResize(){
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════════
+   ANIMATION LOOP
+════════════════════════════════════════════ */
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if(!introFinished){
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for(let i = 0; i < wheels.length; i++){
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* GLTF mixer */
+    if(modelReady && mixer) mixer.update(clock.getDelta());
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

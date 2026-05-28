@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ferrari Intro → Capacitor Laboratory</title>
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="shortcut icon" href="../files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
+	<link rel="shortcut icon" href="../files/favicon.ico" media="(prefers-color-scheme: light)" />
+	<link rel="stylesheet" type="text/css" href="../css/style-page.css">
+	<style>
+		.label {
+			font-weight: bold;
+			font-size: 12px;
+
+		}
+	</style>
+
+</head>
+<body>
+ 
+        <button style="background-color: rgb(164, 26, 26);" id="flow">OFF</button>
+        <button id="flip">DC VOLTAGE</button>
+        <button id="cal" onClick="extraSite()">CAPACITANCE</button>
+
+    </div>
+<script>
+        function extraSite() {
+
+            window.open("Electricity_Understanding_Capacitance.html", "_self")
+        }
+    </script>
+
+<script type="importmap">
+{
+    "imports": {
+
+        "three":
+        "https://unpkg.com/three@0.160.0/build/three.module.js",
+
+        "three/addons/":
+        "https://unpkg.com/three@0.160.0/examples/jsm/",
+
+        "tween":
+        "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js",
+
+        "lil-gui":
+        "https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js",
+
+        "stats":
+        "https://unpkg.com/stats.js@0.17.0/build/stats.min.js"
+    }
+}
+</script>
+
+</head>
+
+<body>
+
+<div id="introTitle">
+    CINEMATIC FERRARI SHOWROOM
+</div>
+
+<!-- LAB UI -->
+
+<div id="labUI">
+
+    <div id="topmenu">
+        Capacitor - Factors affecting capacitance
+    </div>
+
+    <div id="sidemenu">
+
+        <label class="label">
+            Area of plates
+        </label>
+
+        <br>
+
+        <input type="range" id="area" min="5000" max="15000" value="10000">
+
+        <br><br>
+
+        <label class="label">
+            Distance
+        </label>
+
+        <br>
+
+        <input type="range" id="dist" min="1" max="10" value="5">
+
+    </div>
+
+    <div id="menu">
+
+        <div>
+
+            C =
+            <span id="capacitanceValue">
+                1.77 × 10^-11 F
+            </span>
+
+        </div>
+
+        <br>
+
+        <button id="flow">
+            OFF
+        </button>
+
+        <button id="flip">
+            DC VOLTAGE
+        </button>
+
+    </div>
+
+</div>
+
+<script type="module">
+
+
+/* ------------------------------------------------ */
+/* IMPORTS  — via importmap                          */
+/* ------------------------------------------------ */
+
+import * as THREE
+from 'three';
+
+import { OrbitControls }
+from 'three/addons/controls/OrbitControls.js';
+                                                            import { DragControls }
+from 'three/addons/controls/DragControls.js';
+
+import { TransformControls }                                from 'three/addons/controls/TransformControls.js';
+
+import { GLTFLoader }
+from 'three/addons/loaders/GLTFLoader.js';
+
+import { DRACOLoader }
+from 'three/addons/loaders/DRACOLoader.js';                 
+import { RGBELoader }
+from 'three/addons/loaders/RGBELoader.js';
+
+import TWEEN
+from 'tween';
+
+import { GUI }
+from 'lil-gui';
+
+/* ------------------------------------------------ */
+/* GLOBALS                                           */
+/* ------------------------------------------------ */
+
+let renderer;
+let camera;
+let scene;
+let controls;
+
+let ferrariGroup = new THREE.Group();
+let capacitorGroup = new THREE.Group();
+
+let car;
+let grid;
+
+const wheels = [];
+
+const lookTarget =
+new THREE.Vector3(0,0.5,0);
+
+const smoothLook =
+new THREE.Vector3(0,0.5,0);
+
+let introFinished = false;
+
+
+/* ------------------------------------------------ */
+/* INIT                                              */
+/* ------------------------------------------------ */
+
+init();
+
+function init(){
+
+    renderer =
+    new THREE.WebGLRenderer({
+        antialias:true
+    });
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    renderer.setPixelRatio(
+        window.devicePixelRatio
+    );
+
+    renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+    renderer.toneMapping =
+    THREE.ACESFilmicToneMapping;
+
+    renderer.toneMappingExposure = 1.1;
+
+    document.body.appendChild(
+        renderer.domElement
+    );
+
+    camera =
+    new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth/window.innerHeight,
+        0.1,
+        50000
+    );
+
+    scene = new THREE.Scene();
+
+    scene.background =
+    new THREE.Color(0x111111);
+
+    controls =
+    new OrbitControls(
+        camera,
+        renderer.domElement
+    );
+
+    controls.enabled = false;
+
+    createLights();
+
+    createFerrariShowroom();
+
+    createCapacitorScene();
+
+    animate();
+
+    window.addEventListener(
+        'resize',
+        onResize
+    );
+}
+
+
+/* ------------------------------------------------ */
+/* LIGHTS                                            */
+/* ------------------------------------------------ */
+
+function createLights(){
+
+    const ambient =
+    new THREE.AmbientLight(
+        0xffffff,
+        2
+    );
+
+    scene.add(ambient);
+
+    const dir =
+    new THREE.DirectionalLight(
+        0xffffff,
+        4
+    );
+
+    dir.position.set(
+        5,
+        10,
+        7
+    );
+
+    scene.add(dir);
+}
+
+
+/* ------------------------------------------------ */
+/* FERRARI INTRO                                     */
+/* ------------------------------------------------ */
+
+function createFerrariShowroom(){
+
+    scene.add(ferrariGroup);
+
+    grid =
+    new THREE.GridHelper(
+        20,
+        40,
+        0xffffff,
+        0xffffff
+    );
+
+    grid.material.opacity = 0.15;
+    grid.material.transparent = true;
+
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+
+    .setDataType(
+        THREE.UnsignedByteType
+    )
+
+    .load(
+
+        'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+
+        function(texture){
+
+            const pmrem =
+            new THREE.PMREMGenerator(renderer);
+
+            const env =
+            pmrem
+            .fromEquirectangular(texture)
+            .texture;
+
+            scene.environment = env;
+
+            texture.dispose();
+            pmrem.dispose();
+        }
+    );
+
+    const dracoLoader =
+    new DRACOLoader();
+
+    dracoLoader.setDecoderPath(
+        'https://www.gstatic.com/draco/v1/decoders/'
+    );
+
+    const loader =
+    new GLTFLoader();
+
+    loader.setDRACOLoader(
+        dracoLoader
+    );
+
+    loader.load(
+
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+
+        function(gltf){
+
+            car =
+            gltf.scene.children[0];
+
+            const bodyMaterial =
+            new THREE.MeshPhysicalMaterial({
+
+                color:0xff0000,
+                metalness:1,
+                roughness:0.35,
+                clearcoat:1
+            });
+
+            car.getObjectByName(
+                'body'
+            ).material = bodyMaterial;
+
+            wheels.push(
+
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+
+            startFerrariSequence();
+        }
+    );
+}
+
+
+/* ------------------------------------------------ */
+/* CAMERA MOVE                                       */
+/* ------------------------------------------------ */
+
+function moveCamera(
+    x,y,z,
+    tx,ty,tz,
+    duration
+){
+
+    return new TWEEN.Tween(
+        camera.position
+    )
+
+    .to({
+        x,y,z
+    },duration)
+
+    .easing(
+        TWEEN.Easing.Cubic.InOut
+    )
+
+    .onStart(()=>{
+
+        new TWEEN.Tween(
+            lookTarget
+        )
+
+        .to({
+            x:tx,
+            y:ty,
+            z:tz
+        },duration)
+
+        .easing(
+            TWEEN.Easing.Cubic.InOut
+        )
+
+        .start();
+    });
+}
+
+
+/* ------------------------------------------------ */
+/* FERRARI CINEMATIC                                 */
+/* ------------------------------------------------ */
+
+function startFerrariSequence(){
+
+    camera.position.set(
+        0,
+        25,
+        -80
+    );
+
+    const fly =
+    moveCamera(
+        0,8,-18,
+        0,0.5,0,
+        2500
+    );
+
+    const approach =
+    moveCamera(
+        0,3,-8,
+        0,0.5,0,
+        2500
+    );
+
+    const orbitObj = {
+        angle:0
+    };
+
+    const orbit =
+    new TWEEN.Tween(orbitObj)
+
+    .to({
+        angle:Math.PI*2
+    },8000)
+
+    .onUpdate(()=>{
+
+        camera.position.x =
+        Math.cos(orbitObj.angle)*8;
+
+        camera.position.z =
+        Math.sin(orbitObj.angle)*8;
+
+        camera.position.y =
+        2.5 +
+        Math.sin(
+            orbitObj.angle*2
+        )*0.5;
+    });
+
+    const rise =
+    moveCamera(
+        0,
+        12,
+        -14,
+        0,
+        0,
+        0,
+        3000
+    );
+
+    const transition =
+    moveCamera(
+        1650,
+        300,
+        800,
+        0,
+        0,
+        0,
+        5000
+    )
+
+    .onComplete(()=>{
+
+        ferrariGroup.visible = false;
+
+        capacitorGroup.visible = true;
+
+        document.getElementById(
+            'introTitle'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'labUI'
+        ).style.display = 'block';
+
+        controls.enabled = true;
+
+        controls.target.set(
+            80,
+            130,
+            -30
+        );
+
+        controls.update();
+
+        introFinished = true;
+    });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+
+/* ------------------------------------------------ */
+/* CAPACITOR LAB                                     */
+/* ------------------------------------------------ */
+
+function createCapacitorScene(){
+
+    capacitorGroup.visible = false;
+
+    scene.add(capacitorGroup);
+
+    const grid2 =
+    new THREE.GridHelper(
+        1000,
+        50
+    );
+
+    capacitorGroup.add(grid2);
+
+    const connectorMaterial =
+    new THREE.MeshPhongMaterial({
+        color:0xb87333
+    });
+
+    const plateMaterial =
+    new THREE.MeshPhongMaterial({
+        color:0xff7d7a,
+        transparent:true,
+        opacity:0.3
+    });
+
+    const plateGeo =
+    new THREE.BoxGeometry(
+        180,
+        220,
+        5
+    );
+
+    const plate1 =
+    new THREE.Mesh(
+        plateGeo,
+        plateMaterial
+    );
+
+    const plate2 =
+    new THREE.Mesh(
+        plateGeo,
+        plateMaterial
+    );
+
+    plate1.position.set(
+        -250,
+        110,
+        -50
+    );
+
+    plate2.position.set(
+        -250,
+        110,
+        50
+    );
+
+    capacitorGroup.add(plate1);
+    capacitorGroup.add(plate2);
+
+    const dielectric =
+    new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+            170,
+            210,
+            80
+        ),
+
+        new THREE.MeshPhongMaterial({
+            color:0xffffff
+        })
+    );
+
+    dielectric.position.set(
+        -250,
+        110,
+        0
+    );
+
+    capacitorGroup.add(
+        dielectric
+    );
+
+    createPowerSupply();
+}
+
+
+/* ------------------------------------------------ */
+/* POWER SUPPLY                                      */
+/* ------------------------------------------------ */
+
+function createPowerSupply(){
+
+    const loader =
+    new GLTFLoader();
+
+    loader.load(
+
+        './model/powersupply.glb',
+
+        function(gltf){
+
+            const model =
+            gltf.scene;
+
+            model.scale.set(
+                100,
+                100,
+                100
+            );
+
+            capacitorGroup.add(model);
+        }
+    );
+}
+
+
+/* ------------------------------------------------ */
+/* RESIZE                                            */
+/* ------------------------------------------------ */
+
+function onResize(){
+
+    camera.aspect =
+    window.innerWidth /
+    window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+}
+
+
+/* ------------------------------------------------ */
+/* ANIMATE                                           */
+/* ------------------------------------------------ */
+
+function animate(){
+
+    requestAnimationFrame(
+        animate
+    );
+
+    TWEEN.update();
+
+    smoothLook.lerp(
+        lookTarget,
+        0.05
+    );
+
+    if(!introFinished){
+
+        camera.lookAt(
+            smoothLook
+        );
+
+        const time =
+        -performance.now()/1000;
+
+        grid.position.z =
+        -(time)%1;
+
+        for(let i=0;i<wheels.length;i++){
+
+            wheels[i].rotation.x =
+            time*Math.PI*2;
+        }
+    }
+
+    controls.update();
+
+    renderer.render(
+        scene,
+        camera
+    );
+}
+
+</script>
+
+</body>
+</html>
