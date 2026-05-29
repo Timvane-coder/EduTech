@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Electromagnetism</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro title ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.10em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:10px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #message-el {
+            flex:1 1 100%; font-size:12px;
+            color:#aed6f1; font-weight:600;
+            margin-bottom:4px;
+        }
+
+        /* buttons */
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #menu button:disabled { opacity:.4; cursor:default; }
+
+        #flow          { background:#1a6e3f; }
+        #flip          { background:#1a4e8f; }
+        #theorybutton  { background:#6e3a1a; }
+    </style>
+</head>
+<body>
+
+<!-- intro overlay -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI shown after transition -->
+<div id="labUI">
+
+    <div id="topmenu">
+        Effect of steady state current on a magnetic needle (Oersted's law)
+    </div>
+
+    <div id="menu">
+        <div id="message-el">Press Switch Button</div>
+        <button id="flow">SWITCH</button>
+        <button id="flip">POLARITY</button>
+        <button id="theorybutton">THEORY</button>
+    </div>
+
+</div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup         = new THREE.Group();
+let electromagnetismGroup = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── electromagnetism ── */
+let emModel, emMixer, current;
+let emModelReady = false;
+let emFlow  = 0;   // 0 = off,  1 = on
+let emFlip  = 0;   // 0 = normal polarity,  1 = reversed
+let emButton;      // last button pressed: 0 = flow,  1 = flip
+const emActions = {};
+const emClock   = new THREE.Clock();
+
+/* DOM refs — filled by setupEmUI() */
+let buttonFlow, buttonFlip, messageEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer — identical to original */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — starts at Ferrari intro position */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* orbit controls disabled during intro */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createElectromagnetismScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  — unchanged
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — unchanged
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — unchanged
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — unchanged except
+   transition onComplete swapped for EM
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* transition lands at EM scene camera position */
+    const transition = moveCamera(5, 3, 5, 1, 0.8, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible          = false;
+            electromagnetismGroup.visible = true;
+
+            /* swap background to EM scene colour */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            /* remove HDR environment so EM model isn't over-lit */
+            scene.environment = null;
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* hand orbit controls to EM scene target */
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(1, 0.8, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   ELECTROMAGNETISM SCENE
+════════════════════════════════════════ */
+
+function createElectromagnetismScene() {
+
+    electromagnetismGroup.visible = false;
+    scene.add(electromagnetismGroup);
+
+    /* grid — same size as EM original */
+    const grid2 = new THREE.GridHelper(10, 10);
+    electromagnetismGroup.add(grid2);
+
+    /* extra lights matching EM original */
+    const hemi = new THREE.AmbientLight(0xffffff, 0.20);
+    hemi.position.set(0, 20, 0);
+    scene.add(hemi);
+
+    const dirEM = new THREE.DirectionalLight(0xffffff, 1);
+    dirEM.position.set(-30, 50, -30);
+    dirEM.castShadow = true;
+    scene.add(dirEM);
+
+    /* wire up UI then load model */
+    setupEmUI();
+    createEmModel();
+}
+
+/* ------------------------------------------------ */
+/* createEmModel                                     */
+/* ------------------------------------------------ */
+
+function createEmModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'supply.glb',
+        function (gltf) {
+
+            emModel = gltf.scene;
+            scene.add(emModel);
+
+            /* get arrow morph target */
+            current = emModel.getObjectByName('arrow');
+
+            emMixer = new THREE.AnimationMixer(emModel);
+
+            /* start with arrow showing no current */
+            if (current) current.morphTargetInfluences[0] = 1;
+
+            const fixedStates = ['polarity1','polarity','needleL','needleR'];
+
+            for (const clip of gltf.animations) {
+                const action = emMixer.clipAction(clip);
+                emActions[clip.name] = action;
+                if (fixedStates.includes(clip.name)) {
+                    action.clampWhenFinished = true;
+                    action.loop = THREE.LoopOnce;
+                }
+            }
+
+            emModelReady = true;
+        },
+        undefined,
+        (e) => console.warn('supply.glb not found – scene works without it.', e)
+    );
+}
+
+/* ------------------------------------------------ */
+/* currentFlow                                       */
+/* ------------------------------------------------ */
+
+function currentFlow() {
+
+    if (emFlip === 0 && emFlow === 0) {
+
+        if (emActions['needleR']) emActions['needleR'].setDuration(5).play();
+
+        setTimeout(() => {
+            if (current) current.morphTargetInfluences[0] = 0;
+            if (emActions['flowF']) emActions['flowF'].setDuration(5).play();
+        }, 2500);
+
+        emFlow = 1;
+        messageEl.textContent = 'Current Flows from A to B, Compass needle deflects';
+
+    } else if (emFlip === 1 && emFlow === 0) {
+
+        if (emActions['needleL']) emActions['needleL'].setDuration(5).play();
+
+        setTimeout(() => {
+            if (current) current.morphTargetInfluences[0] = 0;
+            if (emActions['flowR']) emActions['flowR'].setDuration(5).play();
+        }, 2500);
+
+        emFlow = 1;
+        messageEl.textContent = 'Current Flows from B to A, Compass needle deflects in opposite direction';
+
+    } else {
+
+        if (emActions['needleR']) emActions['needleR'].fadeOut(0.5);
+        if (emActions['needleL']) emActions['needleL'].fadeOut(0.5);
+        if (current) current.morphTargetInfluences[0] = 1;
+        emFlow = 0;
+        messageEl.textContent = 'No Current Flows, Switch OFF';
+    }
+}
+
+/* ------------------------------------------------ */
+/* polarity                                          */
+/* ------------------------------------------------ */
+
+function polarity() {
+
+    if (emFlip === 0) {
+
+        if (emActions['polarity'])  emActions['polarity'].fadeOut(0.5);
+        if (emActions['needleR'])   emActions['needleR'].fadeOut(0.5);
+        if (emActions['flowR'])     emActions['flowR'].fadeOut(0.5);
+        if (emActions['polarity1']) emActions['polarity1'].setDuration(2).play();
+
+        if (current) current.morphTargetInfluences[0] = 1;
+        emFlow = 0;
+        emFlip = 1;
+        messageEl.textContent = 'Polarity Changed. B is now the + terminal';
+
+    } else {
+
+        if (emActions['polarity1']) emActions['polarity1'].fadeOut(0.5);
+        if (emActions['needleL'])   emActions['needleL'].fadeOut(0.5);
+        if (emActions['flowF'])     emActions['flowF'].fadeOut(0.5);
+        if (emActions['polarity'])  emActions['polarity'].setDuration(2).play();
+
+        if (current) current.morphTargetInfluences[0] = 1;
+        emFlow = 0;
+        emFlip = 0;
+        messageEl.textContent = 'Polarity Changed. A is now the + terminal';
+    }
+}
+
+/* ------------------------------------------------ */
+/* setEmCamera                                       */
+/* Maps to setCamera() in the original              */
+/* ------------------------------------------------ */
+
+function setEmCamera() {
+
+    if (emButton === 1) {
+        /* polarity view — wider FOV, same position */
+        camera.fov = 40;
+        camera.position.set(5, 3, 5);
+        camera.rotation.set(0, 0, 0);
+        controls.target.set(1, 0.8, 0);
+    } else {
+        /* current flow view — narrow FOV, slightly higher */
+        camera.fov = 20;
+        camera.position.set(5, 5, 5);
+        controls.target.set(1, 0.4, 0);
+    }
+
+    camera.updateProjectionMatrix();
+    controls.update();
+}
+
+/* ------------------------------------------------ */
+/* setupEmUI                                         */
+/* Maps to the inline addEventListener block        */
+/* in the original createModel callback             */
+/* ------------------------------------------------ */
+
+function setupEmUI() {
+
+    buttonFlow = document.getElementById('flow');
+    buttonFlip = document.getElementById('flip');
+    messageEl  = document.getElementById('message-el');
+
+    buttonFlip.addEventListener('click', () => {
+
+        if (emActions['polarity1']) emActions['polarity1'].reset();
+        if (emActions['polarity'])  emActions['polarity'].reset();
+        if (emActions['flowF'])     emActions['flowF'].stop();
+        if (emActions['flowR'])     emActions['flowR'].stop();
+
+        emButton = 1;
+        setEmCamera();
+        polarity();
+    });
+
+    buttonFlow.addEventListener('click', () => {
+
+        if (emActions['needleR']) emActions['needleR'].stop().reset();
+        if (emActions['needleL']) emActions['needleL'].stop().reset();
+        if (emActions['flowF'])   emActions['flowF'].stop().reset();
+        if (emActions['flowR'])   emActions['flowR'].stop().reset();
+
+        emButton = 0;
+        setEmCamera();
+        currentFlow();
+    });
+
+    document.getElementById('theorybutton').addEventListener('click', () => {
+        window.open(
+            '../Theory/Magnetism/Magnetism_History_of_Electromagnetism.html',
+            '_self'
+        );
+    });
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — unchanged
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE  — updated for EM mixer
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* EM animation mixer */
+    if (emModelReady && emMixer) emMixer.update(emClock.getDelta());
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Magnetic Force Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top banner */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(10,14,20,.95);
+            color:#e0e8f0; font-size:12px; letter-spacing:.10em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.07);
+        }
+
+        /* left side panel — Fleming's rule */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:260px;
+            background:rgba(10,14,20,.88);
+            color:#ccd6e0; font-size:12px;
+            padding:14px 14px;
+            z-index:100;
+            border-right:1px solid rgba(255,255,255,.06);
+            line-height:1.9;
+        }
+        #sidemenu strong { color:#e0e8f0; }
+        #sidemenu a      { font-weight:600; }
+
+        /* bottom control bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(10,14,20,.95);
+            color:#ccd6e0; font-size:12px;
+            padding:8px 14px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:6px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.07);
+        }
+
+        #conductor-el {
+            flex:1 1 100%; color:#8b1a1a;
+            font-weight:700; font-size:11.5px;
+            margin-top:1px;
+        }
+        #message-el {
+            flex:1 1 100%; color:#8ca0b0;
+            font-size:11px; margin-top:1px;
+        }
+
+        /* buttons */
+        #menu button {
+            padding:6px 13px; border:none; border-radius:4px;
+            font-size:11.5px; font-weight:600; letter-spacing:.05em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover  { filter:brightness(1.2); }
+        #menu button:disabled { opacity:.38; cursor:default; }
+
+        #wire-el      { background:rgb(3,67,97); }
+        #coil-el      { background:rgb(3,108,156); }
+        #hand-el      { background:#2d4a1e; }
+        #flow-el      { background:#5a1e1e; }
+        #flip-el      { background:#1a3a5c; }
+        #direction-el { background:#3a2060; }
+        #slow-el      { background:#4a3800; }
+
+        .row-break { flex:1 1 100%; height:0; }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── magnetic lab UI (shown after transition) ── -->
+<div id="labUI">
+
+    <div id="topmenu">
+        Force on a current carrying conductor in a magnetic field
+    </div>
+
+    <div id="sidemenu">
+        <div style="visibility:hidden;" id="rule-el">
+            <strong>Fleming's Left Hand Rule</strong><br>
+            Thu<a style="color:red;">m</a>b :- <a style="color:red;">M</a>echanical Force;<br>
+            <a style="color:#4488ff;">F</a>ore Finger :- Magnetic <a style="color:#4488ff;">F</a>ield;<br>
+            Se<a style="color:rgb(60,220,60);">c</a>ond Finger :- Electric <a style="color:rgb(60,220,60);">C</a>urrent;
+        </div>
+    </div>
+
+    <div id="menu">
+        <button id="wire-el">Straight Wire</button>
+        <button id="coil-el">Armature Coil</button>
+        <div class="row-break"></div>
+        <button id="hand-el">HAND GESTURE</button>
+        <button id="flow-el">SWITCH ON/OFF</button>
+        <button id="flip-el">CURRENT POLARITY</button>
+        <button id="direction-el">MAGNETIC POLARITY</button>
+        <button style="visibility:hidden;" id="slow-el">SLOW</button>
+        <div id="conductor-el">--------</div>
+        <div id="message-el">
+            Investigate the force on current carrying Aluminium Rod held within the magnetic field
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup  = new THREE.Group();
+let magneticGroup = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── magnetic scene: state ── */
+let element    = 0;   // 0 = straight wire, 1 = armature coil
+let flip       = false;
+let flow       = false;
+let slow       = false;
+let fDirection = false;
+let mrotate    = false;
+let hGesture   = false;
+
+/* ── magnetic scene: model refs ── */
+let magModel, magMixer;           // elements.glb  (arrow + polarity needle)
+let wireModel, wireMixer;         // ForceonWire.glb
+let leftHand;                     // lefthandrule.glb
+let coilModel, coilMixer;         // ForceonCoil.glb
+let magnetModel;                  // magnet.glb
+
+let arrow;                        // from elements.glb
+let current;                      // from ForceonWire.glb
+let magnet_direction, mField;     // from magnet.glb
+let currentwire;                  // from ForceonCoil.glb
+let arrow1, arrow2;
+let direction1, direction2;
+
+const actions = {};               // shared animation action map
+const clock   = new THREE.Clock();
+
+const modelPath = './model/';
+const modelFiles = {
+    '1': 'elements.glb',
+    '2': 'ForceonWire.glb',
+    '3': 'lefthandrule.glb',
+    '4': 'ForceonCoil.glb',
+    '5': 'magnet.glb'
+};
+
+/* ── DOM refs (filled in setupMagneticUI) ── */
+let messageEl, conductorEl, ruleEl;
+let buttonWireEl, buttonCoilEl;
+let buttonHand, buttonFlow, buttonFlip, buttonDirection, buttonSlowEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — FOV 40 for Ferrari intro, will stay (magnetic scene
+       uses OrbitControls target, not a different FOV)              */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 1500
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* orbit controls — disabled during intro */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createMagneticScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+   (identical to working Ferrari+Cap file)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC
+   (identical chain — only onComplete updated
+    for magnetic scene values)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into magnetic scene ── */
+    const transition = moveCamera(5, 3, 5, 0.8, 0.8, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible  = false;
+            magneticGroup.visible = true;
+
+            /* magnetic scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+            scene.environment = null;
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* magnetic scene camera target — matches original:
+               createControls(0.8, 0.8, 0) */
+            controls.enabled = true;
+            controls.target.set(0.8, 0.8, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   MAGNETIC SCENE — top-level builder
+════════════════════════════════════════ */
+
+function createMagneticScene() {
+
+    magneticGroup.visible = false;
+    scene.add(magneticGroup);
+
+    const gridHelper = new THREE.GridHelper(10, 10);
+    magneticGroup.add(gridHelper);
+
+    /* wire up HTML buttons before models load
+       so no null-ref if user clicks early     */
+    setupMagneticUI();
+
+    /* load all five GLTF models */
+    loadMagneticModels();
+}
+
+/* ------------------------------------------------ */
+/* loadMagneticModels                               */
+/* ------------------------------------------------ */
+
+function loadMagneticModels() {
+
+    const loader = new GLTFLoader();
+
+    /* 1 — elements.glb  (polarity needle + arrow) */
+    loader.setPath(modelPath).load(modelFiles['1'], function (gltf) {
+
+        magModel = gltf.scene;
+        magMixer = new THREE.AnimationMixer(magModel);
+        arrow    = magModel.getObjectByName('arrow');
+        scene.add(magModel);
+        arrow.visible = false;
+
+        const fixed = ['polarity1', 'polarity', 'needleL'];
+        for (const clip of gltf.animations) {
+            const action = magMixer.clipAction(clip);
+            actions[clip.name] = action;
+            if (fixed.includes(clip.name)) {
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+            }
+        }
+    });
+
+    /* 2 — ForceonWire.glb  (aluminium rod + current arrows) */
+    loader.setPath(modelPath).load(modelFiles['2'], function (gltf) {
+
+        wireModel = gltf.scene;
+        current   = wireModel.getObjectByName('current');
+        wireMixer = new THREE.AnimationMixer(wireModel);
+        scene.add(wireModel);
+
+        const fixed = ['currentleft','currentleftR','currentright','currentrightR','right','left'];
+        for (const clip of gltf.animations) {
+            const action = wireMixer.clipAction(clip);
+            actions[clip.name] = action;
+            if (fixed.includes(clip.name)) {
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+            }
+        }
+    });
+
+    /* 3 — lefthandrule.glb */
+    loader.setPath(modelPath).load(modelFiles['3'], function (gltf) {
+
+        leftHand = gltf.scene;
+        scene.add(leftHand);
+        leftHand.visible = false;
+    });
+
+    /* 4 — ForceonCoil.glb  (armature coil) */
+    loader.setPath(modelPath).load(modelFiles['4'], function (gltf) {
+
+        coilModel  = gltf.scene;
+        coilMixer  = new THREE.AnimationMixer(coilModel);
+
+        currentwire = gltf.scene.getObjectByName('currentwire');
+        arrow1      = gltf.scene.getObjectByName('arrow1');
+        arrow2      = gltf.scene.getObjectByName('arrow2');
+        direction1  = gltf.scene.getObjectByName('direction1');
+        direction2  = gltf.scene.getObjectByName('direction2');
+
+        direction1.visible  = false;
+        direction2.visible  = false;
+        currentwire.visible = false;
+        arrow1.visible      = false;
+        arrow2.visible      = false;
+
+        const fixed = ['direction1', 'direction2'];
+        for (const clip of gltf.animations) {
+            const action = coilMixer.clipAction(clip);
+            actions[clip.name] = action;
+            if (fixed.includes(clip.name)) {
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+            }
+        }
+    });
+
+    /* 5 — magnet.glb */
+    loader.setPath(modelPath).load(modelFiles['5'], function (gltf) {
+
+        magnetModel      = gltf.scene;
+        magnet_direction = magnetModel.getObjectByName('direction');
+        mField           = magnetModel.getObjectByName('Magnet');
+        scene.add(magnetModel);
+        magnet_direction.visible = false;
+    });
+}
+
+/* ------------------------------------------------ */
+/* slowarmatureAction                               */
+/* ------------------------------------------------ */
+
+function slowarmatureAction() {
+
+    if (!flip && slow) {
+
+        currentwire.visible = true;
+        currentwire.morphTargetInfluences[0] = 0;
+        arrow1.visible = true;
+        arrow2.visible = true;
+        buttonSlowEl.disabled = true;
+        buttonSlowEl.style.cursor = 'default';
+        actions['clockwise'].setDuration(25).play();
+        actions['arrow1flip'].setDuration(25).play();
+        actions['arrowflip'].setDuration(25).play();
+        conductorEl.textContent = 'CLICK ON SHOW DIRECTION';
+        messageEl.textContent   = 'SLOW MOTION: Current flows from A to B into the armature coil, Force exerted on the coil makes it rotate clockwise';
+
+    } else if (flip && slow) {
+
+        currentwire.visible = true;
+        currentwire.morphTargetInfluences[0] = 1;
+        arrow1.visible = true;
+        arrow2.visible = true;
+        buttonSlowEl.disabled = true;
+        buttonSlowEl.style.cursor = 'default';
+        actions['counterclockwise'].setDuration(25).play();
+        actions['arrow1flipR'].setDuration(25).play();
+        actions['arrowflipR'].setDuration(25).play();
+        conductorEl.textContent = 'CLICK ON SHOW DIRECTION';
+        messageEl.textContent   = 'SLOW MOTION: Current flows from B to A, Force exerted on the coil make it rotate counterclockwise';
+
+    } else {
+
+        buttonSlowEl.style.visibility = 'hidden';
+        slow = false;
+        currentwire.visible = false;
+        arrow1.visible      = false;
+        arrow2.visible      = false;
+        messageEl.textContent   = 'SWITCH OFF';
+        conductorEl.textContent = 'CLICK ON SWITCH BUTTON';
+    }
+}
+
+/* ------------------------------------------------ */
+/* handGesture                                      */
+/* ------------------------------------------------ */
+
+function handGesture() {
+
+    if (element === 0 && !hGesture) {
+
+        leftHand.position.set(-1, 1, 0.7);
+        leftHand.visible = true;
+        ruleEl.style.visibility = 'visible';
+        hGesture = true;
+        buttonHand.innerHTML = 'HIDE GESTURE';
+
+    } else if (element === 1 && !hGesture) {
+
+        leftHand.position.set(-1, 1, 1.3);
+        leftHand.rotation.set(-1.57, 1.57, 0);
+        leftHand.visible = true;
+        ruleEl.style.visibility = 'visible';
+        hGesture = true;
+        buttonHand.innerHTML = 'HIDE GESTURE';
+
+    } else {
+
+        leftHand.visible = false;
+        ruleEl.style.visibility = 'hidden';
+        hGesture = false;
+        buttonHand.innerHTML = 'HAND GESTURE';
+    }
+}
+
+/* ------------------------------------------------ */
+/* polarity                                         */
+/* ------------------------------------------------ */
+
+function polarity() {
+
+    if (!flip) {
+        actions['polarity1'].setDuration(0.5).play();
+        flow = false;
+        flip = true;
+        messageEl.textContent = 'Polarity Changed. B is now the + terminal';
+    } else {
+        actions['polarity'].setDuration(0.5).play();
+        flow = false;
+        flip = false;
+        messageEl.textContent = 'Polarity Changed. A is now the + terminal';
+    }
+}
+
+/* ------------------------------------------------ */
+/* currentFlow  (straight wire)                     */
+/* ------------------------------------------------ */
+
+function currentFlow() {
+
+    if (!flip && !flow && !mrotate && element === 0) {
+
+        actions['needleL'].setDuration(5).play();
+        current.visible = true;
+        setTimeout(() => {
+            actions['left'].setDuration(5).play();
+            actions['currentleft'].setDuration(5).play();
+            setTimeout(() => {
+                leftHand.rotation.set(0, 0, 0);
+                magnet_direction.morphTargetInfluences[0] = 1;
+                magnet_direction.morphTargetInfluences[1] = 0;
+                magnet_direction.morphTargetInfluences[2] = 0;
+                magnet_direction.visible = true;
+            }, 1500);
+        }, 1000);
+        flow = true;
+        conductorEl.textContent = 'Blue pointer: field direction | Green pointer: current direction | Red pointer: force direction';
+        messageEl.textContent   = 'Current flows from A to B, Force exerted on the Rod is as shown by the pointer';
+
+    } else if (flip && !flow && !mrotate && element === 0) {
+
+        actions['needleL'].setDuration(5).play();
+        current.visible = true;
+        setTimeout(() => {
+            actions['right'].setDuration(5).play();
+            actions['currentright'].setDuration(5).play();
+            setTimeout(() => {
+                leftHand.rotation.set(0, 3.14, 0);
+                magnet_direction.morphTargetInfluences[0] = 0;
+                magnet_direction.morphTargetInfluences[1] = 0;
+                magnet_direction.morphTargetInfluences[2] = 1;
+                magnet_direction.visible = true;
+            }, 1500);
+        }, 1000);
+        flow = true;
+        conductorEl.textContent = 'Blue pointer: field direction | Green pointer: current direction | Red pointer: force direction';
+        messageEl.textContent   = 'Current flows from B to A, Force exerted on the Rod is as shown by the pointer';
+
+    } else if (!flip && !flow && mrotate && element === 0) {
+
+        actions['needleL'].setDuration(5).play();
+        current.visible = true;
+        setTimeout(() => {
+            actions['right'].setDuration(5).play();
+            actions['currentrightR'].setDuration(5).play();
+            setTimeout(() => {
+                leftHand.rotation.set(0, 0, 3.14);
+                magnet_direction.morphTargetInfluences[0] = 0;
+                magnet_direction.morphTargetInfluences[1] = 1;
+                magnet_direction.morphTargetInfluences[2] = 0;
+                magnet_direction.visible = true;
+            }, 1500);
+        }, 1000);
+        flow = true;
+        conductorEl.textContent = 'Blue pointer: field direction | Green pointer: current direction | Red pointer: force direction';
+        messageEl.textContent   = 'Current flows from A to B, Force exerted on the Rod is as shown by the pointer';
+
+    } else if (flip && !flow && mrotate && element === 0) {
+
+        actions['needleL'].setDuration(5).play();
+        current.visible = true;
+        setTimeout(() => {
+            actions['left'].setDuration(5).play();
+            actions['currentleftR'].setDuration(5).play();
+            setTimeout(() => {
+                leftHand.rotation.set(0, 3.14, 3.14);
+                magnet_direction.morphTargetInfluences[0] = 1;
+                magnet_direction.morphTargetInfluences[1] = 1;
+                magnet_direction.morphTargetInfluences[2] = 1;
+                magnet_direction.visible = true;
+            }, 1500);
+        }, 1000);
+        flow = true;
+        conductorEl.textContent = 'Blue pointer: field direction | Green pointer: current direction | Red pointer: force direction';
+        messageEl.textContent   = 'Current flows from B to A, Force exerted on the Rod is as shown by the pointer';
+
+    } else {
+
+        actions['needleL'].fadeOut();
+        actions['left'].fadeOut();
+        actions['currentleft'].fadeOut();
+        actions['right'].fadeOut();
+        actions['currentright'].fadeOut();
+        actions['currentleftR'].fadeOut();
+        actions['currentrightR'].fadeOut();
+        flow = false;
+        conductorEl.textContent      = '------------------------------------------------';
+        messageEl.textContent        = 'No Current Flows, Switch OFF, rod position restored';
+        magnet_direction.visible     = false;
+        current.visible              = false;
+        hGesture = false;
+        handGesture();
+    }
+}
+
+/* ------------------------------------------------ */
+/* armatureFlow  (coil)                             */
+/* ------------------------------------------------ */
+
+function armatureFlow() {
+
+    if (!flip && !flow) {
+
+        currentwire.visible = true;
+        currentwire.morphTargetInfluences[0] = 0;
+        arrow1.visible = true;
+        arrow2.visible = true;
+        flow = true;
+        actions['needleL'].setDuration(0.5).play();
+        actions['clockwise'].play();
+        actions['arrow1flip'].play();
+        actions['arrowflip'].play();
+        conductorEl.textContent = 'CLICK SLOW for slow-motion | SHOW DIRECTION for vectors';
+        messageEl.textContent   = 'Current flows from A to B into the armature coil; Forces on the two arms are opposite — rotates clockwise';
+        buttonSlowEl.style.visibility = 'visible';
+
+    } else if (flip && !flow) {
+
+        currentwire.visible = true;
+        currentwire.morphTargetInfluences[0] = 1;
+        arrow1.visible = true;
+        arrow2.visible = true;
+        flow = true;
+        actions['needleL'].setDuration(0.5).play();
+        actions['counterclockwise'].play();
+        actions['arrow1flipR'].play();
+        actions['arrowflipR'].play();
+        conductorEl.textContent = 'CLICK ON SHOW DIRECTION';
+        messageEl.textContent   = 'Current flows from B to A, Force makes the coil rotate counterclockwise';
+        buttonSlowEl.style.visibility = 'visible';
+
+    } else {
+
+        actions['needleL'].stop().reset();
+        actions['clockwise'].stop().reset();
+        actions['counterclockwise'].stop().reset();
+        flow = false;
+        currentwire.visible = false;
+        direction1.visible  = false;
+        direction2.visible  = false;
+        arrow1.visible      = false;
+        arrow2.visible      = false;
+        buttonSlowEl.style.visibility = 'hidden';
+        buttonDirection.textContent   = 'SHOW DIRECTION';
+        conductorEl.textContent       = '------------------------------------------------';
+        messageEl.textContent         = 'No Current Flows, Switch OFF, rod position restored';
+        if (leftHand) leftHand.visible = false;
+    }
+}
+
+/* ------------------------------------------------ */
+/* magnetRotation                                   */
+/* ------------------------------------------------ */
+
+function magnetRotation() {
+
+    if (!mrotate) {
+        mField.rotation.set(3.14, 0, 0);
+        mrotate = true;
+        messageEl.textContent = 'Magnet Polarity Changed. Field directed DOWNWARD';
+    } else {
+        mField.rotation.set(0, 0, 0);
+        mrotate = false;
+        messageEl.textContent = 'Magnet Polarity Changed. Field directed UPWARD';
+    }
+}
+
+/* ------------------------------------------------ */
+/* forceDirection                                   */
+/* ------------------------------------------------ */
+
+function forceDirection() {
+
+    if (!flip && fDirection) {
+
+        actions['direction1'].reset().stop();
+        actions['direction2'].reset().stop();
+        direction1.visible = true;
+        direction2.visible = true;
+        conductorEl.textContent = 'FORCE ON TWO ARMS: Blue=field | Green=current | Red=force direction';
+        buttonDirection.textContent = 'HIDE DIRECTION';
+
+    } else if (flip && fDirection) {
+
+        actions['direction1'].setDuration(0.01).play();
+        actions['direction2'].setDuration(0.01).play();
+        direction1.visible = true;
+        direction2.visible = true;
+        conductorEl.textContent = 'FORCE ON TWO ARMS: Blue=field | Green=current | Red=force direction';
+        buttonDirection.textContent = 'HIDE DIRECTION';
+
+    } else {
+
+        direction1.visible = false;
+        direction2.visible = false;
+        buttonDirection.textContent = 'SHOW DIRECTION';
+    }
+}
+
+/* ------------------------------------------------ */
+/* stopAllAction                                    */
+/* ------------------------------------------------ */
+
+function stopAllAction() {
+
+    const toStop = [
+        'polarity1','polarity','needleL',
+        'clockwise','counterclockwise',
+        'currentleft','left','currentright','right',
+        'arrow1flip','arrowflip','arrow1flipR','arrowflipR',
+        'direction1','direction2',
+        'currentleftR','currentrightR'
+    ];
+    toStop.forEach(name => {
+        if (actions[name]) actions[name].reset().stop();
+    });
+
+    if (leftHand)    leftHand.visible    = false;
+    if (coilModel)   coilModel.visible   = false;
+    if (wireModel)   wireModel.visible   = false;
+    if (magnetModel) magnetModel.visible = false;
+
+    if (current)          current.visible          = false;
+    if (magnet_direction) magnet_direction.visible  = false;
+    if (arrow1)           arrow1.visible            = false;
+    if (arrow2)           arrow2.visible            = false;
+    if (currentwire)      currentwire.visible       = false;
+}
+
+/* ------------------------------------------------ */
+/* setMagneticCamera                                */
+/* ------------------------------------------------ */
+
+function setMagneticCamera() {
+
+    if (element === 0) {
+        /* straight wire view — fov 50, pos (5,3,5), target (0.8,0.8,0) */
+        camera.fov = 50;
+        camera.updateProjectionMatrix();
+        camera.position.set(5, 3, 5);
+        controls.target.set(0.8, 0.8, 0);
+    } else {
+        /* armature coil view — fov 35, pos (5,5,5), target (0.4,0.4,0) */
+        camera.fov = 35;
+        camera.updateProjectionMatrix();
+        camera.position.set(5, 5, 5);
+        controls.target.set(0.4, 0.4, 0);
+    }
+    controls.update();
+}
+
+/* ------------------------------------------------ */
+/* setupMagneticUI  (= buttonLoad in original)      */
+/* ------------------------------------------------ */
+
+function setupMagneticUI() {
+
+    messageEl     = document.getElementById('message-el');
+    conductorEl   = document.getElementById('conductor-el');
+    ruleEl        = document.getElementById('rule-el');
+    buttonWireEl  = document.getElementById('wire-el');
+    buttonCoilEl  = document.getElementById('coil-el');
+    buttonHand    = document.getElementById('hand-el');
+    buttonFlow    = document.getElementById('flow-el');
+    buttonFlip    = document.getElementById('flip-el');
+    buttonDirection = document.getElementById('direction-el');
+    buttonSlowEl  = document.getElementById('slow-el');
+
+    /* ── Straight Wire scene ── */
+    buttonWireEl.addEventListener('click', () => {
+        buttonCoilEl.style.backgroundColor = 'rgb(3,108,156)';
+        buttonWireEl.style.backgroundColor = 'rgb(3,67,97)';
+        messageEl.textContent  = 'Investigate the force on current carrying Aluminium Rod held within the magnetic field';
+        ruleEl.style.visibility        = 'hidden';
+        buttonHand.innerHTML           = 'HAND GESTURE';
+        buttonDirection.innerHTML      = 'MAGNETIC POLARITY';
+        buttonSlowEl.style.visibility  = 'hidden';
+        element = 0;
+        flow = false; flip = false; hGesture = false;
+        stopAllAction();
+        if (magnetModel) magnetModel.visible = true;
+        if (wireModel)   wireModel.visible   = true;
+        setMagneticCamera();
+    });
+
+    /* ── Armature Coil scene ── */
+    buttonCoilEl.addEventListener('click', () => {
+        buttonWireEl.style.backgroundColor = 'rgb(3,108,156)';
+        buttonCoilEl.style.backgroundColor = 'rgb(3,67,97)';
+        messageEl.textContent  = 'Investigate the force on Armature Coil held within the magnetic field';
+        ruleEl.style.visibility       = 'hidden';
+        buttonHand.innerHTML          = 'HAND GESTURE';
+        buttonDirection.innerHTML     = 'SHOW DIRECTION';
+        buttonSlowEl.style.visibility = 'hidden';
+        element = 1;
+        flow = false; flip = false; hGesture = false;
+        stopAllAction();
+        if (coilModel) { scene.add(coilModel); coilModel.visible = true; }
+        setMagneticCamera();
+    });
+
+    /* ── Hand gesture ── */
+    buttonHand.addEventListener('click', () => {
+        if (!leftHand) return;
+        if (flow) {
+            leftHand.visible = true;
+            handGesture();
+        } else {
+            leftHand.visible  = false;
+            messageEl.textContent = 'SWITCH ON';
+        }
+    });
+
+    /* ── Switch ON/OFF ── */
+    buttonFlow.addEventListener('click', () => {
+
+        if (element === 0) {
+            ['needleL','currentleft','left','currentright','right',
+             'currentleftR','currentrightR'].forEach(n => {
+                if (actions[n]) actions[n].reset().stop();
+            });
+            currentFlow();
+
+        } else if (element === 1) {
+            ['clockwise','counterclockwise',
+             'arrow1flip','arrowflip','arrow1flipR','arrowflipR'].forEach(n => {
+                if (actions[n]) actions[n].reset().stop();
+            });
+            armatureFlow();
+            buttonSlowEl.disabled = false;
+            buttonSlowEl.style.cursor = 'pointer';
+            slow = false;
+        }
+    });
+
+    /* ── Current polarity ── */
+    buttonFlip.addEventListener('click', () => {
+
+        ['polarity1','polarity','needleL',
+         'clockwise','counterclockwise',
+         'currentleft','left','currentright','right'].forEach(n => {
+            if (actions[n]) actions[n].reset().stop();
+        });
+
+        if (magnet_direction) magnet_direction.visible = false;
+        ruleEl.style.visibility = 'hidden';
+        buttonHand.innerHTML    = 'HAND GESTURE';
+        if (direction1) direction1.visible = false;
+        if (direction2) direction2.visible = false;
+        if (currentwire) currentwire.visible = false;
+        if (arrow1) arrow1.visible = false;
+        if (arrow2) arrow2.visible = false;
+        if (current) current.visible = false;
+        conductorEl.textContent       = '------------------------------------------------';
+        buttonSlowEl.style.visibility = 'hidden';
+
+        polarity();
+    });
+
+    /* ── Slow motion (coil only) ── */
+    buttonSlowEl.addEventListener('click', () => {
+        slow = true;
+        ['clockwise','arrow1flip','arrowflip',
+         'counterclockwise','arrow1flipR','arrowflipR'].forEach(n => {
+            if (actions[n]) actions[n].reset().stop();
+        });
+        slowarmatureAction();
+    });
+
+    /* ── Direction / Magnetic polarity ── */
+    buttonDirection.addEventListener('click', () => {
+
+        if (element === 0 && !flow) {
+            conductorEl.textContent = '------------------------------------------------';
+            if (leftHand) leftHand.visible = false;
+            magnetRotation();
+        } else if (element === 1) {
+            if (leftHand) leftHand.visible = true;
+            fDirection = !fDirection;
+            forceDirection();
+        } else {
+            messageEl.textContent = 'SWITCH OFF';
+        }
+    });
+}
+
+/* ════════════════════════════════════════
+   RESIZE
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* ── tick all three magnetic mixers ── */
+    const delta = clock.getDelta();
+    if (magMixer)  magMixer.update(delta);
+    if (wireMixer) wireMixer.update(delta);
+    if (coilMixer) coilMixer.update(delta);
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

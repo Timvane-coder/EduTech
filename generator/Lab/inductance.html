@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Inductor Laboratory</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left panel — inductance formula */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:260px;
+            background:rgba(15,15,20,.9);
+            color:#d4d4d4; font-size:13px;
+            padding:18px 16px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:2;
+        }
+        #sidemenu a { color:#e07070; font-weight:600; }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a    { color:#e07070; font-weight:600; }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+
+        /* fraction */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+        .bar { display:none; }
+
+        /* buttons */
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover   { filter:brightness(1.18); }
+        #menu button:disabled{ opacity:.4; cursor:default; }
+        #flow    { background:rgb(164,26,26); }
+        #flip    { background:#1a4e8f; }
+        #ind-btn { background:#2a6e3f; }
+
+        /* freq buttons */
+        #freq { display:none; gap:6px; }
+        #freq button { padding:5px 12px; }
+        #lowF  { background:rgb(164,26,26); }
+        #highF { background:rgb(164,26,26); }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI shown after transition ── -->
+<div id="labUI">
+
+    <div id="topmenu">Inductor &mdash; Understanding inductance</div>
+
+    <!-- inductance formula panel -->
+    <div id="sidemenu">
+        L = N
+        <div class="fraction">
+            <span class="fup">&Delta;&phi;</span>
+            <span class="bar">/</span>
+            <span class="fdn">&Delta;I</span>
+        </div>
+        =
+        <div class="fraction">
+            <span class="fup"><a id="factor-el">&mu;<sub>0</sub>N<sup>2</sup></a>A</span>
+            <span class="bar">/</span>
+            <span class="fdn">&ell;</span>
+        </div>
+        <br>Unit of inductance is Henry, (H)
+    </div>
+
+    <div id="menu">
+        <div style="font-weight:bolder;"><a id="message-el"></a></div>
+        <a id="calDisplay"></a><br>
+
+        <div id="freq" style="display:none;">
+            <button id="lowF">LOW f</button>
+            <button id="highF">HIGH f</button>
+        </div>
+
+        <button id="flow">OFF</button>
+        <button id="flip">DC VOLTAGE</button>
+        <button id="ind-btn">INDUCTION</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup    = new THREE.Group();
+let inductanceGroup = new THREE.Group();   // replaces capacitorGroup
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── inductance scene ── */
+let model, mixer, knob, plus, minus;
+let modelReady = false;
+let flow  = false;
+let acVolt = false;
+let lowF   = true;
+const actions = {};
+const clock   = new THREE.Clock();
+
+/* inductance geometry groups */
+let connector   = new THREE.Group();
+let INDUCTOR    = new THREE.Group();
+let graph       = new THREE.Group();
+let spring      = new THREE.Group();
+
+/* waveform / animation state */
+let iWave, vWave;
+let t  = 0;
+let s  = 1;
+let A  = 1;
+let intensity  = 0;
+let reqID, reqAC;
+
+/* label materials */
+let voltageMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+let chargeMaterial  = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+let plusMaterial    = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+let minusMaterial   = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+
+/* label geometry (shared) */
+const labelGeometry = new THREE.PlaneGeometry(10, 10);
+
+/* bulb */
+let bulbMaterial, bulbLight, group;
+
+/* display objects */
+let iDisplay, vDisplay, iplus, iminus;
+
+/* connector material */
+const connectorMaterial = new THREE.MeshPhongMaterial({
+    color: 0xb87333,
+    side : THREE.DoubleSide
+});
+
+/* inductance params — mirror original */
+const params = {
+    b      : 2.4,
+    p      : 500,
+    extrude: 5,
+    r      : 40,
+    t      : 119.6,
+    f      : [30, 1, 1],
+    points : 200
+};
+
+const messages = {
+    0: 'Impedance of the Inductor, X<sub>L</sub> = 2&pi; f L',
+    1: 'For a given inductor, impedance depends on the frequency (f) of the AC voltage source.',
+    2: 'For a changing current, the Magnetic Field and Flux linked with the coil changes, inducing a counter EMF. (Lenz\'s Law)',
+    3: 'Self-Inductance: The effect of Faraday\'s Law of Induction of a device on itself.'
+};
+
+/* DOM refs — filled by setupLabUI() */
+let buttonFlow, buttonFlip, calDisplay, messageEl, freqDisplay, lowFreq, highFreq;
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* FOV 40 for Ferrari intro; matches inductance scene FOV 20 after
+       transition (original inductance camera was PerspectiveCamera(20,...)) */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createInductanceScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════════
+   LIGHTS  — unchanged
+════════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════════
+   FERRARI SHOWROOM  — unchanged
+════════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════════
+   CAMERA HELPERS  — unchanged
+════════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════════
+   FERRARI CINEMATIC  — unchanged
+════════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* transition lands camera at inductance scene position */
+    const transition = moveCamera(1650, 435, 800, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible    = false;
+            inductanceGroup.visible = true;
+
+            /* inductance scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* controls target matches inductance original: (-50, 160, -30) */
+            controls.enabled = true;
+            controls.target.set(-50, 160, -30);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════════
+   INDUCTANCE SCENE
+════════════════════════════════════════════ */
+
+function createInductanceScene() {
+
+    inductanceGroup.visible = false;
+    scene.add(inductanceGroup);
+
+    /* lab grid */
+    const grid2 = new THREE.GridHelper(2000, 50);
+    inductanceGroup.add(grid2);
+
+    /* add shared scene groups */
+    scene.add(connector);
+    scene.add(INDUCTOR);
+    scene.add(graph);
+
+    /* helix coil */
+    addSpring(params.extrude, params.b, params.t, params.p);
+    scene.add(spring);
+    spring.position.set(-250, 52, -120);
+    spring.rotation.z = -1.7;
+
+    /* copper wires */
+    makeConnector(92, 2, -20,  -250, 10, -250, -120);
+    makeConnector(92, 2,  20,  -250, 10,  250,  163);
+
+    /* extra components */
+    makeResistor();
+    makeBulb();
+    makeGround();
+
+    /* GLTF power supply */
+    createModel();
+
+    /* wire HTML controls */
+    setupLabUI();
+}
+
+/* ------------------------------------------------
+   addSpring  — helix coil geometry
+------------------------------------------------ */
+
+function addSpring(extrude, b, t, data) {
+
+    /* INDUCTOR label */
+    let iMat   = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    let iLabel = makeText(-250, 120, 0, 30, iMat, 'INDUCTOR',
+                          'rgba(0,0,0,0)', 'rgba(5,5,5,1)');
+    iLabel.rotation.y = 1.57;
+    scene.add(iLabel);
+
+    const helixPoints = helixPointsArray(params.r, b, t);
+    const curve       = new THREE.CatmullRomCurve3(helixPoints);
+    const tubeGeo     = new THREE.TubeGeometry(curve, data, extrude, 15, false);
+    addGeometry(tubeGeo, connectorMaterial);
+}
+
+function helixPointsArray(a, b, value) {
+    const pts = [];
+    for (let t = 0; t < value; t += 0.1) {
+        pts.push(helixPoint(a, b, t));
+    }
+    return pts;
+}
+
+function helixPoint(a, b, t) {
+    return new THREE.Vector3(
+        a * Math.cos(t),
+        a * Math.sin(t),
+        b * t
+    );
+}
+
+function addGeometry(geometry, mat) {
+    const mesh = new THREE.Mesh(geometry, mat);
+    spring.add(mesh);
+}
+
+/* ------------------------------------------------
+   makeConnector  — copper tube wires
+------------------------------------------------ */
+
+function makeConnector(x1, y1, z1, x2, y2, z2, gap) {
+
+    const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(x1,      y1,     z1),
+        new THREE.Vector3(x1 - 40, y1 + 5, z2),
+        new THREE.Vector3(x2,      y2 + 1, z2),
+        new THREE.Vector3(x2,      y2,     gap)
+    ]);
+
+    const tube = new THREE.TubeGeometry(curve, 25, 6, 4, false);
+    connector.add(new THREE.Mesh(tube, connectorMaterial));
+}
+
+/* ------------------------------------------------
+   makeResistor
+------------------------------------------------ */
+
+function makeResistor() {
+
+    const geo  = new THREE.BoxGeometry(120, 40, 40).translate(0, 20, 0);
+    const mat  = new THREE.MeshPhongMaterial({ color: 0x221011 });
+    const rMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+
+    const rLabel1 = makeText(0, 20, 20.1,  20, rMat, ' RESISTOR ',
+                             'rgba(0,0,0,0.1)', 'rgba(250,55,5,1)');
+    const rLabel2 = rLabel1.clone();
+    rLabel2.position.set(0, 20, -20.1);
+    rLabel2.rotation.y = 3.14;
+
+    const rLabel3 = rLabel1.clone();
+    rLabel3.position.set(0, 40.1, 0);
+    rLabel3.rotation.set(-1.57, 0, 0);
+
+    const resistor = new THREE.Mesh(geo, mat);
+    resistor.add(rLabel1, rLabel2, rLabel3);
+    resistor.position.set(-80, 0, 280);
+    scene.add(resistor);
+}
+
+/* ------------------------------------------------
+   makeBulb
+------------------------------------------------ */
+
+function makeBulb() {
+
+    group = new THREE.Group();
+
+    const bulbGeometry = new THREE.SphereGeometry(1, 32, 32);
+    bulbLight    = new THREE.PointLight(0x986b65, intensity, 300, 6);
+    bulbMaterial = new THREE.MeshStandardMaterial({
+        emissive         : 0xffffee,
+        emissiveIntensity: intensity,
+        color            : 0xeeeeee,
+        roughness        : 1
+    });
+
+    bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMaterial));
+    bulbLight.position.set(0, 1, 0);
+    bulbLight.castShadow = true;
+
+    const d = 2000;
+    bulbLight.shadow.camera.left   = -d;
+    bulbLight.shadow.camera.right  =  d;
+    bulbLight.shadow.camera.top    =  d;
+    bulbLight.shadow.camera.bottom = -d;
+    bulbLight.shadow.camera.far    = 1000;
+
+    const bStem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.65, 0.5, 0.55, 32),
+        bulbMaterial
+    );
+    bStem.position.set(0, 1, 0);
+    bStem.castShadow = bStem.receiveShadow = true;
+
+    const plug = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.52, 0.52, 1.2, 32),
+        new THREE.MeshPhongMaterial({ color: 0x837d7a })
+    );
+    plug.position.set(0, 0.5, 0);
+    plug.castShadow = plug.receiveShadow = true;
+
+    bulbLight.position.y = 2.0;
+    group.add(bStem, bulbLight, plug);
+    group.scale.set(20, 20, 20);
+    group.position.set(-260, 0, -200);
+    scene.add(group);
+}
+
+/* ------------------------------------------------
+   makeGround
+------------------------------------------------ */
+
+function makeGround() {
+
+    const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshStandardMaterial({ color: 0x779977, metalness: 0.65 })
+    );
+    ground.rotation.x  = -Math.PI / 2;
+    ground.position.y  = 0;
+    ground.scale.set(20, 20, 20);
+    ground.receiveShadow = true;
+    scene.add(ground);
+}
+
+/* ------------------------------------------------
+   makeDisplay  — DC label overlays on INDUCTOR group
+------------------------------------------------ */
+
+function makeDisplay() {
+
+    while (INDUCTOR.children.length > 0) {
+        INDUCTOR.children[0].parent.remove(INDUCTOR.children[0]);
+    }
+
+    vDisplay = makeText(220, 130, -180, 50, voltageMaterial,
+                        'Increasing Current', 'rgba(0,0,0,0)', 'rgba(0,5,5,1)');
+    vDisplay.rotation.y = 0;
+    scene.add(vDisplay);
+
+    iDisplay = makeText(-200, 50, 0, 35, chargeMaterial,
+                        'Induced EMF', 'rgba(0,0,0,0.1)', 'rgba(0,5,5,1)');
+    iDisplay.rotation.y = 1.57;
+    INDUCTOR.add(iDisplay);
+
+    iplus = makeText(-200, 50,  140, 40, plusMaterial,
+                     '+', 'rgba(0,0,0,0)', 'rgba(0,5,5,1)');
+    iplus.rotation.y = 1.57;
+
+    iminus = makeText(-200, 50, -140, 50, minusMaterial,
+                      '-', 'rgba(0,0,0,0)', 'rgba(0,5,5,1)');
+    iminus.rotation.y = 1.57;
+
+    INDUCTOR.add(iminus, iplus);
+
+    for (let i = 0; i < INDUCTOR.children.length; i++) {
+        INDUCTOR.children[i].visible = false;
+    }
+}
+
+/* ------------------------------------------------
+   buttonAction / setupLabUI
+------------------------------------------------ */
+
+function setupLabUI() {
+
+    buttonFlow  = document.getElementById('flow');
+    buttonFlip  = document.getElementById('flip');
+    calDisplay  = document.getElementById('calDisplay');
+    messageEl   = document.getElementById('message-el');
+    freqDisplay = document.getElementById('freq');
+    lowFreq     = document.getElementById('lowF');
+    highFreq    = document.getElementById('highF');
+
+    calDisplay.innerHTML = messages[2];
+    messageEl.innerHTML  = messages[3];
+
+    /* FLOW */
+    buttonFlow.addEventListener('click', () => {
+        flow = !flow;
+        chargeAction();
+    });
+
+    /* FLIP — DC / AC */
+    buttonFlip.addEventListener('click', () => {
+        acVolt = !acVolt;
+        flow   = false;
+        if (actions['Action']) actions['Action'].reset().stop();
+        if (knob) knob.rotation.y = 0;
+        freqSelect();
+        buttonFlow.innerText             = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+
+        if (acVolt) {
+            freqDisplay.style.display = 'flex';
+            if (actions['DC_connector']) actions['DC_connector'].reset().stop();
+            if (actions['AC_connector']) actions['AC_connector'].setDuration(2).play();
+            buttonFlip.innerText     = 'AC VOLTAGE';
+            calDisplay.innerHTML     = messages[0];
+            messageEl.innerHTML      = messages[1];
+        } else {
+            freqDisplay.style.display = 'none';
+            if (actions['AC_connector']) actions['AC_connector'].reset().stop();
+            if (actions['DC_connector']) actions['DC_connector'].setDuration(2).play();
+            buttonFlip.innerText = 'DC VOLTAGE';
+            calDisplay.innerHTML = messages[2];
+            messageEl.innerHTML  = messages[3];
+        }
+    });
+
+    /* LOW / HIGH frequency */
+    lowFreq.addEventListener('click',  () => { lowF = true;  freqSelect(); });
+    highFreq.addEventListener('click', () => { lowF = false; freqSelect(); });
+
+    /* INDUCTION link */
+    document.getElementById('ind-btn').addEventListener('click', inductionSite);
+}
+
+/* ------------------------------------------------
+   freqSelect
+------------------------------------------------ */
+
+function freqSelect() {
+
+    if (lowF) {
+        params.f = [30, 1, 1];
+        lowFreq.style.backgroundColor  = 'rgb(26,164,26)';
+        highFreq.style.backgroundColor = 'rgb(164,26,26)';
+    } else {
+        params.f = [15, 0.67, 3];
+        highFreq.style.backgroundColor = 'rgb(26,164,26)';
+        lowFreq.style.backgroundColor  = 'rgb(164,26,26)';
+    }
+}
+
+/* ------------------------------------------------
+   inductionSite
+------------------------------------------------ */
+
+function inductionSite() {
+    window.open('induction.html', '_self');
+}
+
+/* ------------------------------------------------
+   chargeAction  — master dispatch
+------------------------------------------------ */
+
+function chargeAction() {
+
+    if (acVolt) {
+        t = 0;
+        makeWaveform(params.f[0], params.f[1], params.f[2]);
+        periodicAction();
+    } else {
+        makeDisplay();
+        flowAction();
+        buttonFlip.disabled = true;
+        buttonFlip.style.cursor = 'default';
+    }
+}
+
+/* ------------------------------------------------
+   flowAction  — DC on / off
+------------------------------------------------ */
+
+function flowAction() {
+
+    cancelAnimationFrame(reqID);
+    cancelAnimationFrame(reqAC);
+
+    if (flow) {
+
+        buttonFlow.disabled              = true;
+        buttonFlow.style.cursor          = 'default';
+        if (actions['Action']) actions['Action'].play();
+        buttonFlow.innerText             = 'ON';
+        buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
+
+        setTimeout(() => {
+            if (iminus) iminus.position.z = -140;
+            if (iplus)  iplus.position.z  =  140;
+            inducedEmf();
+            voltageMaterial.map = new THREE.CanvasTexture(
+                makeLabelCanvas(50, 'Increasing Current',
+                                'rgba(0,0,0,0)', 'rgba(5,55,5,1)')
+            );
+        }, 1000);
+
+        setTimeout(() => {
+            if (plus)  plus.visible  = true;
+            if (minus) minus.visible = true;
+            s = 1;
+            for (let i = 0; i < INDUCTOR.children.length; i++) {
+                INDUCTOR.children[i].visible = true;
+                INDUCTOR.children[i].scale.set(1, 1, 1);
+            }
+        }, 2500);
+
+        setTimeout(() => {
+            voltageMaterial.map = new THREE.CanvasTexture(
+                makeLabelCanvas(50, 'Constant Current',
+                                'rgba(0,0,0,0)', 'rgba(5,55,5,1)')
+            );
+            buttonFlow.disabled     = false;
+            buttonFlow.style.cursor = 'pointer';
+        }, 10000);
+
+    } else {
+
+        s = 1; intensity = 20;
+        buttonFlow.disabled              = true;
+        buttonFlow.style.cursor          = 'default';
+        voltageMaterial.map = new THREE.CanvasTexture(
+            makeLabelCanvas(50, 'Decreasing Current',
+                            'rgba(0,0,0,0)', 'rgba(5,55,5,1)')
+        );
+
+        setTimeout(() => {
+            if (iminus) iminus.position.z =  140;
+            if (iplus)  iplus.position.z  = -140;
+            offEmf();
+        }, 1000);
+
+        setTimeout(() => {
+            if (plus)  plus.visible  = true;
+            if (minus) minus.visible = true;
+            s = 1;
+            for (let i = 0; i < INDUCTOR.children.length; i++) {
+                INDUCTOR.children[i].visible = true;
+                INDUCTOR.children[i].scale.set(1, 1, 1);
+            }
+        }, 2500);
+
+        for (let i = 0; i < INDUCTOR.children.length; i++) {
+            INDUCTOR.children[i].visible = true;
+            INDUCTOR.children[i].scale.set(1, 1, 1);
+        }
+
+        setTimeout(() => {
+            if (plus)  plus.visible  = false;
+            if (minus) minus.visible = false;
+        }, 1000);
+
+        setTimeout(() => {
+            buttonFlow.disabled     = false;
+            buttonFlow.style.cursor = 'pointer';
+            if (actions['Action']) actions['Action'].reset().stop();
+            buttonFlip.disabled     = false;
+            buttonFlip.style.cursor = 'pointer';
+            voltageMaterial.map = new THREE.CanvasTexture(
+                makeLabelCanvas(50, 'No Current',
+                                'rgba(0,0,0,0)', 'rgba(5,55,5,1)')
+            );
+        }, 18000);
+
+        buttonFlow.innerText             = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+    }
+}
+
+/* ------------------------------------------------
+   inducedEmf  — knob animation on DC ON
+------------------------------------------------ */
+
+function inducedEmf() {
+
+    if (knob && knob.rotation.y > -5) {
+        knob.rotation.y -= 0.01;
+        reqID = requestAnimationFrame(inducedEmf);
+    } else {
+        cancelAnimationFrame(reqID);
+        onscaleAction();
+    }
+}
+
+function onscaleAction() {
+
+    if (s >= 0) {
+        bulbMaterial.emissiveIntensity = intensity;
+        bulbLight.intensity            = intensity;
+        for (let i = 0; i < INDUCTOR.children.length; i++) {
+            s = Math.max(s, 0);
+            INDUCTOR.children[i].scale.set(s, s, s);
+        }
+        reqID = requestAnimationFrame(onscaleAction);
+    } else {
+        s = 0;
+        cancelAnimationFrame(reqID);
+    }
+    s         -= 0.003;
+    intensity += 0.08;
+}
+
+/* ------------------------------------------------
+   offEmf  — knob animation on DC OFF
+------------------------------------------------ */
+
+function offEmf() {
+
+    if (knob && knob.rotation.y > -5.1 && knob.rotation.y < 0) {
+        knob.rotation.y += 0.005;
+        reqID = requestAnimationFrame(offEmf);
+    } else if (knob && knob.rotation.y >= 0) {
+        cancelAnimationFrame(reqID);
+        offscaleAction();
+    }
+}
+
+function offscaleAction() {
+
+    if (s >= 0) {
+        bulbMaterial.emissiveIntensity = intensity;
+        bulbLight.intensity            = intensity;
+        for (let i = 0; i < INDUCTOR.children.length; i++) {
+            INDUCTOR.children[i].scale.set(s, s, s);
+        }
+        reqID = requestAnimationFrame(offscaleAction);
+    } else {
+        for (let i = 0; i < INDUCTOR.children.length; i++) {
+            INDUCTOR.children[i].visible = false;
+        }
+        intensity = 0; s = 0;
+        bulbMaterial.emissiveIntensity = intensity;
+        bulbLight.intensity            = intensity;
+        cancelAnimationFrame(reqID);
+    }
+    s         -= 0.005;
+    intensity -= 0.01;
+}
+
+/* ------------------------------------------------
+   periodicAction  — AC waveform oscillation
+------------------------------------------------ */
+
+function periodicAction() {
+
+    cancelAnimationFrame(reqID);
+    cancelAnimationFrame(reqAC);
+
+    if (flow) {
+
+        if (actions['Action']) actions['Action'].play();
+        buttonFlow.innerText             = 'ON';
+        buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
+        if (knob) knob.rotation.y        = -1.4;
+        bulbMaterial.emissiveIntensity   = 20;
+        bulbLight.intensity              = 20;
+
+        for (let i = 0; i < INDUCTOR.children.length; i++) {
+            INDUCTOR.children[i].visible = true;
+        }
+        drawWaveform();
+        INDUCTOR.position.set(-250, 150, 100);
+        INDUCTOR.rotation.set(0, 1.57, 0);
+
+    } else {
+
+        if (actions['Action']) actions['Action'].reset().stop();
+        if (knob) knob.rotation.y = 0;
+        if (plus)  plus.visible   = false;
+        if (minus) minus.visible  = false;
+        buttonFlow.innerText             = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+
+        INDUCTOR.position.set(0, 0, 0);
+        INDUCTOR.rotation.set(0, 0, 0);
+        for (let i = 0; i < INDUCTOR.children.length; i++) {
+            INDUCTOR.children[i].visible = false;
+        }
+
+        setTimeout(() => {
+            if (vWave) vWave.geometry.setDrawRange(0, 0);
+            if (iWave) iWave.geometry.setDrawRange(0, 0);
+            t = 0;
+            bulbMaterial.emissiveIntensity = 0;
+            bulbLight.intensity            = 0;
+        }, 500);
+
+        makeWaveform(params.f[0], params.f[1], params.f[2]);
+    }
+}
+
+/* ------------------------------------------------
+   drawWaveform
+------------------------------------------------ */
+
+function drawWaveform() {
+
+    const count = iWave.geometry.attributes.position.count;
+
+    if (t < count) {
+        vWave.geometry.setDrawRange(0, t);
+        iWave.geometry.setDrawRange(0, t);
+        reqAC = requestAnimationFrame(drawWaveform);
+    } else {
+        vWave.geometry.setDrawRange(0, t);
+        iWave.geometry.setDrawRange(0, 0);
+        t = 0;
+        reqAC = requestAnimationFrame(drawWaveform);
+    }
+    t += 1;
+}
+
+/* ------------------------------------------------
+   makeWaveform
+------------------------------------------------ */
+
+function makeWaveform(X, F, factor) {
+
+    while (INDUCTOR.children.length > 0) {
+        INDUCTOR.children[0].parent.remove(INDUCTOR.children[0]);
+    }
+
+    if (iWave) { iWave.geometry.dispose(); iWave.material.dispose(); }
+
+    const a = 0, b = 100, c = 0, d = 0, w = 200;
+    const lmat = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+    /* axes */
+    INDUCTOR.add(initLine([new THREE.Vector3(a, d + w, c), new THREE.Vector3(a, 0, c)],        lmat));
+    INDUCTOR.add(initLine([new THREE.Vector3(a, b, c),     new THREE.Vector3(a + w, b, c)],    lmat));
+    INDUCTOR.add(initLine([new THREE.Vector3(a+w,d+w,c),   new THREE.Vector3(a+w, d, c)],      lmat));
+    INDUCTOR.add(initLine([new THREE.Vector3(a, d+w, c),   new THREE.Vector3(a+w, d+w, c)],    lmat));
+    INDUCTOR.add(initLine([new THREE.Vector3(a, d, c),     new THREE.Vector3(a+w, d, c)],      lmat));
+
+    /* sine trace */
+    const wavePoints = [];
+    for (let j = 0, l = 2 * factor * Math.PI; j <= l; j += 0.25) {
+        wavePoints.push(new THREE.Vector3(a + j * X * F, b + 80 * Math.sin(j * F), 0));
+    }
+    for (let k = 1; k < wavePoints.length; k++) {
+        INDUCTOR.add(initLine([wavePoints[k-1], wavePoints[k]], lmat));
+    }
+
+    /* hide static lines until AC is ON */
+    for (let i = 0; i < INDUCTOR.children.length; i++) {
+        INDUCTOR.children[i].visible = false;
+    }
+
+    /* animated current points (red) */
+    const iGeo = new THREE.BufferGeometry();
+    const iPos = new Float32Array(params.points * 4 * 3);
+    iGeo.setAttribute('position', new THREE.BufferAttribute(iPos, 3));
+    iWave = new THREE.Points(iGeo, new THREE.PointsMaterial({ size: 10, color: 0xff0000 }));
+
+    /* animated voltage points (blue) */
+    const vGeo = new THREE.BufferGeometry();
+    const vPos = new Float32Array(params.points * 4 * 3);
+    vGeo.setAttribute('position', new THREE.BufferAttribute(vPos, 3));
+    vWave = new THREE.Points(vGeo, new THREE.PointsMaterial({ size: 10, color: 0x0000ff }));
+    vWave.geometry.setDrawRange(0, 0);
+
+    let idx = 0, idx1 = 0, ii = 0;
+    for (let j = 0; j < params.points * 4; j++) {
+        const tt = ii;
+        const px = a + tt * X * F;
+        const py = b + 80 * Math.sin(tt * F);
+        const pv = b + 100 * Math.cos(tt * F);
+
+        vPos[idx1++] = px; vPos[idx1++] = pv; vPos[idx1++] = c;
+        iPos[idx++]  = px; iPos[idx++]  = py; iPos[idx++]  = c;
+        ii += 0.00835 * factor;
+    }
+
+    INDUCTOR.add(iWave); iWave.geometry.setDrawRange(0, 0);
+    INDUCTOR.add(vWave); vWave.geometry.setDrawRange(0, 0);
+}
+
+/* ------------------------------------------------
+   initLine helper
+------------------------------------------------ */
+
+function initLine(points, mat) {
+    return new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(points),
+        mat
+    );
+}
+
+/* ------------------------------------------------
+   createModel  — GLTF power supply
+------------------------------------------------ */
+
+function createModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'powersupply.glb',
+        function (gltf) {
+            model = gltf.scene;
+            model.scale.set(100, 100, 100);
+            scene.add(model);
+
+            knob  = model.getObjectByName('knob');
+            plus  = model.getObjectByName('plus');
+            minus = model.getObjectByName('minus');
+
+            if (knob)  knob.rotation.y = 0;
+            if (plus)  { plus.position.set(1, 0.2,  0.6); plus.visible  = false; }
+            if (minus) { minus.position.set(1, 0.2, -0.6); minus.visible = false; }
+
+            mixer      = new THREE.AnimationMixer(model);
+            modelReady = true;
+
+            const fixedStates = [
+                'polarity','Action','Action_knob',
+                'AC_connector','DC_connector','knob_reset'
+            ];
+
+            for (const clip of gltf.animations) {
+                const action = mixer.clipAction(clip);
+                actions[clip.name] = action;
+                if (fixedStates.includes(clip.name)) {
+                    action.clampWhenFinished = true;
+                    action.loop = THREE.LoopOnce;
+                }
+            }
+        },
+        undefined,
+        (e) => console.warn('powersupply.glb not found – lab works without it.', e)
+    );
+}
+
+/* ------------------------------------------------
+   Label canvas helpers
+------------------------------------------------ */
+
+function makeLabelCanvas(size, name, backgdCol, color) {
+
+    const borderSize = 2;
+    const ctx  = document.createElement('canvas').getContext('2d');
+    const font = `${size}px bold sans-serif`;
+    ctx.font   = font;
+    const dbs  = borderSize * 2;
+    const w    = ctx.measureText(name).width + dbs;
+    const h    = size + dbs;
+    ctx.canvas.width  = w;
+    ctx.canvas.height = h;
+    ctx.font      = font;
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = backgdCol;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = color;
+    ctx.fillText(name, borderSize, borderSize);
+    return ctx.canvas;
+}
+
+function makeText(x, y, z, size, material, name, backgdCol, color) {
+
+    const canvas = makeLabelCanvas(size, name, backgdCol, color);
+    material.map = new THREE.CanvasTexture(canvas);
+
+    const root  = new THREE.Object3D();
+    root.position.set(x, y, z);
+
+    const label = new THREE.Mesh(labelGeometry, material);
+    const scale = 0.1;
+    label.scale.x = canvas.width  * scale;
+    label.scale.y = canvas.height * scale;
+    root.add(label);
+    return root;
+}
+
+/* ════════════════════════════════════════════
+   RESIZE  — unchanged
+════════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════════
+   ANIMATE  — updated for inductance
+════════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* GLTF animation mixer */
+    if (modelReady && mixer) mixer.update(clock.getDelta());
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

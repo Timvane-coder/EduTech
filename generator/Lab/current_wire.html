@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Force on a Current Carrying Wire</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top banner */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(10,14,20,.95);
+            color:#e0e8f0; font-size:12px; letter-spacing:.10em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.07);
+        }
+
+        /* left side panel — Fleming's rule */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:260px;
+            background:rgba(10,14,20,.88);
+            color:#ccd6e0; font-size:12px;
+            padding:14px 14px;
+            z-index:100;
+            border-right:1px solid rgba(255,255,255,.06);
+            line-height:1.9;
+        }
+        #sidemenu strong { color:#e0e8f0; }
+        #sidemenu a      { font-weight:600; }
+
+        /* bottom control bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(10,14,20,.95);
+            color:#ccd6e0; font-size:12px;
+            padding:8px 14px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:6px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.07);
+        }
+
+        #message-el {
+            flex:1 1 100%; color:#8ca0b0;
+            font-size:11px; margin-top:1px;
+        }
+
+        /* voltage slider row */
+        .volt-row {
+            flex:1 1 100%;
+            display:flex; align-items:center; gap:8px;
+            color:#ccd6e0; font-size:12px; margin-top:2px;
+        }
+        .volt-row label { white-space:nowrap; }
+        #voltDisplay {
+            display:inline-block; min-width:28px; text-align:center;
+            color:#e0e8f0; font-weight:700;
+        }
+        #volt {
+            flex:1; max-width:220px;
+            accent-color:#3a8ecc;
+        }
+
+        /* buttons */
+        #menu button {
+            padding:6px 13px; border:none; border-radius:4px;
+            font-size:11.5px; font-weight:600; letter-spacing:.05em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover  { filter:brightness(1.2); }
+        #menu button:disabled { opacity:.38; cursor:default; }
+
+        #motorSims { background:rgb(3,67,97); }
+
+        .row-break { flex:1 1 100%; height:0; }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI (shown after transition) ── -->
+<div id="labUI">
+    <div id="topmenu">Force on a current carrying wire</div>
+
+    <div id="sidemenu">
+        <div style="visibility:hidden;" id="rule-el">
+            <strong>Fleming's Left Hand Rule</strong><br>
+            Thu<a style="color:red;">m</a>b :- <a style="color:red;">M</a>echanical Force;<br>
+            <a style="color:blue;">F</a>ore Finger :- Magnetic <a style="color:blue;">F</a>ield;<br>
+            Se<a style="color:rgb(0,255,0);">c</a>ond Finger :- Electric <a style="color:rgb(0,255,0);">C</a>urrent;
+        </div>
+    </div>
+
+    <div id="menu">
+        <div class="volt-row">
+            <label for="volt">Applied Voltage</label>
+            <span id="voltDisplay">0</span> V
+            <input type="range" id="volt" name="volt" min="-1" max="1" value="0" step="1">
+        </div>
+        <div class="row-break"></div>
+        <button id="motorSims">FORCE 3D VISUALISATION</button>
+        <div class="row-break"></div>
+        <div id="message-el">
+            Investigate the force on a current carrying Aluminium Rod held within the magnetic field
+        </div>
+    </div>
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ═══════════════════════════════════════
+   SCALE NOTE
+   The lab GLTFs are authored at ~1 unit = tiny.
+   The standalone lab used scale(20,20,20) and
+   camera positions of 50-80 units.
+   The Ferrari is ~4 units long in its own space.
+
+   STRATEGY: keep lab models at scale(20,20,20)
+   and their native camera (50,40,80 → target -5,7,5).
+   During the Ferrari intro we position the camera
+   in Ferrari-scale space (radius ~8 units around origin).
+   The lab group starts hidden; Ferrari group hides on
+   transition. Both live at world origin — no z-fighting
+   because they are never visible at the same time.
+═══════════════════════════════════════ */
+
+/* ── renderer / camera / scene / controls ── */
+let renderer, camera, scene, controls;
+
+/* ── scene groups — EVERYTHING lab-related inside currentWireGroup ── */
+let ferrariGroup     = new THREE.Group();
+let currentWireGroup = new THREE.Group();   // hidden during intro
+
+/* ── Ferrari intro ── */
+let car, ferrariGrid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── Current Wire scene — state ── */
+let visual = false;
+let params = { V: 0 };
+
+/* ── Current Wire scene — model refs ── */
+let cwModel,   cwMixer1;   // elements.glb
+let wireModel, cwMixer2;   // ForceonWire.glb
+let magnetModel;            // magnet.glb
+let current, wire;
+let direction, mField;
+
+/* electron / atom helpers (3-D vis mode) */
+let requestID;
+/* These groups must be children of currentWireGroup so they hide correctly */
+let magLine  = new THREE.Group();
+let box      = new THREE.Group();
+let ELEMENTS = new THREE.Group();
+const spheres = [], VELOCITY = [];
+
+const actions   = {};
+const clock     = new THREE.Clock();
+const modelPath = './model/';
+
+/* ── DOM refs ── */
+let messageEl, ruleEl, inputVolt, displayVolt, motorSimsEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — near/far span both worlds */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 5000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* orbit controls — disabled during intro */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    /* distance limits suit the lab world (scale ×20) */
+    controls.maxDistance   = 300;
+    controls.minDistance   = 30;
+
+    /* add both top-level groups */
+    scene.add(ferrariGroup);
+    scene.add(currentWireGroup);   // hidden until transition
+
+    createLights();
+    createFerrariShowroom();
+    createCurrentWireScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS — identical, untouched
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    dir.castShadow = true;
+    scene.add(dir);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM — identical, untouched
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    ferrariGrid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    ferrariGrid.material.opacity     = 0.15;
+    ferrariGrid.material.transparent = true;
+    ferrariGroup.add(ferrariGrid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS — identical, untouched
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC — identical chain
+   onComplete hands off to Current Wire scene
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /*
+     * Transition: fly camera from Ferrari space to lab space.
+     * Lab default: camera(50,40,80) → target(-5,7,5)
+     * (matches standalone lab's createCamera(50,50,40,80)
+     *  + createControls(-5,7,5))
+     */
+    const transition = moveCamera(50, 40, 80, -5, 7, 5, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            /* swap visibility */
+            ferrariGroup.visible     = false;
+            currentWireGroup.visible = true;
+
+            // NOW scale up — models are definitely loaded by this point
+            // (transition fires ~25 seconds after page load)
+            if (cwModel)     cwModel.scale.set(20, 20, 20);
+            if (wireModel)   wireModel.scale.set(20, 20, 20);
+            if (magnetModel) magnetModel.scale.set(20, 20, 20);
+   
+            /* lab sky */
+            scene.background  = new THREE.Color(0xbfd1e5);
+            scene.environment = null;
+
+            /* show lab UI */
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* lab camera */
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(-5, 7, 5);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   CURRENT WIRE SCENE
+   KEY FIX: every model and helper group is
+   added to currentWireGroup (not scene),
+   so currentWireGroup.visible = false hides
+   everything during the Ferrari intro.
+════════════════════════════════════════ */
+
+function createCurrentWireScene() {
+
+       // hidden until transition currentWireGroup.visible = false;
+    /* lab floor grid — matches standalone lab scale */
+    const labGrid = new THREE.GridHelper(100, 10);
+    currentWireGroup.add(labGrid);
+
+    /* helper sub-groups also parented to currentWireGroup */
+    currentWireGroup.add(magLine);
+    currentWireGroup.add(box);
+    currentWireGroup.add(ELEMENTS);
+
+    setupCurrentWireUI();
+    loadCurrentWireModels();
+}
+
+/* ------------------------------------------------ */
+/* loadCurrentWireModels                            */
+/* ------------------------------------------------ */
+
+function loadCurrentWireModels() {
+
+    const loader = new GLTFLoader();
+
+    /* 1 — elements.glb (power supply / polarity needle) */
+    loader.setPath(modelPath).load('elements.glb', function (gltf) {
+
+        cwModel  = gltf.scene;
+        cwMixer1 = new THREE.AnimationMixer(cwModel);
+        cwModel.scale.set(1, 1, 1);
+
+        const arrow = cwModel.getObjectByName('arrow');
+        if (arrow) arrow.visible = false;
+
+        gltf.scene.traverse(c => { if (c.type === 'SkinnedMesh') c.frustumCulled = false; });
+
+        /* ADD TO currentWireGroup — not scene */
+        currentWireGroup.add(cwModel);
+
+        const fixed = ['polarity1', 'polarity', 'needleL'];
+        for (const clip of gltf.animations) {
+            const action = cwMixer1.clipAction(clip);
+            actions[clip.name] = action;
+            if (fixed.includes(clip.name)) {
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+            }
+        }
+    });
+
+    /* 2 — ForceonWire.glb (aluminium rod + current arrows) */
+    loader.setPath(modelPath).load('ForceonWire.glb', function (gltf) {
+
+        wireModel = gltf.scene;
+        current   = wireModel.getObjectByName('current');
+        wire      = wireModel.getObjectByName('wire');
+        cwMixer2  = new THREE.AnimationMixer(wireModel);
+        wireModel.scale.set(1, 1, 1);
+
+        gltf.scene.traverse(c => { if (c.type === 'SkinnedMesh') c.frustumCulled = false; });
+
+        /* ADD TO currentWireGroup */
+        currentWireGroup.add(wireModel);
+
+        const fixed = ['currentleft','currentleftR','currentright','currentrightR','right','left'];
+        for (const clip of gltf.animations) {
+            const action = cwMixer2.clipAction(clip);
+            actions[clip.name] = action;
+            if (fixed.includes(clip.name)) {
+                action.clampWhenFinished = true;
+                action.loop = THREE.LoopOnce;
+            }
+        }
+    });
+
+    /* 5 — magnet.glb */
+    loader.setPath(modelPath).load('magnet.glb', function (gltf) {
+
+        magnetModel = gltf.scene;
+        direction   = magnetModel.getObjectByName('direction');
+        mField      = magnetModel.getObjectByName('MField');
+        magnetModel.scale.set(1, 1, 1);
+
+        if (direction) {
+            direction.scale.set(-1, 1, 1);
+            direction.position.set(0, 0, 0);
+            magLine.add(direction);            // magLine is already in currentWireGroup
+        }
+        magLine.position.set(0, 1, -3);
+
+        gltf.scene.traverse(c => { if (c.type === 'SkinnedMesh') c.frustumCulled = false; });
+
+        /* ADD TO currentWireGroup */
+        currentWireGroup.add(magnetModel);
+    });
+}
+
+/* ------------------------------------------------ */
+/* setupCurrentWireUI                               */
+/* ------------------------------------------------ */
+
+function setupCurrentWireUI() {
+
+    messageEl   = document.getElementById('message-el');
+    ruleEl      = document.getElementById('rule-el');
+    inputVolt   = document.getElementById('volt');
+    displayVolt = document.getElementById('voltDisplay');
+    motorSimsEl = document.getElementById('motorSims');
+
+    inputVolt.addEventListener('input', function () {
+        const A = Number(inputVolt.value);
+        displayVolt.textContent = A * 2.5;
+        params.V = A / 5;
+        electronAction();
+        wireAction();
+    });
+
+    motorSimsEl.addEventListener('click', function () {
+        visual = !visual;
+        resetAction();
+
+        if (wire)        wire.visible        = !wire.visible;
+        if (mField)      mField.visible      = !mField.visible;
+        if (magnetModel) magnetModel.visible = !magnetModel.visible;
+
+        if (visual) {
+            visualElement();
+            /* 3-D vis camera — matches standalone lab values */
+            camera.position.set(50, 100, 65);
+            controls.target.set(-60, 130, 25);
+            camera.fov = 5;
+            camera.updateProjectionMatrix();
+        } else {
+            /* restore lab default view */
+            camera.position.set(50, 40, 80);
+            controls.target.set(-5, 7, 5);
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+        }
+        controls.update();
+    });
+}
+
+/* ------------------------------------------------ */
+/* wireAction                                       */
+/* ------------------------------------------------ */
+
+function wireAction() {
+    if (params.V > 0) {
+        resetAction();
+        if (actions['polarity'])  actions['polarity'].play();
+        if (actions['needleL'])   actions['needleL'].setDuration(0.1).play();
+        if (current) current.visible = true;
+        setTimeout(() => {
+            if (actions['left'])        actions['left'].setDuration(1).play();
+            if (actions['currentleft']) actions['currentleft'].setDuration(1).play();
+        }, 1000);
+
+    } else if (params.V === 0) {
+        resetAction();
+
+    } else {
+        resetAction();
+        if (actions['polarity1']) actions['polarity1'].play();
+        setTimeout(() => {
+            if (actions['needleL']) actions['needleL'].setDuration(0.1).play();
+            setTimeout(() => {
+                if (actions['right'])        actions['right'].setDuration(1).play();
+                if (actions['currentright']) actions['currentright'].setDuration(1).play();
+                if (current) current.visible = true;
+            }, 1000);
+        }, 1000);
+    }
+}
+
+/* ------------------------------------------------ */
+/* resetAction                                      */
+/* ------------------------------------------------ */
+
+function resetAction() {
+    ['polarity','polarity1','needleL','left','currentleft','right','currentright'].forEach(n => {
+        if (actions[n]) actions[n].stop().reset();
+    });
+    if (current) current.visible = false;
+}
+
+/* ------------------------------------------------ */
+/* electronAction / movement                        */
+/* ------------------------------------------------ */
+
+function electronAction() {
+    cancelAnimationFrame(requestID);
+
+    if (params.V === 0) {
+        for (const s of spheres) s.position.z = Math.floor(Math.random() * 8 + 1);
+        randMovement();
+    } else {
+        directedMovement();
+    }
+}
+
+function randMovement() {
+    for (let i = 0; i < spheres.length; i++) {
+        const s = spheres[i];
+        if      (s.position.x <= -10 || s.position.x >= 10) { VELOCITY[i].x *= -1; s.position.add(VELOCITY[i]); }
+        else if (s.position.y <= -10 || s.position.y >= 10) { VELOCITY[i].y *= -1; s.position.add(VELOCITY[i]); }
+        else if (s.position.z <= -10 || s.position.z >= 10) { VELOCITY[i].z *= -1; s.position.add(VELOCITY[i]); }
+        else if (Math.abs(s.position.x) > 10 || Math.abs(s.position.y) > 10 || Math.abs(s.position.z) > 10) {
+            s.position.set(0, 0, 0);
+        } else {
+            s.position.add(VELOCITY[i]);
+        }
+    }
+    requestID = requestAnimationFrame(randMovement);
+}
+
+function directedMovement() {
+    const vVec = new THREE.Vector3(0, 0, params.V);
+    for (let i = 0; i < spheres.length; i++) {
+        const s = spheres[i];
+        if      (params.V > 0 && s.position.z >  11) { s.position.z = -11; }
+        else if (params.V < 0 && s.position.z < -11) { s.position.z =  11; }
+        else if (s.position.y <= -10 || s.position.y >= 10) { VELOCITY[i].y *= -1; s.position.add(VELOCITY[i]); }
+        else if (s.position.x <= -10 || s.position.x >= 10) { VELOCITY[i].x *= -1; s.position.add(VELOCITY[i]); }
+        else { s.position.add(vVec); }
+    }
+    requestID = requestAnimationFrame(directedMovement);
+}
+
+/* ------------------------------------------------ */
+/* addElectrons / addAtoms / visualElement          */
+/* ------------------------------------------------ */
+
+function addElectrons(N) {
+    const geo = new THREE.SphereGeometry(0.4, 16, 8);
+    const mat = new THREE.MeshPhongMaterial({ color: 'blue' });
+    for (let i = 0; i < N; i++) {
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(Math.random()*10-5, Math.random()*10-5, Math.random()*10-5);
+        mesh.rotation.set(Math.random()*1.57, 0, Math.random()*1.57);
+        ELEMENTS.add(mesh);
+        const mag = Math.random() < 0.5 ? -1 : 1;
+        VELOCITY.push(new THREE.Vector3(
+            mag*(Math.random()*(0.06-0.02)+0.02),
+            mag*(Math.random()*(0.06-0.02)+0.02),
+            mag*(Math.random()*(0.06-0.02)+0.02)
+        ));
+        spheres.push(mesh);
+    }
+}
+
+function addAtoms() {
+    const geo  = new THREE.SphereGeometry(1, 32, 16);
+    const mat  = new THREE.MeshPhongMaterial({
+        color:'red', transparent:true, opacity:0.45,
+        side:THREE.DoubleSide, depthTest:false
+    });
+    const mesh   = new THREE.Mesh(geo, mat);
+    const LATTICE = new THREE.Group();
+    for (let i=-8; i<9; i+=4)
+        for (let j=-8; j<9; j+=4)
+            for (let k=-8; k<9; k+=4) {
+                const A = mesh.clone(); A.position.set(i,j,k); LATTICE.add(A);
+            }
+    ELEMENTS.add(LATTICE);
+}
+
+function visualElement() {
+    const geo = new THREE.BoxGeometry(20.8, 20.8, 20.8);
+    const mat = new THREE.MeshPhongMaterial({ color:'green', transparent:true, opacity:0.25, side:THREE.FrontSide });
+    const wireMesh = new THREE.Mesh(geo, mat);
+
+    const wire1 = new THREE.Mesh(
+        new THREE.BoxGeometry(20.8, 20.8, 90).translate(0,0,45+10.4),
+        new THREE.MeshPhongMaterial({ color:'orange' })
+    );
+    const wire2 = wire1.clone(); wire2.scale.set(1,1,-1);
+
+    /* box is already in currentWireGroup */
+    box.add(wireMesh, wire1, wire2);
+    ELEMENTS.add(box);
+    addElectrons(50);
+    addAtoms();
+    randMovement();
+    ELEMENTS.position.set(-190, 160, -16);
+}
+
+/* ════════════════════════════════════════
+   RESIZE — identical, untouched
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro: steer camera & spin wheels ── */
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        ferrariGrid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* ── tick lab animation mixers ── */
+    const delta = clock.getDelta();
+    if (cwMixer1) cwMixer1.update(delta);
+    if (cwMixer2) cwMixer2.update(delta);
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

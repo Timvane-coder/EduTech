@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Understanding Capacitance</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a { color:#e07070; font-weight:600; }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+            font-weight:bold;
+        }
+
+        /* fraction display */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+        .bar { display:none; }
+
+        /* buttons */
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover  { filter:brightness(1.18); }
+        #menu button:disabled { opacity:.4; cursor:default; }
+        #flow  { background:rgb(164,26,26); }
+        #flip  { background:#1a4e8f; }
+        #extra { background:#2a6e3f; }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI shown after transition ── -->
+<div id="labUI">
+
+    <div id="topmenu">Capacitor &mdash; Understanding capacitance</div>
+
+    <div id="menu">
+        C =
+        <div class="fraction">
+            <span class="fup">Q</span>
+            <span class="bar">/</span>
+            <span class="fdn">V</span>
+        </div>
+        =
+        <div class="fraction">
+            <span class="fup"><a id="factor-el">&epsilon;<sub>0</sub></a>A</span>
+            <span class="bar">/</span>
+            <span class="fdn">d</span>
+        </div>
+        =
+        <div class="fraction">
+            <span class="fup">
+                <a id="factor-el">8.854 &times; 10<sup>-12</sup> &times;</a>(1 m<sup>2</sup>)
+            </span>
+            <span class="bar">/</span>
+            <span class="fdn">(5 &times; 10<sup>-3</sup> m)</span>
+        </div>
+        = <a id="calDisplay"></a> F
+
+        <div style="font-weight:bolder;">
+            A resistor-capacitor circuit...<br>
+            <a id="message-el">Click on the button (OFF).</a>
+        </div>
+
+        <button id="flow">OFF</button>
+        <button id="flip">DC VOLTAGE</button>
+        <button id="extra">Factors Effecting Capacitance</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup    = new THREE.Group();
+let capacitanceGroup = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── capacitance scene vars ── */
+let plate1, plate2;
+let cMaterial;
+let chargeMaterial = new THREE.MeshBasicMaterial({
+    side: THREE.DoubleSide,
+    transparent: true
+});
+let connectorMaterial = new THREE.MeshPhongMaterial({
+    color: 0xb87333,
+    side : THREE.DoubleSide
+});
+let connector    = new THREE.Group();
+let cDisplay;                          // canvas label on the capacitor
+let labelGeometry = new THREE.PlaneGeometry(10, 10);
+
+let redPoints, bluePoints, waveform;
+let drawCount  = 0;
+let drawCount1 = 0;
+let reqID, reqAC;
+let t = 0;                             // waveform counter
+let intensity  = 0;
+let group;                             // bulb group
+let bulbMaterial, bulbLight;
+
+let model, mixer, knob, plus, minus;
+let modelReady = false;
+let flow   = false;
+let acVolt = false;
+const actions  = {};
+const objects  = [];                   // raycaster targets (knob, switch)
+const clock    = new THREE.Clock();
+let A = 1;
+
+let raycaster = new THREE.Raycaster();
+let pointer   = new THREE.Vector2();
+let SELECTED;
+
+const LINE = new THREE.Group();
+
+const params = {
+    dist  : 50,
+    factor: 1,
+    l     : 170,
+    h     : 210,
+    a     : 10000,
+    area  : 10000,
+    k     : 80,
+    i     : 9,
+    j     : 20,
+    points: 9 * 21
+};
+
+const messages = {
+    0: ' Click on the button (OFF).  ',
+    1: ' For DC voltage - current passes through the circuit when the capacitor plates gets charged. ',
+    2: ' No current flows through the circuit when the capacitor plates are fully charged (Open circuit). ',
+    3: ' Click on the button (ON)...to visualise discharge action of the capacitor',
+    4: 'Charging - discharging of the capacitor, depends on the frequency of the AC voltage',
+    6: 'Discharging of the capacitor happens for a while and then returns to its native state'
+};
+
+/* DOM refs – filled by setupLabUI() */
+let buttonFlow, buttonFlip, messageEl, calDisplay;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer – untouched from ferrari file */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera FOV 20 matches the capacitance scene original */
+    camera = new THREE.PerspectiveCamera(
+        20, window.innerWidth / window.innerHeight, 1, 50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createCapacitanceScene();     /* ← new scene replaces old */
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  — untouched
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — untouched
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — untouched
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — untouched
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition lands at capacitance-scene camera position ── */
+    const transition = moveCamera(1650, 435, 800, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible     = false;
+            capacitanceGroup.visible = true;
+
+            /* capacitance scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* capacitance scene orbit target from original */
+            controls.enabled = true;
+            controls.target.set(-50, 160, -30);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* wire click raycaster now that scene is live */
+            document.addEventListener('click', onClick);
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   CAPACITANCE SCENE
+════════════════════════════════════════ */
+
+function createCapacitanceScene() {
+
+    capacitanceGroup.visible = false;
+    scene.add(capacitanceGroup);
+
+    /* ground grid – 2000 wide matches original */
+    const grid2 = new THREE.GridHelper(2000, 50);
+    capacitanceGroup.add(grid2);
+
+    /* extra scene lights matching original createLight() */
+    const hemi = new THREE.AmbientLight(0xffffff, 0.35);
+    hemi.position.set(0, 20, 0);
+    scene.add(hemi);
+
+    const dirLab = new THREE.DirectionalLight(0xffffff, 1);
+    dirLab.position.set(-30, 50, -30);
+    dirLab.castShadow = true;
+    scene.add(dirLab);
+
+    /* connector group */
+    scene.add(connector);
+
+    /* LINE group for waveform */
+    scene.add(LINE);
+
+    /* build geometry */
+    makeCapacitor(-250, 0, 0, params.l + 10, params.h + 10, params.dist, 5, 0xff7d7a, 'brown');
+    makeConnector(92, 2, -20,  -250, 2, -250,  -params.dist);
+    makeConnector(92, 2,  20,  -250, 2,  250,   params.dist);
+    plusPoints();
+    minusPoints();
+    makeResistor();
+    makeBulb();
+    makeGround();
+
+    /* GLTF model */
+    createModel();
+
+    /* wire UI */
+    setupLabUI();
+}
+
+/* ─────────────────────────────────────
+   makeCapacitor
+───────────────────────────────────── */
+
+function makeCapacitor(x, y, z, l, h, dist, t, col, col2) {
+
+    const capacitor = new THREE.Group();
+    const geo = new THREE.BoxGeometry(l, h, t).translate(0, h / 2, 0);
+
+    cMaterial = new THREE.MeshPhongMaterial({
+        color      : col,
+        transparent: false,
+        opacity    : 0.3
+    });
+
+    const baseGeo = new THREE.BoxGeometry(l + 5, 10, t + 4);
+    const baseMat = new THREE.MeshPhongMaterial({ color: col2 });
+    const base1   = new THREE.Mesh(baseGeo, baseMat);
+
+    plate1 = new THREE.Mesh(geo, cMaterial);
+    plate1.add(base1);
+
+    plate2 = plate1.clone();
+    plate2.rotation.y = 3.14;
+
+    capacitor.add(plate1, plate2);
+    plate1.position.z = -dist;
+    plate2.position.z =  dist;
+
+    capacitor.position.set(x, y, z);
+    scene.add(capacitor);
+
+    /* canvas label on the capacitor */
+    cDisplay = makeText(
+        -250, 250, 0, 150,
+        chargeMaterial,
+        '   CAPACITOR   ',
+        'rgba(0,0,0,0.1)',
+        'rgba(250,55,5,1)'
+    );
+    cDisplay.rotation.y = 1.57;
+    scene.add(cDisplay);
+}
+
+/* ─────────────────────────────────────
+   makeConnector
+───────────────────────────────────── */
+
+function makeConnector(x1, y1, z1, x2, y2, z2, gap) {
+
+    const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(x1,      y1,     z1),
+        new THREE.Vector3(x1 - 40, y1 + 5, z2),
+        new THREE.Vector3(x2,      y2 + 1, z2),
+        new THREE.Vector3(x2,      y2,     gap)
+    ]);
+
+    const tube = new THREE.TubeGeometry(curve, 25, 4, 4, false);
+    connector.add(new THREE.Mesh(tube, connectorMaterial));
+}
+
+/* ─────────────────────────────────────
+   makeResistor
+───────────────────────────────────── */
+
+function makeResistor() {
+
+    const geo      = new THREE.BoxGeometry(120, 40, 40).translate(0, 20, 0);
+    const material = new THREE.MeshPhongMaterial({ color: 0x221011 });
+    const rMat     = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+
+    const rLabel1 = makeText(0, 20, 20.1,  120, rMat, ' RESISTOR ', 'rgba(0,0,0,0.1)', 'rgba(250,55,5,1)');
+    const rLabel2 = rLabel1.clone();
+    rLabel2.position.set(0, 20, -20.1);
+    rLabel2.rotation.y = 3.14;
+    const rLabel3 = rLabel1.clone();
+    rLabel3.position.set(0, 40.1, 0);
+    rLabel3.rotation.set(-1.57, 0, 0);
+
+    const resistor = new THREE.Mesh(geo, material);
+    resistor.add(rLabel1, rLabel2, rLabel3);
+    resistor.position.set(-80, 0, 280);
+    scene.add(resistor);
+}
+
+/* ─────────────────────────────────────
+   makeBulb
+───────────────────────────────────── */
+
+function makeBulb() {
+
+    group = new THREE.Group();
+
+    bulbLight = new THREE.PointLight(0x986b65, intensity, 300, 6);
+    bulbMaterial = new THREE.MeshStandardMaterial({
+        emissive         : 0xffffee,
+        emissiveIntensity: intensity,
+        color            : 0xeeeeee,
+        roughness        : 1
+    });
+
+    const bulbGeo = new THREE.SphereGeometry(1, 32, 32);
+    bulbLight.add(new THREE.Mesh(bulbGeo, bulbMaterial));
+    bulbLight.position.set(0, 1, 0);
+    bulbLight.castShadow = true;
+    bulbLight.shadow.camera.left   = -2000;
+    bulbLight.shadow.camera.right  =  2000;
+    bulbLight.shadow.camera.top    =  2000;
+    bulbLight.shadow.camera.bottom = -2000;
+    bulbLight.shadow.camera.far    =  1000;
+
+    const stemGeo  = new THREE.CylinderGeometry(0.65, 0.5, 0.55, 32);
+    const bStem    = new THREE.Mesh(stemGeo, bulbMaterial);
+    bStem.position.set(0, 1, 0);
+    bStem.castShadow    = true;
+    bStem.receiveShadow = true;
+
+    const plugGeo = new THREE.CylinderGeometry(0.52, 0.52, 1.2, 32);
+    const plugMat = new THREE.MeshPhongMaterial({ color: 0x837d7a });
+    const plug    = new THREE.Mesh(plugGeo, plugMat);
+    plug.position.set(0, 0.5, 0);
+    plug.castShadow    = true;
+    plug.receiveShadow = true;
+
+    bulbLight.position.y = 2.0;
+
+    group.add(bStem, bulbLight, plug);
+    group.scale.set(20, 20, 20);
+    group.position.set(-265, 0, -200);
+    scene.add(group);
+}
+
+/* ─────────────────────────────────────
+   makeGround
+───────────────────────────────────── */
+
+function makeGround() {
+
+    const geo = new THREE.PlaneGeometry(100, 100);
+    const mat = new THREE.MeshStandardMaterial({
+        color    : 0x779977,
+        metalness: 0.65
+    });
+    const ground = new THREE.Mesh(geo, mat);
+    ground.rotation.x    = -Math.PI / 2;
+    ground.position.y    = 0;
+    ground.scale.set(20, 20, 20);
+    ground.receiveShadow = true;
+    scene.add(ground);
+}
+
+/* ─────────────────────────────────────
+   Canvas label helpers
+───────────────────────────────────── */
+
+function makeLabelCanvas(size, name, backgdCol, color) {
+
+    const borderSize = 2;
+    const ctx  = document.createElement('canvas').getContext('2d');
+    const font = `${size}px bold sans-serif`;
+    ctx.font = font;
+
+    const doubleBorder = borderSize * 2;
+    const width  = ctx.measureText(name).width + doubleBorder;
+    const height = size + doubleBorder;
+    ctx.canvas.width  = width;
+    ctx.canvas.height = height;
+
+    ctx.font         = font;
+    ctx.textBaseline = 'top';
+    ctx.fillStyle    = backgdCol;
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = color;
+    ctx.fillText(name, borderSize, borderSize);
+
+    return ctx.canvas;
+}
+
+function makeText(x, y, z, size, material, name, backgdCol, color) {
+
+    const canvas = makeLabelCanvas(size, name, backgdCol, color);
+    material.map = new THREE.CanvasTexture(canvas);
+
+    const root  = new THREE.Object3D();
+    root.position.set(x, y, z);
+
+    const label = new THREE.Mesh(labelGeometry, material);
+    const labelBaseScale = 0.02;
+    label.scale.x = canvas.width  * labelBaseScale;
+    label.scale.y = canvas.height * labelBaseScale;
+    root.add(label);
+
+    scene.add(root);
+    return root;
+}
+
+/* ─────────────────────────────────────
+   plusPoints
+───────────────────────────────────── */
+
+function plusPoints() {
+
+    const geometry  = new THREE.BufferGeometry();
+    const positions = new Float32Array(params.points * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setDrawRange(0, 0);
+
+    redPoints = new THREE.Points(
+        geometry,
+        new THREE.PointsMaterial({ size: 20, color: 0xff0000 })
+    );
+    redPoints.position.z = params.dist;
+    scene.add(redPoints);
+
+    let idx = 0, row = 0;
+    let x = -250 - params.k, y = 10;
+
+    for (let j = 0; j < params.points; j++) {
+        row++;
+        y += (Math.random() - 0.5);
+        positions[idx++] = x;
+        positions[idx++] = y;
+        positions[idx++] = 0;
+        x += params.j;
+        if (row === params.i) { row = 0; x = -250 - params.k; y += 10; }
+    }
+}
+
+/* ─────────────────────────────────────
+   minusPoints
+───────────────────────────────────── */
+
+function minusPoints() {
+
+    const geometry  = new THREE.BufferGeometry();
+    const positions = new Float32Array(params.points * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setDrawRange(0, 0);
+
+    bluePoints = new THREE.Points(
+        geometry,
+        new THREE.PointsMaterial({ size: 20, color: 0x0000ff })
+    );
+    bluePoints.position.z = -params.dist;
+    scene.add(bluePoints);
+
+    let idx = 0, row = 0;
+    let x = -250 - params.k, y = 10;
+
+    for (let j = 0; j < params.points; j++) {
+        row++;
+        y += (Math.random() - 0.5);
+        positions[idx++] = x;
+        positions[idx++] = y;
+        positions[idx++] = 0;
+        x += params.j;
+        if (row === params.i) { row = 0; x = -250 - params.k; y += 10; }
+    }
+
+    updatePoints();
+}
+
+/* ─────────────────────────────────────
+   pointsRecreate
+───────────────────────────────────── */
+
+function pointsRecreate() {
+    redPoints.geometry.dispose();  redPoints.material.dispose();
+    bluePoints.geometry.dispose(); bluePoints.material.dispose();
+    scene.remove(redPoints, bluePoints);
+    plusPoints();
+    minusPoints();
+    updatePoints();
+}
+
+/* ─────────────────────────────────────
+   updatePoints
+───────────────────────────────────── */
+
+function updatePoints() {
+    redPoints.geometry.setDrawRange(0, 0);
+    bluePoints.geometry.setDrawRange(0, 0);
+}
+
+/* ─────────────────────────────────────
+   removePoints
+───────────────────────────────────── */
+
+function removePoints() {
+
+    if (drawCount1 >= 0) {
+        redPoints.geometry.setDrawRange(0, drawCount1);
+        bluePoints.geometry.setDrawRange(0, drawCount1);
+        bulbLight.intensity              = intensity < 0 ? 0 : intensity;
+        bulbMaterial.emissiveIntensity   = intensity < 0 ? 0 : intensity;
+        requestAnimationFrame(removePoints);
+    } else {
+        intensity = 0;
+        bulbLight.intensity            = 0;
+        bulbMaterial.emissiveIntensity = 0;
+        cMaterial.transparent = false;
+        cancelAnimationFrame(removePoints);
+    }
+    intensity  -= 0.1;
+    drawCount1--;
+}
+
+/* ─────────────────────────────────────
+   addPoints
+───────────────────────────────────── */
+
+function addPoints() {
+
+    if (drawCount1 < params.points + 1) {
+        redPoints.geometry.setDrawRange(0, drawCount1);
+        bluePoints.geometry.setDrawRange(0, drawCount1);
+        bulbLight.intensity            = intensity;
+        bulbMaterial.emissiveIntensity = intensity;
+        requestAnimationFrame(addPoints);
+    } else {
+        intensity = 0;
+        bulbLight.intensity            = 0;
+        bulbMaterial.emissiveIntensity = 0;
+        cancelAnimationFrame(addPoints);
+    }
+    drawCount1++;
+    intensity += 0.2;
+}
+
+/* ─────────────────────────────────────
+   chargeAction
+───────────────────────────────────── */
+
+function chargeAction() {
+
+    cancelAnimationFrame(reqAC);
+    cancelAnimationFrame(reqID);
+
+    if (flow && acVolt) {
+
+        actions['Action'] && actions['Action'].play();
+        cMaterial.transparent            = true;
+        buttonFlow.innerText             = 'ON';
+        buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
+
+        setTimeout(() => { if (knob) knob.rotation.y = -1.4; }, 500);
+
+        setTimeout(() => {
+            cMaterial.transparent = true;
+            periodicAction();
+            drawWaveform();
+        }, 1500);
+
+    } else if (flow && !acVolt) {
+
+        flowAction();
+
+    } else if (!flow && !acVolt) {
+
+        flowAction();
+
+    } else if (!flow && acVolt) {
+
+        removePoints();
+        if (waveform) waveform.geometry.setDrawRange(0, 0);
+        t = 0;
+        /* reset capacitor label */
+        chargeMaterial.map = new THREE.CanvasTexture(
+            makeLabelCanvas(250, 'CAPACITOR', 'rgba(0,0,0,0.1)', 'rgba(250,55,5,1)')
+        );
+        actions['Action'] && actions['Action'].reset().stop();
+        if (knob)  knob.rotation.y = 0;
+        drawCount = 0;
+        A = 1;
+        if (plus)  plus.visible  = false;
+        if (minus) minus.visible = false;
+        cMaterial.transparent            = false;
+        buttonFlow.innerText             = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+    }
+}
+
+/* ─────────────────────────────────────
+   flowAction
+───────────────────────────────────── */
+
+function flowAction() {
+
+    if (flow) {
+
+        actions['Action'] && actions['Action'].play();
+        buttonFlow.innerText             = 'ON';
+        buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
+
+        setTimeout(() => {
+            if (knob)  knob.rotation.y = -1.4;
+            if (plus)  plus.visible    = true;
+            if (minus) minus.visible   = true;
+        }, 500);
+
+        setTimeout(() => {
+            cMaterial.transparent = true;
+            addPoints();
+        }, 1500);
+
+    } else {
+
+        intensity = 20;
+        actions['Action'] && actions['Action'].reset().stop();
+        if (knob)  knob.rotation.y = 0;
+        bulbLight.intensity            = 20;
+        bulbMaterial.emissiveIntensity = 20;
+        removePoints();
+        if (plus)  plus.visible  = false;
+        if (minus) minus.visible = false;
+        buttonFlow.innerText             = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+    }
+}
+
+/* ─────────────────────────────────────
+   periodicAction
+───────────────────────────────────── */
+
+function periodicAction() {
+
+    drawCount += A;
+    intensity += drawCount;
+
+    if (drawCount > 0 && drawCount < params.points + 1) {
+
+        const label = A === -1 ? 'DISCHARGING' : 'CHARGING';
+        chargeMaterial.map = new THREE.CanvasTexture(
+            makeLabelCanvas(250, label, 'rgba(0,0,0,0.1)', 'rgba(5,55,5,1)')
+        );
+
+        redPoints.geometry.setDrawRange(0, drawCount);
+        bluePoints.geometry.setDrawRange(0, drawCount);
+
+        if (intensity < 10) {
+            bulbLight.intensity = bulbMaterial.emissiveIntensity = 10;
+        } else if (intensity > 100) {
+            bulbLight.intensity = bulbMaterial.emissiveIntensity = 50;
+        } else {
+            bulbLight.intensity = bulbMaterial.emissiveIntensity = intensity;
+        }
+
+    } else {
+
+        A *= -1;
+
+        if (A > 0) {
+            const rm = redPoints.material.color;
+            const bm = bluePoints.material.color;
+            const newR = rm.r < 1 ? 1 : 0;
+            const newB = rm.b < 1 ? 1 : 0;
+            rm.r = newR;  rm.b = newB;
+            bm.r = newB;  bm.b = newR;
+        }
+    }
+
+    reqAC = requestAnimationFrame(periodicAction);
+}
+
+/* ─────────────────────────────────────
+   makeWaveform
+───────────────────────────────────── */
+
+function makeWaveform() {
+
+    const geometry  = new THREE.BufferGeometry();
+    const pos       = new Float32Array(params.points * 4 * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+    waveform = new THREE.Points(
+        geometry,
+        new THREE.PointsMaterial({ size: 10, color: 0x00ffff })
+    );
+    waveform.geometry.setDrawRange(0, 0);
+
+    let idx = 0, i = 0;
+    for (let j = 0; j < params.points * 4; j++) {
+        pos[idx++] = 250 + i * 30;
+        pos[idx++] = 0;
+        pos[idx++] = 100 * Math.sin(i);
+        i += 0.00835;
+    }
+
+    scene.add(waveform);
+}
+
+/* ─────────────────────────────────────
+   drawWaveform
+───────────────────────────────────── */
+
+function drawWaveform() {
+
+    if (!waveform) makeWaveform();
+
+    const count = waveform.geometry.attributes.position.count;
+
+    if (t < count) {
+        waveform.geometry.setDrawRange(0, t);
+        reqID = requestAnimationFrame(drawWaveform);
+    } else {
+        waveform.geometry.setDrawRange(0, 0);
+        t = 0;
+        reqID = requestAnimationFrame(drawWaveform);
+    }
+    t++;
+}
+
+/* ─────────────────────────────────────
+   createModel
+───────────────────────────────────── */
+
+function createModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'powersupply.glb',
+        function (gltf) {
+            model = gltf.scene;
+            model.scale.set(100, 100, 100);
+            scene.add(model);
+
+            knob  = model.getObjectByName('knob');
+            plus  = model.getObjectByName('plus');
+            minus = model.getObjectByName('minus');
+
+            const onSwitch = model.getObjectByName('switch');
+            if (knob)     { objects.push(knob);     knob.rotation.y = 0; }
+            if (onSwitch) { objects.push(onSwitch); }
+            if (plus)  { plus.position.set(1, 0.2,  0.6); plus.visible  = false; }
+            if (minus) { minus.position.set(1, 0.2, -0.6); minus.visible = false; }
+
+            mixer      = new THREE.AnimationMixer(model);
+            modelReady = true;
+
+            const fixedStates = ['polarity','Action','Action_knob','AC_connector','DC_connector'];
+            for (const clip of gltf.animations) {
+                const action = mixer.clipAction(clip);
+                actions[clip.name] = action;
+                if (fixedStates.includes(clip.name)) {
+                    action.clampWhenFinished = true;
+                    action.loop = THREE.LoopOnce;
+                }
+            }
+        },
+        undefined,
+        (e) => console.warn('powersupply.glb not found.', e)
+    );
+}
+
+/* ─────────────────────────────────────
+   calCapacitance / countPower
+───────────────────────────────────── */
+
+function calCapacitance() {
+    const e0  = 8.854e-12;
+    const raw = (e0 * params.factor * params.a) / params.dist;
+    const { num, count } = countPower(raw);
+    return { C: num, exp: count };
+}
+
+function countPower(num) {
+    let count = 0;
+    while (num < 1) { num *= 10; count++; }
+    return { num, count };
+}
+
+/* ─────────────────────────────────────
+   extraSite
+───────────────────────────────────── */
+
+function extraSite() {
+    window.open('lab.html', '_self');
+}
+
+/* ─────────────────────────────────────
+   onClick  — raycaster for 3D switch
+───────────────────────────────────── */
+
+function onClick(event) {
+    event.preventDefault();
+
+    pointer.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObjects(objects, true);
+
+    if (intersects.length > 0) {
+        SELECTED = intersects[0].object;
+        if (
+            SELECTED.parent.name === 'switch' ||
+            SELECTED.parent.name === 'knob'
+        ) {
+            flow = !flow;
+            chargeAction();
+        }
+    }
+}
+
+/* ─────────────────────────────────────
+   setupLabUI  — button/flip wiring
+───────────────────────────────────── */
+
+function setupLabUI() {
+
+    buttonFlow = document.getElementById('flow');
+    buttonFlip = document.getElementById('flip');
+    messageEl  = document.getElementById('message-el');
+    calDisplay = document.getElementById('calDisplay');
+
+    /* initial capacitance value */
+    const r = calCapacitance();
+    calDisplay.innerHTML = r.C.toFixed(2) + ' &times; 10 <sup>-' + r.exp + '</sup>';
+
+    /* FLOW button */
+    buttonFlow.addEventListener('click', () => {
+        flow = !flow;
+        chargeAction();
+    });
+
+    /* FLIP (DC / AC) button */
+    buttonFlip.addEventListener('click', () => {
+
+        cMaterial.transparent = false;
+        acVolt = !acVolt;
+        flow   = false;
+        actions['Action'] && actions['Action'].reset().stop();
+        if (knob) knob.rotation.y = 0;
+        pointsRecreate();
+        buttonFlow.innerText             = 'OFF';
+        buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
+
+        if (acVolt) {
+            makeWaveform();
+            actions['DC_connector'] && actions['DC_connector'].reset().stop();
+            actions['AC_connector'] && actions['AC_connector'].setDuration(2).play();
+            buttonFlip.innerText = 'AC VOLTAGE';
+        } else {
+            actions['AC_connector'] && actions['AC_connector'].reset().stop();
+            actions['DC_connector'] && actions['DC_connector'].setDuration(2).play();
+            buttonFlip.innerText = 'DC VOLTAGE';
+        }
+    });
+
+    /* EXTRA button */
+    document.getElementById('extra').addEventListener('click', extraSite);
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — untouched
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── ferrari intro steering ── */
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* GLTF mixer for capacitance model */
+    if (modelReady && mixer) mixer.update(clock.getDelta());
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
