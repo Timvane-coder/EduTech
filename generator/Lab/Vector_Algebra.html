@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Properties of Vector</title>
+    <style>
+        /* ── reset ── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── CSS2D labels (Vector scene) ── */
+        .label {
+            font-weight:bold;
+            font-size:12px;
+            color:#111;
+            pointer-events:none;
+        }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── vector lab UI — hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* sidemenu — empty in Vector scene, kept for layout symmetry */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:0;
+            z-index:100;
+        }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #inputAction {
+            display:flex; align-items:center; gap:10px;
+            font-size:12px; color:#ccc;
+        }
+        #inputAction input[type=checkbox] { accent-color:#c0392b; }
+        #inputAction label { color:#bbb; font-size:11.5px; cursor:pointer; }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+            background:#1a4e8f;
+        }
+        #menu button:hover { filter:brightness(1.2); }
+
+        /* vector readouts */
+        #vectorReadouts {
+            display:flex; gap:16px; align-items:center;
+            flex-wrap:wrap; font-size:12px;
+        }
+        #vectorReadouts div { font-weight:600; }
+    </style>
+</head>
+<body>
+
+<!-- intro overlay -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- Vector lab UI  (shown after transition) -->
+<div id="labUI">
+
+    <div id="topmenu">Properties of Vector</div>
+
+    <div id="sidemenu"></div>
+
+    <div id="menu">
+        <div id="inputAction">
+            <input type="checkbox" id="xyPlane" name="xyPlane">
+            <label for="xyPlane">Only XY plane</label>
+            <input type="checkbox" id="yzPlane" name="yzPlane">
+            <label for="yzPlane">Only YZ plane</label>
+            <input type="checkbox" id="zxPlane" name="zxPlane">
+            <label for="zxPlane">Only ZX plane</label>
+        </div>
+
+        <button id="random">REGENERATE VECTORS</button>
+        <button id="add">ADD</button>
+        <button id="cross">CROSS</button>
+        <button id="reset">RESET</button>
+        <button id="polar">PROJECTION <strong>A</strong></button>
+        <button id="vecDisplay">VECTOR DISPLAY</button>
+
+        <div id="vectorReadouts">
+            <div style="color:#ff4444;"><strong>A</strong> = <span id="vectorA"></span></div>
+            <div style="color:#44cc44;"><strong>B</strong> = <span id="vectorB"></span></div>
+            <div style="color:#4488ff; display:none;" id="vectorDisplay">
+                <strong>A+B</strong> = <span id="vectorAdd"></span>
+            </div>
+            <div style="color:#cc8844; display:none;" id="crossDisplay">
+                <strong>A&times;B</strong> = <span id="vectorCross"></span>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup = new THREE.Group();
+let vectorGroup  = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── vector scene ── */
+let labelRenderer;
+
+let ARROWS = new THREE.Group();
+let DOTS   = new THREE.Group();
+let LABELS = new THREE.Group();
+let PLANES = new THREE.Group();
+
+let XZplane, XYplane, ZYplane, polarHelper;
+let Alabel, Blabel;
+let ADDlabel   = new THREE.Object3D();
+let Avector, Bvector;
+let ADDvector  = new THREE.Object3D();
+let angleMeasure = new THREE.Object3D();
+let angleText1, angleText2, angleDisplay;
+let pointLabel, magLabel;
+
+let selectA = true;
+
+let point   = [-2, 10, 4];
+let vectorV = [-4, -1, 1];
+
+const axis = new THREE.Vector3(0, 0, 0);
+
+/* DOM refs for vector UI — populated in setupVectorUI() */
+let btnAdd, btnCross, btnReset, btnRandom, btnPolar, btnVecDisplay;
+let vectorAEl, vectorBEl, vectorDisplayEl, vectorAddEl;
+let crossDisplayEl, vectorCrossEl;
+let inputxyPlane, inputyzPlane, inputzxPlane, inputAction;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* CSS2D label renderer — needed by vector scene */
+    createLabelRenderer();
+
+    /* camera — FOV 60 matches the Vector scene's camera */
+    camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createVectorScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function(texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function(gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* transition flies to Vector scene camera position */
+    const transition = moveCamera(7, 8, 45, 4, 9, 2, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            vectorGroup.visible  = true;
+
+            /* Vector scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Vector scene orbit target */
+            controls.enabled = true;
+            controls.target.set(4, 9, 2);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   VECTOR SCENE
+════════════════════════════════════════ */
+
+function createVectorScene() {
+
+    vectorGroup.visible = false;
+    scene.add(vectorGroup);
+
+    /* floor box */
+    const floor = new THREE.Mesh(
+        new THREE.BoxGeometry(50, 0.2, 50).translate(0, -0.1, 0),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.4 })
+    );
+    vectorGroup.add(floor);
+
+    /* grids */
+    const gridH = new THREE.GridHelper(100, 10);
+    vectorGroup.add(gridH);
+
+    const gridV = gridH.clone();
+    gridV.rotation.set(1.57, 0, 0);
+    vectorGroup.add(gridV);
+
+    polarHelper = gridH.clone();
+    polarHelper.rotation.set(1.57, 0, 1.57);
+    polarHelper.visible = false;
+    vectorGroup.add(polarHelper);
+
+    /* axis GLTF model */
+    const loader = new GLTFLoader();
+    loader.load(
+        './model/axis.glb',
+        function(gltf) { vectorGroup.add(gltf.scene); },
+        undefined,
+        (e) => console.warn('axis.glb not found – vector scene works without it.', e)
+    );
+
+    /* extra lights to complement the ferro HDR */
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1));
+    const pt = new THREE.PointLight(0xAA8899, 1);
+    scene.add(pt);
+
+    /* groups that live in scene (not vectorGroup) so we
+       can freely add/remove objects during interactions */
+    scene.add(DOTS);
+    scene.add(PLANES);
+
+    /* initial vectors */
+    initialiseVectors();
+
+    /* angle arc */
+    const theta = Math.atan(point[1] / point[0]);
+    const arcGeo = new THREE.RingGeometry(0.92, 1, 16, 1, 0, theta);
+    angleMeasure = new THREE.Mesh(
+        arcGeo,
+        new THREE.MeshBasicMaterial({ color: 'black', side: THREE.DoubleSide })
+    );
+    scene.add(angleMeasure);
+    angleMeasure.visible = false;
+
+    /* wire up UI buttons */
+    setupVectorUI();
+}
+
+/* ------------------------------------------------ */
+/* initialiseVectors                                 */
+/* ------------------------------------------------ */
+
+function initialiseVectors() {
+
+    const dotPos = new THREE.Vector3(point[0], point[1], point[2]);
+    createDots(dotPos);
+    htmlLabels(dotPos, document.getElementById('vectorA'));
+
+    const aResult = addVectors(point[0],   point[1],   point[2],   'red',  'A');
+    const bResult = addVectors(vectorV[0], vectorV[1], vectorV[2], 'blue', 'B');
+
+    Alabel  = aResult.label;
+    Avector = aResult.vector;
+    Blabel  = bResult.label;
+    Bvector = bResult.vector;
+
+    scene.add(Alabel, Avector, Blabel, Bvector);
+    scene.add(ADDlabel, ADDvector);
+
+    htmlLabels(
+        new THREE.Vector3(vectorV[0], vectorV[1], vectorV[2]),
+        document.getElementById('vectorB')
+    );
+}
+
+/* ------------------------------------------------ */
+/* setupVectorUI  (= buttonActions in original)      */
+/* ------------------------------------------------ */
+
+function setupVectorUI() {
+
+    btnAdd        = document.getElementById('add');
+    btnCross      = document.getElementById('cross');
+    btnReset      = document.getElementById('reset');
+    btnRandom     = document.getElementById('random');
+    btnPolar      = document.getElementById('polar');
+    btnVecDisplay = document.getElementById('vecDisplay');
+
+    vectorAEl       = document.getElementById('vectorA');
+    vectorBEl       = document.getElementById('vectorB');
+    vectorDisplayEl = document.getElementById('vectorDisplay');
+    vectorAddEl     = document.getElementById('vectorAdd');
+    crossDisplayEl  = document.getElementById('crossDisplay');
+    vectorCrossEl   = document.getElementById('vectorCross');
+
+    inputxyPlane = document.getElementById('xyPlane');
+    inputyzPlane = document.getElementById('yzPlane');
+    inputzxPlane = document.getElementById('zxPlane');
+    inputAction  = document.getElementById('inputAction');
+
+    /* ── ADD ── */
+    btnAdd.addEventListener('click', () => {
+        resetVector();
+        const A = new THREE.Vector3(point[0],   point[1],   point[2]);
+        const B = new THREE.Vector3(vectorV[0], vectorV[1], vectorV[2]);
+
+        /* shift B to tip of A */
+        const initPt = scene.getObjectByName('__initDot__') || DOTS.children[0];
+        if (initPt) {
+            Bvector.position.copy(initPt.position);
+            Blabel.position.copy(initPt.position);
+        }
+
+        const E = A.add(B);
+        if (initPt) initPt.position.copy(E);
+
+        vectorDisplayEl.style.display = 'block';
+        const res = addVectors(E.x, E.y, E.z, 'green', 'A + B');
+        ADDlabel  = res.label;
+        ADDvector = res.vector;
+        scene.add(ADDlabel, ADDvector);
+        htmlLabels(E, vectorAddEl);
+    });
+
+    /* ── CROSS ── */
+    btnCross.addEventListener('click', () => {
+        resetVector();
+        const A = new THREE.Vector3(point[0],   point[1],   point[2]);
+        const B = new THREE.Vector3(vectorV[0], vectorV[1], vectorV[2]);
+        const E = A.cross(B);
+
+        const initPt = DOTS.children[0];
+        if (initPt) initPt.position.copy(E);
+
+        crossDisplayEl.style.display = 'block';
+        const res = addVectors(E.x, E.y, E.z, 'green', 'A x B');
+        ADDlabel  = res.label;
+        ADDvector = res.vector;
+        scene.add(ADDlabel, ADDvector);
+        htmlLabels(E, vectorCrossEl);
+    });
+
+    /* ── RESET ── */
+    btnReset.addEventListener('click', resetVector);
+
+    /* ── REGENERATE ── */
+    btnRandom.addEventListener('click', () => {
+        if (inputxyPlane.checked) {
+            point   = [rnd(1,15),  rnd(1,15),  0];
+            vectorV = [rnd(-7,7),  rnd(-7,7),  0];
+        } else if (inputyzPlane.checked) {
+            point   = [0, rnd(1,15),  rnd(1,15)];
+            vectorV = [0, rnd(-7,7),  rnd(-7,7)];
+        } else if (inputzxPlane.checked) {
+            point   = [rnd(1,15),  0, rnd(1,15)];
+            vectorV = [rnd(-2,2),  0, rnd(-7,7)];
+        } else {
+            point   = [rnd(-15,15), rnd(0,15),  rnd(-15,15)];
+            vectorV = [rnd(-5,5),   rnd(-2,5),  rnd(-5,5)];
+        }
+        resetVector();
+    });
+
+    /* ── PROJECTION A ── */
+    btnPolar.addEventListener('click', () => {
+        PLANES = new THREE.Group();
+        const initPt = DOTS.children[0];
+        if (initPt) initPt.visible = false;
+        polarHelper.visible = true;
+        angleMeasure.visible = true;
+
+        scene.remove(angleMeasure, angleText1, angleText2, angleDisplay);
+
+        if (selectA) {
+            Bvector.visible = false;
+            Blabel.visible  = false;
+
+            XZplane = initPlane({
+                points: [0,0,0, point[0],point[1],point[2], point[0],0,point[2]],
+                col: 'yellow'
+            });
+            XYplane = initPlane({
+                points: [0,0,0, point[0],point[1],point[2], point[0],point[1],0],
+                col: 'orange'
+            });
+            ZYplane = initPlane({
+                points: [0,0,0, point[0],point[1],point[2], 0,point[1],point[2]],
+                col: 'pink'
+            });
+            PLANES.add(XZplane, XYplane, ZYplane);
+            scene.add(PLANES);
+
+            scene.remove(pointLabel);
+            pointLabel = addLabel(
+                point[0], point[1], point[2],
+                ' ( ' + point[0] + ', ' + point[1] + ', ' + point[2] + ' ) '
+            );
+            scene.add(pointLabel);
+            scene.remove(magLabel);
+        }
+
+        if (inputxyPlane.checked && selectA) {
+            Alabel.visible = false;
+            Blabel.visible = false;
+            const sum = point[0]**2 + point[1]**2 + point[2]**2;
+            const R   = Math.sqrt(sum).toFixed(2);
+            const theta = Math.atan(point[1] / point[0]);
+            magLabel = addLabel(point[0]/2, point[1]/2, point[2]/2, 'r = ' + R);
+            scene.add(magLabel);
+            angleLabel(theta, point[0], point[1], point[2], theta);
+            scene.add(angleMeasure, angleText1, angleText2, angleDisplay);
+        }
+    });
+
+    /* ── VECTOR DISPLAY ── */
+    btnVecDisplay.addEventListener('click', () => {
+        window.open('Mechanics_Vector_Display.html', '_self');
+    });
+
+    /* ── plane checkboxes mutex ── */
+    inputAction.addEventListener('click', () => {
+        if (inputyzPlane.checked) {
+            inputxyPlane.checked = false;
+            inputzxPlane.checked = false;
+        } else if (inputzxPlane.checked) {
+            inputxyPlane.checked = false;
+            inputyzPlane.checked = false;
+        } else if (inputxyPlane.checked) {
+            inputyzPlane.checked = false;
+            inputzxPlane.checked = false;
+        }
+    });
+}
+
+/* ------------------------------------------------ */
+/* resetVector                                       */
+/* ------------------------------------------------ */
+
+function resetVector() {
+
+    polarHelper.visible = false;
+    scene.remove(DOTS, PLANES);
+    scene.remove(Alabel, Avector, Blabel, Bvector, ADDlabel, ADDvector);
+
+    DOTS = new THREE.Group();
+    scene.add(DOTS);
+
+    createDots(new THREE.Vector3(point[0], point[1], point[2]));
+    htmlLabels(new THREE.Vector3(point[0], point[1], point[2]), vectorAEl);
+
+    const aRes = addVectors(point[0],   point[1],   point[2],   'red',  'A');
+    const bRes = addVectors(vectorV[0], vectorV[1], vectorV[2], 'blue', 'B');
+    Alabel  = aRes.label;  Avector = aRes.vector;
+    Blabel  = bRes.label;  Bvector = bRes.vector;
+    scene.add(Alabel, Avector, Blabel, Bvector);
+
+    ADDlabel  = new THREE.Object3D();
+    ADDvector = new THREE.Object3D();
+    scene.add(ADDlabel, ADDvector);
+
+    htmlLabels(new THREE.Vector3(vectorV[0], vectorV[1], vectorV[2]), vectorBEl);
+
+    scene.remove(pointLabel, magLabel);
+    vectorDisplayEl.style.display = 'none';
+    crossDisplayEl.style.display  = 'none';
+    scene.remove(angleMeasure, angleText1, angleText2, angleDisplay);
+
+    btnPolar.innerHTML = 'PROJECTION <strong>A</strong>';
+}
+
+/* ------------------------------------------------ */
+/* addVectors                                        */
+/* ------------------------------------------------ */
+
+function addVectors(X, Y, Z, col, name) {
+
+    const a      = new THREE.Vector3(X, Y, Z);
+    const label  = addLabel(X, Y, Z, name);
+    label.position.multiplyScalar(0.5);
+
+    const d      = a.distanceTo(axis);
+    a.normalize();
+    const vector = new THREE.ArrowHelper(a, axis, d, col);
+
+    ARROWS.add(vector);
+    return { vector, label };
+}
+
+/* ------------------------------------------------ */
+/* addLabel                                          */
+/* ------------------------------------------------ */
+
+function addLabel(X, Y, Z, name) {
+
+    const div = document.createElement('div');
+    div.className   = 'label';
+    div.innerHTML   = name;
+
+    const label = new CSS2DObject(div);
+    label.position.set(X, Y, Z);
+    LABELS.add(label);
+    return label;
+}
+
+/* ------------------------------------------------ */
+/* angleLabel                                        */
+/* ------------------------------------------------ */
+
+function angleLabel(a, X, Y, Z, value) {
+
+    angleMeasure.geometry.dispose();
+    const newGeo = new THREE.RingGeometry(0.9, 1, 16, 1, 0, a);
+    angleMeasure.position.z = 0.1;
+    angleMeasure.geometry   = newGeo;
+
+    const D    = (value * (180 / Math.PI)).toFixed(1);
+    angleDisplay = addLabel(3, -0.25, 0, '&theta; = ' + D + '&deg;');
+    angleText1   = addLabel(X / 2,   -2,     0, 'r cos&theta;');
+    angleText2   = addLabel(X + 1, Y / 2,    0, 'r sin&theta;');
+}
+
+/* ------------------------------------------------ */
+/* createDots                                        */
+/* ------------------------------------------------ */
+
+function createDots(pos) {
+
+    const geo  = new THREE.CircleGeometry(0.2, 8);
+    const mat  = new THREE.MeshBasicMaterial({ color: 'black', side: THREE.DoubleSide });
+    const dot  = new THREE.Mesh(geo, mat);
+    dot.position.copy(pos);
+    DOTS.add(dot);
+    return dot;
+}
+
+/* ------------------------------------------------ */
+/* htmlLabels                                        */
+/* ------------------------------------------------ */
+
+function htmlLabels(A, html) {
+
+    const fmt = (v, suffix) => {
+        if (v ===  1) return ' + '  + suffix;
+        if (v === -1) return ' - '  + suffix;
+        if (v  >  0) return ' + '  + v + ' ' + suffix;
+        if (v  <  0) return ' '    + v + ' ' + suffix;
+        return '';
+    };
+
+    const X = A.x === 0 ? '' :
+              A.x ===  1 ? ' i' :
+              A.x === -1 ? ' -i' :
+              A.x + ' i';
+
+    html.innerHTML = X + fmt(A.y, 'j') + fmt(A.z, 'k');
+}
+
+/* ------------------------------------------------ */
+/* initPlane                                         */
+/* ------------------------------------------------ */
+
+function initPlane(data) {
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute(
+        'position',
+        new THREE.BufferAttribute(new Float32Array(data.points), 3)
+    );
+    const mat = new THREE.MeshBasicMaterial({
+        color      : data.col,
+        transparent: true,
+        opacity    : 0.6,
+        side       : THREE.DoubleSide
+    });
+    return new THREE.Mesh(geo, mat);
+}
+
+/* ------------------------------------------------ */
+/* createLabelRenderer                               */
+/* ------------------------------------------------ */
+
+function createLabelRenderer() {
+
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.left         = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+}
+
+/* ------------------------------------------------ */
+/* rnd helper                                        */
+/* ------------------------------------------------ */
+
+function rnd(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+/* ════════════════════════════════════════
+   RESIZE
+════════════════════════════════════════ */
+
+function onResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via tone-mapping exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* render main scene */
+    renderer.render(scene, camera);
+
+    /* render CSS2D labels (only meaningful after transition) */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>

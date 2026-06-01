@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Circular Motion Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* CSS2D labels rendered by labelRenderer */
+        .label {
+            color: #fff;
+            font-size: 12px;
+            font-family: 'Segoe UI', sans-serif;
+            background: rgba(0,0,0,0.45);
+            padding: 2px 6px;
+            border-radius: 3px;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Side menu (Free Body Diagram panel) ── */
+        #sidemenu {
+            position:fixed; top:38px; right:0; width:260px;
+            background:rgba(15,15,20,.90);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px; z-index:100;
+            border-left:1px solid rgba(255,255,255,.07);
+            line-height:1.9;
+        }
+        #sidemenu h3 {
+            font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+            color:#aaa; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,.08);
+            padding-bottom:6px;
+        }
+        #sidemenu label {
+            display:flex; align-items:center; gap:8px;
+            cursor:pointer; font-size:12px; color:#ccc;
+            margin-bottom:4px;
+        }
+        #sidemenu input[type=checkbox]{
+            accent-color:#c0392b; width:14px; height:14px; cursor:pointer;
+        }
+        #sidemenu label span { flex:1; }
+        .swatch {
+            width:10px; height:10px; border-radius:50%; flex-shrink:0;
+        }
+
+        /* Speed slider */
+        #sidemenu .slider-row { margin-top:10px; }
+        #sidemenu .slider-row label {
+            display:block; color:#aaa; font-size:11px; margin-bottom:3px;
+        }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#c0392b;
+        }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a { color:#e07070; font-weight:600; }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #menu button:disabled { opacity:.4; cursor:default; }
+        #move-el    { background:rgb(164,26,26); }
+        #theory-el  { background:#1a4e8f; }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Mechanics &mdash; Uniform Circular Motion</div>
+
+    <!-- Free Body Diagram side panel -->
+    <div id="sidemenu">
+        <h3>Free Body Diagram</h3>
+
+        <label>
+            <input type="checkbox" id="chk-force">
+            <div class="swatch" style="background:#ff4444;"></div>
+            <span>Force &amp; Velocity vectors</span>
+        </label>
+
+        <label>
+            <input type="checkbox" id="chk-weight">
+            <div class="swatch" style="background:#44ff44;"></div>
+            <span>Weight (mg)</span>
+        </label>
+
+        <label>
+            <input type="checkbox" id="chk-normal">
+            <div class="swatch" style="background:#ffffff;"></div>
+            <span>Normal vector</span>
+        </label>
+
+        <div class="slider-row">
+            <label for="speed-sl">Modify time scale: <a id="speedDisplay">1.0</a></label>
+            <input type="range" id="speed-sl" min="0" max="1.5" value="1" step="0.005">
+        </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div id="menu">
+        <button id="move-el">PAUSE</button>
+        <button id="theory-el">THEORY</button>
+        <div id="message-el">
+            Visualise free-body diagram for an object in uniform circular motion
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* ferrari */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* circular motion lab */
+let circularMotionGroup = new THREE.Group();
+
+let cmModel, cmMixer, cmCar, cmWempty;
+let cmModelReady    = false;
+let cmMove          = true;
+let circularAction, WAction;
+const cmActions     = [];
+const cmClock       = new THREE.Clock();
+
+/* vectors / labels */
+let weight, force, normal, velocity;
+let Wlabel, Flabel, Nlabel, Vlabel;
+const vectorGroup = new THREE.Group();
+const axis        = new THREE.Vector3(0.6, 0, 0);
+
+/* DOM refs */
+let moveEl, messageEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position    = 'absolute';
+    labelRenderer.domElement.style.top         = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── Camera ── */
+    camera = new THREE.PerspectiveCamera(
+        45, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+    createCircularMotionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    const ambient = new THREE.HemisphereLight(0xddeeff, 0x202020, 0.5);
+    scene.add(ambient);
+
+    const main = new THREE.DirectionalLight(0xffffff, 4);
+    main.position.set(5, 10, 7);
+    scene.add(main);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Circular Motion lab ── */
+    const transition = moveCamera(-50, 10, 40, 0, -2, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible        = false;
+            circularMotionGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera & controls tuned to circular motion scene */
+            camera.position.set(-50, 10, 40);
+            camera.fov = 45;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(5, -2, -4.5);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            setupLabUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   CIRCULAR MOTION SCENE
+════════════════════════════════════════ */
+
+function createCircularMotionScene() {
+
+    circularMotionGroup.visible = false;
+    scene.add(circularMotionGroup);
+
+    /* Ground grid */
+    const grid2 = new THREE.GridHelper(60, 60);
+    circularMotionGroup.add(grid2);
+
+    /* Build physics vectors (hidden until toggled) */
+    const vForce    = makeArrow(new THREE.Vector3(1, 0, 0), 'a (centripetal)', 0xff4444);
+    force   = vForce.arrow;  Flabel  = vForce.label;
+
+    const vVelocity = makeArrow(new THREE.Vector3(0, 0, -1), 'v (velocity)', 0x4488ff);
+    velocity = vVelocity.arrow; Vlabel = vVelocity.label;
+
+    const vWeight   = makeArrow(new THREE.Vector3(0, -1, 0), 'mg', 0x44ff44);
+    weight  = vWeight.arrow;  Wlabel  = vWeight.label;
+
+    const vNormal   = makeArrow(new THREE.Vector3(1, 0, 0), 'N (Normal)', 0xffffff);
+    normal  = vNormal.arrow;  Nlabel  = vNormal.label;
+
+    /* All vectors start hidden */
+    [force, velocity, weight, normal].forEach(v => { v.visible = false; });
+    [Flabel, Vlabel, Wlabel, Nlabel].forEach(l => { l.visible = false; });
+
+    /* Load circularMotion.glb */
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'circularMotion.glb',
+        function (gltf) {
+            cmModel  = gltf.scene;
+            cmCar    = cmModel.getObjectByName('car');
+            cmWempty = cmModel.getObjectByName('Wempty');
+
+            scene.add(cmModel);
+            circularMotionGroup.add(cmModel);
+
+            cmMixer        = new THREE.AnimationMixer(cmModel);
+            cmModelReady   = true;
+
+            const clips = gltf.animations;
+            circularAction = cmMixer.clipAction(clips[0]);
+            WAction        = cmMixer.clipAction(clips[1]);
+            cmActions.push(circularAction, WAction);
+
+            circularAction.play();
+            WAction.play();
+
+            /* Attach vectors to their parent objects once model is ready */
+            if (cmCar) {
+                cmCar.add(force);    cmCar.add(Flabel);
+                cmCar.add(velocity); cmCar.add(Vlabel);
+                cmCar.add(normal);   cmCar.add(Nlabel);
+            }
+            if (cmWempty) {
+                cmWempty.add(weight); cmWempty.add(Wlabel);
+            }
+
+            gltf.scene.traverse((child) => {
+                if (child.type === 'SkinnedMesh') child.frustumCulled = false;
+            });
+        },
+        undefined,
+        (e) => console.warn('circularMotion.glb not found – lab works without it.', e)
+    );
+}
+
+/* ────────────────────────────────────────
+   makeArrow  – creates ArrowHelper + CSS2D label
+──────────────────────────────────────── */
+
+function makeArrow(dir, name, color) {
+
+    const arrow = new THREE.ArrowHelper(
+        dir.normalize(),
+        new THREE.Vector3(0, 0, 0),
+        1,
+        color
+    );
+
+    const div       = document.createElement('div');
+    div.className   = 'label';
+    div.textContent = name;
+    const label     = new CSS2DObject(div);
+    label.position.copy(dir);
+
+    return { arrow, label };
+}
+
+/* ════════════════════════════════════════
+   LAB UI  (wired after transition completes)
+════════════════════════════════════════ */
+
+function setupLabUI() {
+
+    moveEl    = document.getElementById('move-el');
+    messageEl = document.getElementById('message-el');
+
+    /* ── PAUSE / CONTINUE ── */
+    moveEl.addEventListener('click', () => {
+        cmMove = !cmMove;
+        cmActions.forEach(a => { a.paused = !cmMove; });
+        moveEl.textContent = cmMove ? 'PAUSE' : 'CONTINUE';
+    });
+
+    /* ── THEORY ── */
+    document.getElementById('theory-el').addEventListener('click', () => {
+        window.open('Mechanics_Circular_Motion.html', '_self');
+    });
+
+    /* ── Force + Velocity vectors ── */
+    document.getElementById('chk-force').addEventListener('change', function () {
+        const on = this.checked;
+        force.visible    = on;  Flabel.visible    = on;
+        velocity.visible = on;  Vlabel.visible    = on;
+        messageEl.textContent = on
+            ? 'Centripetal force and velocity vectors shown'
+            : 'Force / velocity vectors hidden';
+    });
+
+    /* ── Weight ── */
+    document.getElementById('chk-weight').addEventListener('change', function () {
+        const on = this.checked;
+        weight.visible = on; Wlabel.visible = on;
+        messageEl.textContent = on ? 'Weight vector (mg) shown' : 'Weight vector hidden';
+    });
+
+    /* ── Normal ── */
+    document.getElementById('chk-normal').addEventListener('change', function () {
+        const on = this.checked;
+        normal.visible = on; Nlabel.visible = on;
+        messageEl.textContent = on ? 'Normal vector shown' : 'Normal vector hidden';
+        if (on) normalMagnitudeLoop();
+    });
+
+    /* ── Time scale ── */
+    const speedSl      = document.getElementById('speed-sl');
+    const speedDisplay = document.getElementById('speedDisplay');
+    speedSl.addEventListener('input', () => {
+        const v = Number(speedSl.value);
+        speedDisplay.textContent = v.toFixed(2);
+        if (cmMixer) cmMixer.timeScale = v;
+    });
+}
+
+/* ────────────────────────────────────────
+   normalMagnitudeLoop
+   Continuously adjusts the Normal arrow length
+   based on the car's horizontal position
+──────────────────────────────────────── */
+
+function normalMagnitudeLoop() {
+
+    if (!cmCar || !normal.visible) return;
+
+    const A = Math.abs(cmCar.position.x / 1.4);
+    const B = Math.abs(cmCar.position.y);
+
+    if (A <= 0.9 && B > 1.2) {
+        normal.setLength(Math.sin(A));
+        Nlabel.position.copy(axis);
+    } else {
+        normal.setLength(0.8);
+    }
+
+    requestAnimationFrame(normalMagnitudeLoop);
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (labelRenderer) labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* ── Circular motion mixer ── */
+    if (cmModelReady && cmMixer) {
+        cmMixer.update(cmClock.getDelta());
+    }
+
+    renderer.render(scene, camera);
+    if (labelRenderer) labelRenderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

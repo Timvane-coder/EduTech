@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Circular Motion</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── CSS2D label layer (circular motion) ── */
+        #label-renderer {
+            position:absolute; top:0; left:0;
+            pointer-events:none; z-index:5;
+        }
+        .label {
+            color:#111; background:rgba(255,255,255,.72);
+            padding:2px 6px; border-radius:3px;
+            font-size:12px; font-family:'Segoe UI',sans-serif;
+            pointer-events:none;
+        }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── bottom bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:10px 18px 12px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+            display:flex; flex-direction:column; gap:6px;
+        }
+        #message-el {
+            font-size:11.5px; color:#aaa;
+        }
+        .radius-row {
+            display:flex; align-items:center; gap:10px;
+            flex-wrap:wrap;
+        }
+        .radius-row label { font-size:12px; color:#ccc; }
+        .radius-row a     { color:#e07070; font-weight:600; }
+        #radius {
+            width:220px; accent-color:#c0392b;
+        }
+
+        /* ── toggle buttons ── */
+        .ctrl-row {
+            display:flex; gap:8px; flex-wrap:wrap;
+        }
+        .ctrl-row button {
+            padding:5px 13px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        .ctrl-row button:hover { filter:brightness(1.18); }
+        #btnLabels  { background:rgb(26,78,143); }
+        #btnHelpers { background:rgb(42,110,63); }
+    </style>
+</head>
+<body>
+
+<!-- intro label -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI (hidden until transition) -->
+<div id="labUI">
+
+    <div id="topmenu">MOTION IN A CIRCULAR PATH &mdash; Conservation of Angular Momentum</div>
+
+    <div id="menu">
+        <div id="message-el">
+            <strong>Conservation of angular momentum</strong> — decrease in radius of rotation results in increase of speed.
+        </div>
+
+        <div class="radius-row">
+            <label for="radius">CHANGE RADIUS, A =</label>
+            <a id="radiusDisplay">50</a> units
+            <input type="range" id="radius" min="10" max="50" value="50" step="5">
+        </div>
+
+        <div class="ctrl-row">
+            <button id="btnLabels">TOGGLE LABELS</button>
+            <button id="btnHelpers">TOGGLE AXES</button>
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+let labelRenderer;                               // CSS2D layer for circular motion labels
+
+/* ────────────────────────────────────────
+   Ferrari globals  (unchanged)
+──────────────────────────────────────── */
+let ferrariGroup      = new THREE.Group();
+let circularMotionGroup = new THREE.Group();     // replaces mechanicsGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Circular Motion globals
+──────────────────────────────────────── */
+let bodyOrbit, bodyCurve, body;
+let line, lineText, lineLabel;
+let arrowVlabel;
+let axesHelperObj;
+
+const arrowR = new THREE.Group();
+const arrowV = new THREE.Group();
+const arrowL = new THREE.Group();
+const ARROW  = new THREE.Group();
+const BODY   = new THREE.Group();
+
+const Label  = [];     // CSS2D objects toggled by LABELS button
+const Helper = [];     // axes / grid toggled by HELPERS button
+
+let labelVisible = false;
+let axisVisible  = false;
+
+const cmClock = new THREE.Clock();   // separate clock for circular motion
+let t = 0;
+
+const cmParams = {
+    radius : 50,
+    n      : 25,          // 50/2
+    speed  : 0.08 / 50   // angular step per frame
+};
+
+// Frenet frame vectors
+const N0 = new THREE.Vector3(0, 1, 0);
+const N  = new THREE.Vector3(0, 1, 0);
+const B  = new THREE.Vector3();
+let   X;
+const matrix3 = new THREE.Matrix3();
+const matrix4 = new THREE.Matrix4();
+let   P = new THREE.Vector3();
+
+let circularMotionReady = false;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer ─────────────────────────── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* CSS2D renderer for labels ─────────── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top      = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    labelRenderer.domElement.id = 'label-renderer';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* camera ────────────────────────────── */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* scene ─────────────────────────────── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* controls ──────────────────────────── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    /* build both scenes ─────────────────── */
+    createLights();
+    createFerrariShowroom();
+    createCircularMotionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    /* circular motion uses hemisphere + directional */
+    const hemi = new THREE.HemisphereLight(0xddeeff, 0x202020, 1);
+    const main = new THREE.DirectionalLight(0xffffff, 0.3);
+    main.position.set(0, 60, 0);
+    scene.add(hemi, main);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into circular motion scene ── */
+    const transition = moveCamera(30, 10, 30, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible        = false;
+            circularMotionGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls — target matches circular motion scene origin */
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            motionBlurStrength  = 0;
+            introFinished       = true;
+            circularMotionReady = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   CIRCULAR MOTION SCENE
+════════════════════════════════════════ */
+
+function createCircularMotionScene() {
+
+    circularMotionGroup.visible = false;
+    scene.add(circularMotionGroup);
+
+    /* ground grid + axes ───────────────── */
+    const scaleHorizontal = new THREE.GridHelper(100, 10);
+    scaleHorizontal.position.y = 0.05;
+    circularMotionGroup.add(scaleHorizontal);
+    Helper.push(scaleHorizontal);
+
+    axesHelperObj = new THREE.AxesHelper(50);
+    circularMotionGroup.add(axesHelperObj);
+    Helper.push(axesHelperObj);
+
+    /* travelling body (purple box) ─────── */
+    const bodyGeo = new THREE.BoxGeometry(4, 1, 1).translate(0, 0.5, 0);
+    const bodyMat = new THREE.MeshPhongMaterial({ color: 0xa020f0 });
+    body = new THREE.Mesh(bodyGeo, bodyMat);
+    circularMotionGroup.add(body);
+
+    /* orbit path ───────────────────────── */
+    const orbitData = circularCurve();
+    bodyOrbit = orbitData.mesh;
+    bodyCurve = orbitData.curve;
+    BODY.add(bodyOrbit);
+    circularMotionGroup.add(BODY);
+    circularMotionGroup.add(ARROW);
+
+    /* velocity arrow (magenta) ─────────── */
+    const arrowVtail = new THREE.Mesh(
+        new THREE.BoxGeometry(6, 0.1, 0.1).translate(-3, 1, 0),
+        new THREE.MeshBasicMaterial({ color: 0xff20ff, side: THREE.DoubleSide })
+    );
+    const arrowVhead = new THREE.Mesh(
+        new THREE.CircleGeometry(1, 3).rotateZ(1).translate(-5, 1, 0),
+        new THREE.MeshBasicMaterial({ color: 0xff20ff, side: THREE.DoubleSide })
+    );
+    arrowVtail.add(arrowVhead);
+    arrowV.add(arrowVtail);
+    arrowVtail.scale.set(100 / cmParams.radius, 1, 1);
+    ARROW.add(arrowV);
+    body.add(arrowV);
+
+    arrowVlabel = addLabel('<b>V</b>');
+    arrowVlabel.position.x = -6;
+    arrowV.add(arrowVlabel);
+    Label.push(arrowVlabel);
+
+    /* radius line + label ──────────────── */
+    const pts = [new THREE.Vector3(0, 0, 0), body.position.clone()];
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x000000 }));
+    circularMotionGroup.add(line);
+
+    lineText = document.createElement('div');
+    lineText.className = 'label';
+    lineText.innerHTML = '<b>r</b> = 50 units';
+    lineLabel = new CSS2DObject(lineText);
+    lineLabel.position.set(body.position.x / 2, 2, body.position.z / 2);
+    line.add(lineLabel);
+    Label.push(lineLabel);
+
+    /* radius arrow (yellow) ────────────── */
+    const arrowRtail = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 0.1, cmParams.radius)
+            .translate(0, 0, -cmParams.radius / 2),
+        new THREE.MeshBasicMaterial({ color: 0xffff20, side: THREE.DoubleSide })
+    );
+    const arrowRhead = new THREE.Mesh(
+        new THREE.CircleGeometry(1, 3)
+            .rotateX(1.57).rotateY(1.57)
+            .translate(0, 0.1, -cmParams.radius + 2),
+        new THREE.MeshBasicMaterial({ color: 0xffff20, side: THREE.DoubleSide })
+    );
+    arrowRtail.add(arrowRhead);
+    arrowR.add(arrowRtail);
+    arrowR.scale.set(1, 1, cmParams.radius / 50);
+    ARROW.add(arrowR);
+
+    /* angular momentum arrow L (green) ─── */
+    const arrowLtail = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 6, 0.1).translate(0, 3, 0),
+        new THREE.MeshBasicMaterial({ color: 0x3afa1a, side: THREE.DoubleSide })
+    );
+    const arrowLhead = new THREE.Mesh(
+        new THREE.CircleGeometry(1, 3).rotateZ(1.57).translate(0, 6, 0),
+        new THREE.MeshBasicMaterial({ color: 0x3afa1a, side: THREE.DoubleSide })
+    );
+    arrowLtail.add(arrowLhead);
+    arrowL.scale.set(1, 2, 1);
+    arrowL.add(arrowLtail);
+    ARROW.add(arrowL);
+
+    const arrowLlabel = addLabel('<b>L</b>');
+    arrowLlabel.position.y = 10;
+    circularMotionGroup.add(arrowLlabel);
+    Label.push(arrowLlabel);
+
+    /* start body moving ────────────────── */
+    bodyMovement();
+
+    /* wire up UI ───────────────────────── */
+    setupCircularMotionUI();
+}
+
+/* ════════════════════════════════════════
+   CIRCULAR MOTION UI
+════════════════════════════════════════ */
+
+function setupCircularMotionUI() {
+
+    /* radius slider */
+    const inputRadius  = document.getElementById('radius');
+    const radiusDisplay = document.getElementById('radiusDisplay');
+
+    inputRadius.addEventListener('change', () => {
+        const val = Number(inputRadius.value);
+        radiusDisplay.innerHTML  = val;
+        cmParams.radius = val;
+        cmParams.n      = val / 2;
+        cmParams.speed  = 0.08 / val;
+
+        /* rescale velocity arrow — larger radius = slower, smaller arrow */
+        const vTail = arrowV.children[0];
+        if (vTail) vTail.scale.set(20 / val, 1, 1);
+
+        /* rescale radius arrow */
+        arrowR.scale.set(1, 1, val / 50);
+
+        /* rebuild orbit path */
+        changePath();
+    });
+
+    /* label toggle */
+    document.getElementById('btnLabels').addEventListener('click', () => {
+        labelVisible = !labelVisible;
+        Label.forEach(l => { l.visible = labelVisible; });
+    });
+
+    /* axes / grid toggle */
+    document.getElementById('btnHelpers').addEventListener('click', () => {
+        axisVisible = !axisVisible;
+        Helper.forEach(h => { h.visible = axisVisible; });
+    });
+}
+
+/* ════════════════════════════════════════
+   CIRCULAR MOTION HELPERS
+════════════════════════════════════════ */
+
+function circularCurve() {
+    const r   = cmParams.radius;
+    const n   = cmParams.n;
+    const rad = Math.PI / n;
+    const pts = [];
+
+    for (let i = -n; i <= n - 1; i++) {
+        pts.push(new THREE.Vector3(
+            r * Math.sin(rad * i), 0, r * Math.cos(rad * i)
+        ));
+    }
+
+    const curve = new THREE.CatmullRomCurve3(pts);
+    curve.curveType = 'chordal';
+    curve.closed    = true;
+
+    const tubeGeo = new THREE.TubeGeometry(curve, r * 5, 0.1, 4, false);
+    const mat     = new THREE.MeshLambertMaterial({ color: 0xb00000 });
+    const mesh    = new THREE.Mesh(tubeGeo, mat);
+
+    return { curve, mesh };
+}
+
+function changePath() {
+    while (BODY.children.length > 0) {
+        const child = BODY.children[0];
+        if (child.geometry) child.geometry.dispose();
+        child.parent.remove(child);
+    }
+    const data = circularCurve();
+    bodyOrbit  = data.mesh;
+    bodyCurve  = data.curve;
+    BODY.add(bodyOrbit);
+}
+
+function bodyMovement() {
+    requestAnimationFrame(bodyMovement);
+
+    if (t === 0 || t > 1) {
+        N.copy(N0);
+        t = 0;
+    }
+
+    t += cmParams.speed;
+
+    X = bodyCurve.getTangent(t);
+    B.crossVectors(X, N);
+    N.crossVectors(X, B.negate());
+
+    matrix3.set(
+        -X.x, N.x, B.x,
+        -X.y, N.y, B.y,
+        -X.z, N.z, B.z
+    );
+    matrix4.setFromMatrix3(matrix3);
+
+    P = bodyCurve.getPoint(t);
+    body.setRotationFromMatrix(matrix4);
+    body.position.set(P.x, P.y, P.z);
+
+    arrowR.setRotationFromMatrix(matrix4);
+    arrowR.position.set(0, 0, 0);
+
+    /* update radius line and label */
+    const newPts = [new THREE.Vector3(0, 0, 0), body.position.clone()];
+    line.geometry.setFromPoints(newPts);
+    const r = body.position.length().toFixed(1);
+    lineText.innerHTML = '<b>r</b> = ' + r + ' units';
+    lineLabel.position.set(body.position.x / 2, 0, body.position.z / 2);
+}
+
+function addLabel(name) {
+    const div = document.createElement('div');
+    div.className = 'label';
+    div.innerHTML = name;
+    return new CSS2DObject(div);
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+
+    /* CSS2D labels — rendered on top */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>

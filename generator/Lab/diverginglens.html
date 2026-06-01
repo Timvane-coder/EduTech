@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Diverging Lens</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* formula side panel (toggled by button) */
+        #sidemenu {
+            display:none;
+            position:fixed; top:38px; left:0; width:240px;
+            background:rgba(15,15,20,.92);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:2;
+        }
+
+        /* bottom info bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu b       { color:#e07070; }
+        #menu a       { color:#d4d4d4; }
+        #message-el   { font-size:12px; }
+
+        /* fraction helper */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+        .bar { display:none; }
+
+        /* buttons */
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+            background:#1a4e8f;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #theorybutton { background:#2a6e3f; }
+
+        /* CSS2D labels */
+        .label {
+            font-weight:bold; font-size:12px;
+            color:#222;
+            text-shadow:0 0 3px #fff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI shown after transition ── -->
+<div id="labUI">
+
+    <div id="topmenu">Image Formation with Diverging Lens</div>
+
+    <!-- formula panel, hidden by default, toggled by FORMULA button -->
+    <div id="sidemenu">
+        <b>Lens Formula:</b><br>
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">f</span></div>
+        =
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">v</span></div>
+        &minus;
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">u</span></div>
+        <br>&nbsp;&nbsp;&nbsp;or<br>
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">v</span></div>
+        =
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">f</span></div>
+        +
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">u</span></div>
+        <br>magnification:<br>
+        m =
+        <div class="fraction"><span class="fup">v</span><span class="bar">/</span><span class="fdn">u</span></div>
+    </div>
+
+    <div id="menu">
+        <div id="message-el">
+            Focal length, (f) = <b id="fmessage-el">-10</b> cm &nbsp;
+            Object Distance, (u) = <b id="umessage-el">-15</b> cm &nbsp;
+            Image Distance, (v) = <b style="color:red;" id="vmessage-el">-6</b> cm
+        </div>
+
+        <div class="fraction"><span class="fup" style="color:red;">1</span><span class="bar">/</span><span id="v-el" class="fdn" style="color:red;">-6</span></div>
+        =
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="f-el" class="fdn">-10</span></div>
+        +
+        <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="u-el" class="fdn">-15</span></div>
+        &nbsp;&nbsp; m =
+        <div class="fraction"><span style="color:red;" id="mv-el" class="fup">-6</span><span class="bar">/</span><span id="mu-el" class="fdn">-15</span></div>
+        &nbsp;= <a id="m-el">0.4</a>
+
+        <button onclick="displayOn()">FORMULA</button>
+        <button id="theorybutton" onclick="theorySite()">THEORY</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE          from 'three';
+import { OrbitControls }   from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }     from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }      from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer,
+         CSS2DObject }     from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN               from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup      = new THREE.Group();
+let divergingLensGroup = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── diverging lens scene ── */
+let labelRenderer;
+
+let incidentRay1, incidentRay2, incidentRay3;
+let incidentArrow1, incidentArrow2, incidentArrow3;
+let reflectedRay1, reflectedRay2, reflectedRay3;
+let reflectedArrow1, reflectedArrow2, reflectedArrow3;
+let rayLine, rayArrow;
+let lensModel, eye;
+let object3D, objectTip, image3D, imageTip, imagePoint;
+let pole, opticalAxis;
+let pointP1, pointA, pointP2;
+let objLabel, imgLabel, f1Point, f1Label, f2Point, f2Label, opticalLabel, lensLabel;
+
+let v, f, u, m, heightV;
+
+const lensParams = {
+    f : -10,
+    h :   5,
+    u : -15,
+    v :  -6,
+    m :  0.4
+};
+
+/* ── DOM refs ── */
+let fmessageEl, umessageEl, vmessageEl;
+let vEl, uEl, mvEl, muEl, mEl, fEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera  (FOV 40 for Ferrari intro; we'll match Diverging Lens
+          FOV 70 after transition via a TWEEN on camera.fov) ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls (disabled during intro) ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createDivergingLensScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+   (identical to working integrated file)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+   (identical to working integrated file)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+   (identical to working integrated file)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC
+   (identical to working integrated file
+    except transition.onComplete swaps
+    in the Diverging Lens scene)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── final transition into Diverging Lens scene ── */
+    const transition = moveCamera(-35, 5, -22, 0, 2, -2, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible       = false;
+            divergingLensGroup.visible = true;
+
+            /* match original Diverging Lens background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            /* clear Ferrari HDR env so lens materials render cleanly */
+            scene.environment = null;
+
+            /* snap FOV to Diverging Lens value */
+            camera.fov = 70;
+            camera.near = 0.1;
+            camera.far  = 1000;
+            camera.updateProjectionMatrix();
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Diverging Lens orbit target */
+            controls.enabled = true;
+            controls.target.set(0, 2, -2);
+            controls.enableDamping  = true;
+            controls.dampingFactor  = 0.05;
+            controls.rotateSpeed    = 0.1;
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   DIVERGING LENS SCENE
+════════════════════════════════════════ */
+
+function createDivergingLensScene() {
+
+    divergingLensGroup.visible = false;
+    scene.add(divergingLensGroup);
+
+    /* initialise all values from lensParams */
+    f = lensParams.f;
+    u = lensParams.u;
+    v = (u * f) / (u + f);
+    m = v / u;
+    heightV = m * lensParams.h;
+
+    /* grid */
+    const scaleHorizontal = new THREE.GridHelper(70, 70);
+    divergingLensGroup.add(scaleHorizontal);
+
+    /* ── pole (origin point) ── */
+    pole = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 0x8888FF, size: 0.01 }),
+        x: 0, y: 0, z: 0
+    });
+    divergingLensGroup.add(pole);
+
+    pointP1 = new THREE.Vector3(0, lensParams.h, 0);
+    pointA  = new THREE.Vector3(u, lensParams.h, 0);
+
+    /* ── image point ── */
+    imagePoint = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 0x88FF88, size: 0.01 }),
+        x: 0, y: heightV, z: v
+    });
+    divergingLensGroup.add(imagePoint);
+    imagePoint.position.set(0, heightV, v);
+
+    pointP2 = new THREE.Vector3(0, heightV, 0);
+
+    /* ── object ── */
+    object3D  = addObject(lensParams.h).tube;
+    objectTip = addObject(lensParams.h).cone;
+    object3D.position.z = u;
+    object3D.add(objectTip);
+
+    /* ── image ── */
+    image3D  = addObject(lensParams.h).tube;
+    imageTip = addObject(lensParams.h).cone;
+    image3D.position.z = v;
+    image3D.scale.set(m, m, m);
+    image3D.add(imageTip);
+
+    divergingLensGroup.add(object3D, image3D);
+
+    /* ── optical axis ── */
+    opticalAxis = addRays(80).rayLine;
+    opticalAxis.material = new THREE.MeshBasicMaterial({ color: 'black' });
+    opticalAxis.position.z = -40;
+    divergingLensGroup.add(opticalAxis);
+
+    /* ── incident rays (parented to object so they move with u) ── */
+    incidentRay1   = addRays(Math.abs(u)).rayLine;
+    incidentRay2   = addRays(pointA.distanceTo(pole.position)).rayLine;
+    incidentRay3   = addRays(pointA.distanceTo(pointP2)).rayLine;
+    incidentArrow1 = addRays(Math.abs(u)).rayArrow;
+    incidentArrow2 = addRays(pointA.distanceTo(pole.position)).rayArrow;
+    incidentArrow3 = addRays(pointA.distanceTo(pointP2)).rayArrow;
+
+    incidentRay1.position.set(0, lensParams.h, 0);
+    incidentRay2.position.set(0, lensParams.h, 0);
+    incidentRay3.position.set(0, lensParams.h, 0);
+
+    incidentRay1.add(incidentArrow1);
+    incidentRay2.add(incidentArrow2);
+    incidentRay3.add(incidentArrow3);
+    object3D.add(incidentRay1, incidentRay2, incidentRay3);
+
+    /* ── reflected (refracted) rays ── */
+    const greenMat = new THREE.MeshBasicMaterial({ color: 'green' });
+
+    reflectedRay1   = addRays(pointP1.distanceTo(imagePoint.position)).rayLine;
+    reflectedArrow1 = addRays(pointP1.distanceTo(imagePoint.position)).rayArrow;
+    reflectedRay1.position.copy(pointP1);
+    reflectedRay1.material = greenMat;
+    reflectedRay1.add(reflectedArrow1);
+    divergingLensGroup.add(reflectedRay1);
+
+    reflectedRay2   = addRays(pole.position.distanceTo(imagePoint.position)).rayLine;
+    reflectedArrow2 = addRays(pole.position.distanceTo(imagePoint.position)).rayArrow;
+    reflectedRay2.position.copy(pole.position);
+    reflectedRay2.material = greenMat;
+    reflectedRay2.add(reflectedArrow2);
+    divergingLensGroup.add(reflectedRay2);
+
+    reflectedRay3   = addRays(pointP2.distanceTo(imagePoint.position)).rayLine;
+    reflectedArrow3 = addRays(pointP2.distanceTo(imagePoint.position)).rayArrow;
+    reflectedRay3.position.copy(pointP2);
+    reflectedRay3.material = greenMat;
+    reflectedRay3.add(reflectedArrow3);
+    divergingLensGroup.add(reflectedRay3);
+
+    /* initial lookAt directions */
+    incidentRay1.lookAt(reflectedRay1.position);
+    incidentRay2.lookAt(pole.position);
+    incidentRay3.lookAt(reflectedRay3.position);
+    reflectedRay1.lookAt(imagePoint.position);
+    reflectedRay2.lookAt(imagePoint.position);
+    reflectedRay3.lookAt(imagePoint.position);
+
+    /* ── load GLTF concave lens model ── */
+    createLensModel();
+
+    /* ── eye sprite ── */
+    eyeShow();
+
+    /* ── CSS2D labels ── */
+    showLabels();
+
+    /* ── lil-gui controls ── */
+    setupLensGUI();
+
+    /* ── grab DOM refs ── */
+    fmessageEl = document.getElementById('fmessage-el');
+    umessageEl = document.getElementById('umessage-el');
+    vmessageEl = document.getElementById('vmessage-el');
+    vEl        = document.getElementById('v-el');
+    uEl        = document.getElementById('u-el');
+    mvEl       = document.getElementById('mv-el');
+    muEl       = document.getElementById('mu-el');
+    mEl        = document.getElementById('m-el');
+    fEl        = document.getElementById('f-el');
+}
+
+/* ─────────────────────────────────────────
+   addObject  – arrow-shaped object/image
+───────────────────────────────────────── */
+function addObject(height) {
+
+    const tube = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.1, 0.1, height).translate(0, height / 2, 0),
+        new THREE.MeshBasicMaterial({ color: 'black' })
+    );
+
+    const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.5, 1, 6).translate(0, height + 0.5, 0),
+        new THREE.MeshBasicMaterial({ color: 'black' })
+    );
+
+    return { tube, cone };
+}
+
+/* ─────────────────────────────────────────
+   addRays  – cylinder + arrowhead
+───────────────────────────────────────── */
+function addRays(length) {
+
+    const rayGeometry = new THREE.CylinderGeometry(0.05, 0.05, length)
+        .translate(0, length / 2, 0);
+    rayGeometry.rotateX(Math.PI / 2);
+    rayLine = new THREE.Mesh(rayGeometry, new THREE.MeshBasicMaterial({ color: 'blue' }));
+
+    const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 6)
+        .translate(0, length / 2, 0);
+    coneGeometry.rotateX(Math.PI / 2);
+    rayArrow = new THREE.Mesh(coneGeometry, new THREE.MeshBasicMaterial({ color: 'red' }));
+
+    return { rayLine, rayArrow };
+}
+
+/* ─────────────────────────────────────────
+   adjustRays  – resize a ray cylinder
+───────────────────────────────────────── */
+function adjustRays(vector, length) {
+    vector.geometry.dispose();
+    const g = new THREE.CylinderGeometry(0.05, 0.05, length)
+        .translate(0, length / 2, 0);
+    g.rotateX(Math.PI / 2);
+    vector.geometry = g;
+}
+
+/* ─────────────────────────────────────────
+   changeHeight  – resize an object cylinder
+───────────────────────────────────────── */
+function changeHeight(vector, height) {
+    vector.geometry.dispose();
+    vector.geometry = new THREE.CylinderGeometry(0.1, 0.1, height)
+        .translate(0, height / 2, 0);
+}
+
+/* ─────────────────────────────────────────
+   adjustCones
+───────────────────────────────────────── */
+function adjustCones(vector, height) {
+    vector.geometry.dispose();
+    vector.geometry = new THREE.ConeGeometry(0.5, 1, 6)
+        .translate(0, height + 0.5, 0);
+}
+
+/* ─────────────────────────────────────────
+   lensFormula  – recalculate + reposition
+   everything when f, h, or u changes
+───────────────────────────────────────── */
+function lensFormula(fVal, heightU, uVal) {
+
+    v       = (uVal * fVal) / (uVal + fVal);
+    m       = v / uVal;
+    heightV = m * heightU;
+
+    changeHeight(object3D,  heightU);
+    adjustCones(objectTip,  heightU);
+    object3D.position.z = uVal;
+
+    changeHeight(image3D,  heightU);
+    adjustCones(imageTip,  heightU);
+    image3D.position.z = v;
+    image3D.scale.set(m, m, m);
+
+    pointP1 = new THREE.Vector3(0, heightU, 0);
+    pointA  = new THREE.Vector3(uVal, heightU, 0);
+    pointP2 = new THREE.Vector3(0, heightV, 0);
+
+    imagePoint.position.set(0, heightV, v);
+    reflectedRay3.position.copy(pointP2);
+
+    incidentRay1.position.set(0, heightU, 0);
+    incidentRay2.position.set(0, heightU, 0);
+    incidentRay3.position.set(0, heightU, 0);
+
+    adjustRays(incidentRay1, pointA.distanceTo(pointP1));
+    adjustRays(incidentRay2, pointA.distanceTo(pole.position));
+    adjustRays(incidentRay3, pointA.distanceTo(pointP2));
+
+    incidentRay1.lookAt(reflectedRay1.position);
+    incidentRay2.lookAt(pole.position);
+    incidentRay3.lookAt(reflectedRay3.position);
+
+    adjustRays(reflectedRay1, pointP1.distanceTo(imagePoint.position));
+    adjustRays(reflectedRay2, pole.position.distanceTo(imagePoint.position));
+    adjustRays(reflectedRay3, pointP2.distanceTo(imagePoint.position));
+
+    reflectedRay1.position.copy(pointP1);
+    reflectedRay2.position.copy(pole.position);
+    reflectedRay3.position.copy(pointP2);
+
+    reflectedRay1.lookAt(imagePoint.position);
+    reflectedRay2.lookAt(imagePoint.position);
+    reflectedRay3.lookAt(imagePoint.position);
+
+    if (f1Point) f1Point.position.z =  fVal;
+    if (f2Point) f2Point.position.z = -fVal;
+}
+
+/* ─────────────────────────────────────────
+   initPoint  – BufferGeometry point helper
+───────────────────────────────────────── */
+function initPoint(data) {
+    const geo  = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(data.vertices, 3));
+    const pt = new THREE.Points(geo, data.material);
+    pt.position.set(data.x, data.y, data.z);
+    return pt;
+}
+
+/* ─────────────────────────────────────────
+   createLensModel  – load concave lens GLTF
+───────────────────────────────────────── */
+function createLensModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'concaveLens.glb',
+        function (gltf) {
+            lensModel = gltf.scene;
+            lensModel.traverse(n => {
+                if (n.isMesh) {
+                    n.castShadow    = true;
+                    n.receiveShadow = true;
+                    if (n.material.map) n.material.map.anisotropy = 1;
+                    n.material.side = THREE.DoubleSide;
+                }
+            });
+            lensModel.scale.set(7.5, 7.5, 7.5);
+            divergingLensGroup.add(lensModel);
+        },
+        undefined,
+        (e) => console.warn('concaveLens.glb not found – scene works without it.', e)
+    );
+}
+
+/* ─────────────────────────────────────────
+   eyeShow  – observer eye sprite
+───────────────────────────────────────── */
+function eyeShow() {
+
+    const map      = new THREE.TextureLoader().load('./assets/img/eyeIconR.png');
+    const material = new THREE.SpriteMaterial({ map, color: 0xffffff });
+    eye = new THREE.Sprite(material);
+    eye.scale.set(5, 5, 5);
+    eye.position.set(0, 2, -lensParams.u);
+    divergingLensGroup.add(eye);
+}
+
+/* ─────────────────────────────────────────
+   addLabel  – CSS2DObject helper
+───────────────────────────────────────── */
+function addLabel(name) {
+    const div       = document.createElement('div');
+    div.className   = 'label';
+    div.textContent = name;
+    const label     = new CSS2DObject(div);
+    label.position.set(0, 1, -2);
+    return label;
+}
+
+/* ─────────────────────────────────────────
+   showLabels  – attach all CSS2D labels
+───────────────────────────────────────── */
+function showLabels() {
+
+    objLabel = addLabel('Object');
+    imgLabel = addLabel('Virtual Image');
+    objLabel.position.y = lensParams.h + lensParams.h / 2;
+    imgLabel.position.y = lensParams.h - 4 * heightV;
+    object3D.add(objLabel);
+    image3D.add(imgLabel);
+
+    f1Label = addLabel('F1');
+    f1Point = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 0xFF8888, size: 1 }),
+        x: 0, y: 0, z: 0
+    });
+
+    f2Label = addLabel('F2');
+    f2Point = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 0xFF8888, size: 1 }),
+        x: 0, y: 0, z: 0
+    });
+
+    divergingLensGroup.add(f1Point, f2Point);
+    f1Point.position.z =  lensParams.f;
+    f1Point.add(f1Label);
+    f2Point.position.z = -lensParams.f;
+    f2Point.add(f2Label);
+
+    opticalLabel = addLabel('Optical Axis');
+    opticalLabel.position.z =  18;
+    opticalLabel.position.y =  -2;
+    opticalAxis.add(opticalLabel);
+
+    lensLabel = addLabel('Concave Lens');
+    lensLabel.position.y = 8;
+    divergingLensGroup.add(lensLabel);
+}
+
+/* ─────────────────────────────────────────
+   setupLensGUI  – lil-gui panel
+───────────────────────────────────────── */
+function setupLensGUI() {
+
+    /* Lazy-load lil-gui only when the lab is visible */
+    import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+        .then(({ GUI }) => {
+
+            const gui = new GUI({ width: 250 });
+
+            gui.add(lensParams, 'f', -50, -2, 1).name('f (in cm)')
+                .onChange(value => {
+                    lensParams.f = value;
+                    const a = ((lensParams.u * value) / (lensParams.u + value)).toFixed(2);
+                    const b = (a / lensParams.u).toFixed(2);
+                    lensParams.v = a;
+                    lensParams.m = b;
+                    changeElements(a, b, value, lensParams.u);
+                });
+
+            gui.add(lensParams, 'h', 1, 7, 0.1).name('ho (in cm)')
+                .onChange(value => {
+                    lensParams.h = value;
+                    changeElements(lensParams.v, lensParams.m, lensParams.f, lensParams.u);
+                    objLabel.position.y = value + value / 2;
+                    imgLabel.position.y = value + heightV;
+                });
+
+            gui.add(object3D.position, 'z', -100, -0.5, 0.5).name('u (in cm)')
+                .onChange(value => {
+                    lensParams.u = value;
+                    const a = ((value * lensParams.f) / (value + lensParams.f)).toFixed(2);
+                    const b = (a / value).toFixed(2);
+                    changeElements(a, b, lensParams.f, value);
+                });
+        });
+}
+
+/* ─────────────────────────────────────────
+   changeElements  – update rays + DOM
+───────────────────────────────────────── */
+function changeElements(a, b, c, d) {
+
+    lensFormula(c, lensParams.h, d);
+    changeHeight(object3D, lensParams.h);
+    changeHeight(image3D,  lensParams.h);
+    adjustCones(objectTip, lensParams.h);
+    adjustCones(imageTip,  lensParams.h);
+
+    if (fEl)        fEl.innerHTML        = c;
+    if (uEl)        uEl.innerHTML        = d;
+    if (vEl)        vEl.innerHTML        = a;
+    if (muEl)       muEl.innerHTML       = d;
+    if (mvEl)       mvEl.innerHTML       = a;
+    if (mEl)        mEl.innerHTML        = b;
+    if (fmessageEl) fmessageEl.innerHTML = c;
+    if (vmessageEl) vmessageEl.innerHTML = a;
+    if (umessageEl) umessageEl.innerHTML = d;
+
+    /* hide arrows when object is very close to lens */
+    const visible = lensParams.u <= -10;
+    incidentArrow1.visible  = visible;
+    incidentArrow2.visible  = visible;
+    incidentArrow3.visible  = visible;
+    reflectedArrow1.visible = visible;
+    reflectedArrow2.visible = visible;
+    reflectedArrow3.visible = visible;
+}
+
+/* ─────────────────────────────────────────
+   displayOn / theorySite  – UI helpers
+   (need to be window-scope for onclick=)
+───────────────────────────────────────── */
+window.displayOn = function () {
+    const sm = document.getElementById('sidemenu');
+    sm.style.display = sm.style.display === 'block' ? 'none' : 'block';
+};
+
+window.theorySite = function () {
+    window.open('../Theory/Optics/Optics_Diverging_Lens.html', '_self');
+};
+
+/* ════════════════════════════════════════
+   RESIZE
+   (identical to working integrated file)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+
+    /* CSS2D labels only rendered when lab is active */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>

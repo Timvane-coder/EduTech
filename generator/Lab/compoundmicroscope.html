@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Compound Microscope</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* annotation panel */
+        #detail {
+            position:fixed; top:56px; left:16px;
+            width:270px;
+            background:rgba(15,15,20,.88);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px;
+            border:1px solid rgba(255,255,255,.09);
+            border-radius:6px;
+            z-index:100;
+            line-height:1.7;
+        }
+        #detail p { margin-bottom:6px; }
+        #detail strong { color:#e8e8e8; }
+
+        /* bottom button bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #menuButton  { background:#1a4e8f; }
+        #theorybutton { background:#2a6e3f; }
+
+        /* CSS2D labels (microscope part labels) */
+        .labelparts {
+            font-weight:bold; font-size:12px;
+            color:#fff;
+            background:rgba(15,15,20,.7);
+            padding:2px 6px; border-radius:3px;
+            pointer-events:none;
+        }
+
+        /* lil-gui sits top-right by default – fine as-is */
+    </style>
+</head>
+<body>
+
+<!-- intro overlay -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Microscope&hellip;</div>
+
+<!-- lab UI shown after transition -->
+<div id="labUI">
+
+    <div id="container">
+        <div id="topmenu">Compound Microscope</div>
+    </div>
+
+    <div id="detail" style="display:none;" class="annotation">
+        <p id="part"><strong>Compound Microscope</strong></p>
+        <p id="describe">
+            An optical system with multiple lenses:<br><br>
+            The objective lens (typically 4x, 10x, 40x or 100x) and<br><br>
+            The eyepiece lens (typically 10x) to obtain a high magnification
+            of 40x, 100x, 400x and 1000x.<br><br>
+            Higher magnification is achieved by using two lenses rather than
+            just a single magnifying lens
+        </p>
+    </div>
+
+    <div id="menu">
+        <button id="menuButton">Show Description</button>
+        <button id="theorybutton">THEORY</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { GUI }           from 'three/addons/libs/lil-gui.module.min.js';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup    = new THREE.Group();
+let microscopeGroup = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── microscope ── */
+let microscopeModel;
+let INTERSECTED;
+const meshObjects = [];
+const labels      = [];
+const rayObjects  = [];
+let labelDisplay  = false;
+let iRay          = false;
+let raycaster;
+const mouse       = new THREE.Vector2();
+
+/* parts JSON – loaded async in createMicroscopeScene */
+let parts = {};
+
+/* ── DOM refs filled in setupMicroscopeUI ── */
+let partEl, describeEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D renderer for microscope labels ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera (FOV 40 matches Ferrari intro; microscope uses 45
+         after transition via controls) ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1500
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls – disabled during intro ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled   = false;
+    controls.enablePan = true;
+    controls.enableZoom = true;
+
+    /* ── raycaster for microscope part click ── */
+    raycaster = new THREE.Raycaster();
+
+    createLights();
+    createFerrariShowroom();
+    createMicroscopeScene();   /* builds group, hidden until transition */
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+   (identical to capacitor version)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC
+   (identical — untouched, only transition
+    onComplete swapped for microscope)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition: land on microscope scene ── */
+    const transition = moveCamera(-50, 10, 50, 0, 20, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible    = false;
+            microscopeGroup.visible = true;
+
+            /* microscope background matches original */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            /* clear Ferrari HDR env so microscope looks clean */
+            scene.environment = null;
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit target matches original microscope createControls(5,20,-4.5) */
+            controls.enabled = true;
+            controls.target.set(5, 20, -4.5);
+            controls.update();
+
+            /* wire UI buttons now that DOM is visible */
+            setupMicroscopeUI();
+
+            /* register click listener for part inspection */
+            document.addEventListener('click', clickAction);
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   MICROSCOPE SCENE
+════════════════════════════════════════ */
+
+function createMicroscopeScene() {
+
+    microscopeGroup.visible = false;
+    scene.add(microscopeGroup);
+
+    /* ground grid — same size as original */
+    const grid2 = new THREE.GridHelper(70, 70);
+    microscopeGroup.add(grid2);
+
+    /* load microscope GLTF */
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'microscope.glb',
+        function (gltf) {
+
+            microscopeModel = gltf.scene;
+
+            /* collect mesh objects for raycasting */
+            for (let i = 0; i < microscopeModel.children.length; i++) {
+                if (microscopeModel.children[i].type !== 'Object3D') {
+                    meshObjects.push(microscopeModel.children[i]);
+                }
+            }
+
+            /* ── attach CSS2D labels ── */
+            const eyepiece  = microscopeModel.getObjectByName('eyepiece');
+            const objective = microscopeModel.getObjectByName('objective');
+            const stage     = microscopeModel.getObjectByName('stage');
+            const coarse    = microscopeModel.getObjectByName('coarse');
+            const fine      = microscopeModel.getObjectByName('fine');
+            const light     = microscopeModel.getObjectByName('light');
+            const diaphragm = microscopeModel.getObjectByName('diaphragm');
+
+            const spriteEye       = addLabel('Eyepiece');
+            const spriteObj       = addLabel('Objective Lenses');
+            const spriteStage     = addLabel('Sample Stage');
+            const spriteCoarse    = addLabel('Coarse Adjustment');
+            const spriteFine      = addLabel('Fine Adjustment');
+            const spriteLight     = addLabel('Light Source');
+            const spriteDiaphragm = addLabel('Condenser/Diaphragm');
+
+            if (eyepiece)  { eyepiece.add(spriteEye);         labels.push(spriteEye); }
+            if (objective) { objective.add(spriteObj);        labels.push(spriteObj); }
+            if (stage)     { stage.add(spriteStage);          labels.push(spriteStage); }
+            if (coarse)    { coarse.add(spriteCoarse);        labels.push(spriteCoarse); }
+            if (fine)      { fine.add(spriteFine);            labels.push(spriteFine); }
+            if (light)     { light.add(spriteLight);          labels.push(spriteLight); }
+            if (diaphragm) { diaphragm.add(spriteDiaphragm);  labels.push(spriteDiaphragm); }
+
+            microscopeGroup.add(microscopeModel);
+
+            /* start with labels hidden */
+            labelsAction();
+
+            /* build GUI after model is ready */
+            buildGUI();
+        },
+        undefined,
+        (e) => console.warn('microscope.glb not found – continuing without model.', e)
+    );
+
+    /* load parts JSON for click descriptions */
+    fetch('./model/microscopeParts.json')
+        .then(r => r.json())
+        .then(j => { parts = j; })
+        .catch(() => console.warn('microscopeParts.json not found.'));
+}
+
+/* ── CSS2D label helper ── */
+function addLabel(name) {
+    const div = document.createElement('div');
+    div.className   = 'labelparts';
+    div.textContent = name;
+    return new CSS2DObject(div);
+}
+
+/* ── show / hide labels ── */
+function labelsAction() {
+    for (let i = 0; i < labels.length; i++) {
+        labels[i].visible = labelDisplay;
+    }
+    if (!labelDisplay) {
+        if (partEl)     partEl.innerHTML     = '<strong>Compound Microscope</strong>';
+        if (describeEl) describeEl.innerHTML =
+            'An optical system with multiple lenses:<br><br>' +
+            'The objective lens (typically 4x, 10x, 40x or 100x) and<br><br>' +
+            'The eyepiece lens (typically 10x) to obtain a high magnification ' +
+            'of 40x, 100x, 400x and 1000x.<br><br>' +
+            'Higher magnification is achieved by using two lenses rather than ' +
+            'just a single magnifying lens';
+    }
+}
+
+/* ── raycaster click on microscope parts ── */
+function clickAction(event) {
+    mouse.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight)  * 2 + 1;
+}
+
+/* ── ray diagram toggle ── */
+function rayAction() {
+
+    if (iRay) {
+
+        /* slide microscope aside and zoom out to show ray diagram */
+        new TWEEN.Tween(microscopeModel.position)
+            .to({ x: -20, z: -20 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+        new TWEEN.Tween(camera.position)
+            .to({ x: -45, z: 60 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+        controls.target.set(-10, 18, -4.5);
+        controls.update();
+
+        for (let i = 0; i < rayObjects.length; i++) {
+            rayObjects[i].visible = true;
+        }
+
+        if (partEl)     partEl.innerHTML     = 'Ray Diagram';
+        if (describeEl) describeEl.innerHTML =
+            '1 - Object (Specimen);<br>2 - Objective Lens;<br>' +
+            '3 - Eyepiece Lens;<br>4 - Intermediate Image;<br>' +
+            '5 - Final Inverted Image';
+
+        rayDiagram();
+
+    } else {
+
+        /* restore microscope position */
+        new TWEEN.Tween(microscopeModel.position)
+            .to({ x: 0, z: 0 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+        new TWEEN.Tween(camera.position)
+            .to({ x: -50, z: 30 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+        controls.target.set(5, 20, -4.5);
+        controls.update();
+
+        for (let i = 0; i < rayObjects.length; i++) {
+            rayObjects[i].visible = false;
+        }
+
+        if (partEl)     partEl.innerHTML     = '<strong>Compound Microscope</strong>';
+        if (describeEl) describeEl.innerHTML =
+            'An optical system with multiple lenses:<br><br>' +
+            'The objective lens (typically 4x, 10x, 40x or 100x) and<br><br>' +
+            'The eyepiece lens (typically 10x) to obtain a high magnification ' +
+            'of 40x, 100x, 400x and 1000x.<br><br>' +
+            'Higher magnification is achieved by using two lenses rather than ' +
+            'just a single magnifying lens';
+    }
+}
+
+/* ── ray diagram geometry (exact port from original) ── */
+function rayDiagram() {
+
+    const lensLoc = 0;
+    const eye = 30;
+    const P1  = 18,  P2  = 24.2;
+    const Ox  = 1.5, Oy  = 15;
+    const I1x = 2,   I1y = 23.1;
+    const I2x = 7,   I2y = 10;
+
+    const objective = addLens(3);
+    objective.position.set(lensLoc, P1, 0);
+    const objLabel = roundLabel('2');
+    objLabel.position.set(lensLoc + 10, P1 - 1, 0);
+    scene.add(objective, objLabel);
+    rayObjects.push(objective, objLabel);
+
+    const eyepiece = objective.clone();
+    eyepiece.position.set(lensLoc, P2, 0);
+    const eyeLabel = roundLabel('3');
+    eyeLabel.position.set(lensLoc + 10, P2, 0);
+    scene.add(eyepiece, eyeLabel);
+    rayObjects.push(eyepiece, eyeLabel);
+
+    const opticalAxis = addRays(new THREE.Vector3(lensLoc, 0, 0), new THREE.Vector3(lensLoc, 50, 0), 'black');
+    scene.add(opticalAxis);
+    rayObjects.push(opticalAxis);
+
+    const sample      = addRays(new THREE.Vector3(lensLoc + Ox, Oy, 0), new THREE.Vector3(lensLoc, Oy, 0), 'blue');
+    const sampleLabel = roundLabel('1');
+    sampleLabel.position.set(lensLoc + 10, Oy - 1.5, 0);
+    scene.add(sample, sampleLabel);
+    rayObjects.push(sample, sampleLabel);
+
+    const sampleHead = shortArrowLine(lensLoc + Ox, Oy, 0, true, 'blue');
+    sampleHead.scale.set(-1, 1, 0);
+    sampleHead.position.set(2 * Ox, 0, 0);
+    scene.add(sampleHead);
+    rayObjects.push(sampleHead);
+
+    const incidentRay1 = addRays(new THREE.Vector3(lensLoc + Ox, Oy, 0), new THREE.Vector3(lensLoc + Ox, P1, 0), 'green');
+    scene.add(incidentRay1);
+    rayObjects.push(incidentRay1);
+
+    const rayArrow1 = shortArrowLine(0, 0, 0, true, 'red');
+    rayArrow1.rotation.set(0, 0, -1.57);
+    rayArrow1.position.set(lensLoc + Ox, Oy + 2, 0);
+    scene.add(rayArrow1);
+    rayObjects.push(rayArrow1);
+
+    const image      = addRays(new THREE.Vector3(lensLoc - I1x, I1y, 0), new THREE.Vector3(lensLoc, I1y, 0), 'red');
+    const imageLabel = roundLabel('4');
+    imageLabel.position.set(lensLoc + 10, I1y - 1, 0);
+    scene.add(image, imageLabel);
+    rayObjects.push(image, imageLabel);
+
+    const imageHead = shortArrowLine(lensLoc - I1x, I1y, 0, true, 'red');
+    scene.add(imageHead);
+    rayObjects.push(imageHead);
+
+    const incidentRay2 = addRays(new THREE.Vector3(lensLoc + Ox, Oy, 0), new THREE.Vector3(lensLoc - I1x, I1y, 0), 'green');
+    scene.add(incidentRay2);
+    rayObjects.push(incidentRay2);
+
+    const rayArrow2 = rayArrow1.clone();
+    rayArrow2.rotation.set(0, 0, -1.2);
+    rayArrow2.position.set(lensLoc + Ox - 0.85, Oy + 2, 0);
+    scene.add(rayArrow2);
+    rayObjects.push(rayArrow2);
+
+    const incidentRay3 = addRays(new THREE.Vector3(lensLoc + Ox, P1, 0), new THREE.Vector3(lensLoc - I1x, I1y, 0), 'green');
+    scene.add(incidentRay3);
+    rayObjects.push(incidentRay3);
+
+    const rayArrow3 = rayArrow1.clone();
+    rayArrow3.rotation.set(0, 0, -0.9);
+    rayArrow3.position.set(-0.64, I1y - 2, 0);
+    scene.add(rayArrow3);
+    rayObjects.push(rayArrow3);
+
+    const rayArrow4 = rayArrow1.clone();
+    rayArrow4.rotation.set(0, 0, -1.2);
+    rayArrow4.position.set(-1.14, I1y - 2, 0);
+    scene.add(rayArrow4);
+    rayObjects.push(rayArrow4);
+
+    const incidentRay4 = addRays(new THREE.Vector3(lensLoc - I1x, I1y, 0), new THREE.Vector3(lensLoc - I1x, P2, 0), 'green');
+    scene.add(incidentRay4);
+    rayObjects.push(incidentRay4);
+
+    const rayArrow5 = rayArrow1.clone();
+    rayArrow5.position.set(-lensLoc - I1x, I1y + 0.8, 0);
+    scene.add(rayArrow5);
+    rayObjects.push(rayArrow5);
+
+    const incidentRay5 = addRays(new THREE.Vector3(lensLoc - I1x, I1y, 0), new THREE.Vector3(lensLoc + 0.5, eye - 0.3, 0), 'green');
+    scene.add(incidentRay5);
+    rayObjects.push(incidentRay5);
+
+    const incidentRay6 = addRays(new THREE.Vector3(lensLoc - I1x, P2, 0), new THREE.Vector3(lensLoc, eye, 0), 'green');
+    scene.add(incidentRay6);
+    rayObjects.push(incidentRay6);
+
+    const rayArrow6 = rayArrow1.clone();
+    rayArrow6.rotation.set(0, 0, -2);
+    rayArrow6.position.set(lensLoc - 0.81, P2 + 2, 0);
+    scene.add(rayArrow6);
+    rayObjects.push(rayArrow6);
+
+    const rayArrow7 = rayArrow1.clone();
+    rayArrow7.rotation.set(0, 0, -1.8);
+    rayArrow7.position.set(lensLoc - 1.31, P2 + 2, 0);
+    scene.add(rayArrow7);
+    rayObjects.push(rayArrow7);
+
+    const eyeIcon = eyeShow();
+    eyeIcon.position.set(lensLoc, eye, 0.3);
+    scene.add(eyeIcon);
+    rayObjects.push(eyeIcon);
+
+    const image2      = addRays(new THREE.Vector3(lensLoc - I2x, I2y, 0), new THREE.Vector3(lensLoc, I2y, 0), 'brown');
+    const image2Label = roundLabel('5');
+    image2Label.position.set(lensLoc + 10, I2y - 2, 0);
+    scene.add(image2, image2Label);
+    rayObjects.push(image2, image2Label);
+
+    const incidentRay7 = addRays(new THREE.Vector3(lensLoc - I2x, I2y, 0), new THREE.Vector3(lensLoc, eye, 0), 'grey');
+    scene.add(incidentRay7);
+    rayObjects.push(incidentRay7);
+
+    const incidentRay8 = addRays(new THREE.Vector3(lensLoc - I2x, I2y, 0), new THREE.Vector3(lensLoc + 0.5, eye - 0.3, 0), 'grey');
+    scene.add(incidentRay8);
+    rayObjects.push(incidentRay8);
+
+    const image2Head = shortArrowLine(lensLoc - I2x, I2y, 0, false, 'brown');
+    scene.add(image2Head);
+    rayObjects.push(image2Head);
+}
+
+/* ── geometry helpers ── */
+
+function addLens(radius) {
+    const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(radius, 16, 8),
+        new THREE.MeshBasicMaterial({ color: 'orange', transparent: true, opacity: 0.8 })
+    );
+    mesh.scale.set(1, 0.15, 1);
+    return mesh;
+}
+
+function eyeShow() {
+    const map      = new THREE.TextureLoader().load('./assets/img/eyeIconUp.png');
+    const material = new THREE.SpriteMaterial({ map, color: 0xffffff });
+    const eye      = new THREE.Sprite(material);
+    eye.scale.set(2, 2, 2);
+    return eye;
+}
+
+function addRays(vector1, vector2, col) {
+    const geo  = new THREE.BufferGeometry().setFromPoints([vector1, vector2]);
+    const mat  = new THREE.LineBasicMaterial({ color: col });
+    return new THREE.Line(geo, mat);
+}
+
+function shortArrowLine(x, y, z, short, col) {
+    const tip = new THREE.Vector3(x, y, z);
+    const a   = short
+        ? new THREE.Vector3(x + 0.5, y - 0.25, z)
+        : new THREE.Vector3(x + 1,   y - 0.5,  z);
+    const b   = short
+        ? new THREE.Vector3(x + 0.5, y + 0.25, z)
+        : new THREE.Vector3(x + 1,   y + 0.5,  z);
+    const geo = new THREE.BufferGeometry().setFromPoints([a, tip, b]);
+    return new THREE.Line(geo, new THREE.LineBasicMaterial({ color: col }));
+}
+
+function roundLabel(N) {
+    const canvas  = document.createElement('canvas');
+    const ctx     = canvas.getContext('2d');
+    const font    = 24;
+    ctx.fillStyle = 'rgb(0,0,0)';
+    ctx.beginPath(); ctx.arc(font, font, font - 2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgb(255,255,255)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(font, font, font - 2, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(N, font, font);
+    const tex = new THREE.Texture(canvas);
+    tex.needsUpdate = true;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+    sprite.scale.set(10, 5, 1);
+    return sprite;
+}
+
+/* ── GUI (built after model loads) ── */
+function buildGUI() {
+    const animations = {
+        labels: () => { labelDisplay = !labelDisplay; labelsAction(); },
+        image:  () => { iRay = !iRay; rayAction(); }
+    };
+    const gui = new GUI({ width: 200 });
+    gui.add(animations, 'labels').name('Show/Hide Labels');
+    gui.add(animations, 'image').name('Show/Hide Ray Diagram');
+}
+
+/* ── UI button wiring (called once labUI becomes visible) ── */
+function setupMicroscopeUI() {
+
+    partEl     = document.getElementById('part');
+    describeEl = document.getElementById('describe');
+
+    document.getElementById('menuButton').addEventListener('click', () => {
+        const detail     = document.getElementById('detail');
+        const menuButton = document.getElementById('menuButton');
+        if (detail.style.display === 'block') {
+            detail.style.display = 'none';
+            menuButton.innerText = 'Show Description';
+        } else {
+            detail.style.display = 'block';
+            menuButton.innerText = 'Hide Description';
+        }
+    });
+
+    document.getElementById('theorybutton').addEventListener('click', () => {
+        window.open('../Theory/Optics/Optics_Compound_Microscope.html', '_self');
+    });
+}
+
+/* ════════════════════════════════════════
+   RESIZE
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+
+    } else {
+
+        /* ── microscope raycaster runs every frame after intro ── */
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(meshObjects);
+
+        if (intersects.length > 0) {
+            INTERSECTED = intersects[0].object;
+            const parentName = INTERSECTED.parent.name;
+
+            if (parentName in parts && !iRay) {
+                if (partEl)     partEl.innerHTML     = parts[parentName][0];
+                if (describeEl) describeEl.innerHTML = parts[parentName][1];
+            } else if (iRay) {
+                if (partEl)     partEl.innerHTML     = 'Ray Diagram';
+                if (describeEl) describeEl.innerHTML =
+                    '1 - Object (Specimen);<br>2 - Objective Lens;<br>' +
+                    '3 - Eyepiece Lens;<br>4 - Intermediate Image;<br>' +
+                    '5 - Final Inverted Image';
+            } else {
+                if (partEl)     partEl.innerHTML     = '<strong>Compound Microscope</strong>';
+                if (describeEl) describeEl.innerHTML =
+                    'An optical system with multiple lenses:<br><br>' +
+                    'The objective lens (typically 4x, 10x, 40x or 100x) and<br><br>' +
+                    'The eyepiece lens (typically 10x) to obtain a high magnification ' +
+                    'of 40x, 100x, 400x and 1000x.<br><br>' +
+                    'Higher magnification is achieved by using two lenses rather than ' +
+                    'just a single magnifying lens';
+            }
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via tone-mapping exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);   /* CSS2D labels on top */
+}
+
+</script>
+</body>
+</html>

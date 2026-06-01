@@ -8,87 +8,33 @@
 
 <title>Ferrari Intro → Capacitor Laboratory</title>
 
-<style>
 
-body{
-    margin:0;
-    overflow:hidden;
-    font-family:sans-serif;
-    background:#000;
-}
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="shortcut icon" href="../files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
+	<link rel="shortcut icon" href="../files/favicon.ico" media="(prefers-color-scheme: light)" />
+	<link rel="stylesheet" type="text/css" href="../css/style-page.css">
+	<style>
+		.label {
+			font-weight: bold;
+			font-size: 12px;
 
-canvas{
-    display:block;
-}
+		}
+	</style>
 
-#introTitle{
+</head>
+<body>
+ 
+        <button style="background-color: rgb(164, 26, 26);" id="flow">OFF</button>
+        <button id="flip">DC VOLTAGE</button>
+        <button id="cal" onClick="extraSite()">CAPACITANCE</button>
 
-    position:absolute;
-    top:20px;
-    width:100%;
-    text-align:center;
-    color:white;
-    font-size:20px;
-    letter-spacing:4px;
-    z-index:5;
-    pointer-events:none;
-}
+    </div>
+<script>
+        function extraSite() {
 
-#labUI{
-
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    z-index:4;
-    display:none;
-    pointer-events:auto;
-}
-
-#topmenu{
-    position:absolute;
-    top:0;
-    width:100%;
-    background:#222;
-    color:white;
-    padding:10px;
-    text-align:center;
-    font-weight:bold;
-}
-
-#sidemenu{
-
-    position:absolute;
-    left:10px;
-    top:60px;
-    background:rgba(255,255,255,0.9);
-    padding:12px;
-    border-radius:10px;
-    width:250px;
-}
-
-#menu{
-
-    position:absolute;
-    right:10px;
-    top:60px;
-    background:rgba(255,255,255,0.9);
-    padding:12px;
-    border-radius:10px;
-    width:320px;
-}
-
-button{
-    margin-top:10px;
-    padding:8px 14px;
-}
-
-.label{
-    font-weight:bold;
-}
-
-</style>
+            window.open("Electricity_Understanding_Capacitance.html", "_self")
+        }
+    </script>
 
 <script type="importmap">
 {
@@ -101,7 +47,13 @@ button{
         "https://unpkg.com/three@0.160.0/examples/jsm/",
 
         "tween":
-        "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+        "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js",
+
+        "lil-gui":
+        "https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js",
+
+        "stats":
+        "https://unpkg.com/stats.js@0.17.0/build/stats.min.js"
     }
 }
 </script>
@@ -171,26 +123,34 @@ button{
 
 <script type="module">
 
+
 /* ------------------------------------------------ */
-/* IMPORTS                                           */
+/* IMPORTS  — via importmap                          */
 /* ------------------------------------------------ */
 
-import * as THREE from 'three';
+import * as THREE
+from 'three';
 
 import { OrbitControls }
 from 'three/addons/controls/OrbitControls.js';
+                                                            import { DragControls }
+from 'three/addons/controls/DragControls.js';
+
+import { TransformControls }                                from 'three/addons/controls/TransformControls.js';
 
 import { GLTFLoader }
 from 'three/addons/loaders/GLTFLoader.js';
 
 import { DRACOLoader }
-from 'three/addons/loaders/DRACOLoader.js';
-
+from 'three/addons/loaders/DRACOLoader.js';                 
 import { RGBELoader }
 from 'three/addons/loaders/RGBELoader.js';
 
-import TWEEN from 'tween';
+import TWEEN
+from 'tween';
 
+import { GUI }
+from 'lil-gui';
 
 /* ------------------------------------------------ */
 /* GLOBALS                                           */

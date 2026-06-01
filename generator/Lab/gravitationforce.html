@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Gravitation Force</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(5,5,15,.95);
+            color:#c8d8f0; font-size:13px; letter-spacing:.18em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(100,160,255,.12);
+        }
+
+        /* ── side panel ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:230px;
+            background:rgba(5,5,15,.88);
+            color:#c8d8f0; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(100,160,255,.1);
+            line-height:1.9;
+        }
+        #sidemenu label {
+            color:#7aabdd; font-size:11px; display:block; margin-top:10px;
+            text-transform:uppercase; letter-spacing:.08em;
+        }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#4488cc;
+            margin-top:3px; margin-bottom:2px;
+        }
+
+        /* visibility checkboxes */
+        .visRow {
+            display:flex; align-items:center; gap:8px;
+            margin-top:6px; font-size:12px; color:#b0c8e8;
+            cursor:pointer;
+        }
+        .visRow input[type=checkbox]{ accent-color:#4488cc; width:14px; height:14px; }
+
+        /* ── bottom bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(5,5,15,.93);
+            color:#c8d8f0; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(100,160,255,.1);
+        }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#7aabdd; margin-top:2px;
+        }
+
+        #menu button{
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover{ filter:brightness(1.2); }
+        #btn-law1    { background:#1a3a6e; }
+        #btn-law2    { background:#1a5a3a; }
+        #btn-moon    { background:#4a2a6e; }
+        #btn-sat     { background:#6e3a1a; }
+        #btn-theory  { background:#5a1a1a; }
+        #btn-force   { background:#1a5a5a; }
+    </style>
+</head>
+<body>
+
+<!-- intro label -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI (hidden until transition) -->
+<div id="labUI">
+
+    <div id="topmenu">Gravitational Force &mdash; Kepler's Laws</div>
+
+    <!-- ── side controls ── -->
+    <div id="sidemenu">
+        <label>Visibility</label>
+
+        <label class="visRow">
+            <input type="checkbox" id="chkEarth" checked> Earth
+        </label>
+        <label class="visRow">
+            <input type="checkbox" id="chkOrbit" checked> Earth Orbit
+        </label>
+    </div>
+
+    <!-- ── bottom buttons ── -->
+    <div id="menu">
+        <button id="btn-law1">1st Law</button>
+        <button id="btn-law2">2nd Law</button>
+        <button id="btn-moon">Moon</button>
+        <button id="btn-sat">Satellite</button>
+        <button id="btn-force">Grav. Force</button>
+        <button id="btn-theory">Theory</button>
+
+        <div id="message-el">
+            Gravitational Law — visualise Kepler's laws. Toggle orbit bodies and sweep areas using the buttons above.
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ────────────────────────────────────────
+   Ferrari globals  (unchanged)
+──────────────────────────────────────── */
+let ferrariGroup = new THREE.Group();
+let gravGroup    = new THREE.Group();            // replaces mechanicsGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Gravitation scene globals
+──────────────────────────────────────── */
+const clock = new THREE.Clock();
+
+// solar-system bodies
+let sun, earth, earthOrbit, earthCurve, earthPoints;
+let moon, moonOrbit, moonCurve;
+let satellite, satelliteOrbit, satelliteCurve;
+let mesh, meshCurve, meshOrbit;                  // active satellite/moon
+
+// lights
+let pointLight;
+
+// sweep (Kepler 2nd law)
+let Law1 = [];
+let Law2 = [];
+const Planet = {};
+let group    = new THREE.Group();
+let triangle1, triangle2;
+let area  = false;
+let t     = 0;
+let t1    = 0;
+
+// planet animation RAF handles
+let planetRAF, satelliteRAF;
+const v = new THREE.Vector3();
+
+// sun focus position  (same formula as original)
+const sunCenter = new THREE.Vector3(-Math.sqrt(15 * 15 - 7.5 * 7.5), 0, 0);
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer ─────────────────────────── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — FOV 60 matches gravitation original */
+    camera = new THREE.PerspectiveCamera(
+        60, window.innerWidth / window.innerHeight, 1, 50000
+    );
+
+    /* scene */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* controls */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled     = false;
+    controls.enablePan   = true;
+    controls.enableZoom  = true;
+
+    /* build both scenes */
+    createLights();
+    createFerrariShowroom();
+    createGravitationScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into gravitation scene ── */
+    const transition = moveCamera(-20, -30, 30, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            gravGroup.visible    = true;
+
+            /* deep-space background */
+            scene.background = new THREE.Color(0x000008);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls — target at solar-system origin */
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* start planet motion now that the scene is visible */
+            startPlanetMovement();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION SCENE — BUILD
+════════════════════════════════════════ */
+
+function createGravitationScene() {
+
+    gravGroup.visible = false;
+    scene.add(gravGroup);
+
+    /* point light at sun focus */
+    pointLight = new THREE.PointLight(0xffffff, 4, 200);
+    pointLight.position.copy(sunCenter);
+    gravGroup.add(pointLight);
+
+    /* ambient fill */
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    gravGroup.add(ambient);
+
+    /* ── Sun ── */
+    const sunGeo = new THREE.IcosahedronGeometry(5, 6);
+    const sunTex = new THREE.TextureLoader().load('./assets/gravity/sun.jpg');
+    const sunMat = new THREE.MeshBasicMaterial({ map: sunTex });
+    sun = new THREE.Mesh(sunGeo, sunMat);
+    sun.position.copy(sunCenter);
+    gravGroup.add(sun);
+    Law1.push(pointLight, sun);
+
+    /* sun label */
+    const sunlabel = addLabel('./assets/gravity/sunText.png');
+    sunlabel.position.x  = 10;
+    sunlabel.rotation.x  = 1.57;
+    sun.add(sunlabel);
+    Law2.push(sunlabel);
+
+    /* ── Earth ── */
+    const earthGeo = new THREE.SphereGeometry(1, 12, 12);
+    const earthTex = new THREE.TextureLoader().load('./assets/gravity/earth.jpg');
+    const earthMat = new THREE.MeshPhongMaterial({ map: earthTex });
+    earth = new THREE.Mesh(earthGeo, earthMat);
+    earth.rotation.x = 1.57;
+    earth.rotation.y = 0.57;
+
+    const earthEl  = addEllipse(30, 15, 0, 100, 'yellow');
+    earthOrbit = earthEl.ellipse;
+    earthCurve = earthEl.curve;
+    earthPoints = earthEl.points;
+
+    gravGroup.add(earth);
+    gravGroup.add(earthOrbit);
+    Law1.push(earth);
+
+    /* arrow helpers on earth */
+    const dir  = new THREE.Vector3(0,  1, 0).normalize();
+    const dir1 = new THREE.Vector3(-1, 4, 0).normalize();
+    const origin = new THREE.Vector3(0, 0, 0);
+    earth.add(new THREE.ArrowHelper(dir,  origin, 5, 0xffff00));
+    earth.add(new THREE.ArrowHelper(dir1, origin, 5, 0xff0000));
+
+    /* ── Moon ── */
+    const moonGeo = new THREE.SphereGeometry(0.5, 12, 12);
+    const moonTex = new THREE.TextureLoader().load('./assets/gravity/moon.jpg');
+    const moonMat = new THREE.MeshPhongMaterial({ map: moonTex });
+    moon = new THREE.Mesh(moonGeo, moonMat);
+    gravGroup.add(moon);
+
+    const moonEl = addEllipse(3, 3, 0, 50, 'red');
+    moonOrbit = moonEl.ellipse;
+    moonCurve = moonEl.curve;
+    moonOrbit.rotation.x = -1.57;
+    gravGroup.add(moonOrbit);
+
+    Planet['moon'] = [moon, moonOrbit];
+    hideElements(Planet['moon']);
+
+    /* ── Satellite ── */
+    const satGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const satTex = new THREE.TextureLoader().load('./assets/gravity/moon.jpg');
+    const satMat = new THREE.MeshPhongMaterial({ map: satTex });
+    satellite = new THREE.Mesh(satGeo, satMat);
+    gravGroup.add(satellite);
+
+    const satEl = addEllipse(2, 2, 0, 30, 'green');
+    satelliteOrbit = satEl.ellipse;
+    satelliteCurve = satEl.curve;
+    satelliteOrbit.rotation.x = -1.2;
+    gravGroup.add(satelliteOrbit);
+
+    Planet['satellite'] = [satellite, satelliteOrbit];
+    hideElements(Planet['satellite']);
+
+    /* hide Law2 elements until 2nd-law button pressed */
+    hideElements(Law2);
+
+    /* ── wire UI ── */
+    setupGravitationUI();
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION SCENE — START MOVEMENT
+   Called once transition is complete
+════════════════════════════════════════ */
+
+function startPlanetMovement() {
+    cancelAnimationFrame(planetRAF);
+
+    function loop() {
+        t = (clock.getElapsedTime() * 0.05) % 1;
+        earth.position.copy(earthCurve.getPointAt(t, v));
+        earth.position.applyMatrix4(earthOrbit.matrixWorld);
+        earth.rotation.y += 0.005;
+        planetRAF = requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+function startSatelliteMovement() {
+    cancelAnimationFrame(satelliteRAF);
+    t1 = 0;
+
+    function loop() {
+        t1 = (t1 + 0.001) % 1;
+        mesh.position.copy(meshCurve.getPointAt(t1, v));
+        mesh.position.applyMatrix4(meshOrbit.matrixWorld);
+        satelliteRAF = requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION UI
+════════════════════════════════════════ */
+
+function setupGravitationUI() {
+
+    const messageEl = document.getElementById('message-el');
+
+    /* 1st law */
+    document.getElementById('btn-law1').addEventListener('click', () => {
+        area = false;
+        sweepAction();
+        messageEl.textContent = "Kepler's 1st Law: Planets move in ellipses with the Sun at one focus.";
+    });
+
+    /* 2nd law */
+    document.getElementById('btn-law2').addEventListener('click', () => {
+        area = true;
+        scene.remove(group);
+        group = new THREE.Group();
+        sweepAction();
+        messageEl.textContent = "Kepler's 2nd Law: Equal areas swept in equal times.";
+    });
+
+    /* moon */
+    document.getElementById('btn-moon').addEventListener('click', () => {
+        hideElements(Planet['satellite']);
+        showElements(Planet['moon']);
+        mesh      = moon;
+        meshCurve = moonCurve;
+        meshOrbit = moonOrbit;
+        gravGroup.add(meshOrbit);
+        startSatelliteMovement();
+        messageEl.textContent = 'Showing Moon orbit around Earth.';
+    });
+
+    /* satellite */
+    document.getElementById('btn-sat').addEventListener('click', () => {
+        hideElements(Planet['moon']);
+        showElements(Planet['satellite']);
+        mesh      = satellite;
+        meshCurve = satelliteCurve;
+        meshOrbit = satelliteOrbit;
+        gravGroup.add(meshOrbit);
+        startSatelliteMovement();
+        messageEl.textContent = 'Showing Satellite orbit around Earth.';
+    });
+
+    /* gravitational force page */
+    document.getElementById('btn-force').addEventListener('click', () => {
+        window.open('Mechanics_Gravitational_Force.html', '_self');
+    });
+
+    /* theory page */
+    document.getElementById('btn-theory').addEventListener('click', () => {
+        window.open('Mechanics_Gravitation_Law.html', '_self');
+    });
+
+    /* earth visibility */
+    document.getElementById('chkEarth').addEventListener('change', (e) => {
+        if (earth) earth.visible = e.target.checked;
+    });
+
+    /* orbit visibility */
+    document.getElementById('chkOrbit').addEventListener('change', (e) => {
+        if (earthOrbit) earthOrbit.visible = e.target.checked;
+    });
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION HELPERS
+════════════════════════════════════════ */
+
+function addEllipse(r1, r2, rot, N, col) {
+    const curve = new THREE.EllipseCurve(
+        0, 0, r1, r2,
+        0, 2 * Math.PI,
+        false, rot
+    );
+    const points   = curve.getSpacedPoints(N);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: col });
+    const ellipse  = new THREE.Line(geometry, material);
+    return { curve, points, ellipse };
+}
+
+function addLabel(path) {
+    const geometry = new THREE.PlaneGeometry(2.5, 1);
+    const texture  = new THREE.TextureLoader().load(path);
+    const material = new THREE.MeshStandardMaterial({
+        map: texture, transparent: true, side: THREE.DoubleSide
+    });
+    return new THREE.Mesh(geometry, material);
+}
+
+function hideElements(arr) {
+    if (!arr) return;
+    for (const obj of arr) obj.visible = false;
+}
+
+function showElements(arr) {
+    if (!arr) return;
+    for (const obj of arr) obj.visible = true;
+}
+
+function sweepAction() {
+
+    if (area) {
+
+        hideElements(Law1);
+        showElements(Law2);
+        hideElements(Planet['moon']);
+        hideElements(Planet['satellite']);
+
+        const N = Math.floor(Math.random() * 46);
+        const p = earthPoints;
+
+        const ep1 = new THREE.Vector3(p[N].x,      p[N].y,      0);
+        const ep2 = new THREE.Vector3(p[N + 10].x,  p[N + 10].y,  0);
+        const ep3 = new THREE.Vector3(p[N + 45].x,  p[N + 45].y,  0);
+        const ep4 = new THREE.Vector3(p[N + 55].x,  p[N + 55].y,  0);
+
+        const col = new THREE.Color(Math.random() * 0xff3333);
+        const mat = new THREE.MeshBasicMaterial({
+            color: col, transparent: true, opacity: 0.7
+        });
+
+        triangle1 = initPlane({ points: [sunCenter, ep1, ep2, sunCenter], planeMaterial: mat });
+        triangle2 = initPlane({ points: [sunCenter, ep3, ep4, sunCenter], planeMaterial: mat.clone() });
+
+        group.add(triangle1, triangle2);
+        gravGroup.add(group);
+
+    } else {
+
+        hideElements(Law2);
+        showElements(Law1);
+        gravGroup.remove(group);
+    }
+}
+
+function initPlane(data) {
+    const geo = new THREE.BufferGeometry().setFromPoints(data.points);
+    return new THREE.Mesh(geo, data.planeMaterial);
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone-mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* gravitation scene — sun self-rotation only; planet motion runs in its own RAF */
+    if (introFinished && sun) {
+        sun.rotation.y += 0.002;
+    }
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

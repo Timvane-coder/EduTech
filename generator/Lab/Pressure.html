@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Pressure with Depth</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── side panel ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:280px;
+            background:rgba(15,15,20,.9);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:2;
+        }
+        #sidemenu strong { color:#fff; }
+        #sidemenu sub    { font-size:9px; }
+
+        /* ── bottom bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #btnBuoyant   { background:rgb(26,78,143); }
+        #btnPascal    { background:rgb(164,26,26); }
+        #btnTorricelli{ background:rgb(42,110,63); }
+
+        /* ── fraction display ── */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+        .bar { display:none; }
+
+        /* ── CSS2D labels ── */
+        .label {
+            font-size:13px; font-weight:600;
+            color:#000; background:transparent;
+            pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<div id="labUI">
+
+    <div id="topmenu">Visualise Pressure with Depth in Fluid</div>
+
+    <div id="sidemenu">
+        Pressure due to the water volume at a distance h,<br>
+        <strong>F<sub>fluid</sub> = F<sub>air</sub> + mg</strong><br>
+        <strong>P<sub>fluid</sub>A = P<sub>air</sub>A + (&rho;V)g</strong><br>
+        <strong>P<sub>fluid</sub>A = P<sub>air</sub>A + (&rho;Ah)g</strong><br><br>
+        <strong>P<sub>fluid</sub> = P<sub>air</sub> + &rho;hg</strong>
+    </div>
+
+    <div id="menu">
+        <strong>Pressure</strong>, P =
+        <div class="fraction">
+            <span class="fup">F</span>
+            <span class="bar">/</span>
+            <span class="fdn">A</span>
+        </div>
+        &nbsp; In fluid, pressure at depth h, <strong>P = &rho;hg + P<sub>0</sub></strong>
+
+        <button id="btnBuoyant"    onclick="window.open('Thermodynamics_Buoyant_Force.html','_self')">Buoyant Force</button>
+        <button id="btnPascal"     onclick="window.open('Thermodynamics_Pascal\'s_Law.html','_self')">Pascal's Law</button>
+        <button id="btnTorricelli" onclick="window.open('Thermodynamics_Torricellis_Law.html','_self')">Torricelli's Law</button>
+
+        <div id="message-el">
+            Observe how pressure increases with depth. The fluid column shows force vectors acting on a submerged object.
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* ────────────────────────────────────────
+   Ferrari globals  (unchanged)
+──────────────────────────────────────── */
+let ferrariGroup  = new THREE.Group();
+let pressureGroup = new THREE.Group();          // replaces mechanicsGroup / capacitorGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Pressure scene globals
+──────────────────────────────────────── */
+let column, fluid, steel, wood;
+let pressureGroup3D = new THREE.Group();   // arrow/label helpers live here
+
+const pressureParams = {
+    A    : 10,
+    H    : 1.7,
+    W    : 4,
+    Fair : 1.34,
+    Ffluid: 1.34,
+    pos  : 30
+};
+
+const clock = new THREE.Clock();
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer ─────────────────────────── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* CSS2D label renderer ──────────────── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position      = 'absolute';
+    labelRenderer.domElement.style.top           = '0px';
+    labelRenderer.domElement.style.left          = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    labelRenderer.domElement.style.zIndex        = '5';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* camera ────────────────────────────── */
+    camera = new THREE.PerspectiveCamera(
+        55, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* scene ─────────────────────────────── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* controls ──────────────────────────── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    /* build both scenes ─────────────────── */
+    createLights();
+    createFerrariShowroom();
+    createPressureScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    /* pressure scene fill lights */
+    const hemi = new THREE.AmbientLight(0xffffff, 0.20);
+    hemi.position.set(0, 20, 0);
+    scene.add(hemi);
+
+    const fill = new THREE.DirectionalLight(0xffffff, 1);
+    fill.position.set(-30, 50, -30);
+    scene.add(fill);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into pressure scene ── */
+    const transition = moveCamera(-15, 15, 40, 0, 10, -10, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible  = false;
+            pressureGroup.visible = true;
+
+            /* match pressure scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls — target matches pressure scene */
+            controls.enabled = true;
+            controls.target.set(0, 10, -10);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* lazy-load lil-gui only now that lab is visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => setupPressureGUI(GUI))
+                .catch(e => console.warn('lil-gui failed to load', e));
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   PRESSURE SCENE
+════════════════════════════════════════ */
+
+function createPressureScene() {
+
+    pressureGroup.visible = false;
+    scene.add(pressureGroup);
+
+    const A = pressureParams.A;
+
+    /* ── chamber walls ── */
+    const wallMat = new THREE.MeshPhongMaterial({
+        color: 'grey',
+        side : THREE.DoubleSide,
+        shininess: 30,
+        specular: 0x222222
+    });
+    const wallGeo = new THREE.BoxGeometry(A * 4, A * 2, 0.2).translate(0, A, 0);
+
+    const face1 = new THREE.Mesh(wallGeo, wallMat);
+    face1.position.z = -A;
+    pressureGroup.add(face1);
+
+    const face2 = face1.clone();
+    face2.scale.x    = 0.5;
+    face2.position.x = -A * 2;
+    face2.position.z = 0;
+    face2.rotation.y = -1.57;
+    pressureGroup.add(face2);
+
+    const face3 = face1.clone();
+    face3.scale.x    = 0.5;
+    face3.position.x =  A * 2;
+    face3.position.z = 0;
+    face3.rotation.y =  1.57;
+    pressureGroup.add(face3);
+
+    const face4 = face1.clone();
+    face4.position.z = -A;
+    face4.rotation.x =  1.57;
+    pressureGroup.add(face4);
+
+    /* ── fluid column (cylinder) ── */
+    const colGeo = new THREE.CylinderGeometry(3, 3, 8, 16);
+    const colMat = new THREE.MeshPhongMaterial({ color: 'aqua', side: THREE.DoubleSide });
+    column = new THREE.Mesh(colGeo, colMat);
+    column.position.y = 13;
+    pressureGroup.add(column);
+
+    /* ── water texture ── */
+    const texture = new THREE.TextureLoader()
+        .load('https://threejs.org/examples/textures/waternormals.jpg');
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+    /* ── fluid volume ── */
+    const unitGeo = new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0);
+    const fluidMat = new THREE.MeshPhongMaterial({
+        color      : 'aqua',
+        side       : THREE.DoubleSide,
+        map        : texture,
+        transparent: true,
+        opacity    : 0.3
+    });
+    fluid = new THREE.Mesh(unitGeo, fluidMat);
+    fluid.scale.set(A * 4, A * pressureParams.H, A * 2 - 2);
+    pressureGroup.add(fluid);
+
+    /* ── steel block ── */
+    const steelMat = new THREE.MeshPhongMaterial({
+        color    : 'orange',
+        side     : THREE.DoubleSide,
+        bumpMap  : texture,
+        shininess: 0,
+        specular : 0xff0000
+    });
+    steel = new THREE.Mesh(unitGeo, steelMat);
+    steel.scale.set(8, 4, 4);
+    steel.position.set(-13, 0, 0);
+    pressureGroup.add(steel);
+
+    /* ── wood block ── */
+    const woodMat = new THREE.MeshPhongMaterial({
+        color    : 'wheat',
+        side     : THREE.DoubleSide,
+        bumpMap  : texture,
+        bumpScale: 0.2,
+        specular : 0xff00ff
+    });
+    wood = new THREE.Mesh(unitGeo, woodMat);
+    wood.scale.set(8, 4, 4);
+    wood.position.set(13, 17, 0);
+    pressureGroup.add(wood);
+
+    /* ── force arrows on column ── */
+    column.add(makeArrow(6, new THREE.Vector3(0,-1,0), 'black', 'mg',              new THREE.Vector3(0,  2, 3),  3));
+    column.add(makeArrow(8, new THREE.Vector3(0,-1,0), 'blue',  'F<sub>air</sub>', new THREE.Vector3(0, 12, 0),  2));
+    column.add(makeArrow(0, new THREE.Vector3(0,-1,0), 'blue',  '1',               new THREE.Vector3(0,  2, 0),  0));
+    column.add(makeArrow(8, new THREE.Vector3(0, 1,0), 'red',   'F<sub>fluid</sub>',new THREE.Vector3(0,-12, 0), -2));
+    column.add(makeArrow(0, new THREE.Vector3(0, 1,0), 'red',   '2',               new THREE.Vector3(0, -6, 0),  0));
+    column.add(makeArrow(4, new THREE.Vector3(0,-1,0), 'black', 'h',               new THREE.Vector3(5,  0, 0),  2));
+    column.add(makeArrow(4, new THREE.Vector3(0, 1,0), 'black', '',                new THREE.Vector3(5,  0, 0),  4));
+
+    /* ── material labels ── */
+    wood.add(makeLabel('Wood',  0));
+    steel.add(makeLabel('Steel', 0));
+}
+
+/* ════════════════════════════════════════
+   PRESSURE SCENE HELPERS
+════════════════════════════════════════ */
+
+function makeArrow(len, dir, col, name, pos, labelY) {
+
+    dir.normalize();
+
+    const arrowHelper = new THREE.ArrowHelper(
+        dir,
+        new THREE.Vector3(0,0,0),
+        len,
+        col
+    );
+    arrowHelper.position.copy(pos);
+    arrowHelper.add(makeLabel(name, labelY));
+
+    /* wrap in a group so it can be add()ed to column */
+    const g = new THREE.Group();
+    g.add(arrowHelper);
+    return g;
+}
+
+function makeLabel(name, Y) {
+
+    const div = document.createElement('div');
+    div.className   = 'label';
+    div.innerHTML   = name;
+    div.style.color = 'black';
+
+    const obj = new CSS2DObject(div);
+    obj.position.y = Y;
+    return obj;
+}
+
+/* ════════════════════════════════════════
+   LIL-GUI  (lazy-loaded after transition)
+════════════════════════════════════════ */
+
+function setupPressureGUI(GUI) {
+
+    const gui = new GUI({ width: 220, title: 'Pressure Controls' });
+
+    const params = {
+        'Fluid height H': pressureParams.H,
+        'Show fluid'    : true
+    };
+
+    gui.add(params, 'Fluid height H', 0.5, 3.0, 0.05).onChange(v => {
+        pressureParams.H = v;
+        if (fluid) fluid.scale.y = pressureParams.A * v;
+    });
+
+    gui.add(params, 'Show fluid').onChange(v => {
+        if (fluid) fluid.visible = v;
+    });
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (labelRenderer) labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+
+    /* CSS2D labels only needed in pressure lab */
+    if (introFinished && labelRenderer) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>
+
+

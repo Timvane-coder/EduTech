@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Damped Pendulum</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(31,41,55,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── control panel – bottom centre ── */
+        #control-panel-overlay {
+            position:fixed; bottom:1.5rem; left:50%;
+            transform:translateX(-50%);
+            z-index:100;
+            max-width:780px; width:90%;
+            background:rgba(255,255,255,.88);
+            backdrop-filter:blur(6px);
+            padding:1.25rem 1.5rem;
+            border-radius:1rem;
+            box-shadow:0 10px 30px rgba(0,0,0,.3);
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:1.25rem;
+        }
+
+        .ctrl-group label {
+            display:block; font-size:11px; font-weight:600;
+            color:#374151; margin-bottom:4px;
+        }
+        .ctrl-group input[type=range]{
+            width:100%; height:6px; accent-color:#3b82f6;
+        }
+        .ctrl-group .val {
+            font-size:14px; font-family:monospace; margin-top:2px;
+        }
+        .val.blue  { color:#2563eb; }
+        .val.green { color:#16a34a; }
+        .val.red   { color:#dc2626; }
+
+        /* ── CSS2D label style (injected into DOM by labelRenderer) ── */
+        .length-label {
+            background:rgba(255,255,255,.9);
+            border-radius:.4rem; padding:.2rem .45rem;
+            font-size:.78rem; color:#1f2937;
+            font-weight:bold;
+            box-shadow:0 2px 4px rgba(0,0,0,.15);
+            pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- intro label -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI (hidden until transition) -->
+<div id="labUI">
+
+    <div id="topmenu">Damped Pendulum &mdash; θ(t) = A · e<sup style="font-size:9px">−γt</sup> · cos(ωt)</div>
+
+    <div id="control-panel-overlay">
+
+        <div class="ctrl-group">
+            <label for="lengthSlider">Length (L) cm</label>
+            <input type="range" id="lengthSlider" min="50" max="200" value="100" step="5">
+            <div class="val blue" id="lengthVal">100</div>
+        </div>
+
+        <div class="ctrl-group">
+            <label for="ampSlider">Initial Angle (A) rad</label>
+            <input type="range" id="ampSlider" min="0.1" max="1.5" value="1.0" step="0.05"
+                   style="accent-color:#16a34a">
+            <div class="val green" id="ampVal">1.00</div>
+        </div>
+
+        <div class="ctrl-group">
+            <label for="dampSlider">Damping Coeff (γ)</label>
+            <input type="range" id="dampSlider" min="0" max="0.5" value="0.1" step="0.01"
+                   style="accent-color:#dc2626">
+            <div class="val red" id="dampVal">0.10</div>
+        </div>
+
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ────────────────────────────────────────
+   Ferrari globals  (unchanged)
+──────────────────────────────────────── */
+let ferrariGroup = new THREE.Group();
+let pendulumGroup = new THREE.Group();   // replaces mechanicsGroup / capacitorGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Pendulum scene globals
+──────────────────────────────────────── */
+const SCALE_FACTOR = 0.5;
+const PIVOT_Y_POS  = 0;
+
+let labelRenderer;                       // CSS2D renderer for the length label
+let pendulumBobMesh, pendulumRodMesh;
+let pendulumSwingGroup;                  // the THREE.Group that rotates
+let pivotVisual, lengthLabel;
+
+const pendParams = {
+    g        : 9.81,
+    len      : 100,
+    amp      : 1.0,
+    dampCoeff: 0.1,
+    startTime: 0          // set when transition completes
+};
+
+const clock = new THREE.Clock();
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer ─────────────────────────── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* CSS2D renderer (for pendulum length label) */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.pointerEvents= 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* camera ─ FOV 75 matches pendulum scene ── */
+    camera = new THREE.PerspectiveCamera(
+        75, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* scene ─────────────────────────────── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* controls ──────────────────────────── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    /* build both scenes ─────────────────── */
+    createLights();
+    createFerrariShowroom();
+    createPendulumScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    /* point light the pendulum scene uses */
+    const pt = new THREE.PointLight(0xffffff, 1, 500);
+    pt.position.set(20, 30, 50);
+    scene.add(pt);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into pendulum scene ── */
+    const transition = moveCamera(0, PIVOT_Y_POS, 80, 0, -35, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible  = false;
+            pendulumGroup.visible = true;
+
+            /* pendulum scene uses a dark background */
+            scene.background = new THREE.Color(0x1f2937);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls — target matches pendulum scene */
+            controls.enabled = true;
+            controls.target.set(0, -35 + PIVOT_Y_POS, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* zero the pendulum clock from this moment */
+            pendParams.startTime = performance.now() / 1000;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   PENDULUM SCENE
+════════════════════════════════════════ */
+
+function createPendulumScene() {
+
+    pendulumGroup.visible = false;
+    scene.add(pendulumGroup);
+
+    /* ── Pivot sphere (static, parented to pendulumGroup) ── */
+    const pivotGeo = new THREE.SphereGeometry(2, 32, 32);
+    const pivotMat = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+    pivotVisual = new THREE.Mesh(pivotGeo, pivotMat);
+    pivotVisual.position.set(0, PIVOT_Y_POS, 0);
+    pendulumGroup.add(pivotVisual);
+
+    /* ── The swing group — its rotation.z drives the pendulum ── */
+    pendulumSwingGroup = new THREE.Group();
+    pendulumSwingGroup.position.set(0, PIVOT_Y_POS, 0);
+    pendulumGroup.add(pendulumSwingGroup);
+
+    /* ── Bob ── */
+    const bobGeo = new THREE.SphereGeometry(4, 32, 32);
+    const bobMat = new THREE.MeshPhongMaterial({ color: 0xef4444, shininess: 80 });
+    pendulumBobMesh = new THREE.Mesh(bobGeo, bobMat);
+    pendulumSwingGroup.add(pendulumBobMesh);
+
+    /* ── Rod placeholder (geometry rebuilt in updatePendulumLength) ── */
+    pendulumRodMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.5, 0.5, 1, 32),
+        new THREE.MeshBasicMaterial({ color: 0x4b5563 })
+    );
+    pendulumSwingGroup.add(pendulumRodMesh);
+
+    /* ── CSS2D length label ── */
+    const labelDiv = document.createElement('div');
+    labelDiv.className   = 'length-label';
+    labelDiv.textContent = `L: ${pendParams.len} cm`;
+    lengthLabel = new CSS2DObject(labelDiv);
+    lengthLabel.position.set(-10, PIVOT_Y_POS, 0);
+    pivotVisual.add(lengthLabel);
+
+    /* set initial geometry */
+    updatePendulumLength(pendParams.len);
+
+    /* ── wire up sliders ── */
+    setupPendulumUI();
+}
+
+/* ────────────────────────────────────────
+   updatePendulumLength
+   Rebuilds rod geometry and repositions bob
+──────────────────────────────────────── */
+
+function updatePendulumLength(newLen) {
+
+    const L_scaled  = newLen * SCALE_FACTOR;
+    const rodHeight = L_scaled * 2;
+
+    /* remove old rod */
+    pendulumSwingGroup.remove(pendulumRodMesh);
+    pendulumRodMesh.geometry.dispose();
+
+    const rodGeo = new THREE.CylinderGeometry(0.5, 0.5, rodHeight, 32);
+    const rodMat = new THREE.MeshBasicMaterial({ color: 0x4b5563 });
+    pendulumRodMesh = new THREE.Mesh(rodGeo, rodMat);
+    pendulumRodMesh.position.y = -rodHeight / 2;
+    pendulumSwingGroup.add(pendulumRodMesh);
+
+    /* reposition bob to bottom of rod */
+    pendulumBobMesh.position.y = -rodHeight;
+
+    pendParams.len = newLen;
+}
+
+/* ────────────────────────────────────────
+   Pendulum physics helpers
+──────────────────────────────────────── */
+
+function naturalFrequency() {
+    return Math.sqrt(pendParams.g / (pendParams.len * 0.01));
+}
+
+function getDampedAngle(t) {
+    const w0        = naturalFrequency();
+    const decay     = Math.exp(-pendParams.dampCoeff * t);
+    const oscillation = Math.cos(w0 * t);
+    return pendParams.amp * decay * oscillation;
+}
+
+/* ────────────────────────────────────────
+   Per-frame pendulum update
+──────────────────────────────────────── */
+
+function tickPendulum() {
+
+    const t     = performance.now() / 1000 - pendParams.startTime;
+    const theta = getDampedAngle(t);
+
+    pendulumSwingGroup.rotation.z = theta;
+
+    if (lengthLabel) {
+        lengthLabel.element.textContent = `L: ${pendParams.len} cm`;
+    }
+}
+
+/* ────────────────────────────────────────
+   setupPendulumUI
+──────────────────────────────────────── */
+
+function setupPendulumUI() {
+
+    const restart = () => { pendParams.startTime = performance.now() / 1000; };
+
+    /* length */
+    const lengthSlider = document.getElementById('lengthSlider');
+    const lengthVal    = document.getElementById('lengthVal');
+    lengthSlider.addEventListener('input', () => {
+        const v = parseFloat(lengthSlider.value);
+        lengthVal.textContent = v;
+        updatePendulumLength(v);
+        restart();
+    });
+
+    /* amplitude */
+    const ampSlider = document.getElementById('ampSlider');
+    const ampVal    = document.getElementById('ampVal');
+    ampSlider.addEventListener('input', () => {
+        pendParams.amp = parseFloat(ampSlider.value);
+        ampVal.textContent = pendParams.amp.toFixed(2);
+        restart();
+    });
+
+    /* damping */
+    const dampSlider = document.getElementById('dampSlider');
+    const dampVal    = document.getElementById('dampVal');
+    dampSlider.addEventListener('input', () => {
+        pendParams.dampCoeff = parseFloat(dampSlider.value);
+        dampVal.textContent  = pendParams.dampCoeff.toFixed(2);
+        restart();
+    });
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone-mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* pendulum physics — only tick when scene is visible */
+    if (introFinished) tickPendulum();
+
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);   // renders HTML CSS2D labels
+}
+
+</script>
+</body>
+</html>

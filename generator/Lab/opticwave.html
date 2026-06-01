@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Understanding Waves</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* container for CSS2DRenderer overlay */
+        #container {
+            position:fixed; top:0; left:0;
+            width:100%; height:100%;
+            pointer-events:none;
+            z-index:5;
+        }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left panel */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:270px;
+            background:rgba(15,15,20,.9);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.9;
+            pointer-events:all;
+        }
+        #sidemenu label { color:#aaa; font-size:11px; }
+        #sidemenu a     { color:#e07070; font-weight:600; }
+        #sidemenu input[type=range] {
+            width:100%; accent-color:#c0392b;
+            margin-bottom:2px; display:block;
+        }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12px;
+            padding:10px 18px;
+            line-height:1.75;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+            pointer-events:all;
+        }
+        #menu em { color:#7ab8f5; }
+    </style>
+</head>
+<body>
+
+<!-- intro overlay -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI shown after transition -->
+<div id="labUI">
+
+    <!-- CSS2D label overlay lives here -->
+    <div id="container"></div>
+
+    <div id="topmenu">Understanding Waves</div>
+
+    <div id="sidemenu">
+        <input type="range" id="amp" min="0.05" max="0.8" value="0.2" step="0.05">
+        <label for="amp">Amplitude = <a id="ampDisplay">0.2</a> mm</label>
+
+        <input type="range" id="wave" min="1" max="10" value="2" step="0.5">
+        <label for="wave">Wave Number = <a id="waveDisplay">2</a></label>
+
+        <input type="range" id="freq" min="0.1" max="8" value="1" step="0.01">
+        <label for="freq">Frequency = <a id="freqDisplay">1</a> s<sup>-1</sup></label>
+    </div>
+
+    <div id="menu">
+        Mathematical representation of sinusoidal waves<br>
+        <em>y (x,t)</em> = A cos ( <em>kx &minus; &omega;t</em> )<br>
+        where; wave number, <em>k</em> = 2&pi; / &lambda;<br>
+        and angular frequency, <em>&omega;</em> = 2&pi; <em>f</em><br>
+        and wave speed, <em>v</em> = &omega; / <em>k</em> — travelling in x-direction
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — shared
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── Ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── Optics ── */
+let opticsGroup    = new THREE.Group();
+let labelRenderer;                        // CSS2DRenderer
+let plane;                                // the wave mesh
+let requestAnim;                          // rAF id for wave animation
+const opticsClock  = new THREE.Clock();   // separate clock — not shared with Ferrari
+
+let selectedPos    = new THREE.Vector3(); // last click position on plane
+const mouse        = new THREE.Vector3();
+const raycaster    = new THREE.Raycaster();
+
+const waveParams   = { k: 2, f: 1, A: 0.2 };
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── camera — FOV 40 for Ferrari intro,
+          will not be recreated; optics just repositions it ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls (disabled during intro) ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    /* ── CSS2DRenderer — created now, appended after transition ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position      = 'absolute';
+    labelRenderer.domElement.style.top           = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    /* appended to #container once labUI is visible — see transition onComplete */
+
+    createLights();
+    createFerrariShowroom();
+    createOpticsScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  — unchanged
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — unchanged
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — unchanged
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — unchanged
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition destination matches optics camera: (0, 0, 30) ── */
+    const transition = moveCamera(0, 0, 30, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            /* swap groups */
+            ferrariGroup.visible = false;
+            opticsGroup.visible  = true;
+
+            /* optics background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            /* show lab UI */
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* attach CSS2DRenderer now that container is visible */
+            document.getElementById('container').appendChild(
+                labelRenderer.domElement
+            );
+
+            /* hand orbit controls to optics target */
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            /* match optics camera FOV */
+            camera.fov  = 50;
+            camera.near = 0.1;
+            camera.far  = 1500;
+            camera.updateProjectionMatrix();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* start wave from scene centre immediately */
+            drawWave(selectedPos, waveParams);
+
+            /* lazy-load lil-gui for the optics controls */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => { setupOpticsGui(GUI); });
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   OPTICS SCENE
+════════════════════════════════════════ */
+
+function createOpticsScene() {
+
+    opticsGroup.visible = false;
+    scene.add(opticsGroup);
+
+    /* extra hemisphere light matching the original optics file */
+    const hemi = new THREE.HemisphereLight(0xddeeff, 0x202020, 2);
+    hemi.position.set(0, 20, 0);
+    scene.add(hemi);
+
+    /* wave plane — PlaneGeometry replaces deprecated PlaneBufferGeometry */
+    const planeGeo = new THREE.PlaneGeometry(20, 20, 100, 100);
+    const planeMat = new THREE.MeshPhongMaterial({ color: 0xEF3523 });
+
+    plane = new THREE.Mesh(planeGeo, planeMat);
+    /* mark positions as dynamic for frequent updates */
+    plane.geometry.attributes.position.usage = THREE.DynamicDrawUsage;
+
+    opticsGroup.add(plane);
+
+    /* input wiring */
+    setupOpticsUI();
+}
+
+/* ------------------------------------------------ */
+/* checkMousePos                                     */
+/* ------------------------------------------------ */
+
+function checkMousePos(event) {
+
+    mouse.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    cancelAnimationFrame(requestAnim);
+
+    if (intersects.length > 0) {
+        selectedPos.copy(intersects[0].point);
+        drawWave(selectedPos, waveParams);
+    } else {
+        drawWave(selectedPos, waveParams);
+    }
+}
+
+/* ------------------------------------------------ */
+/* drawWave                                          */
+/* ------------------------------------------------ */
+
+function drawWave(origin, params) {
+
+    const center = new THREE.Vector3(origin.x, origin.y, origin.z);
+    const k      = params.k;
+    const A      = params.A;
+    const f      = params.f;
+
+    function anim() {
+
+        requestAnim = requestAnimationFrame(anim);
+
+        const positions = plane.geometry.attributes.position;
+        const vLength   = positions.count;
+        const t         = opticsClock.getElapsedTime();
+
+        for (let i = 0; i < vLength; i++) {
+
+            const vx   = positions.getX(i);
+            const vy   = positions.getY(i);
+            const vz   = positions.getZ(i);
+            const dist = new THREE.Vector3(vx, vy, vz).sub(center).length();
+
+            positions.setZ(i, Math.sin(f * t - dist * k) * A);
+        }
+
+        plane.geometry.computeVertexNormals();
+        positions.needsUpdate = true;
+    }
+
+    anim();
+}
+
+/* ------------------------------------------------ */
+/* setupOpticsUI  — slider event wiring             */
+/* ------------------------------------------------ */
+
+function setupOpticsUI() {
+
+    const inputFreq   = document.getElementById('freq');
+    const inputWave   = document.getElementById('wave');
+    const inputAmp    = document.getElementById('amp');
+    const freqDisplay = document.getElementById('freqDisplay');
+    const waveDisplay = document.getElementById('waveDisplay');
+    const ampDisplay  = document.getElementById('ampDisplay');
+
+    inputFreq.addEventListener('input', () => {
+        waveParams.f = inputFreq.valueAsNumber;
+        freqDisplay.innerHTML = waveParams.f;
+    });
+
+    inputWave.addEventListener('input', () => {
+        waveParams.k = inputWave.valueAsNumber;
+        waveDisplay.innerHTML = waveParams.k;
+    });
+
+    inputAmp.addEventListener('input', () => {
+        waveParams.A = inputAmp.valueAsNumber;
+        ampDisplay.innerHTML = waveParams.A;
+    });
+
+    /* click on the wave plane to recentre the wave origin */
+    document.addEventListener('click', (e) => {
+        if (introFinished) checkMousePos(e);
+    });
+}
+
+/* ------------------------------------------------ */
+/* setupOpticsGui  — lazy-loaded lil-gui            */
+/* ------------------------------------------------ */
+
+function setupOpticsGui(GUI) {
+
+    const gui = new GUI();
+    gui.title('Wave Controls');
+
+    gui.add(waveParams, 'k', 1, 10, 0.5)
+       .name('Wave Number')
+       .onChange(v => {
+           document.getElementById('waveDisplay').innerHTML = v;
+       });
+
+    gui.add(waveParams, 'f', 0.1, 8, 0.01)
+       .name('Frequency')
+       .onChange(v => {
+           document.getElementById('freqDisplay').innerHTML = v;
+       });
+
+    gui.add(waveParams, 'A', 0.05, 0.8, 0.05)
+       .name('Amplitude')
+       .onChange(v => {
+           document.getElementById('ampDisplay').innerHTML = v;
+       });
+
+    /* camera / controls dev folder — matches original guiControls() */
+    const camFolder = gui.addFolder('Camera');
+    camFolder.add(camera.position, 'x', -100, 100);
+    camFolder.add(camera.position, 'y', -100, 100);
+    camFolder.add(camera.position, 'z', -100, 100);
+
+    const ctrlFolder = gui.addFolder('Target');
+    ctrlFolder.add(controls.target, 'x', -100, 100);
+    ctrlFolder.add(controls.target, 'y', -100, 100);
+    ctrlFolder.add(controls.target, 'z', -100, 100);
+
+    gui.close(); /* collapsed by default */
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — unchanged + labelRenderer
+════════════════════════════════════════ */
+
+function onResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+
+    /* CSS2D labels — only rendered once the lab is live */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>

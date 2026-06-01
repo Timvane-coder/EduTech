@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → The Bohr Atom</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(10,10,16,.95);
+            color:#e8e8e8; font-size:13px; letter-spacing:.18em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.07);
+        }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(10,10,16,.95);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.07);
+        }
+
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+            text-transform:uppercase; letter-spacing:.1em;
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+
+        #switch-el { background:rgb(164,26,26); }
+        #select-el { background:#1a4e8f; text-transform:uppercase; }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+    <div id="topmenu">Quantum Physics &mdash; The Bohr Atom</div>
+
+    <div id="menu">
+        <button id="switch-el">OFF</button>
+        <button id="select-el">sodium</button>
+        <div id="message-el">hydrogen</div>
+    </div>
+</div>
+<!-- ════════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ferrari */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* quantum */
+let quantumGroup = new THREE.Group();
+
+let qPointer  = new THREE.Vector2();
+let qObjects  = [];
+let qSelected;
+let qRaycaster = new THREE.Raycaster();
+
+let qLines    = new THREE.Group();
+let qSpectrum = new THREE.Group();
+let qCap, qTube, qGlow, qScreen;
+let qParams   = {};
+
+let qClearMaterial, qSilverMaterial, qRedMaterial, qMaterial;
+let qHdrEquirect;
+let qLabReady  = false;   // true once HDR + scene built
+
+const labelGeometry = new THREE.PlaneGeometry(2.5, 2.5);
+
+const hydrogen = {
+    total: 4,
+    col0: 'rgb(255, 0, 0)',   line0: 2,
+    col1: 'rgb(15, 194, 75)', line1: 3.5,
+    col2: 'rgb(0, 0, 255)',   line2: 4.5,
+    col3: 'rgb(127, 0, 255)', line3: 5
+};
+const sodium = {
+    total: 2,
+    col0: 'rgb(255, 255, 0)',   line0: 2.5,
+    col1: 'rgb(255, 170, 51)', line1: 2.8
+};
+
+/* DOM refs – populated after transition */
+let switchEl, selectEl, messageEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+
+    /* Quantum scene is built lazily inside the HDR callback
+       so we just add the group now; content arrives async    */
+    quantumGroup.visible = false;
+    scene.add(quantumGroup);
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Quantum lab ── */
+    const transition = moveCamera(-45, 12, 100, 5, 2, -13, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible  = false;
+            quantumGroup.visible  = true;
+
+            /* Dark background suits the emission-spectrum scene */
+            scene.background = new THREE.Color(0x0a0a10);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera tuned to quantum scene */
+            camera.fov = 55;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(5, 2, -13);
+            controls.update();
+            controls.addEventListener('change', () => renderer.render(scene, camera));
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* Build quantum scene now, then wire UI */
+            createQuantumScene();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   QUANTUM SCENE
+   Entire build is gated on HDR load so
+   materials that need envMap are safe.
+════════════════════════════════════════ */
+
+function createQuantumScene() {
+
+    /* Load the lab-specific HDR env map */
+    const hdrLoader = new RGBELoader().setPath('./assets/textures/');
+    hdrLoader.load(
+        'royal_esplanade_1k.hdr',
+        function (hdrTexture) {
+
+            hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
+            qHdrEquirect       = hdrTexture;
+
+            buildQuantumMaterials();
+            buildQuantumObjects();
+            setupQuantumUI();
+            setupQuantumGUI();   /* lazy lil-gui */
+            qLabReady = true;
+        },
+        undefined,
+        function () {
+            /* HDR not found – build scene without it (materials degrade gracefully) */
+            buildQuantumMaterials();
+            buildQuantumObjects();
+            setupQuantumUI();
+            setupQuantumGUI();
+            qLabReady = true;
+        }
+    );
+}
+
+/* ────────────────────────────────────────
+   buildQuantumMaterials
+──────────────────────────────────────── */
+
+function buildQuantumMaterials() {
+
+    qClearMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        metalness: 1,
+        roughness: 0.5,
+        ior: 1.5,
+        envMap: qHdrEquirect || null,
+        thickness: 10,
+        envMapIntensity: 1,
+        transmission: 0.7,
+        specularIntensity: 1,
+        specularColor: 0xffffff,
+        opacity: 1,
+        side: THREE.DoubleSide,
+        transparent: true
+    });
+
+    qSilverMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xb87333,
+        metalness: 1,
+        roughness: 0,
+        side: THREE.DoubleSide
+    });
+
+    const streakTexture = new THREE.TextureLoader().load('./assets/gravity/sun.jpg');
+    qRedMaterial = new THREE.MeshPhongMaterial({
+        color: 0xf43124,
+        map: streakTexture,
+        side: THREE.DoubleSide
+    });
+
+    qMaterial = new THREE.MeshBasicMaterial({
+        color: 0x4D516D,
+        side: THREE.DoubleSide
+    });
+}
+
+/* ────────────────────────────────────────
+   buildQuantumObjects
+──────────────────────────────────────── */
+
+function buildQuantumObjects() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    /* Gas discharge tube (glow cylinder) */
+    qGlow = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.7, 0.7, 14, 32, 16).rotateZ(1.57),
+        qClearMaterial
+    );
+    qGlow.rotation.y = 1.57;
+    qGlow.position.set(-30, 0, 0);
+    qObjects.push(qGlow);
+
+    /* Spectrum screen */
+    qScreen = new THREE.Mesh(
+        new THREE.PlaneGeometry(50, 20).rotateY(1.57).rotateX(1.57),
+        qMaterial
+    );
+    qSpectrum.position.set(50, 0, 0);
+    qScreen.position.x = 50;
+
+    /* Grid */
+    const labGrid = new THREE.GridHelper(50, 10, 'rgb(238, 130, 238)', 0xeeeeee);
+    labGrid.translateY(-10);
+
+    /* Add everything to quantumGroup so it hides with the group */
+    quantumGroup.add(qGlow);
+    quantumGroup.add(qLines);
+    quantumGroup.add(qSpectrum);
+    quantumGroup.add(qScreen);
+    quantumGroup.add(labGrid);
+
+    /* Lines + spectrum start hidden until switch is ON */
+    qLines.visible    = false;
+    qSpectrum.visible = false;
+
+    /* Canvas-texture labels */
+    buildQuantumLabels();
+
+    /* Load GLTFs */
+    loadQuantumModels();
+
+    /* Raycaster click */
+    document.addEventListener('click', onQuantumClick);
+
+    /* Default element */
+    qParams = hydrogen;
+}
+
+/* ────────────────────────────────────────
+   buildQuantumLabels  (canvas-texture plane meshes)
+──────────────────────────────────────── */
+
+function buildQuantumLabels() {
+
+    const cyan = 'rgba(0, 255, 255, 1)';
+    const none = 'rgba(0, 0, 0, 0.1)';
+
+    makeQuantumText(-30, 1.5,  0, 68, 'FILAMENT', none, cyan);
+    makeQuantumText(  0,  15, 0, 68, 'PRISM',    none, cyan);
+    makeQuantumText( 45,  15, 0, 68, 'SCREEN',   none, cyan);
+}
+
+function makeLabelCanvas(size, name, bgCol, color) {
+    const borderSize = 2;
+    const ctx        = document.createElement('canvas').getContext('2d');
+    const font       = `${size}px bold sans-serif`;
+    ctx.font = font;
+    const doubleBorder = borderSize * 2;
+    const width  = ctx.measureText(name).width + doubleBorder;
+    const height = size + doubleBorder;
+    ctx.canvas.width  = width;
+    ctx.canvas.height = height;
+    ctx.font = font;
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = bgCol;
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = color;
+    ctx.fillText(name, borderSize, borderSize);
+    return ctx.canvas;
+}
+
+function makeQuantumText(x, y, z, size, name, bgCol, color) {
+    const canvas   = makeLabelCanvas(size, name, bgCol, color);
+    const material = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide, transparent: true
+    });
+    material.map = new THREE.CanvasTexture(canvas);
+
+    const root  = new THREE.Object3D();
+    root.position.set(x, y, z);
+
+    const label = new THREE.Mesh(labelGeometry, material);
+    const scale = 0.01;
+    label.scale.x = canvas.width  * scale;
+    label.scale.y = canvas.height * scale;
+
+    root.add(label);
+    quantumGroup.add(root);   /* part of quantumGroup so it hides cleanly */
+    return root;
+}
+
+/* ────────────────────────────────────────
+   loadQuantumModels
+──────────────────────────────────────── */
+
+function loadQuantumModels() {
+
+    const loader = new GLTFLoader().setPath('./model/');
+
+    /* Gas tube */
+    loader.load(
+        'gasTube.glb',
+        function (gltf) {
+            const model = gltf.scene;
+            model.position.set(-30, 0, 0);
+            model.scale.set(5, 5, 5);
+            model.rotation.y = 1.57;
+            qTube = model.getObjectByName('tube');
+            qCap  = model.getObjectByName('cap');
+            if (qTube) qTube.material = qClearMaterial;
+            if (qCap)  qCap.material  = qSilverMaterial;
+            qObjects.push(qTube || model);
+            quantumGroup.add(model);
+        },
+        undefined,
+        (e) => console.warn('gasTube.glb not found.', e)
+    );
+
+    /* Prism */
+    loader.load(
+        'prism.glb',
+        function (gltf) {
+            const model = gltf.scene;
+            model.scale.set(10, 10, 10);
+            const prism = model.getObjectByName('prism');
+            if (prism) prism.material = qClearMaterial;
+            quantumGroup.add(model);
+        },
+        undefined,
+        (e) => console.warn('prism.glb not found.', e)
+    );
+}
+
+/* ────────────────────────────────────────
+   setupQuantumUI  – wires the bottom-bar buttons
+──────────────────────────────────────── */
+
+function setupQuantumUI() {
+
+    switchEl  = document.getElementById('switch-el');
+    selectEl  = document.getElementById('select-el');
+    messageEl = document.getElementById('message-el');
+
+    switchEl.addEventListener('click', glowAction);
+    selectEl.addEventListener('click', changeAction);
+}
+
+/* ────────────────────────────────────────
+   setupQuantumGUI  – lazy-loads lil-gui
+──────────────────────────────────────── */
+
+function setupQuantumGUI() {
+
+    import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+        .then(({ GUI }) => {
+            const gui = new GUI({ width: 220, title: 'Bohr Atom' });
+            gui.close();
+
+            const camFolder = gui.addFolder('Camera');
+            camFolder.add(camera.position, 'x', -200, 200).listen();
+            camFolder.add(camera.position, 'y', -100, 100).listen();
+            camFolder.add(camera.position, 'z', -200, 200).listen();
+
+            const ctrlFolder = gui.addFolder('Target');
+            ctrlFolder.add(controls.target, 'x', -100, 100).listen();
+            ctrlFolder.add(controls.target, 'y', -100, 100).listen();
+            ctrlFolder.add(controls.target, 'z', -100, 100).listen();
+        })
+        .catch(() => { /* lil-gui unavailable – silent */ });
+}
+
+/* ────────────────────────────────────────
+   glowAction  – ON / OFF toggle
+──────────────────────────────────────── */
+
+function glowAction() {
+
+    if (switchEl.textContent === 'OFF') {
+        switchEl.textContent              = 'ON';
+        switchEl.style.backgroundColor    = 'green';
+        qGlow.material                    = qRedMaterial;
+        buildGasLines();
+        qLines.visible    = true;
+        qSpectrum.visible = true;
+    } else {
+        switchEl.textContent              = 'OFF';
+        switchEl.style.backgroundColor    = 'rgb(164,26,26)';
+        qGlow.material                    = qClearMaterial;
+        qLines.visible    = false;
+        qSpectrum.visible = false;
+    }
+}
+
+/* ────────────────────────────────────────
+   changeAction  – swap hydrogen ↔ sodium
+──────────────────────────────────────── */
+
+function changeAction() {
+
+    const previous = messageEl.textContent;
+    const next     = selectEl.textContent;
+
+    /* Clear existing spectral lines */
+    while (qLines.children.length)    qLines.children[0].parent.remove(qLines.children[0]);
+    while (qSpectrum.children.length) qSpectrum.children[0].parent.remove(qSpectrum.children[0]);
+
+    switchEl.textContent           = 'OFF';
+    switchEl.style.backgroundColor = 'rgb(164,26,26)';
+    qGlow.material                 = qClearMaterial;
+    qLines.visible    = false;
+    qSpectrum.visible = false;
+
+    messageEl.textContent = next;
+    selectEl.textContent  = previous;
+    qParams = (next === 'hydrogen') ? hydrogen : sodium;
+}
+
+/* ────────────────────────────────────────
+   buildGasLines  – constructs refracted rays + screen bands
+──────────────────────────────────────── */
+
+function buildGasLines() {
+
+    /* Incident beam from filament to prism */
+    qLines.add(
+        addQuantumLine(
+            new THREE.Vector3(-30, 0, 0),
+            new THREE.Vector3(-10, 0, 0),
+            'pink'
+        )
+    );
+
+    /* One dispersed ray per spectral line */
+    for (let i = 0; i < qParams.total; i++) {
+        const col  = new THREE.Color(qParams[`col${i}`]);
+        const disp = qParams[`line${i}`];
+
+        qLines.add(
+            addQuantumLine(
+                new THREE.Vector3(-10, 0, 0),
+                new THREE.Vector3(10 + disp, -disp, 0),
+                col
+            ),
+            addQuantumLine(
+                new THREE.Vector3(10 + disp, -disp, 0),
+                new THREE.Vector3(50, -disp * 3, 0),
+                col
+            )
+        );
+
+        /* Coloured band on the screen */
+        const band = qScreen.clone();
+        band.scale.set(1, 0.015, 1);
+        band.position.set(-0.1, -disp * 3, 0);
+        band.material = new THREE.MeshBasicMaterial({
+            color: col,
+            side: THREE.DoubleSide
+        });
+        qSpectrum.add(band);
+    }
+}
+
+/* ────────────────────────────────────────
+   addQuantumLine  – thin line between two points
+──────────────────────────────────────── */
+
+function addQuantumLine(v1, v2, color) {
+    const geo = new THREE.BufferGeometry().setFromPoints([v1, v2]);
+    const mat = new THREE.LineBasicMaterial({ color });
+    return new THREE.Line(geo, mat);
+}
+
+/* ────────────────────────────────────────
+   onQuantumClick  – clicking the tube toggles it
+──────────────────────────────────────── */
+
+function onQuantumClick(event) {
+    if (!introFinished) return;
+
+    qPointer.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+    qPointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    qRaycaster.setFromCamera(qPointer, camera);
+    const hits = qRaycaster.intersectObjects(qObjects, true);
+    if (hits.length > 0) glowAction();
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* Quantum scene has no mixer – renderer.render() is enough.
+       The orbit-controls 'change' listener handles demand renders;
+       we render every frame here to keep the intro smooth and
+       the quantum scene responsive during free orbit.          */
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

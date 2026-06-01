@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Motion in a Plane Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        .label {
+            color:#fff; font-size:12px;
+            font-family:'Segoe UI',sans-serif;
+            background:rgba(0,0,0,.45);
+            padding:2px 6px; border-radius:3px;
+            pointer-events:none; white-space:nowrap;
+        }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Side menu – data table ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:320px;
+            background:rgba(15,15,20,.90);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+        }
+        #sidemenu table {
+            width:100%; border-collapse:collapse;
+            font-size:12px; text-align:center;
+        }
+        #sidemenu th, #sidemenu td {
+            border:1px solid rgba(255,255,255,.12);
+            padding:5px 6px;
+        }
+        #sidemenu th {
+            background:rgba(255,255,255,.06);
+            color:#aaa; font-weight:600;
+            letter-spacing:.06em; text-transform:uppercase;
+            font-size:11px;
+        }
+        #sidemenu td:first-child { text-align:left; color:#aaa; }
+        #sidemenu a { color:#e07070; font-weight:600; }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #stop { background:rgb(164,26,26); }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Mechanics &mdash; Motion in a Plane</div>
+
+    <div id="sidemenu">
+        <table>
+            <colgroup>
+                <col style="width:34%;">
+                <col style="width:33%;">
+                <col style="width:33%;">
+            </colgroup>
+            <tbody>
+                <tr>
+                    <th></th><th>Body 1</th><th>Body 2</th>
+                </tr>
+                <tr>
+                    <td>Start Point</td>
+                    <td>( &minus;15, 0 )</td>
+                    <td>( &minus;10, 10 )</td>
+                </tr>
+                <tr>
+                    <td>Initial Position</td>
+                    <td>( <a id="initialpos">-15, 0</a> )</td>
+                    <td>( <a id="initialpos1">-10, 10</a> )</td>
+                </tr>
+                <tr>
+                    <td>Final Position</td>
+                    <td>( <a id="finalpos">_, _</a> )</td>
+                    <td>( <a id="finalpos1">_, _</a> )</td>
+                </tr>
+                <tr>
+                    <td>Time taken</td>
+                    <td><a id="time">_</a> s</td>
+                    <td><a id="time1">_</a> s</td>
+                </tr>
+                <tr>
+                    <td>Total Time, T</td>
+                    <td><a id="totalTime">_</a> s</td>
+                    <td><a id="totalTime1">_</a> s</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="menu">
+        <button id="stop">STOP</button>
+        <div id="message-el">
+            Representation of bodies moving in a plane at constant velocity
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js",
+        "lil-gui":       "https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+import GUI               from 'lil-gui';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* ferrari */
+let ferrariGroup = new THREE.Group();
+let ferrariCar, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* plane motion lab */
+let planeMotionGroup = new THREE.Group();
+
+/* bodies */
+let body, body1, body1Ref;
+
+/* curves */
+let bodyCurve, body1Curve;
+let bodyPoints, body1Points;
+
+/* CSS2D label arrays */
+const Label  = [];
+const Helper = [];
+
+/* label DOM elements */
+let bodyText, bodyLabel, bodyHelper;
+let body1Text, body1Label, body1Helper;
+let lineText,  lineLabel,  line;
+let line1Text, line1Label, line1;
+
+/* animation state */
+let axisVisible  = false;
+let labelVisible = false;
+let pmStopped    = false;
+
+/* parametric fractions */
+let t1 = 0, f = 0;
+
+/* Frenet frame temps – body */
+const N0_b = new THREE.Vector3(0, 1, 0);
+const N_b  = new THREE.Vector3(0, 1, 0);
+const B_b  = new THREE.Vector3();
+const M3_b = new THREE.Matrix3();
+const M4_b = new THREE.Matrix4();
+
+/* Frenet frame temps – body1 */
+const n0_1 = new THREE.Vector3(0, 1, 0);
+const n_1  = new THREE.Vector3(0, 1, 0);
+const b_1  = new THREE.Vector3();
+const M3_1 = new THREE.Matrix3();
+const M4_1 = new THREE.Matrix4();
+
+/* clock & time */
+const pmClock    = new THREE.Clock();
+let   initialTime = 0, finalTime = 0, tElapsed = 0;
+let   requestA, requestB;
+
+/* DOM refs (filled after transition) */
+let timeEl, totalEl, initialposEl, finalposEl;
+let time1El, total1El, initialpos1El, finalpos1El;
+let buttonStop, messageEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── Camera (FOV 40 matches plane motion scene) ── */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    createLights();
+    createFerrariShowroom();
+    createPlaneMotionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    const ambient = new THREE.HemisphereLight(0xddeeff, 0x202020, 1);
+    scene.add(ambient);
+
+    const main = new THREE.DirectionalLight(0xffffff, 4);
+    main.position.set(0, 60, 0);
+    scene.add(main);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            ferrariCar = gltf.scene.children[0];
+
+            ferrariCar.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                ferrariCar.getObjectByName('wheel_fl'),
+                ferrariCar.getObjectByName('wheel_fr'),
+                ferrariCar.getObjectByName('wheel_rl'),
+                ferrariCar.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(ferrariCar);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(ferrariCar.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Plane Motion lab ── */
+    const transition = moveCamera(0, 70, 0, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible     = false;
+            planeMotionGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera tuned to plane motion bird's-eye view */
+            camera.position.set(0, 70, 0);
+            camera.fov = 40;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* Start plane-motion animation loops */
+            pmClock.start();
+            initialTime = 0;
+            bodyMovement();
+            ani();
+
+            setupLabUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   PLANE MOTION SCENE
+════════════════════════════════════════ */
+
+function createPlaneMotionScene() {
+
+    planeMotionGroup.visible = false;
+    scene.add(planeMotionGroup);
+
+    /* ── Grid ── */
+    const gridPM = new THREE.GridHelper(50, 50);
+    planeMotionGroup.add(gridPM);
+
+    /* ── Axes helper ── */
+    const axesHelper = new THREE.AxesHelper(15);
+    planeMotionGroup.add(axesHelper);
+    Helper.push(axesHelper);
+
+    /* ── Ground plane ── */
+    const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(50, 50, 50),
+        new THREE.MeshPhongMaterial({
+            color: 0x88aa77,          // fallback colour; texture loaded below
+            side: THREE.DoubleSide
+        })
+    );
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.y = -0.1;
+    planeMotionGroup.add(plane);
+
+    /* attempt texture load – silently ignored if path unavailable */
+    new THREE.TextureLoader().load(
+        './assets/img/ground.jpg',
+        (tex) => { plane.material.map = tex; plane.material.needsUpdate = true; },
+        undefined, () => {}
+    );
+
+    /* ── Curves ── */
+    const catmull = makeCatmullCurve();
+    bodyCurve  = catmull.curve;
+    bodyPoints = catmull.points;
+
+    const some   = makeSomeCurve();
+    body1Curve  = some.curve;
+    body1Points = some.points;
+
+    /* Draw path lines in scene */
+    planeMotionGroup.add(catmull.line);
+    planeMotionGroup.add(some.line);
+
+    /* ── Body 1 (purple box) ── */
+    body = new THREE.Mesh(
+        new THREE.BoxGeometry(4, 1, 0.5).translate(0, 0.5, 0),
+        new THREE.MeshPhongMaterial({ color: 0xa020f0 })
+    );
+    planeMotionGroup.add(body);
+
+    bodyHelper = new THREE.AxesHelper(5);
+    body.add(bodyHelper);
+    Helper.push(bodyHelper);
+
+    bodyText = document.createElement('div');
+    bodyText.className   = 'label';
+    bodyText.innerHTML   = '(' + bodyPoints[0].x + ',' + bodyPoints[0].z + ')';
+    bodyLabel = new CSS2DObject(bodyText);
+    body.add(bodyLabel);
+    Label.push(bodyLabel);
+
+    /* ── Body 2 (loads motionPlane.glb) ── */
+    body1    = new THREE.Object3D();
+    body1Ref = new THREE.Object3D();
+    body1.add(body1Ref);
+    planeMotionGroup.add(body1);
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setPath('./model/');
+    gltfLoader.load(
+        'motionPlane.glb',
+        (gltf) => { body1.add(gltf.scene); },
+        undefined,
+        (e) => console.warn('motionPlane.glb not found – Body 2 uses invisible Object3D.', e)
+    );
+
+    body1Helper = new THREE.AxesHelper(5);
+    body1Ref.add(body1Helper);
+    Helper.push(body1Helper);
+
+    body1Text = document.createElement('div');
+    body1Text.className = 'label';
+    body1Text.innerHTML = '(' + body1Points[0].x + ',' + body1Points[0].z + ')';
+    body1Label = new CSS2DObject(body1Text);
+    body1Ref.add(body1Label);
+    Label.push(body1Label);
+
+    /* ── Position lines from origin ── */
+    const lineMat  = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const line1Mat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+    line  = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0,0,0), body.position
+    ]), lineMat);
+    line1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0,0,0), body1.position
+    ]), line1Mat);
+
+    planeMotionGroup.add(line);
+    planeMotionGroup.add(line1);
+
+    /* line labels */
+    lineText = document.createElement('div');
+    lineText.className = 'label';
+    lineText.innerHTML = new THREE.Vector3().distanceTo(body.position).toFixed(1) + ' units';
+    lineLabel = new CSS2DObject(lineText);
+    line.add(lineLabel);
+    Helper.push(line);
+    Label.push(lineLabel);
+
+    line1Text = document.createElement('div');
+    line1Text.className = 'label';
+    line1Text.innerHTML = new THREE.Vector3().distanceTo(body1.position).toFixed(1) + ' units';
+    line1Label = new CSS2DObject(line1Text);
+    line1.add(line1Label);
+    Helper.push(line1);
+    Label.push(line1Label);
+
+    /* Start hidden */
+    hideElements(Label);
+    hideElements(Helper);
+}
+
+/* ────────────────────────────────────────
+   Curve factories
+──────────────────────────────────────── */
+
+function makeCatmullCurve() {
+
+    const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-15, 0,   0),
+        new THREE.Vector3( -5, 0,  15),
+        new THREE.Vector3( 15, 0,  15),
+        new THREE.Vector3( 10, 0,   0),
+        new THREE.Vector3( -5, 0, -15)
+    ]);
+    curve.closed = true;
+
+    const points = curve.getPoints(50);
+    const line   = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({ color: 0xff0000 })
+    );
+    return { curve, points, line };
+}
+
+function makeSomeCurve() {
+
+    const somePoints = [
+        new THREE.Vector3(-10, 0, -10),
+        new THREE.Vector3(  0, 0,  -8),
+        new THREE.Vector3( 10, 0, -10),
+        new THREE.Vector3(0.8, 0,   0),
+        new THREE.Vector3( 10, 0,  10),
+        new THREE.Vector3(  0, 0,   8),
+        new THREE.Vector3(-10, 0,  10),
+        new THREE.Vector3( -8, 0,   0)
+    ];
+
+    const curve = new THREE.CatmullRomCurve3(somePoints);
+    curve.closed = true;
+
+    const points = curve.getPoints(80);
+    const line   = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({ color: 0xffffaa })
+    );
+    return { curve, points, line };
+}
+
+/* ────────────────────────────────────────
+   Element visibility helpers
+──────────────────────────────────────── */
+
+function hideElements(arr) { arr.forEach(el => { el.visible = false; }); }
+function showElements(arr) { arr.forEach(el => { el.visible = true;  }); }
+
+/* ────────────────────────────────────────
+   Label update helpers
+──────────────────────────────────────── */
+
+function adjustLabel(textEl, pos) {
+    textEl.innerHTML = '(' + pos.x.toFixed(2) + ',' + pos.z.toFixed(2) + ')';
+}
+
+function labelChange(lineObj, textEl, labelObj, ref) {
+    const pts = [new THREE.Vector3(0,0,0), ref.position];
+    lineObj.geometry.dispose();
+    lineObj.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+    textEl.innerHTML = new THREE.Vector3().distanceTo(ref.position).toFixed(2) + ' units';
+    labelObj.position.set(ref.position.x / 2, 0, ref.position.z / 2);
+}
+
+/* ────────────────────────────────────────
+   Body movement loops
+──────────────────────────────────────── */
+
+function bodyMovement() {
+
+    if (pmStopped) return;
+
+    tElapsed = pmClock.getElapsedTime();
+
+    if (t1 === 0 || t1 > 1) {
+        N_b.copy(N0_b);
+        t1 = 0;
+    }
+    t1 += 0.0004;
+
+    const X = bodyCurve.getTangent(t1);
+    B_b.crossVectors(X, N_b);
+    N_b.crossVectors(X, B_b.negate());
+
+    M3_b.set(
+        -X.x, N_b.x, B_b.x,
+        -X.y, N_b.y, B_b.y,
+        -X.z, N_b.z, B_b.z
+    );
+    M4_b.setFromMatrix3(M3_b);
+
+    const P = bodyCurve.getPoint(t1);
+    body.setRotationFromMatrix(M4_b);
+    body.position.set(P.x, P.y + 0.1, P.z);
+    adjustLabel(bodyText, body.position);
+
+    requestA = requestAnimationFrame(bodyMovement);
+}
+
+function ani() {
+
+    if (pmStopped) return;
+
+    tElapsed = pmClock.getElapsedTime();
+
+    if (f === 0 || f > 1) {
+        n_1.copy(n0_1);
+        f = 0;
+    }
+    f += 0.0006;
+
+    const tan = body1Curve.getTangent(f);
+    b_1.crossVectors(tan, n_1);
+    n_1.crossVectors(tan, b_1.negate());
+
+    M3_1.set(
+        -tan.x, n_1.x, b_1.x,
+        -tan.y, n_1.y, b_1.y,
+        -tan.z, n_1.z, b_1.z
+    );
+    M4_1.setFromMatrix3(M3_1);
+
+    const p = body1Curve.getPoint(f);
+    body1.setRotationFromMatrix(M4_1);
+    body1.position.set(p.x, p.y + 0.1, p.z);
+    adjustLabel(body1Text, body1.position);
+
+    requestB = requestAnimationFrame(ani);
+}
+
+/* ────────────────────────────────────────
+   Stop / Start actions
+──────────────────────────────────────── */
+
+function stopAction() {
+
+    cancelAnimationFrame(requestA);
+    cancelAnimationFrame(requestB);
+    pmStopped = true;
+    buttonStop.textContent = 'START';
+
+    finalTime = pmClock.getElapsedTime();
+
+    if (timeEl)      timeEl.innerHTML  = (finalTime - initialTime).toFixed(1);
+    if (totalEl)     totalEl.innerHTML = finalTime.toFixed(1);
+    if (finalposEl)  finalposEl.innerHTML  = body.position.x.toFixed(2)  + ', ' + body.position.z.toFixed(2);
+    if (time1El)     time1El.innerHTML  = (finalTime - initialTime).toFixed(1);
+    if (total1El)    total1El.innerHTML = finalTime.toFixed(1);
+    if (finalpos1El) finalpos1El.innerHTML = body1.position.x.toFixed(2) + ', ' + body1.position.z.toFixed(2);
+
+    body1Text.innerHTML = '(' + body1.position.x.toFixed(2) + ', ' + body1.position.z.toFixed(2) + ')';
+
+    labelChange(line,  lineText,  lineLabel,  body);
+    labelChange(line1, line1Text, line1Label, body1);
+
+    showElements(Label);
+    showElements(Helper);
+}
+
+function startAction() {
+
+    pmStopped = false;
+    buttonStop.textContent = 'STOP';
+
+    initialTime = finalTime;
+
+    if (initialposEl)  initialposEl.innerHTML  = finalposEl ? finalposEl.innerHTML  : '-15, 0';
+    if (initialpos1El) initialpos1El.innerHTML = finalpos1El ? finalpos1El.innerHTML : '-10, 10';
+
+    hideElements(Label);
+    hideElements(Helper);
+
+    bodyMovement();
+    ani();
+}
+
+/* ════════════════════════════════════════
+   LAB UI  (wired after transition completes)
+════════════════════════════════════════ */
+
+function setupLabUI() {
+
+    /* DOM refs */
+    buttonStop    = document.getElementById('stop');
+    messageEl     = document.getElementById('message-el');
+    timeEl        = document.getElementById('time');
+    totalEl       = document.getElementById('totalTime');
+    initialposEl  = document.getElementById('initialpos');
+    finalposEl    = document.getElementById('finalpos');
+    time1El       = document.getElementById('time1');
+    total1El      = document.getElementById('totalTime1');
+    initialpos1El = document.getElementById('initialpos1');
+    finalpos1El   = document.getElementById('finalpos1');
+
+    /* Seed initial position display */
+    if (initialposEl)  initialposEl.innerHTML  = '-15, 0';
+    if (initialpos1El) initialpos1El.innerHTML = '-10, 10';
+
+    /* STOP / START */
+    buttonStop.addEventListener('click', () => {
+        pmStopped = !pmStopped;
+        if (pmStopped) {
+            stopAction();
+        } else {
+            startAction();
+        }
+    });
+
+    /* lil-gui panel */
+    const guiState = {
+        'Body Reference':  false,
+        'Frame Reference': false
+    };
+
+    const gui = new GUI({ width: 250, title: 'View Controls' });
+
+    gui.add(guiState, 'Body Reference').onChange((val) => {
+        labelVisible = val;
+        val ? showElements(Label)  : hideElements(Label);
+    });
+
+    gui.add(guiState, 'Frame Reference').onChange((val) => {
+        axisVisible = val;
+        val ? showElements(Helper) : hideElements(Helper);
+    });
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (labelRenderer) labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+    if (labelRenderer) labelRenderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

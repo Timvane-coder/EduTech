@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Total Internal Reflection</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left panel */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:290px;
+            background:rgba(15,15,20,.9);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.9;
+        }
+        #sidemenu label {
+            color:#aaa; font-size:11px;
+            display:block; margin-top:10px;
+        }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#049EF4;
+            margin-top:3px; margin-bottom:2px;
+        }
+        #sidemenu input[type=data]{
+            border:2px solid #049EF4; border-radius:8px;
+            text-align:center; background:#1e1e28;
+            color:#d4d4d4; width:52px; font-size:12px;
+            padding:2px 4px;
+        }
+        #sidemenu select{
+            background:#1e1e28; color:#d4d4d4;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:4px; padding:3px 6px;
+            font-size:12px; margin-top:2px;
+        }
+        #sidemenu a     { color:#7ec8e3; font-weight:600; }
+        #sidemenu em    { font-style:italic; }
+        #sidemenu sup   { font-size:.72em; }
+        #sidemenu sub   { font-size:.72em; }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a   { color:#7ec8e3; font-weight:600; }
+        #menu em  { font-style:italic; }
+        #menu sup { font-size:.72em; }
+        #menu sub { font-size:.72em; }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+            background:#1a4e8f;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+
+        /* CSS2D labels from the reflection scene */
+        .label {
+            font-weight:bold; font-size:13px;
+            color:#111; pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- intro overlay -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI shown after transition -->
+<div id="labUI">
+
+    <div id="topmenu">Total Internal Reflection</div>
+
+    <div id="sidemenu">
+
+        <label for="incident">Angle of Incidence, <em>i</em> =</label>
+        <input type="range" id="incident" min="0" max="90" value="45" step=".01"><br>
+        <input type="data"  id="incidentDisplay" size="3"> <sup>o</sup>
+
+        <label for="material">Refractive Index of</label>
+        <select id="material">
+            <option value="Ice">Ice</option>
+            <option value="Water">Water</option>
+            <option value="Alcohol">Alcohol</option>
+            <option value="Kerosene">Kerosene</option>
+            <option value="Quartz">Quartz</option>
+            <option value="Oil">Oil</option>
+            <option value="Acrylic" selected>Acrylic</option>
+            <option value="Benzene">Benzene</option>
+            <option value="Glass">Glass</option>
+            <option value="Flint">Flint</option>
+            <option value="Ruby">Ruby</option>
+            <option value="Sapphire">Sapphire</option>
+            <option value="Diamond">Diamond</option>
+        </select>
+        <em>n<sub>d</sub></em> = <a id="materialIndex">1.49</a>
+
+        <label></label>
+        <span id="refract">Angle of Refraction, <em>r</em> = <a id="refractDisplay"></a> <sup>o</sup></span>
+
+    </div>
+
+    <div id="menu">
+        <button id="theorybutton">Laws of Refraction</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── scene groups ── */
+let ferrariGroup    = new THREE.Group();
+let reflectionGroup = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── reflection scene ── */
+let labelRenderer;
+
+let incidentRay, reflectedRay, refractedRay;
+let incidentArrow, reflectedArrow, refractedArrow;
+let iAngle, r1Angle, r2Angle;
+let normalRay;
+let rayLine, rayArrow, lightSource3D, line, slab;
+
+const thickness = 5;
+
+let irayLabel, r1rayLabel, r2rayLabel, normalLabel, medium2Label, originLabel;
+let iangleLabel, r1angleLabel, r2angleLabel;
+let itext, r1text, r2text, medium2text;
+
+let rGroup = new THREE.Group(); // holds all reflection objects
+
+const rParams = {
+    i       : 0.785,   // 45 deg default
+    r       : 0,
+    n       : 1.49,
+    ideg    : 45,
+    rdeg    : 0,
+    critical: 41.81
+};
+
+const materialIndex = {
+    Air     : [1.00, 'white'],
+    Ice     : [1.31, 'white'],
+    Water   : [1.33, 'aqua'],
+    Alcohol : [1.36, 'orange'],
+    Kerosene: [1.44, 'green'],
+    Quartz  : [1.46, 'brown'],
+    Oil     : [1.47, 'black'],
+    Acrylic : [1.49, 'yellow'],
+    Benzene : [1.50, 'blue'],
+    Glass   : [1.52, 'wheat'],
+    Flint   : [1.65, 'indigo'],
+    Ruby    : [1.71, 'violet'],
+    Sapphire: [1.77, 'purple'],
+    Diamond : [2.42, 'red']
+};
+
+/* DOM refs – filled in setupReflectionUI() */
+let incidentSlider, incidentDisplayEl, materialSelect,
+    materialIndexEl, refractEl, refractDisplayEl, theoryBtn;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D renderer for ray labels ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position    = 'absolute';
+    labelRenderer.domElement.style.top         = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera  (FOV 50 matches the reflection scene) ── */
+    camera = new THREE.PerspectiveCamera(
+        50,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls – disabled during intro ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled      = false;
+    controls.enablePan    = true;
+    controls.enableZoom   = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createReflectionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  — unchanged from original
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — unchanged
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — unchanged
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — unchanged
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* transition — lands at reflection scene camera position */
+    const transition = moveCamera(-15, 15, 18, -3, 3, 4, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible    = false;
+            reflectionGroup.visible = true;
+
+            /* clear HDR env so it doesn't tint the optics scene */
+            scene.environment = null;
+            scene.background  = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* hand controls to reflection scene target */
+            controls.enabled = true;
+            controls.target.set(-3, 3, 4);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* lazy-load lil-gui only now that the lab is visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => { setupReflectionGUI(GUI); });
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   REFLECTION SCENE
+════════════════════════════════════════ */
+
+function createReflectionScene() {
+
+    reflectionGroup.visible = false;
+    scene.add(reflectionGroup);
+
+    /* ground grid */
+    const scaleHorizontal = new THREE.GridHelper(70, 70);
+    reflectionGroup.add(scaleHorizontal);
+
+    /* extra lights for the optics scene */
+    const hemi = new THREE.HemisphereLight(0xddeeff, 0x202020, 0.3);
+    hemi.position.set(0, 20, 0);
+    reflectionGroup.add(hemi);
+
+    const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    mainLight.position.set(10, 10, 10);
+    reflectionGroup.add(mainLight);
+
+    const normal_vec = new THREE.Vector3(0, thickness / 2, 0);
+
+    /* ── compute initial refraction ── */
+    const X0 = Math.sin(rParams.i) * rParams.n;
+    const Y0 = Math.asin(X0);
+    rParams.r    = Y0;
+    rParams.rdeg = ((Y0 * 180) / Math.PI).toFixed(1);
+
+    /* ── incident ray ── */
+    incidentRay   = makeRay(15, 'orange').line;
+    incidentArrow = makeRay(15, 'orange').arrow;
+    incidentRay.position.copy(normal_vec);
+    incidentRay.rotation.set(1.57, 0, -rParams.i);
+    incidentRay.add(incidentArrow);
+    reflectionGroup.add(incidentRay);
+
+    iAngle = makeAngle(1.57, -rParams.i);
+    iAngle.position.copy(normal_vec);
+    reflectionGroup.add(iAngle);
+
+    itext = document.createElement('div');
+    itext.className = 'label';
+    itext.innerHTML = rParams.ideg + '&deg;';
+    iangleLabel = new CSS2DObject(itext);
+    iangleLabel.position.set(0.3, 1, 0);
+    iAngle.add(iangleLabel);
+
+    /* ── normal ray ── */
+    normalRay = makeRay(18, 'black').line;
+    normalRay.position.set(0, thickness / 2, -9);
+    normalRay.rotation.set(1.57, 0, 0);
+    reflectionGroup.add(normalRay);
+
+    /* ── refracted ray ── */
+    refractedRay   = makeRay(-10, 'orange').line;
+    refractedArrow = makeRay(-10, 'orange').arrow;
+    refractedRay.position.copy(normal_vec);
+    refractedRay.rotation.set(1.57, 0, -rParams.r);
+    refractedRay.add(refractedArrow);
+    reflectionGroup.add(refractedRay);
+
+    r1Angle = makeAngle(-1.57, -rParams.r);
+    r1Angle.position.copy(normal_vec);
+    reflectionGroup.add(r1Angle);
+
+    r1text = document.createElement('div');
+    r1text.className = 'label';
+    r1text.innerHTML = rParams.rdeg + '&deg;';
+    r1angleLabel = new CSS2DObject(r1text);
+    r1angleLabel.position.set(-0.3, -1.4, 0);
+    r1Angle.add(r1angleLabel);
+
+    /* ── reflected ray ── */
+    reflectedRay   = makeRay(-10, 'orange').line;
+    reflectedArrow = makeRay(-10, 'orange').arrow;
+    reflectedRay.position.copy(normal_vec);
+    reflectedRay.rotation.set(-1.57, 0, -rParams.i);
+    reflectedRay.add(reflectedArrow);
+    reflectionGroup.add(reflectedRay);
+
+    r2Angle = makeAngle(1.57, rParams.i);
+    r2Angle.position.copy(normal_vec);
+    reflectionGroup.add(r2Angle);
+
+    r2text = document.createElement('div');
+    r2text.className = 'label';
+    r2text.innerHTML = rParams.ideg + '&deg;';
+    r2angleLabel = new CSS2DObject(r2text);
+    r2angleLabel.position.set(-0.9, 1, 0);
+    r2Angle.add(r2angleLabel);
+
+    /* ── denser medium slab ── */
+    slab = new THREE.Mesh(
+        new THREE.CylinderGeometry(7, 7, thickness, 16, 1, false, 0, Math.PI)
+            .translate(0, thickness / 2, 0),
+        new THREE.MeshPhongMaterial({ color:'yellow', transparent:true, opacity:0.55 })
+    );
+    slab.rotation.set(0, -1.57, 0);
+
+    const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(14, thickness).translate(0, thickness / 2, 0),
+        new THREE.MeshPhongMaterial({ color:'yellow', transparent:true, opacity:0.35 })
+    );
+    plane.rotation.set(0, -1.57, 0);
+    slab.add(plane);
+    reflectionGroup.add(slab);
+
+    /* ── horizontal line across boundary ── */
+    line = makeRay(20, 'grey').line;
+    line.position.set(10, thickness / 2, 0);
+    line.rotation.set(0, 0, 1.57);
+    reflectionGroup.add(line);
+
+    /* ── light source model ── */
+    lightSource3D = makeLightSource();
+    lightSource3D.rotation.set(-1.57, 0, rParams.i);
+    reflectionGroup.add(lightSource3D);
+
+    /* ── medium label ── */
+    medium2text = document.createElement('div');
+    medium2text.className = 'label';
+    medium2text.innerHTML = 'Acrylic';
+    medium2Label = new CSS2DObject(medium2text);
+    medium2Label.position.set(3, 3, 0);
+    reflectionGroup.add(medium2Label);
+
+    /* ── all ray / diagram labels ── */
+    showRayLabels();
+
+    /* ── wire up HTML controls ── */
+    setupReflectionUI();
+}
+
+/* ── ray constructor ── */
+function makeRay(length, col) {
+
+    const geo  = new THREE.CylinderGeometry(0.05, 0.05, Math.abs(length))
+                     .translate(0, Math.abs(length) / 2, 0);
+    const line = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
+
+    const coneGeo = new THREE.ConeGeometry(0.3, 0.5, 6)
+                        .translate(0, -Math.abs(length) / 2, 0);
+    coneGeo.rotateX(Math.PI);
+    const arrow = new THREE.Mesh(coneGeo, new THREE.MeshBasicMaterial({ color:'red' }));
+
+    return { line, arrow };
+}
+
+/* ── angle arc constructor ── */
+function makeAngle(start, end) {
+
+    const geo = new THREE.RingGeometry(2.1, 2, 11, 1, start, end);
+    const mat = new THREE.MeshBasicMaterial({ color:0x000000, side:THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.set(1.57, 0, 0);
+    return mesh;
+}
+
+/* ── adjust angle arc + label ── */
+function adjustAngle(arc, start, end, textEl, value) {
+
+    arc.geometry.dispose();
+    arc.geometry = new THREE.RingGeometry(2.1, 2, 11, 1, start, end);
+    textEl.innerHTML = value + '&deg;';
+}
+
+/* ── adjust refracted ray length for varying incidence ── */
+function adjustRefractedRay() {
+
+    refractedRay.geometry.dispose();
+    const len = thickness / Math.cos(rParams.r);
+    refractedRay.geometry = new THREE.CylinderGeometry(0.05, 0.05, len)
+                                .translate(0, len / 2, 0);
+    refractedRay.rotation.set(1.57, 0, -rParams.r);
+}
+
+/* ── light source 3-D prop ── */
+function makeLightSource() {
+
+    const head = new THREE.Mesh(
+        new THREE.CylinderGeometry(1, 0.5, 1, 8).translate(0, -15.5, thickness / 2),
+        new THREE.MeshBasicMaterial({ color:'yellow' })
+    );
+    const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.5, 0.5, 5).translate(0, -18, thickness / 2),
+        new THREE.MeshPhongMaterial({ color:'grey' })
+    );
+    body.add(head);
+    return body;
+}
+
+/* ── CSS2D label helper ── */
+function makeLabel(name) {
+
+    const div = document.createElement('div');
+    div.className   = 'label';
+    div.innerHTML   = name;
+    return new CSS2DObject(div);
+}
+
+/* ── place all diagram labels ── */
+function showRayLabels() {
+
+    irayLabel = makeLabel('Incident Ray');
+    irayLabel.position.set(1.5, 7.5, 0);
+    incidentRay.add(irayLabel);
+
+    r1rayLabel = makeLabel('Refracted Ray');
+    r1rayLabel.position.set(0, -5, 0);
+    refractedRay.add(r1rayLabel);
+
+    r2rayLabel = makeLabel('Reflected Ray');
+    r2rayLabel.position.set(0, -5, 0);
+    reflectedRay.add(r2rayLabel);
+
+    normalLabel = makeLabel('Normal');
+    normalLabel.position.set(0, 0, 0);
+    normalRay.add(normalLabel);
+
+    originLabel = makeLabel('O');
+    originLabel.position.set(0, thickness / 2, 0);
+    reflectionGroup.add(originLabel);
+
+    const medium1Label = makeLabel('Air');
+    medium1Label.position.set(5, 5, -5);
+    reflectionGroup.add(medium1Label);
+}
+
+/* ── master display update after any parameter change ── */
+function displayRefract() {
+
+    incidentRay.rotation.set(1.57, 0, -rParams.i);
+    reflectedRay.rotation.set(-1.57, 0, -rParams.i);
+    refractedRay.rotation.set(1.57, 0, -rParams.r);
+    lightSource3D.rotation.set(-1.57, 0, rParams.i);
+
+    if (Number.isNaN(rParams.rdeg) || rParams.rdeg === 'NaN') {
+
+        /* TIR condition */
+        refractEl.innerHTML = 'Total Internal Reflection and critical angle, <em>i<sub>c</sub></em> = ';
+        refractDisplayEl.innerHTML = rParams.critical;
+
+        adjustAngle(iAngle,  1.57,  rParams.i,  itext,  rParams.ideg);
+        adjustAngle(r2Angle, 1.57, -rParams.i,  r2text, rParams.ideg);
+
+        refractedRay.visible  = false;
+        r1Angle.visible       = false;
+        r1angleLabel.visible  = false;
+
+    } else {
+
+        refractEl.innerHTML = 'Angle of Refraction, <em>r</em> =';
+        refractDisplayEl.innerHTML = rParams.rdeg;
+
+        adjustAngle(iAngle,  1.57,  rParams.i,  itext,  rParams.ideg);
+        adjustAngle(r1Angle, -1.57, -rParams.r,  r1text, rParams.rdeg);
+        adjustAngle(r2Angle, 1.57, -rParams.i,  r2text, rParams.ideg);
+
+        refractedRay.visible = true;
+        r1Angle.visible      = true;
+        r1angleLabel.visible = true;
+    }
+}
+
+/* ── HTML controls wiring ── */
+function setupReflectionUI() {
+
+    incidentSlider    = document.getElementById('incident');
+    incidentDisplayEl = document.getElementById('incidentDisplay');
+    materialSelect    = document.getElementById('material');
+    materialIndexEl   = document.getElementById('materialIndex');
+    refractEl         = document.getElementById('refract');
+    refractDisplayEl  = document.getElementById('refractDisplay');
+    theoryBtn         = document.getElementById('theorybutton');
+
+    /* initial values */
+    incidentDisplayEl.value    = rParams.ideg;
+    refractDisplayEl.innerHTML = rParams.rdeg;
+
+    theoryBtn.addEventListener('click', () => {
+        window.open('Optics_Refraction_of_Light.html', '_self');
+    });
+
+    /* angle slider */
+    incidentSlider.addEventListener('input', () => {
+
+        rParams.i    = (Math.PI / 180) * incidentSlider.value;
+        const X      = Math.sin(rParams.i) * rParams.n;
+        const Y      = Math.asin(X);
+        rParams.r    = Y;
+        rParams.ideg = Math.abs(incidentSlider.value);
+        rParams.rdeg = isNaN(Y) ? 'NaN' : Math.abs(((Y * 180) / Math.PI).toFixed(1));
+        incidentDisplayEl.value = incidentSlider.value;
+        displayRefract();
+    });
+
+    /* angle text input */
+    incidentDisplayEl.addEventListener('change', () => {
+
+        rParams.i    = (Math.PI / 180) * incidentDisplayEl.value;
+        const X      = Math.sin(rParams.i) * rParams.n;
+        const Y      = Math.asin(X);
+        rParams.r    = Y;
+        rParams.ideg = Math.abs(incidentDisplayEl.value);
+        rParams.rdeg = isNaN(Y) ? 'NaN' : Math.abs(((Y * 180) / Math.PI).toFixed(1));
+        incidentSlider.value = incidentDisplayEl.value;
+        displayRefract();
+    });
+
+    /* material select */
+    materialSelect.addEventListener('input', () => {
+
+        const key = materialSelect.value;
+        if (!materialIndex[key]) return;
+
+        materialIndexEl.innerHTML = materialIndex[key][0];
+        rParams.n = materialIndex[key][0];
+
+        const X      = Math.sin(rParams.i) * rParams.n;
+        const Y      = Math.asin(X);
+        rParams.r    = Y;
+        rParams.rdeg = isNaN(Y) ? 'NaN' : Math.abs(((Y * 180) / Math.PI).toFixed(1));
+        rParams.critical = (((Math.asin(Math.sin(1.57) / rParams.n)) * 180) / Math.PI).toFixed(2);
+
+        medium2text.innerHTML = key;
+        slab.material = new THREE.MeshPhongMaterial({
+            color      : materialIndex[key][1],
+            transparent: true,
+            opacity    : 0.35
+        });
+
+        displayRefract();
+    });
+}
+
+/* ── lil-gui panel (lazy-loaded after transition) ── */
+function setupReflectionGUI(GUI) {
+
+    const gui = new GUI({ title: 'Camera' });
+    gui.add(camera.position, 'x', -50, 50).name('cam X').listen();
+    gui.add(camera.position, 'y', -50, 50).name('cam Y').listen();
+    gui.add(camera.position, 'z', -50, 50).name('cam Z').listen();
+
+    const cf = gui.addFolder('Target');
+    cf.add(controls.target, 'x', -20, 20).name('x').listen();
+    cf.add(controls.target, 'y', -20, 20).name('y').listen();
+    cf.add(controls.target, 'z', -20, 20).name('z').listen();
+
+    gui.close();
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — unchanged
+════════════════════════════════════════ */
+
+function onResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* main render */
+    renderer.render(scene, camera);
+
+    /* CSS2D labels — only needed when reflection scene is live */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>
+

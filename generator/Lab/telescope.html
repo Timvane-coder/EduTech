@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Astronomical Telescope</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* description panel */
+        #detail {
+            position:fixed; top:48px; left:10px;
+            width:320px;
+            background:rgba(15,15,20,.88);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 16px; z-index:100;
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:6px;
+            line-height:1.75;
+            display:none;
+        }
+        #detail p { margin-bottom:6px; }
+
+        /* bottom button bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #menuButton     { background:#1a4e8f; }
+        #theorybutton   { background:#2a6e3f; }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── telescope UI (shown after transition) ── -->
+<div id="labUI">
+
+    <div id="topmenu">Astronomical Telescope</div>
+
+    <div id="detail">
+        <div id="message-el">
+            <p>A telescope makes use of two positive (convex) lenses:</p>
+            <p>Objective, which forms the image of a distant object at its focal length (f<sub>o</sub>), and</p>
+            <p>Eyepiece, which acts as a simple magnifier (f<sub>e</sub>), which is used to view the image formed by the objective.</p>
+            <p>Its length is equal to the sum of the focal lengths of the objective and eyepiece.</p>
+            <p>Angular magnification, M = &minus;f<sub>o</sub>/f<sub>e</sub>, giving an inverted image.</p>
+        </div>
+    </div>
+
+    <div id="menu">
+        <button id="menuButton">Show Description</button>
+        <button id="theorybutton">THEORY</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js",
+        "lil-gui":       "https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+import { GUI }           from 'lil-gui';
+
+/* ════════════════════════════════════════
+   GLOBALS — SHARED
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* groups */
+let ferrariGroup   = new THREE.Group();
+let telescopeGroup = new THREE.Group();
+
+/* ferrari */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ════════════════════════════════════════
+   GLOBALS — TELESCOPE
+════════════════════════════════════════ */
+
+let objectiveLens, eyepieceLens;
+let incidentRay1, incidentRay2, incidentRay3;
+let incidentArrow1, incidentArrow2, incidentArrow3;
+let reflectedRay1, reflectedRay2, reflectedRay3;
+let reflectedArrow1, reflectedArrow2, reflectedArrow3;
+let eyereflectedRay1, eyereflectedRay2, eyereflectedRay3;
+let imageRay1, imageRay2, imageRay3;
+let telescopeModel, eye, pivot, telescopeMesh, arrow, axis;
+let pole, imagePoint;
+let rayGroup  = new THREE.Group();
+let rayGroup1 = new THREE.Group();
+let rayDiagram = false;
+let labelFlag  = false;
+let labelObjects = [];
+let telescopeGUI = null;
+
+const newMaterial = [
+    new THREE.MeshBasicMaterial({ color: 'green'   }),
+    new THREE.MeshBasicMaterial({ color: 0x00FFdd  }),
+    new THREE.MeshBasicMaterial({ color: 0x0000ff  }),
+    new THREE.MeshBasicMaterial({ color: 'black'   })
+];
+
+const telescopeParams = {
+    zo: -12.5,
+    fo:  30,
+    ze:   7.8,
+    fe:  10,
+    u:  -5000,
+    v1:  40,
+    v2:  13,
+    d:   18.2
+};
+
+const localPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0.2);
+
+/* key optics points — defined after telescopeParams */
+const pointP1 = new THREE.Vector3(0, telescopeParams.d + 1,    telescopeParams.zo);
+const pointA  = new THREE.Vector3(0, telescopeParams.d,        telescopeParams.zo);
+const pointP2 = new THREE.Vector3(0, telescopeParams.d - 1,    telescopeParams.zo);
+const pointQ1 = new THREE.Vector3(0, telescopeParams.d + .2,   telescopeParams.ze);
+const pointB  = new THREE.Vector3(0, telescopeParams.d - 0.13, telescopeParams.ze);
+const pointQ2 = new THREE.Vector3(0, telescopeParams.d - 0.4,  telescopeParams.ze);
+const pointO  = new THREE.Vector3(0, telescopeParams.d - 3,    telescopeParams.v1);
+const pointX  = new THREE.Vector3(0, telescopeParams.d - 4,    -15);
+const pointY  = new THREE.Vector3(0, telescopeParams.d + 0.4,  telescopeParams.v2);
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    /* clipping — disabled until ray diagram is shown */
+    renderer.clippingPlanes        = Object.freeze([]);
+    renderer.localClippingEnabled  = false;
+    document.body.appendChild(renderer.domElement);
+
+    /* Ferrari camera start position */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createTelescopeScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  — unchanged
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — unchanged
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — unchanged
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — unchanged
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /*
+        Transition destination matches telescope scene camera:
+        position (-45, 5, -32), controls target (-5, 14, -4.5)
+    */
+    const transition = moveCamera(-45, 5, -32, -5, 14, -4.5, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible   = false;
+            telescopeGroup.visible = true;
+
+            /* match telescope scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* telescope scene camera FOV */
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+
+            /* hand orbit controls to telescope target */
+            controls.enabled = true;
+            controls.target.set(-5, 14, -4.5);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* wire telescope UI buttons now that panel is visible */
+            setupTelescopeUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   TELESCOPE SCENE
+════════════════════════════════════════ */
+
+function createTelescopeScene() {
+
+    telescopeGroup.visible = false;
+    scene.add(telescopeGroup);
+
+    /* ground grid — same 70×70 as original */
+    const scaleHorizontal = new THREE.GridHelper(70, 70);
+    telescopeGroup.add(scaleHorizontal);
+
+    /* extra hemisphere light used in original telescope scene */
+    const hemi = new THREE.HemisphereLight(0xddeeff, 0x202020, 4);
+    hemi.position.set(0, 20, 0);
+    scene.add(hemi);
+
+    /* pole point */
+    pole = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 0x8888FF, size: 1 })
+    });
+    scene.add(pole);
+
+    /* imagePoint */
+    imagePoint = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 'black', size: 0.5 })
+    });
+    imagePoint.position.set(0, telescopeParams.d - 4, -100);
+    scene.add(imagePoint);
+
+    /* ray groups added to scene but invisible until rayAction */
+    scene.add(rayGroup);
+    scene.add(rayGroup1);
+
+    /* load GLTF, then build rays, labels, eye, GUI */
+    createTelescopeModel();
+}
+
+/* ------------------------------------------------ */
+/* initPoint                                         */
+/* ------------------------------------------------ */
+
+function initPoint(data) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(data.vertices, 3));
+    return new THREE.Points(geo, data.material);
+}
+
+/* ------------------------------------------------ */
+/* createTelescopeModel                              */
+/* ------------------------------------------------ */
+
+function createTelescopeModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'telescope.glb',
+        function (gltf) {
+            telescopeModel  = gltf.scene;
+            telescopeMesh   = telescopeModel.getObjectByName('telescope');
+            pivot           = telescopeModel.getObjectByName('pivot');
+            eyepieceLens    = telescopeModel.getObjectByName('eyepiece');
+            objectiveLens   = telescopeModel.getObjectByName('objectiveLens');
+
+            scene.add(telescopeModel);
+
+            if (telescopeMesh) {
+                telescopeMesh.material.clippingPlanes = [localPlane];
+                telescopeMesh.material.clipShadows    = true;
+            }
+
+            addLabel();
+            labelAction();
+            eyeShow();
+            createRays();
+            createImageRay();
+            buildTelescopeGUI();
+        },
+        undefined,
+        (e) => console.warn('telescope.glb not found – scene works without it.', e)
+    );
+}
+
+/* ------------------------------------------------ */
+/* addRays                                           */
+/* ------------------------------------------------ */
+
+function addRays(vector1, vector2) {
+    const points   = [vector1, vector2];
+    const mat      = new THREE.LineBasicMaterial({ color: 'red' });
+    const geo      = new THREE.BufferGeometry().setFromPoints(points);
+    return new THREE.Line(geo, mat);
+}
+
+/* ------------------------------------------------ */
+/* addArrows                                         */
+/* ------------------------------------------------ */
+
+function addArrows(vector) {
+    const geo    = new THREE.ConeGeometry(0.3, 0.5, 6);
+    geo.rotateX(Math.PI / 2);
+    const mesh   = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 'brown' }));
+    mesh.position.copy(vector);
+    return mesh;
+}
+
+/* ------------------------------------------------ */
+/* createRays                                        */
+/* ------------------------------------------------ */
+
+function createRays() {
+
+    imagePoint.position.set(0, telescopeParams.d - 4, -100);
+
+    incidentRay1 = addRays(
+        new THREE.Vector3(0, telescopeParams.d + 1, telescopeParams.zo),
+        new THREE.Vector3(0, telescopeParams.d + 1, telescopeParams.u)
+    );
+    incidentRay2 = addRays(
+        new THREE.Vector3(0, telescopeParams.d, telescopeParams.zo),
+        new THREE.Vector3(0, telescopeParams.d, telescopeParams.u)
+    );
+    incidentRay3 = addRays(
+        new THREE.Vector3(0, telescopeParams.d - 1, telescopeParams.zo),
+        new THREE.Vector3(0, telescopeParams.d - 1, telescopeParams.u)
+    );
+
+    incidentArrow1 = addArrows(new THREE.Vector3(0, telescopeParams.d + 1, telescopeParams.zo - 3));
+    incidentArrow2 = addArrows(new THREE.Vector3(0, telescopeParams.d,     telescopeParams.zo - 3));
+    incidentArrow3 = addArrows(new THREE.Vector3(0, telescopeParams.d - 1, telescopeParams.zo - 3));
+
+    rayGroup.add(
+        incidentRay1, incidentRay2, incidentRay3,
+        incidentArrow1, incidentArrow2, incidentArrow3
+    );
+
+    reflectedRay1  = addRays(pointP1, pointQ2);
+    reflectedArrow1 = addArrows(new THREE.Vector3(0, telescopeParams.d + 0.8, telescopeParams.zo + 3));
+    rayGroup.add(reflectedRay1);
+    reflectedRay1.add(reflectedArrow1);
+
+    reflectedRay2  = addRays(pointA, pointB);
+    reflectedArrow2 = addArrows(new THREE.Vector3(0, telescopeParams.d,     telescopeParams.zo + 2));
+    rayGroup.add(reflectedRay2);
+    reflectedRay2.add(reflectedArrow2);
+
+    reflectedRay3  = addRays(pointP2, pointQ1);
+    reflectedArrow3 = addArrows(new THREE.Vector3(0, telescopeParams.d - 0.8, telescopeParams.zo + 3));
+    rayGroup.add(reflectedRay3);
+    reflectedRay3.add(reflectedArrow3);
+
+    eyereflectedRay2 = addRays(pointB, pointY);
+    eyereflectedRay2.material = newMaterial[2];
+    rayGroup.add(eyereflectedRay2);
+
+    eyereflectedRay1 = eyereflectedRay2.clone();
+    eyereflectedRay1.position.y  = 0.3;
+    eyereflectedRay1.material    = newMaterial[2];
+    rayGroup.add(eyereflectedRay1);
+
+    eyereflectedRay3 = eyereflectedRay2.clone();
+    eyereflectedRay3.position.y  = -0.3;
+    eyereflectedRay3.material    = newMaterial[2];
+    rayGroup.add(eyereflectedRay3);
+
+    if (eye) {
+        eye.position.copy(pointY);
+        eye.position.x += -0.5;
+    }
+
+    /* rays hidden until rayAction toggles them */
+    rayGroup.visible  = false;
+    rayGroup1.visible = false;
+}
+
+/* ------------------------------------------------ */
+/* createImageRay                                    */
+/* ------------------------------------------------ */
+
+function createImageRay() {
+
+    const a   = addRays(pointB, imagePoint.position);
+    imageRay3 = a;
+    imageRay3.material = newMaterial[3];
+    rayGroup1.add(imageRay3);
+
+    imageRay1 = a.clone();
+    imageRay1.position.y = 0.3;
+    imageRay1.material   = newMaterial[3];
+    rayGroup1.add(imageRay1);
+
+    imageRay2 = a.clone();
+    imageRay2.position.y = -0.3;
+    imageRay2.material   = newMaterial[3];
+    rayGroup1.add(imageRay2);
+}
+
+/* ------------------------------------------------ */
+/* eyeShow                                           */
+/* ------------------------------------------------ */
+
+function eyeShow() {
+
+    const map1 = new THREE.TextureLoader().load('./assets/img/eyeIconR.png');
+    eye = new THREE.Mesh(
+        new THREE.PlaneGeometry(),
+        new THREE.MeshBasicMaterial({ map: map1, side: THREE.DoubleSide, transparent: true })
+    );
+    eye.scale.set(4, 4, 4);
+    eye.rotation.set(0, -1.57, 0);
+    eye.position.set(0, telescopeParams.d, telescopeParams.v2);
+    scene.add(eye);
+}
+
+/* ------------------------------------------------ */
+/* addLabel / makeTextSprite / roundRect             */
+/* ------------------------------------------------ */
+
+function addLabel() {
+
+    const objLabel = makeTextSprite('Objective', pointA);
+    scene.add(objLabel);
+    labelObjects.push(objLabel);
+
+    const imgLabel = makeTextSprite('image at Infinity', pointX);
+    scene.add(imgLabel);
+    labelObjects.push(imgLabel);
+
+    const f1Point = makeTextSprite(
+        'focal length, fo',
+        new THREE.Vector3(0, telescopeParams.d + 1, telescopeParams.zo + 15)
+    );
+    scene.add(f1Point);
+    labelObjects.push(f1Point);
+
+    const f2Point = makeTextSprite(
+        'Eyepiece',
+        new THREE.Vector3(0, telescopeParams.d - 3, telescopeParams.ze + 2)
+    );
+    scene.add(f2Point);
+    labelObjects.push(f2Point);
+}
+
+function makeTextSprite(message, position) {
+
+    const canvas  = document.createElement('canvas');
+    const ctx     = canvas.getContext('2d');
+    const font    = 22;
+    ctx.font      = 'Bold ' + font + 'px Arial';
+    const tw      = ctx.measureText(message).width;
+    const border  = 4;
+
+    ctx.fillStyle   = 'rgba(0,0,0,0.8)';
+    ctx.strokeStyle = 'rgba(0,0,0,1)';
+    ctx.lineWidth   = border;
+    roundRect(ctx, border / 2, border / 2, tw + border, font * 1.4 + border, 6);
+
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.fillText(message, border, font + border);
+
+    const tex  = new THREE.Texture(canvas);
+    tex.needsUpdate = true;
+
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+    sprite.scale.set(10, 5, 1);
+    sprite.position.copy(position);
+    return sprite;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+}
+
+/* ------------------------------------------------ */
+/* labelAction                                       */
+/* ------------------------------------------------ */
+
+function labelAction() {
+    for (let i = 0; i < labelObjects.length; i++) {
+        labelObjects[i].visible = labelFlag;
+    }
+    /* image label only visible when ray diagram is shown */
+    if (labelObjects[1]) {
+        labelObjects[1].visible = rayDiagram;
+    }
+}
+
+/* ------------------------------------------------ */
+/* rayAction                                         */
+/* ------------------------------------------------ */
+
+function rayAction() {
+
+    if (rayDiagram) {
+
+        rayGroup.visible  = true;
+        rayGroup1.visible = true;
+        renderer.localClippingEnabled = true;
+
+        /* zoom to ray-diagram view */
+        camera.fov = 45;
+        camera.updateProjectionMatrix();
+
+        controls.target.set(5, 20, -2);
+        controls.update();
+
+        new TWEEN.Tween(camera.position)
+            .to({ x: -25, z: -22 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+        labelAction();
+
+    } else {
+
+        rayGroup.visible  = false;
+        rayGroup1.visible = false;
+        renderer.localClippingEnabled = false;
+
+        camera.fov = 50;
+        camera.updateProjectionMatrix();
+
+        controls.target.set(-5, 14, -4.5);
+        controls.update();
+
+        labelAction();
+    }
+}
+
+/* ------------------------------------------------ */
+/* buildTelescopeGUI                                 */
+/* ------------------------------------------------ */
+
+function buildTelescopeGUI() {
+
+    /* destroy previous instance if rebuild is called */
+    if (telescopeGUI) { telescopeGUI.destroy(); telescopeGUI = null; }
+
+    /* only show GUI after intro is done */
+    if (!introFinished) {
+        /* defer — will be called again from setupTelescopeUI */
+        return;
+    }
+
+    telescopeGUI = new GUI({ width: 250 });
+
+    const animations = {
+        ray: function () {
+            rayDiagram = !rayDiagram;
+            rayAction();
+        },
+        labels: function () {
+            labelFlag = !labelFlag;
+            labelAction();
+        }
+    };
+
+    telescopeGUI.add(animations, 'ray').name('Show/Hide Ray Diagrams');
+    telescopeGUI.add(animations, 'labels').name('Show/Hide Labels');
+
+    const folderLocal = telescopeGUI.addFolder('Local Clipping');
+    const propsLocal  = {
+        get Enabled() { return renderer.localClippingEnabled; },
+        set Enabled(v) { renderer.localClippingEnabled = v; },
+        get Plane()   { return localPlane.constant; },
+        set Plane(v)  { localPlane.constant = v; }
+    };
+    folderLocal.add(propsLocal, 'Enabled');
+    folderLocal.add(propsLocal, 'Plane', -3, 3);
+}
+
+/* ------------------------------------------------ */
+/* setupTelescopeUI  — button wiring                 */
+/* ------------------------------------------------ */
+
+function setupTelescopeUI() {
+
+    document.getElementById('menuButton').addEventListener('click', () => {
+        const detail     = document.getElementById('detail');
+        const menuButton = document.getElementById('menuButton');
+        if (detail.style.display === 'block') {
+            detail.style.display  = 'none';
+            menuButton.innerText  = 'Show Description';
+        } else {
+            detail.style.display  = 'block';
+            menuButton.innerText  = 'Hide Description';
+        }
+    });
+
+    document.getElementById('theorybutton').addEventListener('click', () => {
+        window.open('../Theory/Optics/Optics_Astronomical_Telescope.html', '_self');
+    });
+
+    /* now that the scene is live, build the GUI */
+    buildTelescopeGUI();
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — unchanged
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

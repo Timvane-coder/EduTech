@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Diverging Mirror Lab</title>
+    <style>
+        /* ── reset ── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── CSS2D labels emitted by Three.js ── */
+        .label {
+            font-weight:bold;
+            font-size:12px;
+            color:#111;
+            pointer-events:none;
+        }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left panel */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:260px;
+            background:rgba(15,15,20,.90);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.9;
+        }
+        #sidemenu label { color:#aaa; font-size:11px; }
+        #sidemenu a     { color:#e07070; font-weight:600; }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#1a6ebd;
+            display:block; margin:3px 0 6px;
+        }
+
+        /* bottom info bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:11.5px;
+            padding:8px 16px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:6px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        /* fraction helper */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.1; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 2px; }
+        .fdn { padding:0 2px; }
+        .bar { display:none; }
+
+        /* formula toggle block */
+        #formula {
+            display:none;
+            flex:1 1 100%;
+            background:rgba(255,255,255,.04);
+            border-radius:4px; padding:6px 10px;
+            font-size:11px; line-height:1.8;
+            margin-bottom:4px;
+        }
+
+        /* readout table */
+        #display { flex:1 1 100%; font-size:11px; line-height:1.7; }
+        #display b[style*="red"] { color:#e07070 !important; }
+        #display table { border-collapse:collapse; }
+        #display td    { padding:0 6px 0 0; }
+
+        /* buttons */
+        #menu button {
+            padding:5px 13px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.05em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover   { filter:brightness(1.18); }
+        #menu button:disabled{ opacity:.4; cursor:default; }
+        #btn-infinity { background:#1a4e8f; }
+        #btn-formula  { background:#2a6e3f; }
+
+        /* CSS2D overlay sits above canvas */
+        #css2d-overlay {
+            position:fixed; top:0; left:0;
+            pointer-events:none; z-index:5;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI shown after transition ── -->
+<div id="labUI">
+
+    <div id="topmenu">Image Formation with Convex Mirror</div>
+
+    <div id="sidemenu">
+        <label for="focal">Focal Length = <a id="focalDisplay">7</a> cm</label>
+        <input type="range" id="focal" min="1" max="25" value="7" step="0.5">
+
+        <div id="items">
+            <label for="object">Object Distance = <a id="objectDisplay">-7</a> cm</label>
+            <input type="range" id="object" min="-50" max="-0.5" value="-7" step="0.5">
+
+            <label for="height">Object Height = <a id="heightDisplay">3</a> cm</label>
+            <input type="range" id="height" min="0.5" max="5" value="3" step="0.5">
+        </div>
+    </div>
+
+    <div id="menu">
+
+        <div id="formula">
+            <strong>Formula:</strong><br>
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">f</span></div>
+            =
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">v</span></div>
+            +
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">u</span></div>
+            &nbsp; or &nbsp; v =
+            <div class="fraction"><span class="fup">uf</span><span class="bar">/</span><span class="fdn">(u−f)</span></div>
+            <br>
+            <strong>Magnification:</strong> m = −
+            <div class="fraction"><span class="fup">v</span><span class="bar">/</span><span class="fdn">u</span></div>
+            =
+            <div class="fraction"><span class="fup">h<sub>i</sub></span><span class="bar">/</span><span class="fdn">h<sub>o</sub></span></div>
+        </div>
+
+        <div id="display">
+            <div>
+                <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="ff-el" class="fdn"></span></div>
+                =
+                <div style="color:#e07070;" class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="fv-el" class="fdn"></span></div>
+                +
+                <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="fu-el" class="fdn"></span></div>
+                &nbsp;&amp;&nbsp; m = −
+                <div class="fraction"><span style="color:#e07070;" id="mv-el" class="fup"></span><span class="bar">/</span><span id="mu-el" class="fdn"></span></div>
+                = <b id="mm-el"></b>
+            </div>
+            <table>
+                <tr>
+                    <td>Focal length (f) = <b id="f-el"></b> cm</td>
+                    <td>&nbsp;&nbsp;</td>
+                    <td>Magnification (m) = <b id="m-el"></b></td>
+                </tr>
+                <tr>
+                    <td>Object Distance (u) = <b id="u-el"></b> cm</td>
+                    <td>&nbsp;&nbsp;</td>
+                    <td>Object Height (h<sub>o</sub>) = <b id="ho-el"></b> cm</td>
+                </tr>
+                <tr>
+                    <td>Image Distance (v) = <b style="color:#e07070;" id="v-el"></b> cm</td>
+                    <td>&nbsp;&nbsp;</td>
+                    <td>Image Height (h<sub>i</sub>) = <b style="color:#e07070;" id="hi-el"></b> cm</td>
+                </tr>
+            </table>
+        </div>
+
+        <button id="btn-infinity">Object at Infinity</button>
+        <button id="btn-formula">FORMULA</button>
+
+    </div>
+
+</div><!-- /labUI -->
+
+<!-- CSS2D label container (appended by JS) -->
+<div id="css2d-overlay"></div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE          from 'three';
+import { OrbitControls }   from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }     from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }      from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer,
+         CSS2DObject }     from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN               from 'tween';
+
+/* ════════════════════════════════════════════
+   GLOBALS — shared
+════════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* groups */
+let ferrariGroup       = new THREE.Group();
+let divergingMirrorGroup = new THREE.Group();
+
+/* ferrari */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ════════════════════════════════════════════
+   GLOBALS — diverging mirror lab
+════════════════════════════════════════════ */
+
+let labelRenderer;   /* CSS2DRenderer */
+
+/* mirror ray objects */
+let mirror;
+let incidentRay1, incidentRay2, incidentRay3, incidentRay;
+let incidentArrow1, incidentArrow2;
+let reflectedRay, reflectedRay1, reflectedRay2, reflectedRay3;
+let reflectedArrow, reflectedArrow3;
+let rayLine, rayArrow, eye;
+
+/* scene objects */
+let mirrorObject, objectTip, mirrorImage, imageTip;
+let pole, pointP1, pointA, pointB, pointF, pointC,
+    pointD, pointP2, opticalAxis, pointX, pointP, pointY;
+
+/* label CSS2D nodes */
+let objLabel, virtualLabel, fPoint, fLabel,
+    cPoint, cLabel, opticalLabel, lensLabel, infinityLabel;
+
+/* state */
+let infinity = false;
+
+/* mirror params — same initial values as original */
+let mParams = {
+    f  : 7,
+    ho : 3,
+    u  : -7,
+    m  : 0,
+    v  : 0,
+    hi : 0,
+    c  : 14
+};
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'fixed';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.left         = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    labelRenderer.domElement.style.zIndex       = '5';
+    labelRenderer.domElement.style.display      = 'none'; /* hidden until lab visible */
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera — Ferrari FOV for intro; will be reassigned on transition ── */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls (disabled during intro) ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+    controls.enableDamping  = true;
+    controls.dampingFactor  = 0.05;
+    controls.rotateSpeed    = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createDivergingMirrorScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged except transition.onComplete)
+════════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    const transition = moveCamera(-60, 0, 40, 0, 2, 3, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            /* ── swap to mirror lab ── */
+            ferrariGroup.visible         = false;
+            divergingMirrorGroup.visible = true;
+            scene.environment            = null;   /* remove HDRI for lab */
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* match original mirror camera */
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+            camera.position.set(-60, 0, 0);
+            camera.lookAt(0, 2, 3);
+
+            controls.enabled = true;
+            controls.target.set(0, 2, 3);
+            controls.update();
+
+            /* show CSS2D labels */
+            labelRenderer.domElement.style.display = 'block';
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* lazy-load lil-gui only when lab is visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => { setupMirrorGUI(GUI); });
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════════
+   DIVERGING MIRROR SCENE
+════════════════════════════════════════════ */
+
+function createDivergingMirrorScene() {
+
+    divergingMirrorGroup.visible = false;
+    scene.add(divergingMirrorGroup);
+
+    /* ── run initial formula ── */
+    mirrorFormula();
+
+    /* ── mirror geometry ── */
+    mirror = new THREE.Mesh(
+        new THREE.SphereGeometry(35, 16, 8, 0, Math.PI * 2, 0, 0.15)
+            .translate(0, -35, 0),
+        new THREE.MeshStandardMaterial({
+            color      : 0x000000,
+            transparent: true,
+            opacity    : 0.6,
+            side       : THREE.DoubleSide
+        })
+    );
+    mirror.rotation.set(-Math.PI / 2, 0, 0);
+
+    const mirrorBack = mirror.clone();
+    mirrorBack.material = new THREE.MeshStandardMaterial({
+        color: 'orange',
+        side : THREE.FrontSide
+    });
+    mirrorBack.position.set(0, 0, -0.15);
+
+    divergingMirrorGroup.add(mirror, mirrorBack);
+
+    /* ── pre-compute key points ── */
+    pole    = new THREE.Vector3(0, 0, 0);
+    pointP1 = new THREE.Vector3(0, mParams.ho, 0);
+    pointA  = new THREE.Vector3(0, mParams.ho, mParams.u);
+    pointB  = new THREE.Vector3(0, mParams.hi, mParams.v);
+    pointF  = new THREE.Vector3(0, 0, mParams.f);
+    pointC  = new THREE.Vector3(0, 0, mParams.c);
+    pointP2 = new THREE.Vector3(0, (mParams.hi * mParams.c) / (mParams.c - mParams.v), 0);
+    pointP  = new THREE.Vector3(0, -mParams.ho, 0);
+    pointD  = new THREE.Vector3(0, -mParams.ho, mParams.u);
+    pointX  = new THREE.Vector3(
+        0,
+        (mParams.ho * (mParams.f + Math.abs(mParams.u))) / mParams.f,
+        mParams.u
+    );
+
+    /* ── object ── */
+    mirrorObject = addObject(mParams.ho).tube;
+    objectTip    = addObject(mParams.ho).cone;
+    mirrorObject.position.z = mParams.u;
+    mirrorObject.add(objectTip);
+
+    /* ── image ── */
+    mirrorImage = addObject(mParams.ho).tube;
+    imageTip    = addObject(mParams.ho).cone;
+    mirrorImage.position.z = mParams.v;
+    mirrorImage.scale.set(mParams.m, mParams.m, mParams.m);
+    mirrorImage.add(imageTip);
+
+    divergingMirrorGroup.add(mirrorObject, mirrorImage);
+
+    /* ── optical axis ── */
+    opticalAxis = addRays(80).rayLine;
+    opticalAxis.material = new THREE.MeshBasicMaterial({ color: 'black' });
+    opticalAxis.position.z = -40;
+    divergingMirrorGroup.add(opticalAxis);
+
+    /* ── scale grid ── */
+    const scaleGrid = new THREE.GridHelper(70, 70);
+    divergingMirrorGroup.add(scaleGrid);
+
+    /* ── ray diagram ── */
+    imageDisplay();
+
+    /* ── labels ── */
+    showLabels();
+
+    /* ── slider / button listeners ── */
+    setupMirrorUI();
+}
+
+/* ────────────────────────────────────────
+   addObject  — arrow representing object/image
+──────────────────────────────────────── */
+function addObject(height) {
+    const tube = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.1, 0.1, height).translate(0, height / 2, 0),
+        new THREE.MeshBasicMaterial({ color: 'black' })
+    );
+    const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.5, 1, 6).translate(0, height + 0.5, 0),
+        new THREE.MeshBasicMaterial({ color: 'brown' })
+    );
+    return { tube, cone };
+}
+
+/* ────────────────────────────────────────
+   addRays  — cylinder + cone arrow helper
+──────────────────────────────────────── */
+function addRays(length) {
+    const rayGeo = new THREE.CylinderGeometry(0.05, 0.05, length)
+        .translate(0, length / 2, 0);
+    rayGeo.rotateX(Math.PI / 2);
+    rayLine = new THREE.Mesh(rayGeo, new THREE.MeshBasicMaterial({ color: 'blue' }));
+
+    const coneGeo = new THREE.ConeGeometry(0.3, 0.5, 6)
+        .translate(0, length / 2, 0);
+    coneGeo.rotateX(Math.PI / 2);
+    rayArrow = new THREE.Mesh(coneGeo, new THREE.MeshBasicMaterial({ color: 'red' }));
+
+    return { rayLine, rayArrow };
+}
+
+/* ────────────────────────────────────────
+   adjustRays / adjustArrows / adjustTube / adjustTip
+──────────────────────────────────────── */
+function adjustRays(vector, length) {
+    vector.geometry.dispose();
+    const g = new THREE.CylinderGeometry(0.05, 0.05, length)
+        .translate(0, length / 2, 0);
+    g.rotateX(Math.PI / 2);
+    vector.geometry = g;
+}
+
+function adjustArrows(vector, pos) {
+    vector.geometry.dispose();
+    const g = new THREE.ConeGeometry(0.3, 0.5, 6)
+        .translate(0, pos / 2, 0);
+    g.rotateX(Math.PI / 2);
+    vector.geometry = g;
+}
+
+function adjustTube(vector, height) {
+    vector.geometry.dispose();
+    vector.geometry = new THREE.CylinderGeometry(0.1, 0.1, height)
+        .translate(0, height / 2, 0);
+}
+
+function adjustTip(vector, height) {
+    vector.geometry.dispose();
+    vector.geometry = new THREE.ConeGeometry(0.5, 1, 6)
+        .translate(0, height + 0.5, 0);
+}
+
+/* ────────────────────────────────────────
+   imageDisplay  — build full ray diagram
+──────────────────────────────────────── */
+function imageDisplay() {
+
+    /* incident rays from object tip */
+    incidentRay1   = addRays(pointA.distanceTo(pointP1)).rayLine;
+    incidentArrow1 = addRays(pointA.distanceTo(pointP1)).rayArrow;
+    incidentRay2   = addRays(pointA.distanceTo(pointP2)).rayLine;
+    incidentArrow2 = addRays(pointA.distanceTo(pointP2)).rayArrow;
+
+    incidentRay1.position.copy(pointP1);
+    incidentRay2.position.copy(pointP1);
+    incidentRay1.add(incidentArrow1);
+    incidentRay2.add(incidentArrow2);
+    mirrorObject.add(incidentRay1, incidentRay2);
+
+    /* actual reflected (diverging) rays */
+    reflectedRay  = addRays(pointP1.distanceTo(pointX)).rayLine;
+    reflectedArrow = addRays(pointP1.distanceTo(pointX)).rayArrow;
+    reflectedRay.position.copy(pointP1);
+    reflectedRay.add(reflectedArrow);
+    reflectedRay.lookAt(pointX);
+    divergingMirrorGroup.add(reflectedRay);
+
+    reflectedRay3  = addRays(pointP2.distanceTo(pointA)).rayLine;
+    reflectedArrow3 = addRays(pointP2.distanceTo(pointA)).rayArrow;
+    reflectedRay3.position.copy(pointP2);
+    reflectedRay3.add(reflectedArrow3);
+    reflectedRay3.lookAt(pointA);
+    divergingMirrorGroup.add(reflectedRay3);
+
+    /* extended (virtual) reflected rays — shown in grey */
+    reflectedRay1 = addRays(pointP1.distanceTo(pointF)).rayLine;
+    reflectedRay1.position.copy(pointP1);
+    reflectedRay1.material = new THREE.MeshBasicMaterial({ color: 'grey' });
+    reflectedRay1.lookAt(pointF);
+    divergingMirrorGroup.add(reflectedRay1);
+
+    reflectedRay2 = addRays(pointP2.distanceTo(pointC)).rayLine;
+    reflectedRay2.position.copy(pointP2);
+    reflectedRay2.material = new THREE.MeshBasicMaterial({ color: 'grey' });
+    reflectedRay2.lookAt(pointC);
+    divergingMirrorGroup.add(reflectedRay2);
+
+    incidentRay1.lookAt(pointP1);
+    incidentRay2.lookAt(pointP2);
+
+    /* eye sprite */
+    eyeShow();
+}
+
+/* ────────────────────────────────────────
+   mirrorFormula  — recalculate & update DOM
+──────────────────────────────────────── */
+function mirrorFormula() {
+
+    mParams.v  = (mParams.u * mParams.f) / (mParams.u - mParams.f);
+    mParams.m  = -(mParams.v / mParams.u);
+    mParams.hi = mParams.m * mParams.ho;
+
+    const fEl   = document.getElementById('f-el');
+    const uEl   = document.getElementById('u-el');
+    const vEl   = document.getElementById('v-el');
+    const mEl   = document.getElementById('m-el');
+    const hoEl  = document.getElementById('ho-el');
+    const hiEl  = document.getElementById('hi-el');
+    const ffEl  = document.getElementById('ff-el');
+    const fvEl  = document.getElementById('fv-el');
+    const fuEl  = document.getElementById('fu-el');
+    const mvEl  = document.getElementById('mv-el');
+    const muEl  = document.getElementById('mu-el');
+    const mmEl  = document.getElementById('mm-el');
+
+    if (!fEl) return; /* DOM not yet ready on first call from createDivergingMirrorScene */
+
+    fEl.innerHTML  = mParams.f;
+    uEl.innerHTML  = mParams.u;
+    vEl.innerHTML  = mParams.v.toFixed(2);
+    hoEl.innerHTML = mParams.ho;
+    hiEl.innerHTML = mParams.hi.toFixed(2);
+    mEl.innerHTML  = mParams.m.toFixed(2);
+
+    ffEl.innerHTML = mParams.f;
+    fuEl.innerHTML = mParams.u;
+    fvEl.innerHTML = mParams.v.toFixed(2);
+
+    mvEl.innerHTML = mParams.v.toFixed(2);
+    muEl.innerHTML = mParams.u;
+    mmEl.innerHTML = mParams.m.toFixed(2);
+}
+
+/* ────────────────────────────────────────
+   showLabels  — CSS2D labels
+──────────────────────────────────────── */
+function showLabels() {
+
+    objLabel      = addLabel('Object');
+    virtualLabel  = addLabel('Virtual Image');
+    infinityLabel = addLabel('Object at infinity');
+
+    objLabel.position.y = mParams.ho + 1;
+    objectTip.add(objLabel);
+
+    infinityLabel.position.y = mParams.hi + 1;
+    infinityLabel.position.z = -3;
+    infinityLabel.visible = false;
+    mirrorObject.add(infinityLabel);
+
+    virtualLabel.position.y = mParams.hi + 5;
+    imageTip.add(virtualLabel);
+
+    /* F point */
+    fLabel = addLabel('F');
+    fPoint = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        material: new THREE.PointsMaterial({ color: 0xFF8888, size: 0.8 }),
+        x: 0, y: 0, z: mParams.f
+    });
+    fLabel.position.z = mParams.f;
+    divergingMirrorGroup.add(fPoint, fLabel);
+
+    /* C point */
+    cLabel = addLabel('C');
+    cPoint = fPoint.clone();
+    cPoint.position.copy(pointC);
+    cLabel.position.copy(pointC);
+    divergingMirrorGroup.add(cPoint, cLabel);
+
+    /* optical axis label */
+    opticalLabel = addLabel('Optical Axis');
+    opticalLabel.position.z = 50;
+    opticalLabel.position.y = -1;
+    opticalAxis.add(opticalLabel);
+
+    /* mirror label */
+    lensLabel = addLabel('Convex Mirror');
+    lensLabel.position.y = -mParams.f + 2;
+    divergingMirrorGroup.add(lensLabel);
+}
+
+/* ────────────────────────────────────────
+   addLabel  — create CSS2DObject
+──────────────────────────────────────── */
+function addLabel(name) {
+    const div = document.createElement('div');
+    div.className   = 'label';
+    div.textContent = name;
+    return new CSS2DObject(div);
+}
+
+/* ────────────────────────────────────────
+   initPoint  — BufferGeometry point marker
+──────────────────────────────────────── */
+function initPoint(data) {
+    const geo  = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(data.vertices, 3));
+    const pt   = new THREE.Points(geo, data.material);
+    pt.position.set(data.x, data.y, data.z);
+    return pt;
+}
+
+/* ────────────────────────────────────────
+   eyeShow  — observer sprite
+──────────────────────────────────────── */
+function eyeShow() {
+    const map      = new THREE.TextureLoader().load('./assets/img/eyeIcon.png');
+    const material = new THREE.SpriteMaterial({ map, color: 0xffffff });
+    eye = new THREE.Sprite(material);
+    eye.scale.set(2.5, 2.5, 2.5);
+    eye.position.set(-2, 0, mParams.u - 2);
+    divergingMirrorGroup.add(eye);
+}
+
+/* ────────────────────────────────────────
+   adjustDisplay  — reposition all ray geometry
+──────────────────────────────────────── */
+function adjustDisplay() {
+
+    mirrorObject.position.z = mParams.u;
+    mirrorImage.position.z  = mParams.v;
+    mirrorImage.scale.set(mParams.m, mParams.m, mParams.m);
+
+    pointP1 = new THREE.Vector3(0, mParams.ho,  0);
+    pointA  = new THREE.Vector3(0, mParams.ho,  mParams.u);
+    pointB  = new THREE.Vector3(0, mParams.hi,  mParams.v);
+    pointF  = new THREE.Vector3(0, 0,            mParams.f);
+    pointC  = new THREE.Vector3(0, 0,            mParams.c);
+    pointP2 = new THREE.Vector3(
+        0,
+        (mParams.hi * mParams.c) / (mParams.c - mParams.v),
+        0
+    );
+    pointX = new THREE.Vector3(
+        0,
+        (mParams.ho * (mParams.f + Math.abs(mParams.u))) / mParams.f,
+        mParams.u
+    );
+
+    fPoint.position.copy(pointF);
+    fLabel.position.copy(pointF);
+    cPoint.position.copy(pointC);
+    cLabel.position.copy(pointC);
+
+    adjustRays  (incidentRay1,    pointA.distanceTo(pointP1));
+    adjustRays  (incidentRay2,    pointA.distanceTo(pointP2));
+    adjustArrows(incidentArrow1,  pointA.distanceTo(pointP1));
+    adjustArrows(incidentArrow2,  pointA.distanceTo(pointP2));
+
+    adjustRays  (reflectedRay,    pointP1.distanceTo(pointX));
+    adjustArrows(reflectedArrow,  pointP1.distanceTo(pointX));
+    adjustRays  (reflectedRay1,   pointP1.distanceTo(pointF));
+    adjustRays  (reflectedRay2,   pointP2.distanceTo(pointC));
+    adjustRays  (reflectedRay3,   pointP2.distanceTo(pointA));
+    adjustArrows(reflectedArrow3, pointP2.distanceTo(pointA));
+
+    incidentRay1.position.copy(pointP1);
+    incidentRay2.position.copy(pointP1);
+    reflectedRay.position.copy(pointP1);
+    reflectedRay1.position.copy(pointP1);
+    reflectedRay2.position.copy(pointP2);
+    reflectedRay3.position.copy(pointP2);
+
+    incidentRay1.lookAt(pointP1);
+    incidentRay2.lookAt(pointP2);
+    reflectedRay.lookAt(pointX);
+    reflectedRay1.lookAt(pointF);
+    reflectedRay2.lookAt(pointC);
+    reflectedRay3.lookAt(pointA);
+}
+
+/* ────────────────────────────────────────
+   changeElements  — full refresh after any input
+──────────────────────────────────────── */
+function changeElements() {
+    mirrorFormula();
+    adjustTube(mirrorObject, mParams.ho);
+    adjustTip (objectTip,    mParams.ho);
+    adjustTube(mirrorImage,  mParams.ho);
+    adjustTip (imageTip,     mParams.ho);
+    adjustDisplay();
+}
+
+/* ────────────────────────────────────────
+   infinityDisplay  — special case: object at ∞
+──────────────────────────────────────── */
+function infinityDisplay() {
+
+    const brownMat = new THREE.MeshBasicMaterial({ color: 'brown' });
+
+    incidentRay3 = incidentRay1.clone();
+    incidentRay  = incidentRay1.clone();
+    incidentRay.material  = brownMat;
+    incidentRay3.material = brownMat;
+
+    divergingMirrorGroup.add(incidentRay, incidentRay3);
+    incidentRay.position.copy(pointA);
+    incidentRay3.position.copy(pointD);
+    incidentRay.lookAt(pointP1);
+    incidentRay3.lookAt(pointP);
+
+    reflectedRay3 = reflectedRay.clone();
+    reflectedRay2 = reflectedRay1.clone();
+    divergingMirrorGroup.add(reflectedRay2, reflectedRay3);
+    reflectedRay3.position.y = -3;
+    reflectedRay2.position.y = -3;
+    reflectedRay2.lookAt(pointF);
+    reflectedRay3.lookAt(pointY);
+}
+
+/* ────────────────────────────────────────
+   setupMirrorUI  — slider + button listeners
+──────────────────────────────────────── */
+function setupMirrorUI() {
+
+    const focalEl       = document.getElementById('focal');
+    const focalDisplay  = document.getElementById('focalDisplay');
+    const objectEl      = document.getElementById('object');
+    const objectDisplay = document.getElementById('objectDisplay');
+    const heightEl      = document.getElementById('height');
+    const heightDisplay = document.getElementById('heightDisplay');
+    const itemsMenu     = document.getElementById('items');
+    const displayMenu   = document.getElementById('display');
+    const btnInfinity   = document.getElementById('btn-infinity');
+    const btnFormula    = document.getElementById('btn-formula');
+    const formulaDiv    = document.getElementById('formula');
+
+    /* focal length */
+    focalEl.addEventListener('input', () => {
+        mParams.f = focalEl.valueAsNumber;
+        mParams.c = 2 * mParams.f;
+        focalDisplay.innerText = mParams.f;
+
+        if (infinity) {
+            /* update points at infinity */
+            pointX = new THREE.Vector3(0, (mParams.ho * (mParams.f + Math.abs(mParams.u))) / mParams.f, mParams.u);
+            pointY = new THREE.Vector3(0, (-mParams.ho * (mParams.f + Math.abs(mParams.u))) / mParams.f, mParams.u);
+            pointF = new THREE.Vector3(0, 0, mParams.f);
+            pointC = new THREE.Vector3(0, 0, mParams.c);
+            fPoint.position.copy(pointF);
+            cPoint.position.copy(pointC);
+            fLabel.position.copy(pointF);
+            cLabel.position.copy(pointC);
+            adjustRays(reflectedRay1,  pointP1.distanceTo(pointF));
+            adjustRays(reflectedRay2,  pointP.distanceTo(pointF));
+            adjustRays(reflectedRay,   pointP1.distanceTo(pointX));
+            adjustRays(reflectedRay3,  pointP.distanceTo(pointY));
+            reflectedRay.lookAt(pointX);
+            reflectedRay1.lookAt(pointF);
+            reflectedRay2.lookAt(pointF);
+            reflectedRay3.lookAt(pointY);
+            mirrorFormula();
+        } else {
+            mParams.v = ((mParams.u * mParams.f) / (mParams.u - mParams.f));
+            mParams.m = (mParams.v / mParams.u);
+            changeElements();
+        }
+    });
+
+    /* object distance */
+    objectEl.addEventListener('input', () => {
+        mParams.u = objectEl.valueAsNumber;
+        objectDisplay.innerText = mParams.u;
+        mParams.v = ((mParams.u * mParams.f) / (mParams.u - mParams.f));
+        mParams.m = (mParams.v / mParams.u);
+        changeElements();
+    });
+
+    /* object height */
+    heightEl.addEventListener('input', () => {
+        mParams.ho = heightEl.valueAsNumber;
+        heightDisplay.innerText = mParams.ho;
+        mParams.m  = (mParams.v / mParams.u);
+        mParams.hi = mParams.m * mParams.ho;
+        changeElements();
+    });
+
+    /* object at infinity toggle */
+    btnInfinity.addEventListener('click', () => {
+        infinity = !infinity;
+
+        if (infinity) {
+            btnInfinity.innerHTML = 'Adjust Object Distance';
+            itemsMenu.style.display  = 'none';
+            displayMenu.style.display = 'none';
+
+            pointX = new THREE.Vector3(0, (mParams.ho * (mParams.f + Math.abs(mParams.u))) / mParams.f, mParams.u);
+            pointY = new THREE.Vector3(0, (-mParams.ho * (mParams.f + Math.abs(mParams.u))) / mParams.f, mParams.u);
+            pointP = new THREE.Vector3(0, -mParams.ho, 0);
+            pointD = new THREE.Vector3(0, -mParams.ho, mParams.u);
+            pointF = new THREE.Vector3(0, 0, mParams.f);
+            pointC = new THREE.Vector3(0, 0, mParams.c);
+
+            fPoint.position.copy(pointF);
+            cPoint.position.copy(pointC);
+            fLabel.position.copy(pointF);
+            cLabel.position.copy(pointC);
+
+            reflectedRay2.visible = false;
+            reflectedRay3.visible = false;
+            mirrorObject.visible  = false;
+            mirrorImage.visible   = false;
+
+            infinityDisplay();
+
+        } else {
+
+            if (incidentRay3) {
+                divergingMirrorGroup.remove(incidentRay3);
+                incidentRay3.geometry.dispose();
+            }
+            if (incidentRay) {
+                divergingMirrorGroup.remove(incidentRay);
+                incidentRay.geometry.dispose();
+            }
+
+            reflectedRay2.visible = true;
+            reflectedRay3.visible = true;
+            mirrorObject.visible  = true;
+            mirrorImage.visible   = true;
+
+            incidentRay1.material = new THREE.MeshBasicMaterial({ color: 'blue' });
+
+            btnInfinity.innerHTML    = 'Object at Infinity';
+            itemsMenu.style.display  = 'block';
+            displayMenu.style.display = 'block';
+
+            focalDisplay.innerText = mParams.f;
+            focalEl.value = mParams.f;
+
+            mirrorFormula();
+            changeElements();
+        }
+    });
+
+    /* formula toggle */
+    btnFormula.addEventListener('click', () => {
+        formulaDiv.style.display =
+            formulaDiv.style.display === 'block' ? 'none' : 'block';
+    });
+}
+
+/* ────────────────────────────────────────
+   setupMirrorGUI  — lil-gui (lazy-loaded)
+──────────────────────────────────────── */
+function setupMirrorGUI(GUI) {
+    const gui = new GUI({ title: 'Camera' });
+    gui.add(camera.position, 'x', -200, 200).name('cam x');
+    gui.add(camera.position, 'y', -100, 100).name('cam y');
+    gui.add(camera.position, 'z', -200, 200).name('cam z');
+    const cf = gui.addFolder('Target');
+    cf.add(controls.target, 'x', -50, 50);
+    cf.add(controls.target, 'y', -50, 50);
+    cf.add(controls.target, 'z', -50, 50);
+    gui.close(); /* collapsed by default */
+}
+
+/* ════════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro steering ── */
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+
+    /* CSS2D labels — only render when lab is active */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>

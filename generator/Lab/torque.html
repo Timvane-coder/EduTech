@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Torque</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.18em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* message panel */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:12px 18px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #message {
+            font-size:12px;
+            color:#aaa;
+            line-height:1.6;
+            max-width:820px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── torque UI shown after transition ── -->
+<div id="labUI">
+    <div id="topmenu">TORQUE</div>
+    <div id="menu">
+        <p id="message">Clockwise rotation of the Wrench results in the downward movement
+        of the nut (tightening) whereas an anti-clockwise rotation results in upward
+        movement of the nut (loosening)</p>
+    </div>
+</div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE           from 'three';
+import { OrbitControls }    from 'three/addons/controls/OrbitControls.js';
+import { TransformControls} from 'three/addons/controls/TransformControls.js';
+import { GLTFLoader }       from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }      from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }       from 'three/addons/loaders/RGBELoader.js';
+import TWEEN                from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — SHARED
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── torque ── */
+let torqueGroup = new THREE.Group();
+
+let wrench    = new THREE.Object3D();
+let bolt      = new THREE.Object3D();
+let vectorF   = new THREE.Object3D();
+let vectorT   = new THREE.Object3D();
+let TORQUE    = new THREE.Group();
+let MAT;                              // platform material (transparent on drag)
+
+let transformControls;
+let initialForce = 0;
+let finalForce   = 0;
+
+const clock = new THREE.Clock();
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — FOV 35 to match Torque scene, wide near/far for Ferrari */
+    camera = new THREE.PerspectiveCamera(
+        35,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* orbit controls — disabled during intro */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled      = false;
+    controls.enableDamping = true;
+    controls.enablePan    = true;
+    controls.enableZoom   = true;
+
+    createLights();
+    createFerrariShowroom();
+    createTorqueScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — unchanged
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — unchanged
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — unchanged
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* transition lands on the Torque scene camera position */
+    const transition = moveCamera(15, 10, 15, 6, 2, 4.5, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            torqueGroup.visible  = true;
+
+            /* match Torque scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* hand orbit controls to Torque target */
+            controls.enabled = true;
+            controls.target.set(6, 2, 4.5);
+            controls.update();
+
+            /* enable transform controls now that intro is done */
+            if (transformControls) transformControls.enabled = true;
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   TORQUE SCENE
+════════════════════════════════════════ */
+
+function createTorqueScene() {
+
+    torqueGroup.visible = false;
+    scene.add(torqueGroup);
+
+    /* ground grid */
+    const hGrid = new THREE.GridHelper(150, 10);
+    torqueGroup.add(hGrid);
+
+    /* orange platform — same geometry and material as original */
+    MAT = new THREE.MeshPhongMaterial({
+        color      : 0xf9a222,
+        transparent: true,
+        opacity    : 0.6
+    });
+
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(), MAT);
+    platform.position.y = -0.5;
+    platform.scale.set(8, 1, 8);
+    platform.castShadow    = true;
+    platform.receiveShadow = true;
+    torqueGroup.add(platform);
+
+    /* extra lights matching original Torque scene */
+    const torqueDir = new THREE.DirectionalLight(0xffffff, 2);
+    torqueDir.position.set(3, 1, 0);
+    scene.add(torqueDir);
+
+    const torqueAmbi = new THREE.AmbientLight(0xffffff, 0.20);
+    scene.add(torqueAmbi);
+
+    /* TORQUE rotation group and scene objects */
+    scene.add(TORQUE);
+    scene.add(bolt);
+    scene.add(vectorF);
+    scene.add(vectorT);
+
+    initialForce = TORQUE.rotation.y;
+    finalForce   = TORQUE.rotation.y;
+
+    /* load wrench GLTF */
+    loadTorqueModel();
+
+    /* TransformControls — rotate Y only, disabled until intro ends */
+    transformControls = new TransformControls(camera, renderer.domElement);
+    transformControls.size    = 2.5;
+    transformControls.attach(TORQUE);
+    transformControls.setMode('rotate');
+    transformControls.showX   = false;
+    transformControls.showZ   = false;
+    transformControls.enabled = false;   // re-enabled in transition onComplete
+    scene.add(transformControls);
+
+    /* prevent orbit firing while dragging the transform gizmo */
+    transformControls.addEventListener('dragging-changed', function (event) {
+        controls.enabled = !event.value;
+
+        initialForce = finalForce;
+        finalForce   = TORQUE.rotation.y;
+
+        const delta = Number((initialForce - finalForce).toFixed(1));
+
+        if (delta > 0) {
+            /* clockwise — bolt moves down (tightening) */
+            MAT.transparent = true;
+            vectorF.rotation.set(3.14, 0,  3.14);
+            vectorT.rotation.set(0,    0, -3.14);
+        } else if (delta < 0) {
+            /* anti-clockwise — bolt moves up (loosening) */
+            MAT.transparent = true;
+            vectorF.rotation.set(0, 0, 0);
+            vectorT.rotation.set(0, 0, 0);
+        }
+    });
+
+    /* keep wrench locked to Y rotation only while dragging */
+    transformControls.addEventListener('change', function () {
+        wrench.rotation.x = 0;
+        wrench.rotation.z = 0;
+    });
+}
+
+/* ────────────────────────────────────────
+   loadTorqueModel
+──────────────────────────────────────── */
+
+function loadTorqueModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'wrench.glb',
+        function (gltf) {
+            const model = gltf.scene;
+            scene.add(model);
+
+            bolt    = model.getObjectByName('bolt');
+            wrench  = model.getObjectByName('wrench');
+            vectorF = model.getObjectByName('vectorF');
+            vectorT = model.getObjectByName('vectorT');
+
+            /* wrench rotates with the TORQUE group */
+            TORQUE.add(wrench);
+        },
+        undefined,
+        (e) => console.warn('wrench.glb not found – scene works without it.', e)
+    );
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — unchanged
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via tone-mapping exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

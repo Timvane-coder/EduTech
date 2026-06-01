@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Torricelli's Law</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── side panel ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:280px;
+            background:rgba(15,15,20,.92);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px 18px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.75;
+        }
+        #sidemenu .section-title {
+            font-size:10px; letter-spacing:.14em;
+            text-transform:uppercase; color:#888;
+            margin-bottom:6px; margin-top:4px;
+        }
+        #sidemenu .eq-block {
+            background:rgba(0,180,180,.13);
+            border:1px solid rgba(0,200,200,.22);
+            border-radius:5px;
+            padding:8px 10px;
+            font-size:12px; color:#b0ecec;
+            margin-bottom:10px;
+            line-height:1.9;
+        }
+        #sidemenu .eq-block a {
+            color:#5fe0e0; font-weight:700;
+        }
+
+        /* ── bottom control bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12px;
+            padding:8px 16px;
+            display:flex; align-items:flex-start;
+            flex-wrap:wrap; gap:6px 10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        /* slider rows */
+        .ctrl-row {
+            display:grid;
+            grid-template-columns:140px 36px 1fr 64px 28px;
+            align-items:center;
+            gap:4px 6px;
+            width:100%;
+        }
+        .ctrl-row label  { color:#aaa; font-size:11.5px; }
+        .ctrl-row .sym   { color:#7de; font-weight:700; font-size:12px; text-align:center; }
+        .ctrl-row input[type=range] { accent-color:#c0392b; width:100%; }
+        .ctrl-row input[type=text],
+        .ctrl-row input[type=number] {
+            width:58px; background:#1a1a24; color:#d4d4d4;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:3px; padding:2px 5px;
+            font-size:11.5px; text-align:right;
+        }
+        .ctrl-row .unit  { color:#888; font-size:11px; }
+
+        /* velocity row (read-only, formula display) */
+        .vel-row {
+            display:grid;
+            grid-template-columns:140px 36px 1fr 64px 28px;
+            align-items:center;
+            gap:4px 6px;
+            width:100%;
+        }
+        .vel-row label   { color:#aaa; font-size:11.5px; }
+        .vel-row .sym    { color:#7de; font-weight:700; font-size:12px; text-align:center; }
+        .vel-row .formula{ color:#9de; font-size:11px; }
+        .vel-row input   {
+            width:58px; background:#1a1a24; color:#5fe0e0;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:3px; padding:2px 5px;
+            font-size:11.5px; text-align:right; font-weight:700;
+        }
+        .vel-row .unit   { color:#888; font-size:11px; }
+
+        /* buttons */
+        .btn-row {
+            display:flex; gap:8px; flex-wrap:wrap;
+            width:100%; padding-top:2px;
+        }
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #btnLaw    { background:rgb(26,78,143); }
+        #btnReset  { background:rgb(164,26,26); }
+        #btnPress  { background:rgb(42,110,63); }
+
+        #message-el {
+            width:100%; font-size:11px; color:#999;
+            padding-top:2px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- intro label -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ════════════ LAB UI ════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Variation of Fluid Speed with Depth &mdash; Torricelli's Law</div>
+
+    <!-- side panel: pressure readout -->
+    <div id="sidemenu">
+        <div class="section-title">Pressure Formula</div>
+        <div class="eq-block">
+            P = h &rho; g + P<sub>0</sub><br>
+            P<sub>0</sub> = 1 atm &asymp; 1.01 &times; 10<sup>5</sup> Pa
+            <br><br>
+            P = <a id="unitAtm">1.00 atm</a><br>
+            P = <a id="unitPa">1.01</a> &times; 10<sup>5</sup> Pa
+        </div>
+        <div class="section-title">Torricelli's Law</div>
+        <div class="eq-block">
+            v = &Sqrt;<span style="text-decoration:overline">2g(H&minus;h)</span>
+        </div>
+    </div>
+
+    <!-- bottom control bar -->
+    <div id="menu">
+
+        <!-- Fluid Height -->
+        <div class="ctrl-row">
+            <label for="fluidH">Fluid Height,</label>
+            <span class="sym">H</span>
+            <input type="range" id="fluidH" min="5" max="100" value="40" step="5">
+            <input type="text"  id="fluidHEl" value="40" readonly>
+            <span class="unit">m</span>
+        </div>
+
+        <!-- Nozzle Position -->
+        <div class="ctrl-row">
+            <label for="nozzleH">Nozzle Position,</label>
+            <span class="sym">h</span>
+            <input type="range" id="nozzleH" min="2" max="45" value="20" step="2">
+            <input type="text"  id="nozzleHEl" value="20" readonly>
+            <span class="unit">m</span>
+        </div>
+
+        <!-- Tank Radius -->
+        <div class="ctrl-row">
+            <label for="tankR">Tank Radius,</label>
+            <span class="sym">R</span>
+            <input type="range" id="tankR" min="5" max="25" value="10" step="1">
+            <input type="text"  id="tankREl" value="10" readonly>
+            <span class="unit">m</span>
+        </div>
+
+        <!-- Nozzle Radius -->
+        <div class="ctrl-row">
+            <label for="nozzleR">Nozzle Radius,</label>
+            <span class="sym">r</span>
+            <input type="range" id="nozzleR" min="0.25" max="10" value="0.5" step="0.25">
+            <input type="text"  id="nozzleREl" value="0.5" readonly>
+            <span class="unit">m</span>
+        </div>
+
+        <!-- Fluid Speed (read-only) -->
+        <div class="vel-row">
+            <label>Fluid Speed,</label>
+            <span class="sym">v</span>
+            <span class="formula">&Sqrt;<span style="text-decoration:overline">2g(H&minus;h)</span> =</span>
+            <input type="text" id="fluidVEl" value="0" readonly>
+            <span class="unit">m/s</span>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-row">
+            <button id="btnLaw">TORRICELLI'S LAW</button>
+            <button id="btnReset">RESET</button>
+            <button id="btnPress">PRESSURE</button>
+        </div>
+
+        <div id="message-el">
+            Visualise underlying physics action. Drag the pressure gauge to measure pressure at any depth.
+        </div>
+    </div>
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — shared renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ────────────────────────────────────────
+   Ferrari globals  (identical to original)
+──────────────────────────────────────── */
+let ferrariGroup    = new THREE.Group();
+let torricellisGroup = new THREE.Group();      // replaces capacitorGroup / mechanicsGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Torricelli scene globals
+──────────────────────────────────────── */
+const g   = 9.8;
+const atm = 101325;
+
+let tParams = {
+    h       : 20,       // nozzle height from ground
+    H       : 40,       // fluid height from ground
+    R       : 10,       // tank radius
+    r       : 0.5,      // nozzle radius
+    V       : 0,        // computed exit speed
+    posH    : 30,       // pressure gauge initial y
+    Fdensity: 1000,
+    factor1 : 9.8692e-6,
+    factor2 : 1e-5
+};
+
+/* scene objects */
+let tFluid, tCylinder, tBase, tValve, tFlowMesh, tIndicator;
+let tPressureGauge, tPressureLabel, tPressureMaterial;
+let tHdisplayValue, tHdisplayMaterial;
+let tHDistValue,    tHDistMaterial;
+let tLabelGeometry;
+
+/* materials */
+let tFluidMaterial, tRedMaterial, tGreyMaterial;
+
+/* flow / animation */
+let tPathPoints = [];
+let tFlowSpline, tFlowPoints;
+let tGroup     = new THREE.Group();
+let tLineGroup = new THREE.Group();
+let tLabelGroup= new THREE.Group();
+let tClock     = new THREE.Clock();
+let tReqID;                        // requestAnimationFrame id for indicator
+
+/* transform controls (pressure gauge dragging) */
+let tTransformControls;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer ─────────────────────────── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — FOV 75 matches Torricelli scene ── */
+    camera = new THREE.PerspectiveCamera(
+        75, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* scene ─────────────────────────────── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* orbit controls — disabled during intro ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+    createTorricellisScene();   // builds the lab; kept invisible until transition
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    /* extra fill used by the fluid scene */
+    const fill = new THREE.DirectionalLight(0xffffff, 1);
+    fill.position.set(-30, 50, -30);
+    scene.add(fill);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into Torricelli scene ─────────────────────
+       Camera lands at Torricelli's init position: (11.5, 20, 60)
+       Controls target matches: (7, 18, 0)
+    ──────────────────────────────────────────────────────────── */
+    const transition = moveCamera(11.5, 20, 60, 7, 18, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible      = false;
+            torricellisGroup.visible  = true;   // show the fluid lab meshes
+
+            scene.background = new THREE.Color(0xbfd1e5);  // Torricelli sky blue
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls */
+            controls.enabled = true;
+            controls.target.set(7, 18, 0);
+            controls.update();
+
+            /* attach transform controls to pressure gauge now that OrbitControls is live */
+            if (tTransformControls && tPressureGauge) {
+                tTransformControls.attach(tPressureGauge);
+            }
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* lazy-load lil-gui only when lab becomes visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => setupTorricellisGUI(GUI))
+                .catch(() => {});
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI SCENE — BUILD
+════════════════════════════════════════ */
+
+function createTorricellisScene() {
+
+    torricellisGroup.visible = false;
+    scene.add(torricellisGroup);
+
+    /* ground grid */
+    const scaleHorizontal = new THREE.GridHelper(160, 160);
+    torricellisGroup.add(scaleHorizontal);
+
+    /* shared geometry placeholder for canvas labels */
+    tLabelGeometry = new THREE.PlaneGeometry(10, 10);
+
+    /* ── materials ─────────────────────── */
+    const waterTexLoader = new THREE.TextureLoader();
+    /* fallback plain aqua if texture 404s */
+    let waterTex = null;
+    waterTexLoader.load(
+        './assets/gravity/waterNormal.jpg',
+        (t) => {
+            t.wrapS = t.wrapT = THREE.RepeatWrapping;
+            if (tFluidMaterial) tFluidMaterial.map = t;
+        },
+        undefined,
+        () => {} // silent fail
+    );
+
+    tFluidMaterial = new THREE.MeshPhongMaterial({
+        color      : 0x00e5e5,
+        side       : THREE.BackSide,
+        transparent: true,
+        opacity    : 0.6
+    });
+
+    tRedMaterial = new THREE.MeshPhongMaterial({
+        color    : 0xff0000,
+        side     : THREE.DoubleSide,
+        shininess: 1,
+        specular : 0x222222
+    });
+
+    tGreyMaterial = new THREE.MeshPhongMaterial({
+        color    : 0x888888,
+        side     : THREE.DoubleSide,
+        shininess: 0,
+        specular : 0x222222
+    });
+
+    tPressureMaterial = new THREE.MeshBasicMaterial({
+        side       : THREE.DoubleSide,
+        transparent: true
+    });
+
+    tHdisplayMaterial = new THREE.MeshBasicMaterial({
+        side       : THREE.DoubleSide,
+        transparent: true
+    });
+
+    tHDistMaterial = new THREE.MeshBasicMaterial({
+        side       : THREE.DoubleSide,
+        transparent: true
+    });
+
+    /* ── pressure gauge ─────────────────── */
+    tPressureGauge = tCreatePipe(10, 0.5, 32, false, 1.57, 3.14, tGreyMaterial, 1.57, -6);
+    tPressureGauge.position.set(25, tParams.posH, 0);
+    scene.add(tPressureGauge);
+
+    const labelMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    tPressureGauge.add(tMakeText(0, 6, 0.5, 32, labelMat, 'Pressure Gauge', 'rgba(0,0,0,0.8)', 'white'));
+
+    tPressureLabel = tMakeText(0, 10, 0.5, 32, tPressureMaterial, '0.00 kPa', 'rgba(0,0,0,0)', 'black');
+    tPressureGauge.add(tPressureLabel);
+
+    /* ── build initial fluid geometry ───── */
+    tPathPoints = [];
+    tFlowPath();   // fills tPathPoints, returns exit speed
+
+    tBuildTank();  // cylinder + fluid + base
+    tBuildFlow();  // flow tube + indicator
+
+    /* ── distance labels ─────────────────── */
+    tHdisplayValue = tMakeText(0, 0, 0.5, 32, tHdisplayMaterial,
+        '   h = ' + tParams.h + ' m   ', 'rgba(0,1,0,0.8)', 'white');
+    tHDistValue    = tMakeText(0, 0, 0.5, 32, tHDistMaterial,
+        '   H = ' + tParams.H + ' m   ', 'rgba(0,0,0,0.3)', 'black');
+
+    torricellisGroup.add(tGroup);
+    torricellisGroup.add(tLineGroup);
+    torricellisGroup.add(tLabelGroup);
+
+    scene.add(tLabelGroup);  // labels rendered in world space
+
+    tLabelDisplay();
+
+    /* ── indicator (moving drop) ─────────── */
+    const indGeo = new THREE.BoxGeometry(1.5, tParams.r + 0.1, tParams.r + 0.1);
+    tIndicator   = new THREE.Mesh(indGeo, tRedMaterial);
+    scene.add(tIndicator);
+
+    /* ── transform controls (pressure gauge) */
+    tTransformControls = new TransformControls(camera, renderer.domElement);
+    tTransformControls.size = 0.5;
+    scene.add(tTransformControls);
+    /* attachment happens after intro (controls.enabled must be true first) */
+
+    tTransformControls.addEventListener('dragging-changed', (event) => {
+        if (controls) controls.enabled = !event.value;
+
+        const gp = tPressureGauge.position;
+        const p  = tParams;
+
+        if (gp.x > -2 * p.R && gp.x < 0 &&
+            gp.z > -p.R    && gp.z < p.R &&
+            gp.y >= 0) {
+            tPressureCal(Number(p.H - gp.y).toFixed(2));
+        } else if (gp.x > 0 && gp.x < 80 &&
+                   gp.z > -25 && gp.z < 25 &&
+                   gp.y < 0) {
+            tPressureCal((-gp.y).toFixed(2));
+        } else {
+            tPressureCal(0);
+        }
+    });
+
+    /* ── wire up HTML controls ───────────── */
+    setupTorricellisUI();
+
+    /* start indicator animation loop */
+    tIndicatorMovement();
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — GEOMETRY HELPERS
+════════════════════════════════════════ */
+
+function tCreatePipe(r, h, vertex, bOpen, angle1, angle2, mat, theta, A) {
+    const geo  = new THREE.CylinderGeometry(r, r, h, vertex, 1, bOpen, angle1, angle2)
+                     .translate(0, 0, A)
+                     .rotateX(theta);
+    return new THREE.Mesh(geo, mat);
+}
+
+function tCreateBox(x, y, z, mat, loc) {
+    const geo = new THREE.BoxGeometry(x, y, z).translate(0, y / 2, 0);
+    const box = new THREE.Mesh(geo, mat);
+    box.position.copy(loc);
+    return box;
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — FLUID PHYSICS
+════════════════════════════════════════ */
+
+function tFlowPath() {
+    tPathPoints = [];
+    const vel = Number(Math.pow(2 * (tParams.H - tParams.h) * g, 0.5).toFixed(2));
+    const a   = tParams.h < 15 ? tParams.h / 10 : tParams.h / 20;
+    for (let i = tParams.h; i >= -3; i -= a) {
+        const X = Number(Math.pow(2 * (tParams.h - i) / g, 0.5).toFixed(3));
+        const D = Number((X * vel).toFixed(3));
+        tPathPoints.push(new THREE.Vector3(D, i, 0));
+    }
+    document.getElementById('fluidVEl').value = vel;
+    return vel;
+}
+
+function tTorricelliLaw(h) {
+    const pts = [];
+    const vel = Number(Math.pow(2 * (tParams.H - h) * g, 0.5).toFixed(3));
+    const a   = h < 15 ? h / 10 : h / 20;
+    for (let i = h; i >= -3; i -= a) {
+        const X = Number(Math.pow(2 * (h - i) / g, 0.5).toFixed(3));
+        const D = Number((X * vel).toFixed(3));
+        pts.push(new THREE.Vector3(D, i, 0));
+    }
+    return pts;
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — SCENE BUILD / REBUILD
+════════════════════════════════════════ */
+
+function tBuildTank() {
+    /* cylinder wall */
+    tCylinder = tCreatePipe(tParams.R + 0.3, tParams.H + 5, 32, true, 0, 4.14, tRedMaterial, 0, 0);
+    tCylinder.position.set(-tParams.R - 0.15, (tParams.H + 5) / 2, 0);
+    tCylinder.rotation.y = 1.2;
+    tGroup.add(tCylinder);
+
+    /* fluid fill */
+    tFluid = tCreatePipe(tParams.R, tParams.H, 32, false, 0, Math.PI * 2, tFluidMaterial, 0, 0);
+    tFluid.position.set(-tParams.R, tParams.H / 2, 0);
+    tGroup.add(tFluid);
+
+    /* base */
+    tBase = tCreateBox(tParams.R * 2 + 0.5, 3, tParams.R * 2 + 0.5,
+                       tRedMaterial, new THREE.Vector3(-tParams.R - 0.5, -3.1, 0));
+    tGroup.add(tBase);
+
+    /* valve */
+    tValve = tCreatePipe(tParams.r + 0.1, 2, 16, true, 0, 6.28, tRedMaterial, 0, 0);
+    tValve.position.set(0.5, tParams.h - 0.1, 0);
+    tValve.rotation.set(0, 0, 1.57);
+    tGroup.add(tValve);
+}
+
+function tRebuildTank() {
+    tGroup.remove(tFluid, tCylinder, tBase);
+
+    tCylinder = tCreatePipe(tParams.R + 0.3, tParams.H + 5, 32, true, 0, 4.14, tRedMaterial, 0, 0);
+    tCylinder.position.set(-tParams.R - 0.15, (tParams.H + 5) / 2, 0);
+    tCylinder.rotation.y = 1.2;
+    tGroup.add(tCylinder);
+
+    tFluid = tCreatePipe(tParams.R, tParams.H, 32, false, 0, Math.PI * 2, tFluidMaterial, 0, 0);
+    tFluid.position.set(-tParams.R, tParams.H / 2, 0);
+    tGroup.add(tFluid);
+
+    tBase = tCreateBox(tParams.R * 2 + 0.5, 3, tParams.R * 2 + 0.5,
+                       tRedMaterial, new THREE.Vector3(-tParams.R - 0.5, -3.1, 0));
+    tGroup.add(tBase);
+}
+
+function tBuildFlow() {
+    if (tFlowMesh) tGroup.remove(tFlowMesh);
+    if (tValve)   tValve.position.set(0.5, tParams.h - 0.1, 0);
+
+    tPathPoints = [];
+    tFlowPath();
+
+    if (tPathPoints.length < 2) return;
+
+    tFlowSpline = new THREE.CatmullRomCurve3(tPathPoints);
+    const geo   = new THREE.TubeGeometry(tFlowSpline, 16, tParams.r, 8, false);
+    tFlowMesh   = new THREE.Mesh(geo, tFluidMaterial);
+    tGroup.add(tFlowMesh);
+
+    tFlowPoints = tFlowSpline.getPoints(50);
+}
+
+function tRebuildValveRadius() {
+    tGroup.remove(tValve);
+    tValve = tCreatePipe(tParams.r + 0.1, 2, 16, true, 0, 6.28, tRedMaterial, 0, 0);
+    tValve.position.set(0.5, tParams.h - 0.1, 0);
+    tValve.rotation.set(0, 0, 1.57);
+    tGroup.add(tValve);
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — LABELS
+════════════════════════════════════════ */
+
+function tMakeLabelCanvas(size, name, bgCol, color) {
+    const borderSize = 2;
+    const ctx  = document.createElement('canvas').getContext('2d');
+    const font = `${size}px bold sans-serif`;
+    ctx.font   = font;
+    const dbs  = borderSize * 2;
+    const w    = ctx.measureText(name).width + dbs;
+    const h    = size + dbs;
+    ctx.canvas.width  = w;
+    ctx.canvas.height = h;
+    ctx.font      = font;
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = bgCol;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = color;
+    ctx.fillText(name, borderSize, borderSize);
+    return ctx.canvas;
+}
+
+function tMakeText(x, y, z, size, mat, name, bgCol, color) {
+    const canvas  = tMakeLabelCanvas(size, name, bgCol, color);
+    mat.map       = new THREE.CanvasTexture(canvas);
+    const root    = new THREE.Object3D();
+    root.position.set(x, y, z);
+    const mesh    = new THREE.Mesh(tLabelGeometry, mat);
+    const base    = 0.01;
+    mesh.scale.x  = canvas.width  * base;
+    mesh.scale.y  = canvas.height * base;
+    root.add(mesh);
+    scene.add(root);
+    return root;
+}
+
+function tLabelDisplay() {
+    /* update canvas textures */
+    if (tHdisplayValue && tHdisplayMaterial) {
+        tHdisplayMaterial.map = new THREE.CanvasTexture(
+            tMakeLabelCanvas(32, '   h = ' + tParams.h + ' m   ', 'rgba(0,1,0,0.8)', 'white'));
+        tHdisplayValue.position.set(-tParams.R * 2 - 8, tParams.h / 2, 0);
+    }
+    if (tHDistValue && tHDistMaterial) {
+        tHDistMaterial.map = new THREE.CanvasTexture(
+            tMakeLabelCanvas(32, '   H = ' + tParams.H + ' m   ', 'rgba(0,0,0,0.3)', 'black'));
+        tHDistValue.position.set(-tParams.R * 2 - 10, tParams.H / 2, 0);
+    }
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — PRESSURE CALC
+════════════════════════════════════════ */
+
+function tPressureCal(pos) {
+    const diff   = Math.max(0, Number(pos));
+    const P      = diff * tParams.Fdensity * g;
+    const pValue = (P / 1000).toFixed(2);
+
+    if (tPressureMaterial) {
+        tPressureMaterial.map = new THREE.CanvasTexture(
+            tMakeLabelCanvas(32, pValue + ' kPa', 'rgba(0,0,0,0)', 'black'));
+    }
+    document.getElementById('unitAtm').textContent =
+        Number((P + atm) * tParams.factor1).toFixed(2) + ' atm';
+    document.getElementById('unitPa').textContent  =
+        Number((P + atm) * tParams.factor2).toFixed(2);
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — INDICATOR ANIMATION
+════════════════════════════════════════ */
+
+function tIndicatorMovement() {
+    if (tReqID) cancelAnimationFrame(tReqID);
+
+    const N0 = new THREE.Vector3(0,  1, 0);
+    const N  = new THREE.Vector3(0, -1, 0);
+    const B  = new THREE.Vector3();
+    const m3 = new THREE.Matrix3();
+    const m4 = new THREE.Matrix4();
+
+    function step() {
+        tReqID = requestAnimationFrame(step);
+
+        if (!tFlowSpline || !tIndicator) return;
+
+        const t = (tClock.getElapsedTime() * (5 / tParams.h)) % 1;
+        const X = tFlowSpline.getTangent(t);
+        B.crossVectors(X, N);
+        N.crossVectors(X, B.negate());
+
+        m3.set(-X.x, N.x, B.x,
+               -X.y, N.y, B.y,
+               -X.z, N.z, B.z);
+        m4.setFromMatrix3(m3);
+
+        const P = tFlowSpline.getPoint(t);
+        tIndicator.setRotationFromMatrix(m4);
+        tIndicator.position.copy(P);
+    }
+
+    step();
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — UI WIRING
+════════════════════════════════════════ */
+
+function setupTorricellisUI() {
+
+    /* Fluid Height */
+    document.getElementById('fluidH').addEventListener('input', function () {
+        this.min = tParams.h + 5;
+        document.getElementById('fluidHEl').value = this.value;
+        tParams.H = Number(this.value);
+        tRebuildTank();
+        tBuildFlow();
+        tLabelDisplay();
+    });
+
+    /* Nozzle Position */
+    document.getElementById('nozzleH').addEventListener('input', function () {
+        this.max = Number(tParams.H) - 5;
+        document.getElementById('nozzleHEl').value = this.value;
+        tParams.h = Number(this.value);
+        document.getElementById('fluidH').min = tParams.h + 5;
+
+        if (tParams.r >= (tParams.H - tParams.h)) {
+            this.max = tParams.H - tParams.r - 2;
+        }
+        tBuildFlow();
+        tLabelDisplay();
+    });
+
+    /* Tank Radius */
+    document.getElementById('tankR').addEventListener('input', function () {
+        document.getElementById('tankREl').value = this.value;
+        tParams.R = Number(this.value);
+        this.min  = tParams.r + 6;
+        tRebuildTank();
+        tLabelDisplay();
+    });
+
+    /* Nozzle Radius */
+    document.getElementById('nozzleR').addEventListener('input', function () {
+        document.getElementById('nozzleREl').value = this.value;
+        tParams.r = Number(this.value);
+        this.max  = Number(tParams.R) / 2 - 2;
+        tRebuildValveRadius();
+        tBuildFlow();
+    });
+
+    /* TORRICELLI'S LAW button — multi-nozzle visualisation */
+    document.getElementById('btnLaw').addEventListener('click', function () {
+
+        if (tReqID) cancelAnimationFrame(tReqID);
+        tIndicator.visible = false;
+
+        /* preset values */
+        tParams.H = 70;  document.getElementById('fluidH').value  = 70; document.getElementById('fluidHEl').value  = 70;
+        tParams.h = 65;  document.getElementById('nozzleH').value = 65; document.getElementById('nozzleHEl').value = 65;
+        tParams.R = 10;  document.getElementById('tankR').value   = 10; document.getElementById('tankREl').value   = 10;
+
+        /* remove old geometry */
+        scene.remove(tGroup);
+        tGroup = new THREE.Group();
+        tRebuildTank();
+
+        /* hide the slider table */
+        document.querySelectorAll('.ctrl-row,.vel-row').forEach(r => r.style.display = 'none');
+
+        /* draw parabolas for every 5 m nozzle height */
+        scene.remove(tLineGroup);
+        tLineGroup = new THREE.Group();
+
+        for (let i = 2; i < tParams.H; i += 5) {
+            const pts  = tTorricelliLaw(i);
+            const spln = new THREE.CatmullRomCurve3(pts);
+            const geo  = new THREE.TubeGeometry(spln, 16, 1, 8, false);
+            tLineGroup.add(new THREE.Mesh(geo, tFluidMaterial));
+
+            const v2 = tCreatePipe(1.1, 2, 16, true, 0, 6.28, tRedMaterial, 0, 0);
+            v2.rotation.set(0, 0, -1.57);
+            v2.position.set(0.5, i - 0.1, 0);
+            tLineGroup.add(v2);
+        }
+
+        scene.add(tLineGroup, tGroup);
+
+        /* pull camera back for the overview */
+        if (introFinished) {
+            camera.position.set(3, 25, 75);
+            controls.target.set(7, 25, 0);
+            controls.update();
+        }
+    });
+
+    /* RESET button */
+    document.getElementById('btnReset').addEventListener('click', function () {
+
+        scene.remove(tGroup, tLineGroup);
+        tGroup     = new THREE.Group();
+        tLineGroup = new THREE.Group();
+
+        tIndicator.visible = true;
+
+        /* reset params */
+        tParams.H = 40;  document.getElementById('fluidH').value  = 40; document.getElementById('fluidHEl').value  = 40;
+        tParams.h = 20;  document.getElementById('nozzleH').value = 20; document.getElementById('nozzleHEl').value = 20;
+        tParams.R = 10;  document.getElementById('tankR').value   = 10; document.getElementById('tankREl').value   = 10;
+        tParams.r = 0.5; document.getElementById('nozzleR').value = 0.5; document.getElementById('nozzleREl').value = 0.5;
+
+        /* show sliders again */
+        document.querySelectorAll('.ctrl-row,.vel-row').forEach(r => r.style.display = '');
+
+        tBuildTank();
+        tBuildFlow();
+        tLabelDisplay();
+        tIndicatorMovement();
+
+        scene.add(tGroup);
+    });
+
+    /* PRESSURE button */
+    document.getElementById('btnPress').addEventListener('click', function () {
+        window.open('Thermodynamics_Pressure.html', '_self');
+    });
+}
+
+/* ════════════════════════════════════════
+   TORRICELLI — lil-gui (lazy loaded)
+════════════════════════════════════════ */
+
+function setupTorricellisGUI(GUI) {
+    const gui = new GUI({ width: 210, title: 'Camera / Controls' });
+    gui.close();
+
+    const camFolder = gui.addFolder('Camera');
+    camFolder.add(camera.position, 'x', -200, 200).listen();
+    camFolder.add(camera.position, 'y', -100, 200).listen();
+    camFolder.add(camera.position, 'z', -200, 200).listen();
+
+    const ctrlFolder = gui.addFolder('Target');
+    ctrlFolder.add(controls.target, 'x', -100, 100).listen().onChange(() => controls.update());
+    ctrlFolder.add(controls.target, 'y', -100, 100).listen().onChange(() => controls.update());
+    ctrlFolder.add(controls.target, 'z', -100, 100).listen().onChange(() => controls.update());
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro phase ── */
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        if (grid) grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

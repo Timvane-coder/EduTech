@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Linear Motion Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a       { color:#e07070; font-weight:600; }
+        #menu label   { color:#aaa; font-size:12px; }
+        #menu select  {
+            background:#1e1e28; color:#d4d4d4;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:4px; padding:4px 8px; font-size:12px;
+        }
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover    { filter:brightness(1.18); }
+        #menu button:disabled { opacity:.4; cursor:default; }
+        #start   { background:rgb(26,164,26); }
+        #reset   { background:rgb(164,26,26); }
+        #theory-el { background:#1a4e8f; }
+
+        /* equation display strip */
+        #eqn-strip {
+            flex:1 1 100%; font-size:12px; color:#ccc;
+            margin-top:2px; display:flex; align-items:baseline; gap:4px;
+            flex-wrap:wrap;
+        }
+        #eqn-strip em   { font-style:italic; }
+        #eqn-strip sup  { font-size:9px; }
+
+        /* ── Canvas overlay (position / velocity graph) ── */
+        #drawing-canvas {
+            position:fixed; bottom:52px; right:12px;
+            background:#fff; border:1px solid rgba(255,255,255,.15);
+            border-radius:4px; z-index:200;
+            width:300px; height:300px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Mechanics &mdash; Motion in a Straight Line</div>
+
+    <div id="menu">
+        <label for="eqnName">Equation of Motion,</label>
+        <div id="eqn-strip">
+            <a><strong><em>x = </em></strong></a>
+            <a id="const"><strong>8.5 +</strong></a>
+            <a id="linearFactor"  style="visibility:hidden;"><strong>2</strong><strong><em>t</em></strong></a>
+            <a id="quadFactor"    style="visibility:hidden;"><strong>+ 2.5</strong><em>t<sup>2</sup></em></a>
+            <a id="cubicFactor"   style="visibility:hidden;"><strong>+ 4</strong><em>t<sup>3</sup></em></a>
+        </div>
+
+        <select id="eqnName">
+            <option value="Linear">Linear</option>
+            <option value="Quadratic">Quadratic</option>
+            <option value="Cubic">Cubic</option>
+        </select>
+        <button id="start">START</button>
+        <button id="reset">RESET</button>
+        <button id="theory-el">THEORY</button>
+    </div>
+
+    <canvas id="drawing-canvas" width="300" height="300"></canvas>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ferrari */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* linear motion lab */
+let linearMotionGroup = new THREE.Group();
+
+let lmBody, lmBody1, lmBody2, lmStand;
+let lmControls;             // separate reference so we can recreate target
+const lmClock = new THREE.Clock();
+
+/* canvas graph */
+let drawingCanvas, drawingContext;
+let maxWidth = 300, maxHeight = 300;
+let halfWidth = maxWidth / 2;
+const xAxis = 25;
+const yAxis = maxHeight / 2 - 15;
+
+/* motion state */
+let tVariation = 'Linear';
+let t = 0;
+let data = [], dataX = [], dataY = [], velocityData = [];
+
+const animations = {
+    const  : 8.5,
+    constA : 2,
+    constB : 2.5,
+    constC : 4
+};
+
+/* DOM refs – filled after transition */
+let eqnLinear, eqnQuad, eqnCubic;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── Camera – FOV 50 matches linear motion scene ── */
+    camera = new THREE.PerspectiveCamera(
+        50, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+    createLinearMotionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+    const ambientLight = new THREE.HemisphereLight(0xddeeff, 0x202020, 1);
+    const mainLight    = new THREE.DirectionalLight(0xffffff, 4);
+    mainLight.position.set(5, 10, 7);
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+    scene.add(ambientLight, mainLight);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Linear Motion lab ── */
+    const transition = moveCamera(10, 15, 20, 0, 8, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible      = false;
+            linearMotionGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera & controls tuned to linear motion scene */
+            camera.position.set(10, 15, 20);
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(0, 8, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            setupLabUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   LINEAR MOTION SCENE
+════════════════════════════════════════ */
+
+function createLinearMotionScene() {
+
+    linearMotionGroup.visible = false;
+    scene.add(linearMotionGroup);
+
+    /* Ground grid */
+    const groundGrid = new THREE.GridHelper(150, 150);
+    linearMotionGroup.add(groundGrid);
+
+    /* Purple moving box (Linear axis) */
+    const material = new THREE.MeshPhongMaterial({ color: 0xA020F0 });
+    lmBody = new THREE.Mesh(
+        new THREE.BoxGeometry(4, 2, 2).translate(0, 1, 0),
+        material
+    );
+    lmBody.position.set(animations.const, 0, 0);
+    linearMotionGroup.add(lmBody);
+
+    /* Load motion1D.glb (body1 = quadratic, body2 = cubic, stand) */
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'motion1D.glb',
+        function (gltf) {
+            const model = gltf.scene;
+            lmBody1 = model.getObjectByName('body1');
+            lmBody2 = model.getObjectByName('body2');
+            lmStand = model.getObjectByName('stand');
+
+            lmBody1.position.set(0, 0, -8.5);
+            lmBody1.rotation.set(0, 3.14, 0);
+
+            linearMotionGroup.add(model);
+
+            gltf.scene.traverse((child) => {
+                if (child.type === 'SkinnedMesh') child.frustumCulled = false;
+            });
+        },
+        undefined,
+        (e) => console.warn('motion1D.glb not found – lab works without it.', e)
+    );
+
+    /* Canvas graph setup */
+    setupCanvasDrawing();
+}
+
+/* ════════════════════════════════════════
+   LAB UI  (wired after transition completes)
+════════════════════════════════════════ */
+
+function setupLabUI() {
+
+    eqnLinear = document.getElementById('linearFactor');
+    eqnQuad   = document.getElementById('quadFactor');
+    eqnCubic  = document.getElementById('cubicFactor');
+
+    const buttonEqn   = document.getElementById('eqnName');
+    const buttonStart = document.getElementById('start');
+    const buttonReset = document.getElementById('reset');
+
+    /* Initial equation state */
+    tVariation = 'Linear';
+    eqnLinear.style.visibility = 'visible';
+    eqnQuad.style.visibility   = 'hidden';
+    eqnCubic.style.visibility  = 'hidden';
+    valueCal();
+
+    /* ── Equation selector ── */
+    buttonEqn.addEventListener('input', function (e) {
+        new TWEEN.Tween(camera.position)
+            .to({ x: 10, y: 15, z: 20 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+        new TWEEN.Tween(controls.target)
+            .to({ y: 8 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+        tVariation = e.target.value;
+        valueCal();
+    });
+
+    /* ── START ── */
+    buttonStart.addEventListener('click', function () {
+        t = 0;
+        setupCanvasDrawing();
+        drawAxes(drawingContext, xAxis, yAxis);
+        controls.target.set(0, 8, 0);
+        plotLabel();
+    });
+
+    /* ── RESET ── */
+    buttonReset.addEventListener('click', function () {
+
+        if (lmBody) {
+            new TWEEN.Tween(lmBody.position)
+                .to({ x: 8.5, y: 0, z: 0 }, 500)
+                .easing(TWEEN.Easing.Linear.None)
+                .start();
+        }
+        if (lmBody1) {
+            new TWEEN.Tween(lmBody1.position)
+                .to({ x: 0, y: 0, z: -8.5 }, 500)
+                .easing(TWEEN.Easing.Quadratic.In)
+                .start();
+        }
+        if (lmBody2) {
+            new TWEEN.Tween(lmBody2.position)
+                .to({ x: 0, y: 8.5, z: 0 }, 500)
+                .easing(TWEEN.Easing.Cubic.In)
+                .start();
+        }
+
+        new TWEEN.Tween(camera.position)
+            .to({ x: 10, y: 15, z: 20 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+        new TWEEN.Tween(controls.target)
+            .to({ y: 8 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+    });
+
+    /* ── THEORY ── */
+    document.getElementById('theory-el').addEventListener('click', () => {
+        window.open('Mechanics_Motion_in_straight_line.html', '_self');
+    });
+}
+
+/* ════════════════════════════════════════
+   CANVAS GRAPH HELPERS
+════════════════════════════════════════ */
+
+function setupCanvasDrawing() {
+    drawingCanvas   = document.getElementById('drawing-canvas');
+    if (!drawingCanvas) return;
+    drawingContext  = drawingCanvas.getContext('2d');
+    drawingContext.clearRect(0, 0, maxWidth, maxHeight);
+    drawingContext.fillStyle = '#FFFFFF';
+    drawingContext.fillRect(0, 0, maxWidth, maxHeight);
+}
+
+function drawAxes(ctx, xA, yA) {
+    ctx.beginPath();
+    ctx.lineWidth   = 2;
+    ctx.strokeStyle = 'black';
+    ctx.moveTo(xA, 0);           ctx.lineTo(xA, maxHeight);
+    ctx.moveTo(10, yA);          ctx.lineTo(maxWidth, yA);
+    ctx.moveTo(10, maxHeight - 25); ctx.lineTo(maxWidth, maxHeight - 25);
+    canvasArrow(ctx, xA - 10, yA - 70,         xA - 10,        10);
+    canvasArrow(ctx, halfWidth - 30, maxHeight - 5, maxWidth - 30, maxHeight - 5);
+    ctx.stroke();
+}
+
+function canvasArrow(ctx, fromx, fromy, tox, toy) {
+    const headlen = 10;
+    const dx = tox - fromx, dy = toy - fromy;
+    const angle = Math.atan2(dy, dx);
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(tox, toy);
+    ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+}
+
+function plotGraph(ctx, x, y, r, col) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+    ctx.lineWidth   = 1;
+    ctx.fillStyle   = col;
+    ctx.strokeStyle = col;
+    ctx.fill();
+    ctx.stroke();
+}
+
+/* ════════════════════════════════════════
+   EQUATION / DATA
+════════════════════════════════════════ */
+
+function valueCal() {
+    data = []; dataX = []; dataY = []; velocityData = [];
+
+    if (tVariation === 'Linear') {
+        eqnLinear.style.visibility = 'visible';
+        eqnQuad.style.visibility   = 'hidden';
+        eqnCubic.style.visibility  = 'hidden';
+        for (let i = 0; i < 2.01; i += 0.01) {
+            const A = animations.const + animations.constA * i;
+            const B = animations.constA;
+            data.push(new THREE.Vector3(A, 0, 0));
+            dataX.push(xAxis + i * (halfWidth - 30));
+            dataY.push((yAxis - A * 10).toFixed(0));
+            velocityData.push(2 * yAxis - B * 40);
+        }
+    } else if (tVariation === 'Quadratic') {
+        eqnLinear.style.visibility = 'visible';
+        eqnQuad.style.visibility   = 'visible';
+        eqnCubic.style.visibility  = 'hidden';
+        for (let i = 0; i < 2.01; i += 0.01) {
+            const A = animations.const + animations.constA * i + animations.constB * i * i;
+            const B = animations.constA + 2 * animations.constB * i;
+            data.push(new THREE.Vector3(0, 0, -A));
+            dataX.push((xAxis + i * (halfWidth - 30)).toFixed(0));
+            dataY.push((yAxis - A * 5).toFixed(0));
+            velocityData.push((2 * yAxis - B * 10).toFixed(2));
+        }
+    } else if (tVariation === 'Cubic') {
+        eqnLinear.style.visibility = 'visible';
+        eqnQuad.style.visibility   = 'visible';
+        eqnCubic.style.visibility  = 'visible';
+        for (let i = 0; i < 2.01; i += 0.01) {
+            const A = animations.const + animations.constA * i + animations.constB * i * i + animations.constC * i * i * i;
+            const B = animations.constA + 2 * animations.constB * i + 3 * animations.constC * i * i;
+            data.push(new THREE.Vector3(1, animations.const + 2 + A, 0));
+            dataX.push((xAxis + i * (halfWidth - 30)).toFixed(0));
+            dataY.push((yAxis + 10 - A * 2.5).toFixed(0));
+            velocityData.push((2 * yAxis + 4 - B * 3).toFixed(2));
+        }
+    }
+}
+
+/* ════════════════════════════════════════
+   MOTION & PLOTTING
+════════════════════════════════════════ */
+
+function boxmovePlot() {
+    if (t < data.length) {
+        t += 1;
+        plotGraph(drawingContext, dataX[t], dataY[t],         1, 'green');
+        plotGraph(drawingContext, dataX[t], velocityData[t],  1, 'red');
+        requestAnimationFrame(boxmovePlot);
+    }
+}
+
+function bodyMovement() {
+    if (tVariation === 'Linear') {
+        if (lmBody) {
+            new TWEEN.Tween(lmBody.position)
+                .to({ x: 12.5 }, 3500)
+                .easing(TWEEN.Easing.Linear.None)
+                .start();
+        }
+        new TWEEN.Tween(camera.position)
+            .to({ x: 25, z: 25 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+    } else if (tVariation === 'Quadratic') {
+        if (lmBody1) {
+            new TWEEN.Tween(lmBody1.position)
+                .to({ z: -22.5 }, 3500)
+                .easing(TWEEN.Easing.Quadratic.In)
+                .start();
+        }
+        new TWEEN.Tween(camera.position)
+            .to({ x: 10, z: 15 }, 1500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+
+    } else if (tVariation === 'Cubic') {
+        if (lmBody2) {
+            new TWEEN.Tween(lmBody2.position)
+                .to({ y: 58.5 }, 3500)
+                .easing(TWEEN.Easing.Cubic.In)
+                .start();
+        }
+        new TWEEN.Tween(camera.position)
+            .to({ x: 30, y: 2, z: 60 }, 5500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+        new TWEEN.Tween(controls.target)
+            .to({ y: 30 }, 5500)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+    }
+}
+
+function plotLabel() {
+
+    if (tVariation === 'Linear') {
+        bodyMovement();
+        boxmovePlot();
+        listLabel(drawingContext, {
+            label: 'Distance', col: 'green',
+            labelW: xAxis,          labelH: yAxis,
+            labelPos1: halfWidth + 30, labelPos2: 100,
+            length: 30, xlabel: 't', xlabelPos: 15,
+            ylabel: 'x', value: animations.const, xvaluePos: 50
+        });
+        listLabel(drawingContext, {
+            label: 'Velocity', col: 'red',
+            labelW: xAxis,          labelH: 2 * yAxis,
+            labelPos1: halfWidth + 30, labelPos2: 250,
+            length: 30, xlabel: 't', xlabelPos: 20,
+            ylabel: 'v', value: animations.constA, xvaluePos: 40
+        });
+
+    } else if (tVariation === 'Quadratic') {
+        bodyMovement();
+        boxmovePlot();
+        listLabel(drawingContext, {
+            label: 'Distance', col: 'green',
+            labelW: xAxis, labelH: yAxis,
+            labelPos1: 180, labelPos2: 100,
+            length: 30, xlabel: 't', xlabelPos: 15,
+            ylabel: 'y', value: animations.const, xvaluePos: 20
+        });
+        listLabel(drawingContext, {
+            label: 'Velocity', col: 'red',
+            labelW: xAxis, labelH: 2 * yAxis,
+            labelPos1: 180, labelPos2: 240,
+            length: 30, xlabel: 't', xlabelPos: 20,
+            ylabel: 'v',
+            value: animations.constA + 2 * animations.constB,
+            xvaluePos: -20
+        });
+
+    } else if (tVariation === 'Cubic') {
+        bodyMovement();
+        boxmovePlot();
+        listLabel(drawingContext, {
+            label: 'Distance', col: 'green',
+            labelW: xAxis, labelH: yAxis,
+            labelPos1: 180, labelPos2: 100,
+            length: 30, xlabel: 't', xlabelPos: 15,
+            ylabel: 'z', value: animations.const, xvaluePos: -25
+        });
+        listLabel(drawingContext, {
+            label: 'Velocity', col: 'red',
+            labelW: xAxis, labelH: 2 * yAxis,
+            labelPos1: 180, labelPos2: 240,
+            length: 30, xlabel: 't', xlabelPos: 20,
+            ylabel: 'v',
+            value: animations.constA + 2 * animations.constB + 3 * animations.constC,
+            xvaluePos: -25
+        });
+    }
+}
+
+function listLabel(ctx, d) {
+    ctx.beginPath();
+    ctx.fillStyle   = d.col;
+    ctx.strokeStyle = d.col;
+    ctx.moveTo(d.labelPos1, d.labelPos2);
+    ctx.lineTo(d.labelPos1 + d.length, d.labelPos2);
+    ctx.stroke();
+    ctx.font = '20px arial';
+    ctx.fillText(d.value,  d.labelW - 15,               d.labelPos2 - d.xvaluePos);
+    ctx.fillText(d.label,  d.labelPos1 + d.length,       d.labelPos2);
+    ctx.fillStyle = '#000000';
+    ctx.fillText(d.xlabel, d.labelPos1 + d.length + 15,  d.labelH + d.xlabelPos);
+    ctx.fillText(d.ylabel, d.labelW - 15,                d.labelPos2);
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    /* Responsive canvas */
+    if (drawingCanvas) {
+        if (window.innerWidth < 800) {
+            drawingCanvas.width = 150;
+            maxWidth  = 150;
+            halfWidth = 75;
+        } else {
+            drawingCanvas.width = 300;
+            maxWidth  = 300;
+            halfWidth = 150;
+        }
+        setupCanvasDrawing();
+    }
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

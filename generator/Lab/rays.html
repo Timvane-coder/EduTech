@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Light as Rays and Waves</title>
+    <style>
+        /* ─── reset ─── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ─── intro overlay ─── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ─── optics lab UI  (hidden until transition) ─── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left description panel */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:240px;
+            background:rgba(15,15,20,.88);
+            color:#d4d4d4; font-size:13px;
+            padding:14px 16px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.7;
+        }
+
+        /* lil-gui override — push it below the top bar */
+        .lil-gui.root {
+            position:fixed !important;
+            top:46px !important;
+            right:8px !important;
+            z-index:200 !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ─── intro overlay ─── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ─── optics lab UI (shown after transition) ─── -->
+<div id="labUI">
+    <div id="topmenu">Light as Rays and Waves</div>
+    <div id="sidemenu">Light as Rays, &lambda; &#8810; d</div>
+</div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup = new THREE.Group();
+let opticsGroup  = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── optics ── */
+let opticsModel;                          // the barrier GLTF scene
+let upSlit, downSlit, arrowUp, arrowDown; // named objects inside barrier.glb
+let wavePlane;                            // the red wave mesh
+let Ray           = false;                // wavefront visible flag
+let requestSingle = null;                 // rAF handle for wave1()
+let center1       = new THREE.Vector3(-150, 0, 0);
+const opticsClock = new THREE.Clock();
+
+/* slit-width animation param (mirrors original `animations.slit`) */
+const opticsParams = { slit: 20 };
+
+/* DOM refs — filled in setupOpticsUI() */
+let menuEl; // the #sidemenu span that shows "Rays / Waves"
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── (unchanged from capacitor version) */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── camera  — Ferrari intro FOV; optics resets it on transition ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls  (disabled during intro) ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createOpticsScene();   // ← replaces createCapacitorScene()
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════════════
+   LIGHTS  — identical to capacitor version
+════════════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════════════
+   FERRARI SHOWROOM  — identical to capacitor version
+════════════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════════════
+   CAMERA HELPERS  — identical to capacitor version
+════════════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════════════
+   FERRARI CINEMATIC  — identical to capacitor version
+════════════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition: lands in the optics scene ── */
+    const transition = moveCamera(45, 75, 200, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            opticsGroup.visible  = true;
+
+            /* optics scene background colour */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            /* show lab UI */
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* reset camera FOV to match original optics scene */
+            camera.fov = 45;
+            camera.updateProjectionMatrix();
+
+            /* orbit controls target from original optics scene */
+            controls.enabled = true;
+            controls.target.set(5, 0, 30);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* lazy-load lil-gui only now that the lab is visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => { setupOpticsGUI(GUI); });
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════════════
+   OPTICS SCENE
+════════════════════════════════════════════════ */
+
+function createOpticsScene() {
+
+    opticsGroup.visible = false;
+    scene.add(opticsGroup);
+
+    /* ground grid — same division count as original */
+    const grid2 = new THREE.GridHelper(1000, 10);
+    opticsGroup.add(grid2);
+
+    /* wave plane — built once, hidden until user toggles */
+    createWavePlane();
+
+    /* load barrier GLTF */
+    loadBarrierModel();
+}
+
+/* ------------------------------------------------
+   createWavePlane
+   Mirrors original createPlane() exactly
+------------------------------------------------ */
+function createWavePlane() {
+
+    const geo = new THREE.PlaneGeometry(20, 10, 100, 50).translate(10, 0, 0);
+    const mat = new THREE.MeshPhongMaterial({ color: 0xEF3523 });
+
+    wavePlane          = new THREE.Mesh(geo, mat);
+    wavePlane.position.x = 1.5;
+    wavePlane.scale.set(10, 10, 10);
+    wavePlane.visible  = false;   // Ray starts false
+    scene.add(wavePlane);
+}
+
+/* ------------------------------------------------
+   loadBarrierModel
+   Mirrors original GLTFLoader block exactly
+------------------------------------------------ */
+function loadBarrierModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'barrier.glb',
+        function (gltf) {
+            opticsModel = gltf.scene;
+            scene.add(opticsModel);
+
+            upSlit   = opticsModel.getObjectByName('Slit1');
+            downSlit = opticsModel.getObjectByName('Slit2');
+            arrowUp  = opticsModel.getObjectByName('ArrowUp');
+            arrowDown= opticsModel.getObjectByName('ArrowDown');
+
+            /* initial slit positions matching original */
+            upSlit.position.y    =  opticsParams.slit;
+            downSlit.position.y  = -opticsParams.slit;
+            arrowUp.position.y   =  opticsParams.slit / 2;
+            arrowDown.position.y = -opticsParams.slit / 2;
+        },
+        undefined,
+        (e) => console.warn('barrier.glb not found — optics scene works without it.', e)
+    );
+}
+
+/* ================================================
+   OPTICS GUI
+   Lazy-loaded and called from transition.onComplete
+================================================ */
+
+function setupOpticsGUI(GUI) {
+
+    menuEl = document.getElementById('sidemenu');
+
+    const gui = new GUI();
+
+    /* ── Slit width slider ── mirrors original exactly ── */
+    gui.add(opticsParams, 'slit', 0.05, 20, 0.001)
+        .name('Slit width')
+        .onChange((value) => {
+
+            opticsParams.slit = value;
+
+            /* hide wavefront when slider moves */
+            wavePlane.visible = Ray = false;
+            if (requestSingle !== null) {
+                cancelAnimationFrame(requestSingle);
+                requestSingle = null;
+            }
+
+            /* guard: model may not be loaded yet */
+            if (upSlit)   upSlit.position.y    =  value;
+            if (downSlit) downSlit.position.y  = -value;
+
+            if (value <= 5) {
+
+                wavePlane.scale.set(10, 10, 10);
+
+                const X = -0.5 + value / 10;
+                center1 = new THREE.Vector3(-value - 0.05, 0, 0);
+
+                if (arrowDown) {
+                    arrowDown.position.y =  -value;
+                    arrowDown.rotation.z =   X;
+                }
+                if (arrowUp) {
+                    arrowUp.position.y   =   value;
+                    arrowUp.rotation.z   =  -X;
+                }
+
+                menuEl.innerHTML = 'Light as Waves, &lambda; &#8909; d';
+
+            } else {
+
+                center1 = new THREE.Vector3(-150, 0, 0);
+
+                if (arrowDown) {
+                    arrowDown.position.y = -value / 2;
+                    arrowDown.rotation.z =  0;
+                }
+                if (arrowUp) {
+                    arrowUp.position.y   =  value / 2;
+                    arrowUp.rotation.z   =  0;
+                }
+
+                menuEl.innerHTML = 'Light as Rays, &lambda; &#8810; d';
+            }
+        });
+
+    /* ── Show/Hide wavefront toggle ── mirrors original rays() ── */
+    gui.add({ rays: toggleWavefront }, 'rays').name('Show/Hide wavefront');
+}
+
+/* ------------------------------------------------
+   toggleWavefront  (= animations.rays() in original)
+------------------------------------------------ */
+function toggleWavefront() {
+
+    Ray               = !Ray;
+    wavePlane.visible =  Ray;
+    wave1();
+}
+
+/* ================================================
+   WAVE ANIMATION
+   Mirrors original wave1() exactly
+================================================ */
+
+function wave1() {
+
+    const vLength = wavePlane.geometry.attributes.position.count;
+    const t       = opticsClock.getElapsedTime();
+
+    for (let i = 0; i < vLength; i++) {
+
+        const vx   = wavePlane.geometry.attributes.position.getX(i);
+        const vy   = wavePlane.geometry.attributes.position.getY(i);
+        const vz   = wavePlane.geometry.attributes.position.getZ(i);
+        const dist = new THREE.Vector3(vx, vy, vz).sub(center1);
+
+        const size      = 5;
+        const magnitude = 0.3;
+        const xsin1     = Math.sin(3 * t - dist.length() * size) * magnitude;
+
+        wavePlane.geometry.attributes.position.setZ(i, xsin1);
+    }
+
+    wavePlane.geometry.computeVertexNormals();
+    wavePlane.geometry.attributes.position.needsUpdate = true;
+
+    requestSingle = requestAnimationFrame(wave1);
+}
+
+/* ════════════════════════════════════════════════
+   RESIZE  — identical to capacitor version
+════════════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via tone-mapping exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* NOTE: wave1() drives its own rAF loop once toggled on,
+       so nothing optics-specific needs to run here */
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

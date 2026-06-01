@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Lorentz Force</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(10,10,14,.95);
+            color:beige; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:260px;
+            background:rgba(10,10,14,.88);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 12px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.8;
+        }
+
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(10,10,14,.92);
+            color:beige; font-size:12.5px;
+            padding:10px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+            width:100%;
+        }
+
+        #menu p {
+            color:beige; font-size:11.5px;
+            flex:1 1 100%; margin:0;
+        }
+
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+            background:#1a4e8f;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI shown after transition ── -->
+<div id="labUI">
+
+    <div id="topmenu">Understanding Lorentz Force</div>
+
+    <div id="sidemenu"></div>
+
+    <div id="menu" style="width:100%;">
+        <p>Press <strong>R</strong> to rotate the Left Hand &nbsp;&middot;&nbsp;
+           Press <strong>T</strong> to change the Left Hand position</p>
+        <button id="reset">RESET / HIDE</button>
+        <button id="change">Change Polarity</button>
+    </div>
+
+</div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE            from 'three';
+import { OrbitControls }     from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { GLTFLoader }        from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }       from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }        from 'three/addons/loaders/RGBELoader.js';
+import TWEEN                 from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — SHARED
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* groups */
+let ferrariGroup   = new THREE.Group();
+let magnetismGroup = new THREE.Group();
+
+/* ferrari */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ════════════════════════════════════════
+   GLOBALS — MAGNETISM / LORENTZ
+════════════════════════════════════════ */
+
+let labelGeometry = new THREE.PlaneGeometry(10, 10);
+
+let electron, negMaterial, leftHand;
+let onLabel, onMaterial, onButton;
+let MagLine   = new THREE.Group();
+let LINES     = new THREE.Group();
+let magnet    = new THREE.Group();
+let curves    = new THREE.Group();
+
+let voltButton, requestID, voltMaterial, force;
+let isChanged  = false;
+let power      = false;
+let isSwitched = false;
+let t          = 0;
+let points     = [];
+
+const objects  = [];
+
+let redMaterial   = new THREE.MeshPhongMaterial({ color: 'red'   });
+let blueMaterial  = new THREE.MeshPhongMaterial({ color: 'blue'  });
+let greenMaterial = new THREE.MeshPhongMaterial({ color: 'green' });
+let light         = new THREE.MeshPhongMaterial({ color: 'wheat' });
+
+let nTexture = new THREE.TextureLoader()
+    .load('https://threejs.org/examples/textures/sprites/spark1.png');
+
+let raycaster = new THREE.Raycaster();
+let pointer   = new THREE.Vector2();
+let SELECTED;
+
+let transformControls;
+let magnetismClock = new THREE.Clock();
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera — FOV 55 matches Lorentz scene */
+    camera = new THREE.PerspectiveCamera(
+        55,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1500
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* orbit controls — disabled during intro */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createMagnetismScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+════════════════════════════════════════ */
+
+function createLights() {
+
+    const hemi = new THREE.AmbientLight(0xffffff, 0.20);
+    hemi.position.set(0, 20, 0);
+    scene.add(hemi);
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    const transition = moveCamera(10, 70, 0, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            /* swap scenes */
+            ferrariGroup.visible   = false;
+            magnetismGroup.visible = true;
+
+            /* dark background suits the Lorentz scene */
+            scene.background = new THREE.Color(0x000000);
+
+            /* show lab UI */
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* hand controls to magnetism camera target */
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* wire buttons now that labUI is visible */
+            setupMagnetismUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   MAGNETISM SCENE — top-level builder
+════════════════════════════════════════ */
+
+function createMagnetismScene() {
+
+    magnetismGroup.visible = false;
+    scene.add(magnetismGroup);
+
+    /* all magnetism objects go into scene directly (same as original)
+       magnetismGroup is used only for the visibility toggle           */
+
+    scene.add(LINES);
+    LINES.visible = false;
+
+    magneticField();
+    sphereClear();
+    electronChamber();
+    addElectron();
+
+    electron.visible = false;
+
+    /* TransformControls — needs renderer to exist */
+    transformControls = new TransformControls(camera, renderer.domElement);
+
+    transformControls.addEventListener('dragging-changed', function (event) {
+        controls.enabled = !event.value;
+    });
+
+    transformControls.attach(MagLine);
+    transformControls.visible = false;
+    scene.add(transformControls);
+
+    window.addEventListener('keydown', function (event) {
+        switch (event.keyCode) {
+            case 84: transformControls.setMode('translate'); break; // T
+            case 82: transformControls.setMode('rotate');    break; // R
+        }
+    });
+
+    document.addEventListener('click', onClick);
+
+    /* load GLTF left-hand model */
+    createModel();
+}
+
+/* ─────────────────────────────────────
+   sphereClear — glass sphere enclosure
+───────────────────────────────────── */
+
+function sphereClear() {
+
+    const geometry = new THREE.SphereGeometry(20, 64, 32);
+
+    const texture = new THREE.CanvasTexture(generateTexture());
+    texture.magFilter  = THREE.NearestFilter;
+    texture.wrapT      = THREE.RepeatWrapping;
+    texture.wrapS      = THREE.RepeatWrapping;
+    texture.repeat.set(1, 0.5);
+
+    const material = new THREE.MeshPhysicalMaterial({
+        color              : 0xffffff,
+        metalness          : 0,
+        roughness          : 0,
+        ior                : 1.5,
+        alphaMap           : texture,
+        thickness          : 1,
+        envMapIntensity    : 1,
+        transmission       : 1,
+        specularIntensity  : 1,
+        specularColor      : 0xffffff,
+        opacity            : 1,
+        side               : THREE.DoubleSide,
+        transparent        : true
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+}
+
+/* ─────────────────────────────────────
+   electronChamber — power supply box + buttons + labels
+───────────────────────────────────── */
+
+function electronChamber() {
+
+    /* electron gun tube */
+    const tubeGeo = new THREE.CylinderGeometry(4, 4, 12, 16)
+                        .rotateZ(1.57).translate(6, 0, 0);
+    const tubeMat = new THREE.MeshPhongMaterial({ color: 0xf12211 });
+    const tube    = new THREE.Mesh(tubeGeo, tubeMat);
+    tube.position.x = 15;
+    scene.add(tube);
+
+    /* power supply box */
+    const supplyGeo = new THREE.BoxGeometry(65, 10, 20).translate(0, -30, 0);
+    const supplyMat = new THREE.MeshPhongMaterial({ color: 0x112211, side: THREE.DoubleSide });
+    const supply    = new THREE.Mesh(supplyGeo, supplyMat);
+    scene.add(supply);
+
+    /* labels */
+    let displayMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(0,   -27, 10.2, 26, displayMat, 'POWER SUPPLY',    'rgba(0,1,0,0.2)',   'rgba(0,0,5,1)');
+
+    let mMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(-20, -34, 10.2, 26, mMat,       'MAGNET CURRENT',  'rgba(0,1,0,0.2)',   'rgba(155,155,155,1)');
+
+    let egunMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(28,   0,   5.2, 26, egunMat,    'Electron Gun',    'rgba(1,1,1,0.2)',   'rgba(155,155,155,1)');
+
+    let eMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(22,  -34, 10.2, 26, eMat,       'HIGH VOLTAGE',    'rgba(0,1,0,0.2)',   'rgba(155,155,155,1)');
+
+    /* magnet ON/OFF button + label */
+    onMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    onLabel    = makeText(-20, -31, 10.2, 28, onMaterial, 'OFF', 'rgba(0,1,0,0.2)', 'rgba(250,0,5,1)');
+    onButton   = addSphere(2, 8, redMaterial);
+    onButton.position.set(-20, -28, 10);
+    scene.add(onButton);
+
+    /* high-voltage button + label */
+    voltButton           = onButton.clone();
+    voltButton.material  = redMaterial.clone();
+    voltButton.position.set(20, -28, 10);
+    scene.add(voltButton);
+
+    voltMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(20, -31, 10.2, 28, voltMaterial, 'OFF', 'rgba(0,1,0,0.2)', 'rgba(250,0,5,1)');
+
+    objects.push(onButton, voltButton);
+}
+
+/* ─────────────────────────────────────
+   magneticField — torus magnet + arrow group
+───────────────────────────────────── */
+
+function magneticField() {
+
+    const mat = new THREE.MeshStandardMaterial({
+        color     : 0xf07707,
+        side      : THREE.DoubleSide,
+        roughness : 0.2,
+        metalness : 0.5
+    });
+
+    const torus = new THREE.Mesh(new THREE.TorusGeometry(30, 5, 8, 50), mat);
+    torus.rotation.z = -1.72;
+    scene.add(torus);
+
+    scene.add(MagLine);
+    MagLine.add(createArrow('green', 'B', 0,    0));
+    MagLine.add(createArrow('blue',  'v', 1.57, 0));
+    force = createArrow('red', 'F', 0, 1.57);
+    MagLine.add(force);
+    MagLine.position.set(55, -10, 5);
+}
+
+/* ─────────────────────────────────────
+   createArrow
+───────────────────────────────────── */
+
+function createArrow(col, label, rot1, rot2) {
+
+    const mesh = new THREE.Group();
+
+    const line = new THREE.Mesh(
+        new THREE.BoxGeometry(0.51, 0.51, 20).translate(0, 0, -10),
+        new THREE.MeshBasicMaterial({ color: col })
+    );
+    line.rotation.y = rot1;
+    line.rotation.x = rot2;
+
+    const arrow = new THREE.Mesh(
+        new THREE.ConeGeometry(2, 5, 60).translate(0, 20, 0).rotateX(-1.57),
+        new THREE.MeshBasicMaterial({ color: col })
+    );
+    line.add(arrow);
+    mesh.add(line);
+
+    return mesh;
+}
+
+/* ─────────────────────────────────────
+   addElectron
+───────────────────────────────────── */
+
+function addElectron() {
+
+    negMaterial = new THREE.MeshPhongMaterial({ color: 'blue', transparent: false });
+    electron    = addSphere(0.5, 8, negMaterial);
+    scene.add(electron);
+
+    const electron1 = electron.clone();
+    electron1.material = new THREE.MeshPhongMaterial({ color: 0xff2100 });
+    electron1.position.x = 15;
+    electron1.scale.set(1, 1, 2);
+    scene.add(electron1);
+
+    addPath();
+}
+
+/* ─────────────────────────────────────
+   addSphere helper
+───────────────────────────────────── */
+
+function addSphere(r, N, mat) {
+    return new THREE.Mesh(new THREE.SphereGeometry(r, N), mat);
+}
+
+/* ─────────────────────────────────────
+   createModel — GLTF left-hand rule
+───────────────────────────────────── */
+
+function createModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'lefthandrule.glb',
+        function (gltf) {
+            leftHand = gltf.scene;
+            leftHand.scale.set(30, 30, 30);
+            leftHand.position.set(6, -3, 0);
+            leftHand.rotation.set(3.14, 0, 1.57);
+            MagLine.add(leftHand);
+        },
+        undefined,
+        (e) => console.warn('lefthandrule.glb not found – continues without it.', e)
+    );
+}
+
+/* ─────────────────────────────────────
+   PATH FUNCTIONS
+───────────────────────────────────── */
+
+function addPath() {
+
+    while (LINES.children.length > 0) {
+        LINES.children[0].parent.remove(LINES.children[0]);
+    }
+
+    const color = new THREE.Color();
+
+    for (let i = 0; i < 33; i += 1.5) {
+        points.push(new THREE.Vector3(15 - i, 0, 0));
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    const vertices = [];
+    const colors   = [];
+
+    for (let i = 0; i < points.length; i++) {
+        vertices.push(points[i].x, points[i].y, points[i].z);
+        color.setHSL(
+            0.1, 1,
+            Math.max(0, (10 + points[i].x) / 20) * 0.5,
+            THREE.SRGBColorSpace
+        );
+        colors.push(color.r, color.g, color.b);
+    }
+
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors,   3));
+
+    const mat  = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true });
+    const line = new THREE.Line(geometry, mat);
+    line.scale.setScalar(0.7 * 1.5);
+    scene.add(line);
+    LINES.add(line);
+}
+
+function anticlockwisePath(a, b) {
+
+    MagLine.visible = true;
+
+    while (LINES.children.length > 0) {
+        LINES.children[0].parent.remove(LINES.children[0]);
+    }
+
+    const r     = a;
+    const theta = 2 * Math.PI / (36 * a);
+    const color = new THREE.Color();
+    const vertices = [], colors = [];
+
+    for (let i = 0; i < (36 * a + 1); i += 8) {
+        points.push(
+            new THREE.Vector3(
+                r * Math.cos(i * theta),
+                r * Math.sin(i * theta),
+                0
+            ).add(new THREE.Vector3(b, 0, 0))
+        );
+    }
+
+    for (let i = 0; i < points.length; i++) {
+        vertices.push(points[i].x, points[i].y, points[i].z);
+        color.setHSL(0.5, 0.51,
+            Math.max(0, (10 - points[i].x) / 20) * 0.3 - 0.2,
+            THREE.SRGBColorSpace
+        );
+        colors.push(color.r, color.g, color.b);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors,   3));
+
+    const mat  = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true });
+    const line = new THREE.Line(geometry, mat);
+    line.scale.setScalar(0.7 * 1.5);
+    scene.add(line);
+    LINES.add(line);
+}
+
+function clockwisePath(a, b) {
+
+    MagLine.visible = true;
+
+    while (LINES.children.length > 0) {
+        LINES.children[0].parent.remove(LINES.children[0]);
+    }
+
+    const r     = a;
+    const theta = 2 * Math.PI / (36 * a);
+    const color = new THREE.Color();
+    const vertices = [], colors = [];
+
+    for (let i = (36 * a + 1); i > 0; i -= 8) {
+        points.push(
+            new THREE.Vector3(
+                r * Math.cos(i * theta),
+                r * Math.sin(i * theta),
+                0
+            ).add(new THREE.Vector3(b, 0, 0))
+        );
+    }
+
+    for (let i = 0; i < points.length; i++) {
+        vertices.push(points[i].x, points[i].y, points[i].z);
+        color.setHSL(0.5, 0.51,
+            Math.max(0, (10 - points[i].x) / 20) * 0.3 - 0.2,
+            THREE.SRGBColorSpace
+        );
+        colors.push(color.r, color.g, color.b);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors,   3));
+
+    const mat  = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true });
+    const line = new THREE.Line(geometry, mat);
+    line.scale.setScalar(0.7 * 1.5);
+    scene.add(line);
+    LINES.add(line);
+}
+
+/* ─────────────────────────────────────
+   electronAction — animate electron along points
+───────────────────────────────────── */
+
+function electronAction() {
+
+    if (t < points.length) {
+        electron.position.copy(points[t]);
+    } else {
+        t = 0;
+    }
+    t++;
+    requestID = requestAnimationFrame(electronAction);
+}
+
+/* ─────────────────────────────────────
+   onClick — raycaster for button clicks
+───────────────────────────────────── */
+
+function onClick(event) {
+
+    /* only respond after intro has finished */
+    if (!introFinished) return;
+
+    pointer.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObjects(objects, true);
+
+    if (intersects.length === 0) return;
+
+    SELECTED = intersects[0].object;
+
+    /* ── HIGH VOLTAGE button ── */
+    if (SELECTED === voltButton || SELECTED.parent === voltButton) {
+
+        isSwitched = !isSwitched;
+
+        if (isSwitched) {
+            SELECTED.material = greenMaterial;
+            voltMaterial.map  = new THREE.CanvasTexture(
+                makeLabelCanvas(18, 'ON',  'rgba(0,1,0,0.2)', 'rgba(0,250,5,1)')
+            );
+            points = []; t = 0;
+            addPath();
+            LINES.visible    = true;
+            electron.visible = true;
+            electronAction();
+        } else {
+            SELECTED.material = redMaterial;
+            voltMaterial.map  = new THREE.CanvasTexture(
+                makeLabelCanvas(18, 'OFF', 'rgba(0,1,0,0.2)', 'rgba(250,0,5,1)')
+            );
+            points = []; t = 0;
+            LINES.visible    = false;
+            electron.visible = false;
+            cancelAnimationFrame(requestID);
+        }
+    }
+
+    /* ── MAGNET CURRENT button ── */
+    if (SELECTED === onButton || SELECTED.parent === onButton) {
+
+        power = !power;
+
+        if (isSwitched && power && !isChanged) {
+            SELECTED.material = greenMaterial;
+            onMaterial.map    = new THREE.CanvasTexture(
+                makeLabelCanvas(18, 'ON',  'rgba(0,1,0,0.2)', 'rgba(0,250,5,1)')
+            );
+            points = []; t = 0;
+            anticlockwisePath(14, 0);
+
+        } else if (isSwitched && power && isChanged) {
+            SELECTED.material = greenMaterial;
+            onMaterial.map    = new THREE.CanvasTexture(
+                makeLabelCanvas(18, 'ON',  'rgba(0,1,0,0.2)', 'rgba(0,250,5,1)')
+            );
+            points = []; t = 0;
+            clockwisePath(14, 0);
+
+        } else {
+            SELECTED.material = redMaterial;
+            onMaterial.map    = new THREE.CanvasTexture(
+                makeLabelCanvas(18, 'OFF', 'rgba(0,1,0,0.2)', 'rgba(250,0,5,1)')
+            );
+            points = []; t = 0;
+            addPath();
+        }
+    }
+}
+
+/* ─────────────────────────────────────
+   setupMagnetismUI — button wiring
+   (called once labUI is visible)
+───────────────────────────────────── */
+
+function setupMagnetismUI() {
+
+    document.getElementById('reset').addEventListener('click', function () {
+        transformControls.visible = !transformControls.visible;
+        MagLine.rotation.set(isChanged ? 3.14 : 0, 0, 0);
+    });
+
+    document.getElementById('change').addEventListener('click', function () {
+        isChanged = !isChanged;
+        onButton.material = redMaterial;
+        onMaterial.map    = new THREE.CanvasTexture(
+            makeLabelCanvas(18, 'OFF', 'rgba(0,1,0,0.2)', 'rgba(250,0,5,1)')
+        );
+        points = []; t = 0;
+        addPath();
+        MagLine.rotation.set(isChanged ? 3.14 : 0, 0, 0);
+    });
+}
+
+/* ─────────────────────────────────────
+   LABEL / CANVAS HELPERS
+───────────────────────────────────── */
+
+function makeLabelCanvas(size, name, backgdCol, color) {
+
+    const borderSize = 2;
+    const ctx  = document.createElement('canvas').getContext('2d');
+    const font = `${size}px bold sans-serif`;
+    ctx.font   = font;
+
+    const dbs    = borderSize * 2;
+    const width  = ctx.measureText(name).width + dbs;
+    const height = size + dbs;
+
+    ctx.canvas.width  = width;
+    ctx.canvas.height = height;
+    ctx.font          = font;
+    ctx.textBaseline  = 'top';
+
+    ctx.fillStyle = backgdCol;
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = color;
+    ctx.fillText(name, borderSize, borderSize);
+
+    return ctx.canvas;
+}
+
+function makeText(x, y, z, size, material, name, backgdCol, color) {
+
+    const canvas = makeLabelCanvas(size, name, backgdCol, color);
+    material.map = new THREE.CanvasTexture(canvas);
+
+    const root  = new THREE.Object3D();
+    root.position.set(x, y, z);
+
+    const label          = new THREE.Mesh(labelGeometry, material);
+    const labelBaseScale = 0.01;
+    label.scale.x        = canvas.width  * labelBaseScale;
+    label.scale.y        = canvas.height * labelBaseScale;
+
+    root.add(label);
+    scene.add(root);
+
+    return root;
+}
+
+function generateTexture() {
+
+    const canvas  = document.createElement('canvas');
+    canvas.width  = 2;
+    canvas.height = 2;
+    const ctx     = canvas.getContext('2d');
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 1, 2, 1);
+    return canvas;
+}
+
+/* ════════════════════════════════════════
+   RESIZE
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

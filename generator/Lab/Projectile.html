@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Projectile Motion Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* CSS2D labels */
+        .label {
+            color:#fff; font-size:12px; font-family:'Segoe UI',sans-serif;
+            background:rgba(0,0,0,0.45); padding:2px 6px;
+            border-radius:3px; pointer-events:none; white-space:nowrap;
+        }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Side menu – Projectile Data table ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:280px;
+            background:rgba(15,15,20,.90);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.8;
+        }
+        #sidemenu h3 {
+            font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+            color:#aaa; margin-bottom:10px;
+            border-bottom:1px solid rgba(255,255,255,.08);
+            padding-bottom:6px;
+        }
+        #caltable { width:100%; border-collapse:collapse; font-size:11.5px; }
+        #caltable td { padding:3px 4px; color:#ccc; }
+        #caltable td:nth-child(3) { text-align:right; color:#e07070; font-weight:600; min-width:40px; }
+        #caltable td:nth-child(4) { color:#888; padding-left:4px; }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12px;
+            padding:8px 16px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px 14px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu label { color:#aaa; font-size:11px; }
+        #menu a     { color:#e07070; font-weight:600; }
+        #menu input[type=range] { accent-color:#c0392b; width:110px; vertical-align:middle; }
+
+        /* slider rows */
+        .sl-row { display:flex; align-items:center; gap:6px; font-size:11.5px; }
+
+        /* checkboxes */
+        .chk-row { display:flex; align-items:center; gap:12px; font-size:11.5px; }
+        .chk-row label { display:flex; align-items:center; gap:4px; cursor:pointer; color:#ccc; }
+        .chk-row input[type=checkbox] { accent-color:#c0392b; cursor:pointer; }
+
+        /* live velocity table */
+        #Vtable { font-weight:bold; font-size:11.5px; }
+        #Vtable td { padding:2px 4px; color:#ccc; }
+        #Vtable td:nth-child(3) { text-align:right; color:#e07070; min-width:36px; }
+        #Vtable td:nth-child(4) { color:#888; }
+
+        #message-el {
+            flex:1 1 100%; font-size:11px; color:#aaa; margin-top:2px;
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover  { filter:brightness(1.18); }
+        #menu button:disabled { opacity:.4; cursor:default; }
+        #shoot-el  { background:rgb(26,130,26); }
+        #reset-el  { background:rgb(164,26,26); }
+        #theory-el { background:#1a4e8f; }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Mechanics &mdash; Projectile Motion</div>
+
+    <!-- Left panel: Projectile Data -->
+    <div id="sidemenu">
+        <h3>Projectile Data</h3>
+        <table id="caltable">
+            <tr><td>Launch Height (y<sub>0</sub>)</td><td>=</td><td>0</td><td>m</td></tr>
+            <tr><td>Launch Velocity (v<sub>0</sub>)</td><td>=</td><td>7</td><td>m/s</td></tr>
+            <tr><td>Launch Angle (&theta;)</td><td>=</td><td>45</td><td>&deg;</td></tr>
+            <tr><td>v<sub>0</sub> cos&theta;</td><td>=</td><td>__</td><td>m/s</td></tr>
+            <tr><td>v<sub>0</sub> sin&theta;</td><td>=</td><td>__</td><td>m/s</td></tr>
+            <tr><td>Maximum Height</td><td>=</td><td>__</td><td>m</td></tr>
+            <tr><td>Maximum Range</td><td>=</td><td>__</td><td>m</td></tr>
+            <tr><td>Time of Flight</td><td>=</td><td>__</td><td>s</td></tr>
+        </table>
+    </div>
+
+    <!-- Bottom bar -->
+    <div id="menu">
+
+        <!-- Sliders -->
+        <div class="sl-row">
+            <label for="height">Launch Height =</label>
+            <input type="range" id="height" min="0" max="25" value="0" step="1">
+            <a id="heightDisplay">0</a> m
+        </div>
+        <div class="sl-row">
+            <label for="velocity">Launch Velocity =</label>
+            <input type="range" id="velocity" min="0" max="25" value="7" step="0.5">
+            <a id="velocityDisplay">7</a> m/s
+        </div>
+        <div class="sl-row">
+            <label for="angle">Launch Angle =</label>
+            <input type="range" id="angle" min="0" max="90" value="45" step="5">
+            <a id="angleDisplay">45</a> &deg;
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="chk-row">
+            <label><input type="checkbox" id="chk-grid"> GRID</label>
+            <label><input type="checkbox" id="chk-vector" checked> VECTOR</label>
+            <label><input type="checkbox" id="chk-components"> COMPONENTS</label>
+        </div>
+
+        <!-- Live velocity table -->
+        <table id="Vtable">
+            <tr><td>v<sub>x</sub></td><td>=</td><td>__</td><td>m/s</td></tr>
+            <tr><td>v<sub>y</sub></td><td>=</td><td>__</td><td>m/s</td></tr>
+        </table>
+
+        <!-- Buttons -->
+        <button id="shoot-el">SHOOT</button>
+        <button id="reset-el">RESET</button>
+        <button id="theory-el">THEORY</button>
+
+        <div id="message-el">
+            Adjust launch height, angle and velocity of the projectile to visualise the trajectory.
+        </div>
+    </div>
+
+</div>
+<!-- ═══════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* ── Ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── Projectile Motion lab ── */
+let projectileGroup = new THREE.Group();
+
+/* scene objects */
+let pmModel, launchHeight, projector, pmFallPoint;
+let pmModelReady = false;
+let plane, scaleHorizontal, scaleVertical;
+let root, mass, vertical, arrows, group;
+let ball, line, point;
+let elevationPoint, launchPoint;
+let angleMeasure, angleGeometry, angleValue, angletext;
+let arrowHelper, speedLabel;
+let velX, velY, VxLabel, VyLabel;
+
+/* physics state */
+const g        = 9.8;
+const deltaT   = 0.07;
+let   a_rad    = 45 * (Math.PI / 180);   // launch angle in radians
+let maxheight  = 0, maxrange = 0, timeflight = 0;
+let vyspeed    = 0, vxspeed  = 0;
+let initialSpeed1 = new THREE.Vector3(0, 0, 0);
+let initialSpeed2 = new THREE.Vector3(0, 0, 0);
+let pmRAF; // requestAnimationFrame handle for projectileMotion loop
+let j = 0; // dataPoints counter
+
+const pmParams = {
+    launchHeight : 0,
+    speed        : 7,
+    degree       : 45,
+    Grid         : false,
+    Velocity     : true,
+    Components   : false
+};
+
+let pmData = {};
+
+/* DOM refs – populated in setupLabUI() */
+let messageEl;
+let heightEl, heightDisplay, angleEl, angleDisplay, velocityEl, velocityDisplay;
+let caltable, Vtable;
+let chkGrid, chkVector, chkComponents;
+let shootBtn, resetBtn;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── Camera (FOV 40 – matches projectile scene) ── */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.5;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.01;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+    createProjectileMotionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+    const hemi = new THREE.HemisphereLight(0xddeeff, 0x202020, 0.8);
+    const main = new THREE.DirectionalLight(0xffffff, 4);
+    main.position.set(10, 10, 10);
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+    scene.add(hemi, main);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition into Projectile Motion lab ── */
+    const transition = moveCamera(-4, 3, 20, 4, 2.5, 0.4, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible    = false;
+            projectileGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera & controls tuned to projectile scene */
+            camera.position.set(-4, 3, 20);
+            camera.fov = 40;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(4, 2.5, 0.4);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            setupLabUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   PROJECTILE MOTION SCENE
+════════════════════════════════════════ */
+
+function createProjectileMotionScene() {
+
+    projectileGroup.visible = false;
+    scene.add(projectileGroup);
+
+    /* Groups used by the simulation */
+    root     = new THREE.Group();
+    mass     = new THREE.Group();
+    vertical = new THREE.Group();
+    arrows   = new THREE.Group();
+    group    = new THREE.Group();
+
+    scene.add(root, mass, vertical, arrows);
+
+    /* Ground */
+    plane = new THREE.Mesh(
+        new THREE.BoxGeometry(300, 2, 100).translate(0, -1, 0),
+        new THREE.MeshBasicMaterial({ color: 0x4F7942, side: THREE.DoubleSide })
+    );
+    projectileGroup.add(plane);
+
+    /* Grids */
+    scaleHorizontal = new THREE.GridHelper(60, 60);
+    scaleVertical   = new THREE.GridHelper(60, 60);
+    scaleVertical.rotation.x = 1.57;
+    scaleVertical.visible    = false;
+    projectileGroup.add(scaleHorizontal, scaleVertical);
+
+    /* Elevation anchor */
+    elevationPoint = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        zRotation: 0, x: 0, y: pmParams.launchHeight / 2, z: 0
+    });
+    scene.add(elevationPoint);
+
+    /* Launch point (child of elevationPoint) */
+    launchPoint = initPoint({
+        vertices: new Float32Array([0, 0, 0]),
+        zRotation: 0, x: 0, y: 0, z: 0
+    });
+    elevationPoint.add(launchPoint);
+
+    /* Angle arc */
+    angleGeometry = new THREE.RingGeometry(0.98, 1, 16, 1, 0, 0.7854);
+    angleMeasure  = new THREE.Mesh(
+        angleGeometry,
+        new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide })
+    );
+    launchPoint.add(angleMeasure);
+
+    angletext           = document.createElement('div');
+    angletext.className = 'label';
+    angletext.textContent = 45;
+    angleValue = new CSS2DObject(angletext);
+    angleValue.position.set(1, 0.3, 0);
+    angleMeasure.add(angleValue);
+
+    launchPoint.add(group);
+    group.add(arrows);
+
+    /* Initial velocity arrow */
+    const a0  = Math.cos(THREE.MathUtils.degToRad(pmParams.degree));
+    const b0  = Math.sin(THREE.MathUtils.degToRad(pmParams.degree));
+    const dir = new THREE.Vector3(a0, b0, 0).normalize();
+    arrowHelper = new THREE.ArrowHelper(dir, new THREE.Vector3(0, 0, 0), pmParams.speed, 0xFFD700);
+    group.add(arrowHelper);
+
+    speedLabel = new CSS2DObject(makeLabelDiv('v₀'));
+    speedLabel.position.copy(arrowHelper.cone.position).add(new THREE.Vector3(0, 0.3, 0));
+    arrowHelper.add(speedLabel);
+
+    /* Component arrows (hidden until toggled) */
+    velX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0),
+                                  vxSpeedCalc(pmParams.speed, pmParams.degree), 0xff0000);
+    velY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0),
+                                  vySpeedCalc(pmParams.speed, pmParams.degree), 0x00ff00);
+    velX.visible = false;
+    velY.visible = false;
+    arrows.add(velX, velY);
+
+    VxLabel = new CSS2DObject(makeLabelDiv('vₓ'));
+    VyLabel = new CSS2DObject(makeLabelDiv('v_y'));
+    velX.add(VxLabel);
+    velY.add(VyLabel);
+
+    /* Load projectile.glb */
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'projectile.glb',
+        function (gltf) {
+            pmModel = gltf.scene;
+
+            launchHeight  = pmModel.getObjectByName('launchHeight');
+            projector     = pmModel.getObjectByName('projector');
+            pmFallPoint   = pmModel.getObjectByName('fallPoint');
+
+            if (projector) {
+                projector.material             = new THREE.MeshPhongMaterial();
+                projector.material.opacity     = 0.6;
+                projector.material.transparent = true;
+                projector.position.y           = 0;
+                projector.rotation.z           = -0.7854;
+            }
+            if (launchHeight) launchHeight.scale.y = 0;
+            if (pmFallPoint)  {
+                pmFallPoint.scale.set(0.2, 0.2, 0.2);
+                pmFallPoint.position.set(5, 0, 0);
+            }
+
+            const base = pmModel.getObjectByName('base');
+            if (base) base.visible = false;
+
+            scene.add(pmModel);
+            projectileGroup.add(pmModel);
+            pmModelReady = true;
+        },
+        undefined,
+        (e) => console.warn('projectile.glb not found – lab works without it.', e)
+    );
+}
+
+/* ════════════════════════════════════════
+   LAB UI  (wired after transition completes)
+════════════════════════════════════════ */
+
+function setupLabUI() {
+
+    messageEl       = document.getElementById('message-el');
+    heightEl        = document.getElementById('height');
+    heightDisplay   = document.getElementById('heightDisplay');
+    angleEl         = document.getElementById('angle');
+    angleDisplay    = document.getElementById('angleDisplay');
+    velocityEl      = document.getElementById('velocity');
+    velocityDisplay = document.getElementById('velocityDisplay');
+    caltable        = document.getElementById('caltable');
+    Vtable          = document.getElementById('Vtable');
+    chkGrid         = document.getElementById('chk-grid');
+    chkVector       = document.getElementById('chk-vector');
+    chkComponents   = document.getElementById('chk-components');
+    shootBtn        = document.getElementById('shoot-el');
+    resetBtn        = document.getElementById('reset-el');
+
+    dataCollection();
+
+    /* ── SHOOT ── */
+    shootBtn.addEventListener('click', () => {
+        vxspeed    = vxSpeedCalc(pmParams.speed, pmParams.degree);
+        vyspeed    = vySpeedCalc(pmParams.speed, pmParams.degree);
+        timeflight = timeFlightCalc(pmParams.speed, pmParams.degree, pmParams.launchHeight);
+        maxheight  = maxHeightCalc(pmParams.speed, pmParams.degree, pmParams.launchHeight);
+        maxrange   = maxRangeCalc(pmParams.speed, pmParams.degree, pmParams.launchHeight);
+        addProjectile();
+        dataCollection();
+    });
+
+    /* ── RESET ── */
+    resetBtn.addEventListener('click', resetScene);
+
+    /* ── THEORY ── */
+    document.getElementById('theory-el').addEventListener('click', () => {
+        window.open('Mechanics_Projectile_Motion.html', '_self');
+    });
+
+    /* ── Height slider ── */
+    heightEl.addEventListener('input', () => {
+        const val = heightEl.valueAsNumber;
+        pmParams.launchHeight   = val;
+        heightDisplay.innerText = val;
+        if (launchPoint)      launchPoint.position.y      = val;
+        if (launchHeight)     launchHeight.scale.y        = val / 10;
+        if (projector)        projector.position.y        = val;
+        if (elevationPoint)   elevationPoint.position.y  = val / 2;
+        setCamera(val);
+        maxheight = maxrange = timeflight = 0;
+        pmData = {};
+        dataCollection();
+    });
+
+    /* ── Angle slider ── */
+    angleEl.addEventListener('input', () => {
+        const val = angleEl.valueAsNumber;
+        pmParams.degree   = val;
+        angleDisplay.innerText = val;
+        a_rad = val * (Math.PI / 180);
+        if (projector) projectorRotate(a_rad);
+        angleLabel(a_rad, val);
+        if (arrowHelper) {
+            const dir = new THREE.Vector3(Math.cos(a_rad), Math.sin(a_rad), 0).normalize();
+            arrowHelper.setDirection(dir);
+        }
+        if (pmParams.Components) updateComponentArrows();
+        maxheight = maxrange = timeflight = 0;
+        pmData = {};
+        velocityVisual(vxSpeedCalc(pmParams.speed, pmParams.degree),
+                       vySpeedCalc(pmParams.speed, pmParams.degree));
+        dataCollection();
+    });
+
+    /* ── Velocity slider ── */
+    velocityEl.addEventListener('input', () => {
+        const val = velocityEl.valueAsNumber;
+        pmParams.speed          = val;
+        velocityDisplay.innerText = val;
+        if (pmParams.Velocity && arrowHelper) {
+            arrowHelper.setLength(val);
+            speedLabel.position.copy(arrowHelper.cone.position)
+                      .add(new THREE.Vector3(0, 0.3, 0));
+        }
+        if (pmParams.Components) updateComponentArrows();
+        maxheight = maxrange = timeflight = 0;
+        pmData = {};
+        velocityVisual(vxSpeedCalc(pmParams.speed, pmParams.degree),
+                       vySpeedCalc(pmParams.speed, pmParams.degree));
+        dataCollection();
+    });
+
+    /* ── GRID checkbox ── */
+    chkGrid.addEventListener('change', () => {
+        pmParams.Grid = chkGrid.checked;
+        if (scaleVertical) scaleVertical.visible = pmParams.Grid;
+    });
+
+    /* ── VECTOR checkbox ── */
+    chkVector.addEventListener('change', () => {
+        pmParams.Velocity = chkVector.checked;
+        if (arrowHelper) arrowHelper.visible = pmParams.Velocity;
+    });
+
+    /* ── COMPONENTS checkbox ── */
+    chkComponents.addEventListener('change', () => {
+        pmParams.Components = chkComponents.checked;
+        if (pmParams.Components) {
+            updateComponentArrows();
+            velX.visible = true;
+            velY.visible = true;
+        } else {
+            velX.visible = false;
+            velY.visible = false;
+        }
+    });
+
+    /* Initial velocity display */
+    velocityVisual(vxSpeedCalc(pmParams.speed, pmParams.degree),
+                   vySpeedCalc(pmParams.speed, pmParams.degree));
+}
+
+/* ════════════════════════════════════════
+   PHYSICS CALCULATORS
+════════════════════════════════════════ */
+
+function vxSpeedCalc(v, deg) {
+    return parseFloat((v * Math.cos(deg * Math.PI / 180)).toFixed(2));
+}
+function vySpeedCalc(v, deg) {
+    return parseFloat((v * Math.sin(deg * Math.PI / 180)).toFixed(2));
+}
+function timeFlightCalc(v, deg, h) {
+    const vy = v * Math.sin(deg * Math.PI / 180);
+    const t  = (vy + Math.sqrt(vy * vy + 2 * g * h)) / g;
+    return parseFloat(t.toFixed(2));
+}
+function maxHeightCalc(v, deg, h) {
+    const vy = v * Math.sin(deg * Math.PI / 180);
+    return parseFloat((h + (vy * vy) / (2 * g)).toFixed(2));
+}
+function maxRangeCalc(v, deg, h) {
+    const vx = v * Math.cos(deg * Math.PI / 180);
+    const t  = timeFlightCalc(v, deg, h);
+    return parseFloat((vx * t).toFixed(2));
+}
+
+/* ════════════════════════════════════════
+   SIMULATION HELPERS
+════════════════════════════════════════ */
+
+function projectorRotate(rad) {
+    projector.rotation.z = -THREE.MathUtils.degToRad(90) + rad;
+}
+
+function angleLabel(rad, deg) {
+    if (!angleMeasure) return;
+    angleMeasure.geometry.dispose();
+    angleMeasure.geometry = new THREE.RingGeometry(0.98, 1, 16, 1, 0, rad);
+    if (angletext) angletext.textContent = deg;
+}
+
+function updateComponentArrows() {
+    const vx = vxSpeedCalc(pmParams.speed, pmParams.degree);
+    const vy = vySpeedCalc(pmParams.speed, pmParams.degree);
+    velX.setLength(Math.abs(vx) || 0.01);
+    velY.setLength(Math.abs(vy) || 0.01);
+}
+
+function makeLabelDiv(text) {
+    const d       = document.createElement('div');
+    d.className   = 'label';
+    d.textContent = text;
+    return d;
+}
+
+function initPoint(data) {
+    const geo  = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(data.vertices, 3));
+    const mat  = new THREE.PointsMaterial({ color: 0x888888, size: 0.01 });
+    const pts  = new THREE.Points(geo, mat);
+    pts.rotation.z  = THREE.MathUtils.degToRad(data.zRotation);
+    pts.position.set(data.x, data.y, data.z);
+    return pts;
+}
+
+function initLine(pts, color) {
+    const geo  = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat  = new THREE.LineBasicMaterial({ color });
+    return new THREE.Line(geo, mat);
+}
+
+function setCamera(h) {
+    if (h <= 6) {
+        camera.position.set(-4, 3, 20);
+        controls.target.set(4, 2.5, 0.4);
+    } else if (h <= 12) {
+        camera.position.set(-3, 6, 42);
+        controls.target.set(10, 12, -5);
+    } else {
+        camera.position.set(-15, 11, 55);
+        controls.target.set(10, 15, 0);
+    }
+    camera.updateProjectionMatrix();
+    controls.update();
+}
+
+/* ── addProjectile ── */
+function addProjectile() {
+
+    /* Remove any previous ball */
+    scene.remove(mass);
+    mass = new THREE.Group();
+    scene.add(mass);
+
+    ball = new THREE.Mesh(
+        new THREE.SphereGeometry(0.2, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0x0000ff })
+    );
+    initialSpeed1 = new THREE.Vector3(0, 0, 0);
+    initialSpeed2 = new THREE.Vector3(0, 0, 0);
+
+    ball.position.copy(launchPoint.position);
+    ball.position.y += pmParams.launchHeight;
+    mass.add(ball);
+    initialSpeed1.copy(ball.position);
+
+    if (pmParams.degree === 90) {
+        j = 0;
+        scene.remove(vertical);
+        vertical = new THREE.Group();
+        scene.add(vertical);
+        ballMotion();
+        dataPoints();
+    } else if (pmParams.degree === 0 && pmParams.speed === 0) {
+        ballMotion();
+    } else if (pmParams.launchHeight === 0 && pmParams.degree === 0) {
+        setTimeout(() => {
+            Vtable.rows[0].cells[2].innerHTML = 0;
+            Vtable.rows[1].cells[2].innerHTML = 0;
+        }, 1000);
+    } else {
+        cancelAnimationFrame(pmRAF);
+        projectileMotion();
+    }
+}
+
+/* ── Parabolic step animation ── */
+function projectileMotion() {
+
+    initialSpeed2.copy(initialSpeed1);
+
+    ball.position.x += deltaT;
+    ball.position.y = pmParams.launchHeight
+        + Math.tan(a_rad) * ball.position.x
+        - (g / (2 * Math.pow(pmParams.speed * Math.cos(a_rad), 2)))
+          * ball.position.x * ball.position.x;
+
+    if (ball.position.y <= 0) {
+        ball.position.y = 0.1;
+        const dot = new THREE.Mesh(
+            new THREE.CircleGeometry(0.06, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffff00 })
+        );
+        dot.position.set(initialSpeed2.x, 0.01, initialSpeed2.z);
+        root.add(dot);
+        Vtable.rows[1].cells[2].innerHTML = (-vxspeed).toFixed(2);
+        cancelAnimationFrame(pmRAF);
+        return;
+    }
+
+    const cal = vyspeed - g * (ball.position.x / vxspeed);
+    initialSpeed1.copy(ball.position);
+
+    scene.add(root);
+    line = initLine([initialSpeed1.clone(), initialSpeed2.clone()], 0xff0000);
+    const dot = new THREE.Mesh(
+        new THREE.CircleGeometry(0.06, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffff00 })
+    );
+    dot.position.copy(initialSpeed2);
+    root.add(line, dot);
+    velocityVisual(vxspeed, cal);
+
+    pmRAF = requestAnimationFrame(projectileMotion);
+}
+
+/* ── Vertical-only (90°) dot trail ── */
+function dataPoints() {
+    const H      = (pmParams.speed * pmParams.speed) / (2 * g);
+    const base_y = launchPoint.position.y;
+    const pts    = [];
+    for (let i = 0; i <= H; i += H / 10) {
+        pts.push(new THREE.Vector3(0, base_y + i, 0));
+    }
+    scene.add(vertical);
+    (function step() {
+        if (j < pts.length) {
+            const dot = new THREE.Mesh(
+                new THREE.CircleGeometry(0.06, 8),
+                new THREE.MeshBasicMaterial({ color: 0xff0000 })
+            );
+            dot.position.copy(pts[j]);
+            vertical.add(dot);
+            j++;
+            requestAnimationFrame(step);
+        }
+    })();
+}
+
+/* ── TWEEN-based straight-up/drop motion ── */
+function ballMotion() {
+    mass.add(ball);
+    const H = (pmParams.speed * pmParams.speed) / (2 * g);
+    if (pmParams.degree === 90) {
+        new TWEEN.Tween(ball.position)
+            .to({ y: H }, pmParams.speed * 50)
+            .easing(TWEEN.Easing.Linear.None).start()
+            .onComplete(() => {
+                new TWEEN.Tween(ball.position)
+                    .to({ y: 0 }, pmParams.speed * 50)
+                    .easing(TWEEN.Easing.Linear.None).start();
+            });
+    } else {
+        new TWEEN.Tween(ball.position)
+            .to({ y: 0.1 }, pmParams.launchHeight * 50)
+            .easing(TWEEN.Easing.Linear.None).start()
+            .onComplete(() => {
+                Vtable.rows[0].cells[2].innerHTML = 0;
+                Vtable.rows[1].cells[2].innerHTML = (g * timeflight).toFixed(2);
+            });
+    }
+}
+
+/* ── RESET ── */
+function resetScene() {
+    cancelAnimationFrame(pmRAF);
+    scene.remove(root, mass, vertical);
+    root     = new THREE.Group();
+    mass     = new THREE.Group();
+    vertical = new THREE.Group();
+    group    = new THREE.Group();
+    scene.add(root, mass, vertical);
+
+    pmParams.launchHeight = 0;
+    pmParams.speed        = 7;
+    pmParams.degree       = 45;
+    pmParams.Grid         = false;
+    pmParams.Velocity     = true;
+    pmParams.Components   = false;
+    maxheight = maxrange = timeflight = 0;
+    pmData = {};
+
+    /* Reset UI controls */
+    heightEl.value          = 0;   heightDisplay.innerText   = 0;
+    velocityEl.value        = 7;   velocityDisplay.innerText = 7;
+    angleEl.value           = 45;  angleDisplay.innerText    = 45;
+    chkGrid.checked         = false;
+    chkVector.checked       = true;
+    chkComponents.checked   = false;
+
+    /* Reset 3D model state */
+    if (launchHeight)   launchHeight.scale.y         = 0;
+    if (projector)      { projector.position.y = 0; projectorRotate(45 * Math.PI / 180); }
+    if (elevationPoint) elevationPoint.position.y    = 0;
+    if (launchPoint)    launchPoint.position.y        = 0;
+    if (scaleVertical)  scaleVertical.visible         = false;
+
+    /* Reset arrow */
+    a_rad = 45 * Math.PI / 180;
+    if (arrowHelper) {
+        arrowHelper.setLength(7);
+        arrowHelper.setDirection(new THREE.Vector3(Math.cos(a_rad), Math.sin(a_rad), 0).normalize());
+        arrowHelper.visible = true;
+    }
+    if (velX) velX.visible = false;
+    if (velY) velY.visible = false;
+    angleLabel(a_rad, 45);
+
+    setCamera(0);
+    dataCollection();
+    velocityVisual(vxSpeedCalc(7, 45), vySpeedCalc(7, 45));
+
+    messageEl.textContent =
+        'Adjust launch height, angle and velocity of the projectile to visualise the trajectory.';
+}
+
+/* ── dataCollection: fills left-panel table ── */
+function dataCollection() {
+    if (!caltable) return;
+    caltable.rows[0].cells[2].innerHTML = pmParams.launchHeight;
+    caltable.rows[1].cells[2].innerHTML = pmParams.speed;
+    caltable.rows[2].cells[2].innerHTML = pmParams.degree;
+    caltable.rows[3].cells[2].innerHTML = vxSpeedCalc(pmParams.speed, pmParams.degree);
+    caltable.rows[4].cells[2].innerHTML = vySpeedCalc(pmParams.speed, pmParams.degree);
+    caltable.rows[5].cells[2].innerHTML = maxheight  || '__';
+    caltable.rows[6].cells[2].innerHTML = maxrange   || '__';
+    caltable.rows[7].cells[2].innerHTML = timeflight || '__';
+}
+
+/* ── velocityVisual: fills bottom Vtable ── */
+function velocityVisual(vx, vy) {
+    if (!Vtable) return;
+    Vtable.rows[0].cells[2].innerHTML = vx;
+    Vtable.rows[1].cells[2].innerHTML = typeof vy === 'number' ? vy.toFixed(2) : vy;
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (labelRenderer) labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+    if (labelRenderer) labelRenderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

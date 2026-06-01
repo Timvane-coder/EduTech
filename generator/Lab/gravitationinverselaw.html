@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Gravitational Force</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── side panel ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:290px;
+            background:rgba(15,15,20,.92);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:2;
+        }
+
+        /* Newton formula block */
+        .formula-box {
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:6px;
+            padding:10px 14px;
+            margin-bottom:10px;
+            font-size:13px;
+            color:#e8e8e8;
+        }
+        .formula-box sub, .formula-box sup { font-size:10px; }
+
+        /* fraction */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+        .bar { display:none; }
+
+        /* ── bottom bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12px;
+            padding:10px 18px;
+            display:flex; align-items:flex-start;
+            flex-wrap:wrap; gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        .data-table {
+            border-collapse:collapse;
+            font-size:12px;
+            color:#d4d4d4;
+        }
+        .data-table td {
+            padding:3px 10px 3px 0;
+            vertical-align:middle;
+        }
+        .data-table td:first-child { color:#aaa; }
+        .data-table a  { color:#e07070; font-weight:600; }
+        .data-table sup, .data-table sub { font-size:9px; }
+
+        #menu select {
+            background:#1e1e28; color:#d4d4d4;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:4px; padding:4px 6px;
+            font-size:12px;
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+            background:rgb(26,78,143);
+            align-self:center;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+
+        /* CSS2D labels emitted by labelRenderer */
+        .grav-label {
+            font-weight:bold;
+            font-size:14px;
+            pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- intro label -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI (hidden until transition) -->
+<div id="labUI">
+
+    <div id="topmenu">Gravitational Force &mdash; Inverse Square Law</div>
+
+    <div id="sidemenu">
+        <div class="formula-box">
+            F = G
+            <div class="fraction">
+                <span class="fup">m<sub>1</sub>m<sub>2</sub></span>
+                <span class="bar">/</span>
+                <span class="fdn">r<sup>2</sup></span>
+            </div>
+            <br>
+            <span style="font-size:11px;color:#aaa;">
+                G = 6.6743 &times; 10<sup>-11</sup> Nm<sup>2</sup>/kg<sup>2</sup>
+            </span>
+        </div>
+    </div>
+
+    <div id="menu">
+        <table class="data-table">
+            <tr>
+                <td>Distance between</td>
+                <td>
+                    <select id="dist-el"></select>
+                </td>
+                <td>= <span id="dist-value"></span></td>
+            </tr>
+            <tr>
+                <td>Mass of <a id="mass1"></a>, m<sub>1</sub> =</td>
+                <td colspan="2" id="m1Value"></td>
+            </tr>
+            <tr>
+                <td>Mass of <a id="mass2"></a>, m<sub>2</sub> =</td>
+                <td colspan="2" id="m2Value"></td>
+            </tr>
+            <tr>
+                <td>Gravitational Force, F =</td>
+                <td colspan="2" id="fValue"></td>
+            </tr>
+        </table>
+
+        <button id="gravLawBtn">Gravitational Law</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* ────────────────────────────────────────
+   Ferrari globals  (unchanged)
+──────────────────────────────────────── */
+let ferrariGroup      = new THREE.Group();
+let gravitationGroup  = new THREE.Group();   // replaces mechanicsGroup / capacitorGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Gravitation scene globals
+──────────────────────────────────────── */
+const G_CONST = 6.6743e-11;   // Nm²/kg²
+
+const mass = {
+    Earth  : '5.972e24',
+    Sun    : '1.989e30',
+    Moon   : '7.348e22',
+    Mars   : '6.416e23',
+    Venus  : '4.867e24',
+    Jupiter: '1.898e27'
+};
+
+const dists = {
+    'Earth-Moon'   : '3.844e5',
+    'Sun-Earth'    : '1.4822e8',
+    'Sun-Jupiter'  : '7.4074e8',
+    'Sun-Venus'    : '1.0803e8',
+    'Sun-Mars'     : '2.4477e8',
+    'Earth-Venus'  : '2.0484e8',
+    'Earth-Mars'   : '1.7301e8',
+    'Jupiter-Earth': '8.633e8',
+    'Venus-Mars'   : '1.1974e8',
+    'Jupiter-Venus': '6.7013e8'
+};
+
+/* planet materials */
+const matLib = {};
+
+const gravParams = {
+    dist      : dists['Earth-Moon'],
+    m1        : 'Earth',
+    m1Mass    : mass['Earth'],
+    m2        : 'Moon',
+    m2Mass    : mass['Moon'],
+    force     : 0
+};
+
+/* THREE groups for gravitation objects */
+let gravObjects = new THREE.Group();
+let gravLabels  = new THREE.Group();
+let gravLines   = new THREE.Group();
+
+/* DOM refs filled by setupGravitationUI() */
+let selectDist, distValueEl, mass1El, m1ValueEl, mass2El, m2ValueEl, fValueEl;
+
+const clock = new THREE.Clock();
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── main WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position      = 'absolute';
+    labelRenderer.domElement.style.top           = '0';
+    labelRenderer.domElement.style.left          = '0';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera (FOV 50 matches gravitation scene) ── */
+    camera = new THREE.PerspectiveCamera(
+        50, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    /* ── build both scenes ── */
+    createLights();
+    createFerrariShowroom();
+    createGravitationForceScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    /* extra lights the gravitation scene uses */
+    const hemi = new THREE.AmbientLight(0xffffff, 0.5);
+    hemi.position.set(0, 200, 0);
+    scene.add(hemi);
+
+    const fill = new THREE.DirectionalLight(0xffffff, 1);
+    fill.position.set(-30, 50, -30);
+    scene.add(fill);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into gravitation scene ── */
+    const transition = moveCamera(-30, 10, 55, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible     = false;
+            gravitationGroup.visible = true;
+
+            /* gravitation scene uses a dark/space background */
+            scene.background = new THREE.Color(0x000510);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls — target matches gravitation scene */
+            controls.enabled = true;
+            controls.target.set(0, 1, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* draw the default Earth-Moon system */
+            earthMoon();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION FORCE SCENE
+════════════════════════════════════════ */
+
+function createGravitationForceScene() {
+
+    gravitationGroup.visible = false;
+    scene.add(gravitationGroup);
+
+    /* planet materials — built once, reused */
+    const tl = new THREE.TextureLoader();
+    matLib['Sun']     = new THREE.MeshBasicMaterial({ map: tl.load('./assets/gravity/sun.jpg') });
+    matLib['Earth']   = new THREE.MeshBasicMaterial({ map: tl.load('./assets/gravity/earth.jpg') });
+    matLib['Moon']    = new THREE.MeshPhongMaterial({ color: 'white' });
+    matLib['Mars']    = new THREE.MeshPhongMaterial({ color: 'red' });
+    matLib['Venus']   = new THREE.MeshPhongMaterial({ color: 'blue' });
+    matLib['Jupiter'] = new THREE.MeshPhongMaterial({ color: 'green' });
+
+    gravParams.m1Material = matLib['Earth'];
+    gravParams.m2Material = matLib['Moon'];
+
+    /* three groups are added to the gravitation group so they
+       hide/show with the rest of the scene */
+    gravitationGroup.add(gravObjects);
+    gravitationGroup.add(gravLabels);
+    gravitationGroup.add(gravLines);
+
+    /* wire up UI */
+    setupGravitationUI();
+}
+
+/* ════════════════════════════════════════
+   EARTH-MOON  (default view)
+════════════════════════════════════════ */
+
+function earthMoon() {
+
+    camera.position.set(-30, 10, 55);
+
+    clearGroup(gravObjects, true);
+
+    const r = 0.5;
+    const m1Geo = new THREE.SphereGeometry(2 ** 3 * r, 16, 16);
+    const m2Geo = new THREE.SphereGeometry(r, 16, 16);
+
+    const m1Mesh = new THREE.Mesh(m1Geo, matLib['Earth']);
+    const m2Mesh = new THREE.Mesh(m2Geo, matLib['Moon']);
+
+    m1Mesh.position.x = 0;
+    const W = gravParams.dist.slice(0, 5) * 10;
+    m2Mesh.position.x = W;
+
+    gravObjects.add(m1Mesh, m2Mesh);
+
+    /* labels */
+    clearGroup(gravLabels, false);
+    gravLabels.add(makeLabel(m1Mesh.position.clone(), '-25px', gravParams.m1, 'white'));
+    gravLabels.add(makeLabel(m2Mesh.position.clone(), '-25px', gravParams.m2, 'white'));
+    gravLabels.add(makeLabel(
+        new THREE.Vector3(W / 2, 0, 0), '25px',
+        gravParams.dist.slice(0, 4) + ' x 10<sup>5</sup> km', 'limegreen'
+    ));
+
+    /* line */
+    clearGroup(gravLines, false);
+    gravLines.add(makeLine(m1Mesh.position.clone(), m2Mesh.position.clone()));
+
+    /* force */
+    const force = gravitationLaw();
+    const fScaled = (force * 1e-20).toFixed(3);
+    gravParams.force = fScaled;
+    gravLabels.add(makeLabel(
+        new THREE.Vector3(W / 2, 0, 0), '-45px',
+        'F = ' + fScaled + ' x 10<sup>20</sup> N', '#ff4444'
+    ));
+
+    updateDataPanel(fScaled + ' x 10<sup>20</sup> N');
+}
+
+/* ════════════════════════════════════════
+   RECREATE SCENE  (all other pairs)
+════════════════════════════════════════ */
+
+function recreateScene(pow) {
+
+    camera.position.set(-120, 0, 100);
+
+    clearGroup(gravObjects, true);
+
+    const massDiff = Math.abs(
+        parseInt(gravParams.m1Mass.slice(-2)) - parseInt(gravParams.m2Mass.slice(-2))
+    ) * 2;
+
+    const r1 = massDiff === 0 ? 5 : 2 * massDiff;
+    const r2 = massDiff === 0 ? 5 : 2;
+
+    const m1Mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(r1, 16, 16), gravParams.m1Material
+    );
+    const m2Mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(r2, 16, 16), gravParams.m2Material
+    );
+
+    const W = gravParams.dist.slice(0, 5) * 150;
+    m1Mesh.position.x = 0;
+    m2Mesh.position.x = W;
+    gravObjects.add(m1Mesh, m2Mesh);
+
+    /* labels */
+    clearGroup(gravLabels, false);
+    gravLabels.add(makeLabel(m1Mesh.position.clone(), '-25px', gravParams.m1, 'white'));
+    gravLabels.add(makeLabel(m2Mesh.position.clone(), '-25px', gravParams.m2, 'white'));
+    gravLabels.add(makeLabel(
+        new THREE.Vector3(W / 2, 0, 0), '25px',
+        'r = ' + gravParams.dist.slice(0, 4) + ' x 10<sup>8</sup> km', 'limegreen'
+    ));
+    gravLabels.add(makeLabel(
+        new THREE.Vector3(W / 2, 0, 0), '-45px',
+        'F = ' + Number(gravParams.force).toFixed(2) + ' x 10<sup>' + pow + '</sup> N', '#ff4444'
+    ));
+
+    /* line */
+    clearGroup(gravLines, false);
+    gravLines.add(makeLine(m1Mesh.position.clone(), m2Mesh.position.clone()));
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION UI
+════════════════════════════════════════ */
+
+function setupGravitationUI() {
+
+    selectDist  = document.getElementById('dist-el');
+    distValueEl = document.getElementById('dist-value');
+    mass1El     = document.getElementById('mass1');
+    m1ValueEl   = document.getElementById('m1Value');
+    mass2El     = document.getElementById('mass2');
+    m2ValueEl   = document.getElementById('m2Value');
+    fValueEl    = document.getElementById('fValue');
+
+    /* populate dropdown */
+    for (const key in dists) {
+        const opt = document.createElement('option');
+        opt.textContent = opt.value = key;
+        selectDist.appendChild(opt);
+    }
+
+    /* initial display */
+    refreshDataRow();
+
+    /* distance pair selector */
+    selectDist.addEventListener('input', () => {
+
+        gravParams.dist = dists[selectDist.value];
+
+        /* parse body names from "Body1-Body2" */
+        const dash = selectDist.value.indexOf('-');
+        gravParams.m1 = selectDist.value.slice(0, dash);
+        gravParams.m2 = selectDist.value.slice(dash + 1);
+
+        gravParams.m1Mass     = mass[gravParams.m1];
+        gravParams.m2Mass     = mass[gravParams.m2];
+        gravParams.m1Material = matLib[gravParams.m1];
+        gravParams.m2Material = matLib[gravParams.m2];
+
+        const force  = gravitationLaw();
+        const pow    = countDigits(force) - 1;
+        gravParams.force = Number((force * Math.pow(10, -pow)).toFixed(3));
+
+        refreshDataRow();
+        fValueEl.innerHTML = gravParams.force + ' x 10<sup>' + pow + '</sup> N';
+
+        if (gravParams.m2 === 'Moon') {
+            earthMoon();
+        } else {
+            recreateScene(pow);
+        }
+    });
+
+    /* theory button */
+    document.getElementById('gravLawBtn').addEventListener('click', () => {
+        window.open('Mechanics_Gravitation_Law.html', '_self');
+    });
+}
+
+/* ════════════════════════════════════════
+   GRAVITATION HELPERS
+════════════════════════════════════════ */
+
+function gravitationLaw() {
+    /* dist in km → convert to m: × 1e3.
+       formula:  F = G m1 m2 / r²  (r in metres) */
+    const r_m = parseFloat(gravParams.dist) * 1e3;
+    return (G_CONST * parseFloat(gravParams.m1Mass) * parseFloat(gravParams.m2Mass))
+           / (r_m * r_m);
+}
+
+function countDigits(num) {
+    let count = 0;
+    while (num >= 10) { num /= 10; count++; }
+    return count + 1;
+}
+
+function refreshDataRow() {
+    const exp = s => s.slice(0, 5) + ' x 10<sup>' + s.slice(-2) + '</sup>';
+    distValueEl.innerHTML = gravParams.dist.slice(0, 5) +
+                            ' x 10<sup>' + gravParams.dist.slice(-1) + '</sup> km';
+    mass1El.innerHTML     = gravParams.m1;
+    m1ValueEl.innerHTML   = exp(gravParams.m1Mass) + ' kg';
+    mass2El.innerHTML     = gravParams.m2;
+    m2ValueEl.innerHTML   = exp(gravParams.m2Mass) + ' kg';
+}
+
+function updateDataPanel(fHTML) {
+    if (fValueEl) fValueEl.innerHTML = fHTML;
+}
+
+function makeLabel(position, topOffset, html, color) {
+    const div       = document.createElement('div');
+    div.className   = 'grav-label';
+    div.style.color = color;
+    div.style.top   = topOffset;
+    div.innerHTML   = html;
+    const obj = new CSS2DObject(div);
+    obj.position.copy(position);
+    return obj;
+}
+
+function makeLine(posA, posB) {
+    const geo = new THREE.BufferGeometry().setFromPoints([posA, posB]);
+    const mat = new THREE.LineBasicMaterial({ color: 0xff2222 });
+    return new THREE.Line(geo, mat);
+}
+
+function clearGroup(group, disposeGeo) {
+    while (group.children.length > 0) {
+        const child = group.children[0];
+        if (disposeGeo && child.geometry) child.geometry.dispose();
+        group.remove(child);
+    }
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* render both main scene and CSS2D labels */
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

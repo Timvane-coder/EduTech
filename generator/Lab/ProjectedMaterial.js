@@ -1,0 +1,397 @@
+import * as THREE from 'three'
+import { monkeyPatch, addLoadListener } from '../lib/three-utils.js'
+
+export default class ProjectedMaterial extends THREE.MeshPhysicalMaterial {
+  #camera
+  #cover
+  #textureScale
+
+  get camera() {
+    return this.#camera
+  }
+  set camera(camera) {
+    if (!camera?.isCamera) {
+      throw new Error('Invalid camera set to the ProjectedMaterial')
+    }
+    if (camera.type !== this.#camera.type) {
+      throw new Error(
+        'Cannot change camera type after the material has been created. Use another material.'
+      )
+    }
+    this.#camera = camera
+    this.#saveDimensions()
+  }
+
+  get texture() {
+    return this.uniforms.projectedTexture.value
+  }
+  set texture(texture) {
+    if (!texture?.isTexture) {
+      throw new Error('Invalid texture set to the ProjectedMaterial')
+    }
+    this.uniforms.projectedTexture.value = texture
+    this.uniforms.isTextureLoaded.value = Boolean(texture.image)
+
+    if (!this.uniforms.isTextureLoaded.value) {
+      addLoadListener(texture, () => {
+        this.uniforms.isTextureLoaded.value = true
+        this.dispatchEvent({ type: 'textureload' })
+        this.#saveDimensions()
+      })
+    } else {
+      this.#saveDimensions()
+    }
+  }
+
+  get textureScale() { return this.#textureScale }
+  set textureScale(v) { this.#textureScale = v; this.#saveDimensions() }
+
+  get textureOffset() { return this.uniforms.textureOffset.value }
+  set textureOffset(v) { this.uniforms.textureOffset.value = v }
+
+  get backgroundOpacity() { return this.uniforms.backgroundOpacity.value }
+  set backgroundOpacity(v) {
+    this.uniforms.backgroundOpacity.value = v
+    if (v < 1 && !this.transparent) {
+      console.warn(
+        'You have to pass "transparent: true" to the ProjectedMaterial for the backgroundOpacity option to work'
+      )
+    }
+  }
+
+  get cover() { return this.#cover }
+  set cover(v) { this.#cover = v; this.#saveDimensions() }
+
+  constructor({
+    camera = new THREE.PerspectiveCamera(),
+    texture = new THREE.Texture(),
+    textureScale = 1,
+    textureOffset = new THREE.Vector2(),
+    backgroundOpacity = 1,
+    cover = false,
+    ...options
+  } = {}) {
+    if (!texture.isTexture) throw new Error('Invalid texture passed to the ProjectedMaterial')
+    if (!camera.isCamera) throw new Error('Invalid camera passed to the ProjectedMaterial')
+
+    if (backgroundOpacity < 1 && !options.transparent) {
+      console.warn(
+        'You have to pass "transparent: true" to the ProjectedMaterial for the backgroundOpacity option to work'
+      )
+    }
+
+    super(options)
+
+    Object.defineProperty(this, 'isProjectedMaterial', { value: true })
+
+    this.#camera = camera
+    this.#cover = cover
+    this.#textureScale = textureScale
+
+    const [widthScaled, heightScaled] = computeScaledDimensions(texture, camera, textureScale, cover)
+
+    this.uniforms = {
+      projectedTexture:     { value: texture },
+      isTextureLoaded:      { value: Boolean(texture.image) },
+      isTextureProjected:   { value: false },
+      backgroundOpacity:    { value: backgroundOpacity },
+      viewMatrixCamera:     { value: new THREE.Matrix4() },
+      projectionMatrixCamera: { value: new THREE.Matrix4() },
+      projPosition:         { value: new THREE.Vector3() },
+      projDirection:        { value: new THREE.Vector3(0, 0, -1) },
+      savedModelMatrix:     { value: new THREE.Matrix4() },
+      widthScaled:          { value: widthScaled },
+      heightScaled:         { value: heightScaled },
+      textureOffset:        { value: textureOffset },
+    }
+
+    this.onBeforeCompile = (shader) => {
+      Object.assign(this.uniforms, shader.uniforms)
+      shader.uniforms = this.uniforms
+
+      if (this.camera.isOrthographicCamera) {
+        shader.defines.ORTHOGRAPHIC = ''
+      }
+
+      shader.vertexShader = monkeyPatch(shader.vertexShader, {
+        header: /* glsl */ `
+          uniform mat4 viewMatrixCamera;
+          uniform mat4 projectionMatrixCamera;
+
+          #ifdef USE_INSTANCING
+          attribute vec4 savedModelMatrix0;
+          attribute vec4 savedModelMatrix1;
+          attribute vec4 savedModelMatrix2;
+          attribute vec4 savedModelMatrix3;
+          #else
+          uniform mat4 savedModelMatrix;
+          #endif
+
+          varying vec3 vSavedNormal;
+          varying vec4 vTexCoords;
+          #ifndef ORTHOGRAPHIC
+          varying vec4 vWorldPosition;
+          #endif
+        `,
+        main: /* glsl */ `
+          #ifdef USE_INSTANCING
+          mat4 savedModelMatrix = mat4(
+            savedModelMatrix0,
+            savedModelMatrix1,
+            savedModelMatrix2,
+            savedModelMatrix3
+          );
+          #endif
+
+          vSavedNormal = mat3(savedModelMatrix) * normal;
+          vTexCoords = projectionMatrixCamera * viewMatrixCamera * savedModelMatrix * vec4(position, 1.0);
+          #ifndef ORTHOGRAPHIC
+          vWorldPosition = savedModelMatrix * vec4(position, 1.0);
+          #endif
+        `,
+      })
+
+      shader.fragmentShader = monkeyPatch(shader.fragmentShader, {
+        header: /* glsl */ `
+          uniform sampler2D projectedTexture;
+          uniform bool isTextureLoaded;
+          uniform bool isTextureProjected;
+          uniform float backgroundOpacity;
+          uniform vec3 projPosition;
+          uniform vec3 projDirection;
+          uniform float widthScaled;
+          uniform float heightScaled;
+          uniform vec2 textureOffset;
+
+          varying vec3 vSavedNormal;
+          varying vec4 vTexCoords;
+          #ifndef ORTHOGRAPHIC
+          varying vec4 vWorldPosition;
+          #endif
+
+          float mapRange(float value, float min1, float max1, float min2, float max2) {
+            return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+          }
+        `,
+        'vec4 diffuseColor = vec4( diffuse, opacity );': /* glsl */ `
+          float w = max(vTexCoords.w, 0.0);
+          vec2 uv = (vTexCoords.xy / w) * 0.5 + 0.5;
+
+          uv += textureOffset;
+
+          uv.x = mapRange(uv.x, 0.0, 1.0, 0.5 - widthScaled / 2.0, 0.5 + widthScaled / 2.0);
+          uv.y = mapRange(uv.y, 0.0, 1.0, 0.5 - heightScaled / 2.0, 0.5 + heightScaled / 2.0);
+
+          bool isInTexture = (max(uv.x, uv.y) <= 1.0 && min(uv.x, uv.y) >= 0.0);
+
+          #ifdef ORTHOGRAPHIC
+          vec3 projectorDirection = projDirection;
+          #else
+          vec3 projectorDirection = normalize(projPosition - vWorldPosition.xyz);
+          #endif
+          float dotProduct = dot(vSavedNormal, projectorDirection);
+          bool isFacingProjector = dotProduct > 0.0000001;
+
+          vec4 diffuseColor = vec4(diffuse, opacity * backgroundOpacity);
+
+          if (isFacingProjector && isInTexture && isTextureLoaded && isTextureProjected) {
+            vec4 textureColor = texture2D(projectedTexture, uv);
+            textureColor.a *= opacity;
+            diffuseColor = textureColor * textureColor.a + diffuseColor * (1.0 - textureColor.a);
+          }
+        `,
+      })
+    }
+
+    window.addEventListener('resize', this.#saveCameraProjectionMatrix)
+
+    addLoadListener(texture, () => {
+      this.uniforms.isTextureLoaded.value = true
+      this.dispatchEvent({ type: 'textureload' })
+      this.#saveDimensions()
+    })
+  }
+
+  #saveCameraProjectionMatrix = () => {
+    // ensure camera matrix is current before copying
+    this.camera.updateProjectionMatrix()
+    this.uniforms.projectionMatrixCamera.value.copy(this.camera.projectionMatrix)
+    this.#saveDimensions()
+  }
+
+  #saveDimensions() {
+    const [widthScaled, heightScaled] = computeScaledDimensions(
+      this.texture,
+      this.camera,
+      this.textureScale,
+      this.cover
+    )
+    this.uniforms.widthScaled.value = widthScaled
+    this.uniforms.heightScaled.value = heightScaled
+  }
+
+  #saveCameraMatrices() {
+    this.camera.updateProjectionMatrix()
+    this.camera.updateMatrixWorld()
+    this.camera.updateWorldMatrix()
+
+    const viewMatrixCamera = this.camera.matrixWorldInverse
+    const projectionMatrixCamera = this.camera.projectionMatrix
+    const modelMatrixCamera = this.camera.matrixWorld
+
+    this.uniforms.viewMatrixCamera.value.copy(viewMatrixCamera)
+    this.uniforms.projectionMatrixCamera.value.copy(projectionMatrixCamera)
+    this.uniforms.projPosition.value.setFromMatrixPosition(modelMatrixCamera)
+    this.uniforms.projDirection.value.set(0, 0, 1).applyMatrix4(modelMatrixCamera)
+    this.uniforms.isTextureProjected.value = true
+  }
+
+  project(mesh) {
+    const mat = mesh.material
+    const hasProjected = Array.isArray(mat)
+      ? mat.some((m) => m.isProjectedMaterial)
+      : mat.isProjectedMaterial
+
+    if (!hasProjected) {
+      throw new Error('The mesh material must be a ProjectedMaterial')
+    }
+
+    const isThisMat = Array.isArray(mat)
+      ? mat.some((m) => m === this)
+      : mat === this
+
+    if (!isThisMat) {
+      throw new Error(
+        "The provided mesh doesn't have the same material as where project() has been called from"
+      )
+    }
+
+    mesh.updateWorldMatrix(true, false)
+    this.uniforms.savedModelMatrix.value.copy(mesh.matrixWorld)
+
+    if (Array.isArray(mat)) {
+      const idx = mat.indexOf(this)
+      if (!mat[idx].transparent) {
+        console.warn(
+          'You have to pass "transparent: true" to the ProjectedMaterial if you\'re working with multiple materials.'
+        )
+      }
+      if (idx > 0) {
+        this.uniforms.backgroundOpacity.value = 0
+      }
+    }
+
+    this.#saveCameraMatrices()
+  }
+
+  projectInstanceAt(index, instancedMesh, matrixWorld, { forceCameraSave = false } = {}) {
+    if (!instancedMesh.isInstancedMesh) {
+      throw new Error('The provided mesh is not an InstancedMesh')
+    }
+
+    const mat = instancedMesh.material
+    if (!(Array.isArray(mat) ? mat.every((m) => m.isProjectedMaterial) : mat.isProjectedMaterial)) {
+      throw new Error('The InstancedMesh material must be a ProjectedMaterial')
+    }
+
+    if (!(Array.isArray(mat) ? mat.some((m) => m === this) : mat === this)) {
+      throw new Error(
+        "The provided InstancedMesh doesn't include the same material where project() has been called from"
+      )
+    }
+
+    for (let i = 0; i < 4; i++) {
+      if (!instancedMesh.geometry.attributes[`savedModelMatrix${i}`]) {
+        throw new Error(
+          "No allocated data found on the geometry, please call 'allocateProjectionData(geometry, instancesCount)'"
+        )
+      }
+    }
+
+    instancedMesh.geometry.attributes['savedModelMatrix0'].setXYZW(index, matrixWorld.elements[0],  matrixWorld.elements[1],  matrixWorld.elements[2],  matrixWorld.elements[3])
+    instancedMesh.geometry.attributes['savedModelMatrix1'].setXYZW(index, matrixWorld.elements[4],  matrixWorld.elements[5],  matrixWorld.elements[6],  matrixWorld.elements[7])
+    instancedMesh.geometry.attributes['savedModelMatrix2'].setXYZW(index, matrixWorld.elements[8],  matrixWorld.elements[9],  matrixWorld.elements[10], matrixWorld.elements[11])
+    instancedMesh.geometry.attributes['savedModelMatrix3'].setXYZW(index, matrixWorld.elements[12], matrixWorld.elements[13], matrixWorld.elements[14], matrixWorld.elements[15])
+
+    if (Array.isArray(mat)) {
+      const idx = mat.indexOf(this)
+      if (!mat[idx].transparent) {
+        console.warn(
+          'You have to pass "transparent: true" to the ProjectedMaterial if you\'re working with multiple materials.'
+        )
+      }
+      if (idx > 0) this.uniforms.backgroundOpacity.value = 0
+    }
+
+    if (index === 0 || forceCameraSave) {
+      this.#saveCameraMatrices()
+    }
+  }
+
+  copy(source) {
+    super.copy(source)
+    this.camera = source.camera
+    this.texture = source.texture
+    this.textureScale = source.textureScale
+    this.textureOffset = source.textureOffset
+    this.cover = source.cover
+    return this
+  }
+
+  dispose() {
+    super.dispose()
+    window.removeEventListener('resize', this.#saveCameraProjectionMatrix)
+  }
+}
+
+function getCameraRatio(camera) {
+  switch (camera.type) {
+    case 'PerspectiveCamera':
+      return camera.aspect
+    case 'OrthographicCamera': {
+      const width = Math.abs(camera.right - camera.left)
+      const height = Math.abs(camera.top - camera.bottom)
+      return width / height
+    }
+    default:
+      throw new Error(`${camera.type} is currently not supported in ProjectedMaterial`)
+  }
+}
+
+function computeScaledDimensions(texture, camera, textureScale, cover) {
+  if (!texture.image) return [1, 1]
+
+  // video not ready yet
+  if (texture.image.videoWidth === 0 && texture.image.videoHeight === 0) return [1, 1]
+
+  const sourceWidth  = texture.image.naturalWidth  || texture.image.videoWidth  || texture.image.clientWidth
+  const sourceHeight = texture.image.naturalHeight || texture.image.videoHeight || texture.image.clientHeight
+
+  const ratio = sourceWidth / sourceHeight
+  const ratioCamera = getCameraRatio(camera)
+  const widthCamera = 1
+  const heightCamera = widthCamera * (1 / ratioCamera)
+
+  let widthScaled, heightScaled
+
+  if (cover ? ratio > ratioCamera : ratio < ratioCamera) {
+    const width = heightCamera * ratio
+    widthScaled  = 1 / ((width / widthCamera) * textureScale)
+    heightScaled = 1 / textureScale
+  } else {
+    const height = widthCamera * (1 / ratio)
+    heightScaled = 1 / ((height / heightCamera) * textureScale)
+    widthScaled  = 1 / textureScale
+  }
+
+  return [widthScaled, heightScaled]
+}
+
+export function allocateProjectionData(geometry, instancesCount) {
+  for (let i = 0; i < 4; i++) {
+    geometry.setAttribute(
+      `savedModelMatrix${i}`,
+      new THREE.InstancedBufferAttribute(new Float32Array(instancesCount * 4), 4)
+    )
+  }
+}

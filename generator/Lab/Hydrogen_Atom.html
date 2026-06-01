@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Hydrogen Atom</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#000; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(5,5,12,.95);
+            color:#c8d8ff; font-size:13px; letter-spacing:.14em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(100,140,255,.15);
+        }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(5,5,12,.95);
+            color:#c0cce8; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(100,140,255,.15);
+        }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#7090c0; margin-top:2px;
+        }
+
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.07em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.2); }
+        #change  { background:#1a3a7a; border:1px solid rgba(100,160,255,.35); }
+        #quantum { background:#2a1a6a; border:1px solid rgba(160,100,255,.35); }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<div id="labUI">
+    <div id="topmenu">Quantum Physics &mdash; Hydrogen Atom</div>
+    <div id="menu">
+        <button id="change">Energy Levels</button>
+        <button id="quantum">Quantum Behaviour</button>
+        <div id="message-el">Explore the hydrogen atom — toggle energy levels or quantum behaviour</div>
+    </div>
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── Ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── Quantum scene ── */
+let quantumGroup = new THREE.Group();
+
+// Atom building blocks
+let atom      = new THREE.Group();
+let POINTS    = new THREE.Group();
+let arrows    = new THREE.Group();
+let labels    = new THREE.Group();
+let electron, orbit, curve;
+
+const qClock  = new THREE.Clock();
+let   t       = 0, interval = 0, requestID;
+const v       = new THREE.Vector3();
+
+const labelGeometry = new THREE.PlaneGeometry(32, 32);
+let isChanged = false, isQuantum = false;
+
+// DOM refs
+let changeEl, quantumEl, messageEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── Renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── Camera ── */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createQuantumScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit3d  = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Quantum lab ── */
+    const transition = moveCamera(-20, 40, 150, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            quantumGroup.visible = true;
+
+            /* Quantum scene is dark/space */
+            scene.background = new THREE.Color(0x000000);
+            scene.environment = null;
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera tuned to quantum scene */
+            camera.fov = 60;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* Start electron orbital animation */
+            planetMovement();
+
+            /* Lazy-load lil-gui only now that the lab is visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => setupQuantumGUI(GUI))
+                .catch(e => console.warn('lil-gui failed to load', e));
+
+            setupLabUI();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit3d);
+    orbit3d.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   QUANTUM SCENE
+════════════════════════════════════════ */
+
+function createQuantumScene() {
+
+    quantumGroup.visible = false;
+    scene.add(quantumGroup);
+
+    /* All sub-groups live inside quantumGroup so they hide/show together */
+    quantumGroup.add(atom, arrows, POINTS, labels);
+
+    buildHydrogenAtom();
+    addElectronCloud();
+}
+
+/* ────────────────────────────────────────
+   buildHydrogenAtom
+──────────────────────────────────────── */
+
+function buildHydrogenAtom() {
+
+    /* ── Nucleus ── */
+    const atomGeo = new THREE.IcosahedronGeometry(5, 6);
+    const atomMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+
+    /* Attempt to load sun texture; silently fall back if missing */
+    new THREE.TextureLoader().load(
+        './assets/gravity/sun.jpg',
+        (tex) => { atomMat.map = tex; atomMat.needsUpdate = true; },
+        undefined,
+        () => {}
+    );
+
+    const nucleus = new THREE.Mesh(atomGeo, atomMat);
+    atom.add(nucleus);
+
+    /* ── Electron ── */
+    electron          = nucleus.clone();
+    electron.material = new THREE.MeshPhongMaterial({ color: 0x0000ff });
+    electron.position.set(30, 0, 0);
+    electron.scale.set(0.5, 0.5, 0.5);
+
+    /* ── Orbital ellipse ── */
+    const built = addEllipse(30, 30, 0, 100, 'yellow');
+    orbit = built.ellipse;
+    curve = built.curve;
+    orbit.rotation.x = -1.57;
+
+    quantumGroup.add(electron, orbit);
+
+    /* Quantum cloud shell (hidden until Quantum Behaviour toggled) */
+    const cloud = nucleus.clone();
+    cloud.material = new THREE.MeshBasicMaterial({
+        color: 0x0000ff, transparent: true, opacity: 0.2
+    });
+    cloud.scale.set(6, 6, 6);
+    POINTS.add(cloud);
+}
+
+/* ────────────────────────────────────────
+   addElectronCloud  – probability cloud points
+──────────────────────────────────────── */
+
+function addElectronCloud() {
+
+    const a = 27, b = 22;
+
+    for (let i = 0.02; i < Math.PI; i += 0.05) {
+        const vertices = [];
+        for (let j = 0.04; j < 2 * Math.PI; j += 0.05) {
+            const r = Math.random() * (a - b) + a;
+            vertices.push(
+                (Math.random() * (a - b) + a) * Math.sin(j),
+                (Math.random() * (a - b) + a) * Math.cos(j),
+                0
+            );
+        }
+        const geo  = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        const pts  = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x888888, size: 0.5 }));
+        pts.rotation.set(0, i, 0);
+        POINTS.add(pts);
+    }
+}
+
+/* ────────────────────────────────────────
+   hydrogenLevels  – energy level diagram
+──────────────────────────────────────── */
+
+function hydrogenLevels() {
+
+    /* Clear previously built labels & arrows to avoid duplication */
+    while (labels.children.length)  labels.remove(labels.children[0]);
+    while (arrows.children.length)  arrows.remove(arrows.children[0]);
+
+    const levels = [
+        { n:1, l:0, name:'1s' }, { n:2, l:0, name:'2s' }, { n:2, l:1, name:'2p' },
+        { n:3, l:0, name:'3s' }, { n:3, l:1, name:'3p' }, { n:3, l:2, name:'3d' },
+        { n:4, l:0, name:'4s' }, { n:4, l:1, name:'4p' }, { n:4, l:2, name:'4d' },
+        { n:4, l:3, name:'4f' }, { n:5, l:0, name:'5s' }, { n:5, l:1, name:'5p' },
+        { n:5, l:2, name:'5d' }, { n:5, l:3, name:'5f' }, { n:6, l:0, name:'6s' },
+        { n:6, l:1, name:'6p' }, { n:6, l:2, name:'6d' }, { n:7, l:0, name:'7s' },
+        { n:7, l:1, name:'7p' }
+    ];
+
+    const filamentMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+
+    for (const lvl of levels) {
+        const x = 10 * lvl.l;
+        const y = 10 * lvl.n;
+        labels.add(makeText(x, y, 0, 22, filamentMat.clone(), lvl.name, 'rgba(0,0,0,0.1)', 'rgba(0,255,255,1)'));
+        const arrow = new THREE.ArrowHelper(
+            new THREE.Vector3(-1, 1, 0).normalize(),
+            new THREE.Vector3(x, y, 0), 15, 0xffff00
+        );
+        arrows.add(arrow);
+    }
+}
+
+/* ────────────────────────────────────────
+   addEllipse
+──────────────────────────────────────── */
+
+function addEllipse(r1, r2, rot, N, col) {
+
+    const curve = new THREE.EllipseCurve(0, 0, r1, r2, 0, 2 * Math.PI, false, rot);
+    const pts   = curve.getSpacedPoints(N);
+    const geo   = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat   = new THREE.LineBasicMaterial({ color: col, linewidth: 2 });
+    return { curve, points: pts, ellipse: new THREE.Line(geo, mat) };
+}
+
+/* ────────────────────────────────────────
+   planetMovement  – electron orbital rAF loop
+──────────────────────────────────────── */
+
+function planetMovement() {
+
+    t = (qClock.getElapsedTime() * 0.1) % 1;
+    electron.position.copy(curve.getPointAt(t, v));
+    electron.position.applyMatrix4(orbit.matrixWorld);
+
+    if (interval > 100) {
+        orbit.rotation.x += 0.05;
+        orbit.rotation.y += 0.05;
+        orbit.rotation.z += 0.05;
+        interval = 0;
+    }
+    electron.rotation.y += 0.05;
+    interval++;
+
+    requestID = requestAnimationFrame(planetMovement);
+}
+
+/* ────────────────────────────────────────
+   Canvas label helpers
+──────────────────────────────────────── */
+
+function makeLabelCanvas(size, name, bgCol, color) {
+
+    const borderSize = 2;
+    const ctx        = document.createElement('canvas').getContext('2d');
+    const font       = `${size}px bold sans-serif`;
+    ctx.font = font;
+    const dbs        = borderSize * 2;
+    const w          = ctx.measureText(name).width + dbs;
+    const h          = size + dbs;
+    ctx.canvas.width  = w;
+    ctx.canvas.height = h;
+    ctx.font          = font;
+    ctx.textBaseline  = 'top';
+    ctx.fillStyle     = bgCol;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = color;
+    ctx.fillText(name, borderSize, borderSize);
+    return ctx.canvas;
+}
+
+function makeText(x, y, z, size, material, name, bgCol, color) {
+
+    const canvas        = makeLabelCanvas(size, name, bgCol, color);
+    material.map        = new THREE.CanvasTexture(canvas);
+
+    const root          = new THREE.Object3D();
+    root.position.set(x, y, z);
+
+    const label         = new THREE.Mesh(labelGeometry, material);
+    const labelBaseScale = 0.01;
+    label.scale.x = canvas.width  * labelBaseScale;
+    label.scale.y = canvas.height * labelBaseScale;
+    root.add(label);
+
+    /* Labels belong to the quantumGroup so they move with it */
+    quantumGroup.add(root);
+    return root;
+}
+
+/* ════════════════════════════════════════
+   LAB UI  (wired after transition completes)
+════════════════════════════════════════ */
+
+function setupLabUI() {
+
+    changeEl  = document.getElementById('change');
+    quantumEl = document.getElementById('quantum');
+    messageEl = document.getElementById('message-el');
+
+    /* ── Energy Levels toggle ── */
+    changeEl.addEventListener('click', () => {
+        isChanged = !isChanged;
+
+        if (isChanged) {
+            atom.position.set(0, -40, 0);
+            orbit.position.set(0, -40, 0);
+            POINTS.position.set(0, -40, 0);
+            hydrogenLevels();
+            labels.visible = true;
+            arrows.visible = true;
+            messageEl.textContent = 'Energy level diagram shown — quantum numbers n and l';
+        } else {
+            atom.position.set(0, 0, 0);
+            orbit.position.set(0, 0, 0);
+            POINTS.position.set(0, 0, 0);
+            hydrogenLevels();     /* rebuild to clear stale state */
+            labels.visible = false;
+            arrows.visible = false;
+            messageEl.textContent = 'Energy level diagram hidden';
+        }
+    });
+
+    /* ── Quantum Behaviour toggle ── */
+    quantumEl.addEventListener('click', () => {
+        isQuantum = !isQuantum;
+
+        if (isQuantum) {
+            POINTS.visible   = true;
+            electron.visible = false;
+            orbit.visible    = false;
+            cancelAnimationFrame(requestID);
+            messageEl.textContent = 'Quantum behaviour: electron probability cloud';
+        } else {
+            POINTS.visible   = false;
+            electron.visible = true;
+            orbit.visible    = true;
+            planetMovement();
+            messageEl.textContent = 'Classical orbital model restored';
+        }
+    });
+}
+
+/* ────────────────────────────────────────
+   setupQuantumGUI  – lazy-loaded lil-gui
+──────────────────────────────────────── */
+
+function setupQuantumGUI(GUI) {
+
+    const gui = new GUI({ width: 220, title: 'Hydrogen Atom' });
+
+    const camFolder = gui.addFolder('Camera');
+    camFolder.add(camera.position, 'x', -200, 200).name('cam x').listen();
+    camFolder.add(camera.position, 'y', -200, 200).name('cam y').listen();
+    camFolder.add(camera.position, 'z', -200, 200).name('cam z').listen();
+    camFolder.close();
+
+    const tgtFolder = gui.addFolder('Look at');
+    tgtFolder.add(controls.target, 'x', -100, 100).name('target x').onChange(() => controls.update());
+    tgtFolder.add(controls.target, 'y', -100, 100).name('target y').onChange(() => controls.update());
+    tgtFolder.add(controls.target, 'z', -100, 100).name('target z').onChange(() => controls.update());
+    tgtFolder.close();
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

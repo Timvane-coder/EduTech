@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Cathode Rays: The Electron</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:beige; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Side menu (empty placeholder, lil-gui panel appended here) ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0;
+            z-index:100;
+        }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+
+        #switch   { background:rgb(164,26,26); }
+        #volt     { background:#1a4e8f; }
+        #polarity { background:#2a6e3f; }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+    <div id="topmenu">Cathode Rays &mdash; The Electron</div>
+    <div id="sidemenu"></div>
+
+    <div id="menu">
+        <button id="switch">OFF</button>
+        <button id="volt">High Voltage &#9889;</button>
+        <button id="polarity">Change Polarity</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── quantum / cathode-ray scene ── */
+let quantumGroup = new THREE.Group();
+
+/* textures – loaded lazily inside createQuantumScene */
+let onTexture, offTexture, voltTexture;
+
+/* scene objects */
+const labelGeometry = new THREE.PlaneGeometry(2.5, 2.5);
+let   electron, t = 0, b = 5;
+let   topMaterial, bottomMaterial;
+let   voltButton, voltLabel, pulseLabel;
+let   electronTube, electronButton, gunLabel;
+let   bottomPlate, topPlate;
+let   pole1, pole2;
+
+let   power     = false;
+let   isflipped = false;
+
+const redMaterial  = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+const blueMaterial = new THREE.MeshPhongMaterial({ color: 0x0000FF });
+const greenMaterial= new THREE.MeshPhongMaterial({ color: 'green'  });
+const lightMat     = new THREE.MeshPhongMaterial({ color: 'wheat'  });
+
+let   clearMaterial;          /* built after HDR loads */
+let   points = [];
+const objects = [];
+const LINES   = new THREE.Group();
+
+/* raycaster */
+const raycaster = new THREE.Raycaster();
+const pointer   = new THREE.Vector2();
+let   SELECTED;
+
+/* DOM refs – filled after transition */
+let buttonSwitch, buttonVolt, buttonPolarity;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── Camera (Ferrari FOV to start) ── */
+    camera = new THREE.PerspectiveCamera(
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+    createQuantumScene();   /* build geometry; GLB + HDR load async */
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Quantum / Cathode-Ray lab ── */
+    const transition = moveCamera(-40, 0, 40, 0, -4, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            quantumGroup.visible = true;
+            scene.add(LINES);
+            LINES.visible = false;
+
+            scene.background = new THREE.Color(0x111111);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera tuned to quantum scene */
+            camera.fov = 55;
+            camera.position.set(-40, 0, 40);
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(0, -4, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            setupQuantumUI();
+            setupQuantumGUI();  /* lazy-load lil-gui */
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   QUANTUM / CATHODE-RAY SCENE
+════════════════════════════════════════ */
+
+function createQuantumScene() {
+
+    quantumGroup.visible = false;
+    scene.add(quantumGroup);
+
+    /* Load textures */
+    const tl    = new THREE.TextureLoader();
+    onTexture   = tl.load('./assets/img/on.png');
+    offTexture  = tl.load('./assets/img/off.png');
+    voltTexture = tl.load('./assets/img/highVolt.png');
+
+    /* Load local HDR for the glass material, then build the rest */
+    new RGBELoader()
+        .setPath('./assets/textures/')
+        .load('royal_esplanade_1k.hdr', function (hdrTex) {
+
+            hdrTex.mapping = THREE.EquirectangularReflectionMapping;
+
+            clearMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                metalness: 1,
+                roughness: 0.6,
+                ior: 1.5,
+                envMap: hdrTex,
+                thickness: 1,
+                envMapIntensity: 1,
+                transmission: 1,
+                specularIntensity: 1,
+                specularColor: 0xffffff,
+                opacity: 1,
+                side: THREE.DoubleSide,
+                transparent: true
+            });
+
+            buildQuantumGeometry();
+
+        }, undefined, () => {
+
+            /* HDR not found – fallback clear material without envMap */
+            clearMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff, transmission: 1,
+                opacity: 1, transparent: true,
+                side: THREE.DoubleSide
+            });
+            buildQuantumGeometry();
+        });
+}
+
+/* ────────────────────────────────────────
+   buildQuantumGeometry
+   Called once HDR has loaded (or failed).
+──────────────────────────────────────── */
+
+function buildQuantumGeometry() {
+
+    electronChamber();
+    loadChamberModel();
+}
+
+/* ────────────────────────────────────────
+   electronChamber  – labels, buttons, plates
+──────────────────────────────────────── */
+
+function electronChamber() {
+
+    /* Electron gun label + 3-D button */
+    const tubeGeo = new THREE.CylinderGeometry(0.8, 0.8, 1, 16);
+
+    const elnMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(-24, -1.5, 1.9, 32, elnMat, 'ELECTRON GUN',
+             'rgba(0,0,0,0.1)', 'rgba(0,255,255,1)');
+
+    electronButton = new THREE.Mesh(tubeGeo, redMaterial);
+    voltButton     = electronButton.clone();
+
+    /* Voltage toggle label */
+    const voltGeo = new THREE.PlaneGeometry(4, 2);
+    voltLabel = new THREE.Mesh(voltGeo,
+        new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: offTexture, transparent: true }));
+    voltLabel.position.set(-13, -8.9, 5);
+    voltLabel.rotation.x = -1.57;
+    quantumGroup.add(voltLabel);
+
+    voltLabel.add(voltButton);
+    voltButton.rotation.set(1.57, 0, 0);
+    voltButton.position.set(-1.1, 0, 0);
+    objects.push(voltButton, voltLabel);
+
+    /* Gun switch label */
+    const gunGeo = new THREE.PlaneGeometry(4, 2);
+    gunLabel = new THREE.Mesh(gunGeo,
+        new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: offTexture, transparent: true }));
+    quantumGroup.add(gunLabel);
+    gunLabel.position.set(-24, 0, 1.9);
+    gunLabel.add(electronButton);
+    electronButton.rotation.x = 1.57;
+    electronButton.position.set(-1.1, 0, 0);
+    objects.push(electronButton, gunLabel);
+
+    /* High-voltage supply text */
+    const powerMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(-10, -12, 7, 32, powerMat, 'HIGH VOLTAGE SUPPLY',
+             'rgba(0,0,0,0.1)', 'rgba(0,255,255,1)');
+
+    /* Voltage pulse icon */
+    const pulseGeo = new THREE.PlaneGeometry(2, 2.5);
+    pulseLabel = new THREE.Mesh(pulseGeo,
+        new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: voltTexture, transparent: true }));
+    quantumGroup.add(pulseLabel);
+    pulseLabel.position.set(-3, 10, 1.9);
+    pulseLabel.visible = false;
+
+    /* Voltage-plates label */
+    const voltMat2 = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(-5, 7, 2, 32, voltMat2, 'VOLTAGE PLATES',
+             'rgba(0,0,0,0.1)', 'rgba(0,255,255,1)');
+
+    /* +/− plate polarity indicators */
+    topMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(-1, 6, 0, 92, topMaterial, '   ', 'rgba(0,0,0,0)', 'rgba(0,255,255,1)');
+
+    bottomMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+    makeText(-1, -6, 0, 92, bottomMaterial, '   ', 'rgba(0,0,0,0)', 'rgba(0,255,255,1)');
+}
+
+/* ────────────────────────────────────────
+   loadChamberModel  – loads chamber.glb
+──────────────────────────────────────── */
+
+function loadChamberModel() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'chamber.glb',
+        function (gltf) {
+            const model = gltf.scene;
+
+            pole1         = model.getObjectByName('pole1');
+            pole2         = model.getObjectByName('pole2');
+            electronTube  = model.getObjectByName('electrontube');
+            const gun     = model.getObjectByName('gun');
+            const platetop    = model.getObjectByName('platetop');
+            const platebottom = model.getObjectByName('platebottom');
+            const chamber = model.getObjectByName('chamber');
+
+            if (chamber)    chamber.material    = clearMaterial;
+            if (platetop)   platetop.material   = blueMaterial;
+            if (platebottom)platebottom.material = redMaterial;
+
+            if (pole1) pole1.visible = false;
+            if (pole2) pole2.visible = false;
+
+            if (electronTube) electronTube.position.x = -23;
+            if (gun)          gun.position.x = -13.5;
+
+            objects.push(electronTube);
+
+            quantumGroup.add(model);
+        },
+        undefined,
+        (e) => console.warn('chamber.glb not found – lab works without it.', e)
+    );
+}
+
+/* ────────────────────────────────────────
+   Electron beam paths
+──────────────────────────────────────── */
+
+function addPath() {
+    clearLines();
+    points = [];
+    const color = new THREE.Color();
+    const vertices = [], colors = [];
+
+    for (let i = 0; i < 33; i += 0.1) {
+        points.push(new THREE.Vector3(15 - i, 0, 0));
+    }
+
+    points.forEach(p => {
+        vertices.push(p.x, p.y, p.z);
+        color.setHSL(1, 1, Math.max(0, (20 - p.x) / 20) * 0.5, THREE.SRGBColorSpace);
+        colors.push(color.r, color.g, color.b);
+    });
+
+    buildLine(vertices, colors);
+}
+
+function curvePath(deflectY) {
+    /* deflectY:  negative = downward, positive = upward */
+    clearLines();
+    points = [];
+    const color = new THREE.Color();
+    const vertices = [], colors = [];
+
+    for (let i = 0; i < 33; i += 0.1) {
+        points.push(new THREE.Vector3(-13 + 12 * i, deflectY * (i * i), 0));
+    }
+
+    points.forEach(p => {
+        vertices.push(p.x, p.y, p.z);
+        color.setHSL(1, 1, Math.max(0, (20 - p.x) / 20) * 0.5, THREE.SRGBColorSpace);
+        colors.push(color.r, color.g, color.b);
+    });
+
+    buildLine(vertices, colors);
+}
+
+function buildLine(vertices, colors) {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors,   3));
+
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true });
+    const line     = new THREE.Line(geometry, material);
+    line.scale.setScalar(0.7 * 1.5);
+    LINES.add(line);
+}
+
+function clearLines() {
+    while (LINES.children.length > 0) {
+        LINES.children[0].parent.remove(LINES.children[0]);
+    }
+}
+
+/* ────────────────────────────────────────
+   Gun / pulse actions
+──────────────────────────────────────── */
+
+function gunAction() {
+    if (power) {
+        buttonSwitch.style.backgroundColor = 'green';
+        buttonSwitch.textContent           = 'ON';
+        if (gunLabel)       gunLabel.material.map         = onTexture;
+        if (electronButton) electronButton.position.set(1.1, 0, 0);
+        if (electronButton) electronButton.material       = greenMaterial;
+        points = []; t = 0;
+        addPath();
+        LINES.visible = true;
+    } else {
+        buttonSwitch.style.backgroundColor = 'red';
+        buttonSwitch.textContent           = 'OFF';
+        if (gunLabel)       gunLabel.material.map         = offTexture;
+        if (electronButton) electronButton.position.set(-1.1, 0, 0);
+        if (electronButton) electronButton.material       = redMaterial;
+        LINES.visible = false;
+    }
+}
+
+function pulseAction() {
+    if (voltLabel)  voltLabel.material.map       = onTexture;
+    if (voltButton) voltButton.position.set(1.1, 0, 0);
+    if (voltButton) voltButton.material          = greenMaterial;
+    if (pulseLabel) pulseLabel.visible           = true;
+
+    points = []; t = 0;
+
+    const setLabel = (mat, text) => {
+        const canvas = makeLabelCanvas(52, text, 'rgba(0,1,0,0)', 'rgba(0,255,255,1)');
+        mat.map = new THREE.CanvasTexture(canvas);
+    };
+
+    if (isflipped) {
+        setLabel(topMaterial,    ' - ');
+        setLabel(bottomMaterial, ' + ');
+        curvePath(-1);   /* downward → negative deflection */
+    } else {
+        setLabel(topMaterial,    ' + ');
+        setLabel(bottomMaterial, ' - ');
+        curvePath(1);    /* upward  → positive deflection */
+    }
+
+    setTimeout(() => {
+        if (voltLabel)  voltLabel.material.map       = offTexture;
+        if (voltButton) voltButton.position.set(-1.1, 0, 0);
+        if (voltButton) voltButton.material          = redMaterial;
+        if (pulseLabel) pulseLabel.visible           = false;
+        setLabel(topMaterial,    '  ');
+        setLabel(bottomMaterial, '  ');
+        points = []; t = 0;
+        addPath();
+    }, 1500);
+}
+
+/* ════════════════════════════════════════
+   QUANTUM UI  (wired after transition)
+════════════════════════════════════════ */
+
+function setupQuantumUI() {
+
+    buttonSwitch   = document.getElementById('switch');
+    buttonVolt     = document.getElementById('volt');
+    buttonPolarity = document.getElementById('polarity');
+
+    /* Switch (electron gun ON/OFF) */
+    buttonSwitch.addEventListener('click', () => {
+        power = !power;
+        gunAction();
+    });
+
+    /* High-voltage pulse */
+    buttonVolt.addEventListener('click', pulseAction);
+
+    /* Change polarity */
+    buttonPolarity.addEventListener('click', () => {
+        isflipped = !isflipped;
+    });
+
+    /* 3-D model click-through (raycaster) */
+    document.addEventListener('click', onQuantumClick);
+}
+
+function onQuantumClick(event) {
+    pointer.x = (event.clientX / window.innerWidth)  *  2 - 1;
+    pointer.y = (event.clientY / window.innerHeight) * -2 + 1;
+
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObjects(objects, true);
+
+    if (intersects.length > 0) {
+        SELECTED = intersects[0].object;
+
+        if (SELECTED === gunLabel || SELECTED === electronButton || SELECTED === electronTube) {
+            power = !power;
+            gunAction();
+        }
+        if (SELECTED === voltLabel || SELECTED === voltButton) {
+            pulseAction();
+        }
+    }
+}
+
+/* ════════════════════════════════════════
+   QUANTUM GUI  (lil-gui lazy-loaded)
+════════════════════════════════════════ */
+
+function setupQuantumGUI() {
+
+    import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+        .then(({ GUI }) => {
+
+            const gui = new GUI({ width: 220, title: 'Camera / Controls' });
+            gui.domElement.style.position = 'absolute';
+            gui.domElement.style.top      = '44px';
+            gui.domElement.style.right    = '0';
+            document.body.appendChild(gui.domElement);
+
+            const camFolder = gui.addFolder('Camera');
+            camFolder.add(camera.position, 'x', -100, 100).name('cam X').listen();
+            camFolder.add(camera.position, 'y', -100, 100).name('cam Y').listen();
+            camFolder.add(camera.position, 'z', -100, 100).name('cam Z').listen();
+
+            const tgtFolder = gui.addFolder('Target');
+            tgtFolder.add(controls.target, 'x', -100, 100).name('tgt X').listen()
+                .onChange(() => controls.update());
+            tgtFolder.add(controls.target, 'y', -100, 100).name('tgt Y').listen()
+                .onChange(() => controls.update());
+            tgtFolder.add(controls.target, 'z', -100, 100).name('tgt Z').listen()
+                .onChange(() => controls.update());
+
+            gui.close();
+        })
+        .catch(e => console.warn('lil-gui failed to load:', e));
+}
+
+/* ════════════════════════════════════════
+   CANVAS LABEL HELPERS
+════════════════════════════════════════ */
+
+function makeLabelCanvas(size, name, backgdCol, color) {
+    const borderSize = 2;
+    const ctx  = document.createElement('canvas').getContext('2d');
+    const font = `${size}px bold sans-serif`;
+    ctx.font   = font;
+    const w    = ctx.measureText(name).width + borderSize * 2;
+    const h    = size + borderSize * 2;
+    ctx.canvas.width  = w;
+    ctx.canvas.height = h;
+    ctx.font          = font;
+    ctx.textBaseline  = 'top';
+    ctx.fillStyle     = backgdCol;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle     = color;
+    ctx.fillText(name, borderSize, borderSize);
+    return ctx.canvas;
+}
+
+function makeText(x, y, z, size, material, name, backgdCol, color) {
+    const canvas = makeLabelCanvas(size, name, backgdCol, color);
+    material.map = new THREE.CanvasTexture(canvas);
+
+    const root  = new THREE.Object3D();
+    root.position.set(x, y, z);
+
+    const label = new THREE.Mesh(labelGeometry, material);
+    const base  = 0.01;
+    label.scale.x = canvas.width  * base;
+    label.scale.y = canvas.height * base;
+    root.add(label);
+
+    quantumGroup.add(root);
+    return root;
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
+

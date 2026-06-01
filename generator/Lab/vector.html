@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Vector Addition</title>
+    <style>
+        /* ─── reset ─── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ─── CSS2D labels (Vector scene) ─── */
+        .label {
+            font-weight:bold;
+            font-size:12px;
+            color:black;
+        }
+
+        /* ─── intro title ─── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ─── vector UI hidden until transition ─── */
+        #vectorUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* left panel — empty for vector scene, kept for layout */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:0;
+            z-index:100;
+        }
+
+        /* bottom bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:13px;
+            padding:10px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a { color:#7ec8e3; font-weight:700; }
+
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; background:#1a4e8f;
+            transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+    </style>
+</head>
+<body>
+
+<!-- ─── intro overlay ─── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Vector Lab&hellip;</div>
+
+<!-- ─── Vector UI (shown after transition) ─── -->
+<div id="vectorUI">
+
+    <div id="topmenu">Vector Addition</div>
+    <div id="sidemenu"></div>
+
+    <div id="menu">
+        Total Distance Travelled = <a id="distEl">----</a> units
+        <button id="btnVectorAlgebra">VECTOR ALGEBRA</button>
+    </div>
+
+</div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE            from 'three';
+import { OrbitControls }     from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { GLTFLoader }        from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }       from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }        from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer,
+         CSS2DObject }       from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN                 from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — SHARED
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+let ferrariGroup = new THREE.Group();
+let vectorGroup  = new THREE.Group();
+
+/* ─── ferrari ─── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ─── vector scene ─── */
+let labelRenderer;
+let transformControls;
+let pointer, raycaster;
+const objects   = [];
+let SELECTED;
+let obj;
+let initialPos;
+let POS = [];
+let LINE  = new THREE.Group();
+let LAST  = new THREE.Group();
+let LABEL = new THREE.Group();
+let line, lineLast;
+let distEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D renderer for vector labels ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.left         = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera — Ferrari FOV 40, matches intro ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls (disabled during intro) ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled         = false;
+    controls.enablePan       = true;
+    controls.enableZoom      = true;
+    controls.enableDamping   = true;
+    controls.dampingFactor   = 0.05;
+    controls.rotateSpeed     = 0.1;
+
+    /* pointer / raycaster for click-select */
+    pointer   = new THREE.Vector2();
+    raycaster = new THREE.Raycaster();
+
+    createLights();
+    createFerrariShowroom();
+    createVectorScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+   (identical to capacitor version — untouched)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC SEQUENCE
+   (identical — untouched, only onComplete swapped)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition — Vector scene values ── */
+    const transition = moveCamera(20, 15, 60, -9, 10, -9, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            vectorGroup.visible  = true;
+
+            /* Vector scene background */
+            scene.background = new THREE.Color(0xf0f0f0);
+
+            /* show Vector UI */
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('vectorUI').style.display   = 'block';
+
+            /* hand orbit controls to Vector scene target */
+            controls.enabled = true;
+            controls.target.set(-9, 10, -9);
+            controls.update();
+
+            /* attach TransformControls now that orbit is live */
+            transformControls.attach(objects[3]);
+            scene.add(transformControls);
+
+            /* re-wire orbit ↔ transform conflict */
+            transformControls.addEventListener('dragging-changed', function (e) {
+                controls.enabled = !e.value;
+                drawLine(SELECTED.position);
+            });
+
+            /* click-to-select active */
+            document.addEventListener('click', onClick);
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   VECTOR SCENE
+════════════════════════════════════════ */
+
+function createVectorScene() {
+
+    vectorGroup.visible = false;
+    scene.add(vectorGroup);
+
+    /* grid */
+    const gridHelper = new THREE.GridHelper(100, 20);
+    vectorGroup.add(gridHelper);
+
+    /* axes */
+    const axesHelper = new THREE.AxesHelper(50);
+    vectorGroup.add(axesHelper);
+
+    /* extra lights matching original vector scene */
+    const ambientLight = new THREE.AmbientLight(0x606060);
+    vectorGroup.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.position.set(1, 0.75, 0.5).normalize();
+    vectorGroup.add(directionalLight);
+
+    /* ── build the four draggable objects ── */
+    const cubeGeo      = new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0);
+    const cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xfeb74c });
+    const blueMat      = new THREE.MeshPhongMaterial({ color: 0x4cb7ff });
+    const redMat       = new THREE.MeshPhongMaterial({ color: 0xff374c });
+    const greyMat      = new THREE.MeshPhongMaterial({ color: 0x676767 });
+
+    /* orange cube */
+    const cube = new THREE.Mesh(cubeGeo, cubeMaterial);
+    cube.position.set(-20, 10, 20);
+    cube.scale.set(5, 5, 5);
+    objects.push(cube);
+    vectorGroup.add(cube);
+
+    /* blue cuboid */
+    const cuboid = cube.clone();
+    cuboid.material = blueMat;
+    cuboid.position.set(20, 0, 10);
+    cuboid.scale.set(10, 5, 5);
+    objects.push(cuboid);
+    vectorGroup.add(cuboid);
+
+    /* red pillar */
+    const pillar = cube.clone();
+    pillar.material = redMat;
+    pillar.position.set(-30, 0, -25);
+    pillar.scale.set(5, 15, 5);
+    objects.push(pillar);
+    vectorGroup.add(pillar);
+
+    /* grey block — default selected */
+    const block = cube.clone();
+    block.material = greyMat;
+    block.position.set(-5, 0, -15);
+    block.scale.set(15, 15, 5);
+    objects.push(block);
+    vectorGroup.add(block);
+
+    /* LINE / LAST / LABEL groups */
+    scene.add(LINE);
+    scene.add(LAST);
+    scene.add(LABEL);
+
+    /* TransformControls — created now, attached after transition */
+    transformControls = new TransformControls(camera, renderer.domElement);
+    transformControls.setTranslationSnap(2);
+
+    /* set up default selection state */
+    SELECTED    = objects[3];
+    obj         = SELECTED;
+    initialPos  = SELECTED.position.clone();
+
+    /* DOM */
+    distEl = document.getElementById('distEl');
+
+    /* VECTOR ALGEBRA button */
+    document.getElementById('btnVectorAlgebra').addEventListener('click', vectorAlgebra);
+}
+
+/* ─────────────────────────────────────────
+   vectorAlgebra
+───────────────────────────────────────── */
+
+function vectorAlgebra() {
+    window.open('Mechanics_Vector_Algebra.html', '_self');
+}
+
+/* ─────────────────────────────────────────
+   onClick  — click to select a new object
+───────────────────────────────────────── */
+
+function onClick(event) {
+
+    event.preventDefault();
+
+    pointer.x =  (event.clientX / window.innerWidth)  * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight)  * 2 + 1;
+
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObjects(objects, true);
+
+    if (intersects.length > 0) {
+
+        initialPos = SELECTED.position.clone();
+        SELECTED   = intersects[0].object;
+
+        if (obj !== SELECTED) {
+
+            /* clear all line groups */
+            clearGroup(LINE);
+            clearGroup(LAST);
+            clearGroup(LABEL);
+
+            /* draw resultant from last position to first */
+            const A = POS[POS.length - 1].geometry.getAttribute('position');
+            const B = new THREE.Vector3(A.getX(1), A.getY(1), A.getZ(1));
+            const C = POS[0].geometry.getAttribute('position');
+            const D = new THREE.Vector3(C.getX(1), C.getY(1), C.getZ(1));
+
+            const resultant = initLine({
+                points      : [B, D],
+                lineMaterial: new THREE.LineBasicMaterial({ color: 'rgb(100%,100%,0%)' })
+            });
+            LINE.add(resultant);
+            LABEL.add(addLabels(B));
+            LABEL.add(addLabels(D));
+            distEl.innerHTML = B.distanceTo(D).toFixed(2);
+
+            obj = SELECTED;
+            POS = [];
+
+            transformControls.attach(SELECTED);
+            drawLine(SELECTED.position);
+        }
+    }
+}
+
+/* ─────────────────────────────────────────
+   drawLine  — draw red line from origin to current pos
+              and blue trail between steps
+───────────────────────────────────────── */
+
+function drawLine(pos) {
+
+    line = initLine({
+        points      : [new THREE.Vector3(0, 0, 0), pos],
+        lineMaterial: new THREE.LineBasicMaterial({ color: 'rgb(100%,0%,0%)' })
+    });
+
+    LABEL.add(addLabels(pos));
+    POS.push(line);
+    LINE.add(line);
+
+    const len = POS.length;
+
+    if (len >= 2) {
+        const A  = POS[len - 2].geometry.getAttribute('position');
+        const B  = new THREE.Vector3(A.getX(1), A.getY(1), A.getZ(1));
+        const X  = POS[0].geometry.getAttribute('position');
+        initialPos = new THREE.Vector3(X.getX(1), X.getY(1), X.getZ(1));
+        previousLine(B, pos, B.distanceTo(pos).toFixed(2));
+    }
+}
+
+/* ─────────────────────────────────────────
+   previousLine  — blue trail segment
+───────────────────────────────────────── */
+
+function previousLine(pos1, pos2) {
+
+    lineLast = initLine({
+        points      : [pos1, pos2],
+        lineMaterial: new THREE.LineBasicMaterial({ color: 'rgb(0%,0%,100%)' })
+    });
+    LAST.add(lineLast);
+}
+
+/* ─────────────────────────────────────────
+   addLabels  — CSS2D coordinate label
+───────────────────────────────────────── */
+
+function addLabels(A) {
+
+    const X = A.x >= 0 ? '' + A.x  : A.x;
+    const Y = A.y >= 0 ? '+' + A.y : A.y;
+    const Z = A.z >= 0 ? '+' + A.z : A.z;
+
+    const text       = document.createElement('div');
+    text.className   = 'label';
+    text.innerHTML   = X + ' i ' + Y + ' j ' + Z + ' z';
+    text.style.color = 'black';
+
+    const label = new CSS2DObject(text);
+    label.position.copy(A);
+    return label;
+}
+
+/* ─────────────────────────────────────────
+   initLine  — build a THREE.Line from points
+───────────────────────────────────────── */
+
+function initLine(data) {
+    const geo = new THREE.BufferGeometry().setFromPoints(data.points);
+    return new THREE.Line(geo, data.lineMaterial);
+}
+
+/* ─────────────────────────────────────────
+   clearGroup  — dispose and remove all children
+───────────────────────────────────────── */
+
+function clearGroup(group) {
+    while (group.children.length > 0) {
+        group.children[0].parent.remove(group.children[0]);
+    }
+}
+
+/* ════════════════════════════════════════
+   RESIZE
+   (identical — untouched)
+════════════════════════════════════════ */
+
+function onResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* render main scene */
+    renderer.render(scene, camera);
+
+    /* render CSS2D labels on top */
+    labelRenderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

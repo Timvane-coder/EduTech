@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Precession Motion</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro title ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #menu button {
+            padding:6px 16px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.08em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.2); }
+        #pausebtn { background:#1a4e8f; }
+        #resetbtn { background:#2a6e3f; }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── lab UI shown after transition ── -->
+<div id="labUI">
+    <div id="topmenu">Precession Motion</div>
+    <div id="menu">
+        <button id="pausebtn">PAUSE</button>
+        <button id="resetbtn">RESET</button>
+    </div>
+</div>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+let labelRenderer;
+
+/* ── groups ── */
+let ferrariGroup        = new THREE.Group();
+let precessionGroup     = new THREE.Group();
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+/* ── transition state ── */
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── precession scene ── */
+let top, planeMaterial, torqueMaterial;
+let mixer;
+const actions    = {};
+let modelReady   = false;
+let play         = true;
+let reset        = false;
+const clock      = new THREE.Clock();
+
+let vectors = new THREE.Group();
+let focus   = new THREE.Group();
+
+/* ── buttons ── */
+let buttonPause, buttonReset;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera — Ferrari intro start position ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.01,
+        50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls (disabled during intro) ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.01;
+    controls.rotateSpeed   = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createPrecessionMotionScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS
+   (identical to Ferrari-Capacitor file)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM
+   (identical to Ferrari-Capacitor file)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS
+   (identical to Ferrari-Capacitor file)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC
+   (identical to Ferrari-Capacitor file
+    — only onComplete swaps to precession)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition to precession lab ── */
+    const transition = moveCamera(2.5, 0.7, -2.5, 0, 0.7, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible    = false;
+            precessionGroup.visible = true;
+
+            /* precession background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* ── camera FOV swap to precession value ── */
+            camera.fov = 50;
+            camera.updateProjectionMatrix();
+
+            /* ── orbit controls tuned for precession scene ── */
+            controls.enabled = true;
+            controls.target.set(0, 0.7, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   PRECESSION MOTION SCENE
+════════════════════════════════════════ */
+
+function createPrecessionMotionScene() {
+
+    precessionGroup.visible = false;
+    scene.add(precessionGroup);
+
+    /* grid */
+    const gridHelper = new THREE.GridHelper(50, 50);
+    precessionGroup.add(gridHelper);
+
+    /* axes helper lives in precessionGroup */
+    precessionGroup.add(new THREE.AxesHelper(15));
+
+    /* shared groups added to scene directly
+       (same pattern as connector in capacitor file) */
+    scene.add(vectors);
+    scene.add(focus);
+
+    /* plane material reused during pause */
+    planeMaterial = new THREE.MeshPhongMaterial({
+        color      : 0xf9c834,
+        transparent: true,
+        opacity    : 0.6
+    });
+
+    /* load spinning top GLTF */
+    loadSpinningTop();
+
+    /* wire UI buttons */
+    setupPrecessionUI();
+}
+
+/* ------------------------------------------------ */
+/* loadSpinningTop                                   */
+/* ------------------------------------------------ */
+
+function loadSpinningTop() {
+
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'spinningTop.glb',
+        function (gltf) {
+
+            const model = gltf.scene;
+
+            top = model.getObjectByName('top');
+
+            /* grab all label objects from the model */
+            // vLabel  = model.getObjectByName('vLabel');
+            // lLabel  = model.getObjectByName('lLabel');
+            // rLabel  = model.getObjectByName('rLabel');
+            // RLabel  = model.getObjectByName('RLabel');
+            // mgLabel = model.getObjectByName('mgLabel');
+            // nLabel  = model.getObjectByName('nLabel');
+            // tLabel  = model.getObjectByName('tLabel');
+
+            scene.add(model);
+
+            /* save original material — used to restore after pause */
+            torqueMaterial = top.material;
+
+            mixer      = new THREE.AnimationMixer(model);
+            modelReady = true;
+
+            const fixedStates = [
+                'topAction','torqueAction','pointAction',
+                'RAction','mgAction','vtrackAction',
+                'LtrackAction','rtrackAction'
+            ];
+
+            for (const clip of gltf.animations) {
+                const action = mixer.clipAction(clip);
+                actions[clip.name] = action;
+                if (fixedStates.includes(clip.name)) {
+                    action.clampWhenFinished = true;
+                    action.loop = THREE.LoopOnce;
+                }
+            }
+
+            /* auto-play all clips */
+            for (const key in actions) {
+                actions[key].play();
+            }
+        },
+        undefined,
+        (e) => console.warn('spinningTop.glb not found – scene works without it.', e)
+    );
+}
+
+/* ------------------------------------------------ */
+/* setupPrecessionUI                                 */
+/* ------------------------------------------------ */
+
+function setupPrecessionUI() {
+
+    buttonPause = document.getElementById('pausebtn');
+    buttonReset = document.getElementById('resetbtn');
+
+    buttonPause.addEventListener('click', () => {
+        play = !play;
+        pauseContinue();
+    });
+
+    buttonReset.addEventListener('click', () => {
+        reset = !reset;
+        resetSpinning();
+    });
+}
+
+/* ------------------------------------------------ */
+/* pauseContinue                                     */
+/* ------------------------------------------------ */
+
+function pauseContinue() {
+
+    if (play) {
+        /* resuming */
+        for (const key in actions) {
+            actions[key].paused = false;
+        }
+        buttonPause.innerHTML = 'PAUSE';
+        if (top) top.material = torqueMaterial;
+
+    } else {
+        /* pausing */
+        for (const key in actions) {
+            actions[key].paused = true;
+        }
+        buttonPause.innerHTML = 'PLAY';
+        if (top) top.material = planeMaterial;
+    }
+}
+
+/* ------------------------------------------------ */
+/* resetSpinning                                     */
+/* ------------------------------------------------ */
+
+function resetSpinning() {
+
+    if (reset) {
+        buttonReset.innerHTML = 'RESTART';
+        for (const key in actions) {
+            actions[key].stop();
+            actions[key].reset();
+        }
+    } else {
+        buttonReset.innerHTML = 'RESET';
+        for (const key in actions) {
+            actions[key].play();
+        }
+    }
+}
+
+/* ════════════════════════════════════════
+   RESIZE
+   (identical to Ferrari-Capacitor file)
+════════════════════════════════════════ */
+
+function onResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── Ferrari intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* ── precession mixer ── */
+    if (modelReady && mixer) mixer.update(clock.getDelta());
+
+    /* ── render both WebGL and CSS2D ── */
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

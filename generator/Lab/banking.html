@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Mechanics: Banked Road</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab shell – hidden until transition ends ── */
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── side panel ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:260px;
+            background:rgba(15,15,20,.9);
+            color:#d4d4d4; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.8;
+        }
+        #sidemenu label {
+            color:#aaa; font-size:11px; display:block; margin-top:10px;
+        }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#c0392b;
+            margin-top:3px; margin-bottom:2px;
+        }
+
+        /* ── free-body checkboxes ── */
+        .fbdRow {
+            display:flex; align-items:center; gap:8px;
+            margin-top:6px; font-size:12px; color:#ccc;
+            cursor:pointer;
+        }
+        .fbdRow input[type=checkbox]{ accent-color:#e07070; width:14px; height:14px; }
+
+        /* ── bottom bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+
+        #menu button{
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover{ filter:brightness(1.18); }
+        #menu button:disabled{ opacity:.4; cursor:default; }
+        #bankBtn    { background:rgb(26,78,143); }
+        #pauseBtn   { background:rgb(164,26,26); }
+        #theoryBtn  { background:rgb(42,110,63); }
+    </style>
+</head>
+<body>
+
+<!-- intro label -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- lab UI (hidden until transition) -->
+<div id="labUI">
+
+    <div id="topmenu">MOVING ON A CURVED ROAD &mdash; A 3D Interactive Simulation</div>
+
+    <!-- ── side controls ── -->
+    <div id="sidemenu">
+        <label>Time scale</label>
+        <input type="range" id="slowSlider" min="0" max="1.5" value="0.6" step="0.005">
+        <span id="slowDisplay" style="font-size:11px;color:#aaa;">0.60×</span>
+
+        <label>Car opacity</label>
+        <input type="range" id="opacitySlider" min="0" max="1" value="1" step="0.005">
+
+        <div style="margin-top:14px;font-size:11px;color:#aaa;letter-spacing:.06em;text-transform:uppercase;">
+            Free-Body Diagram
+        </div>
+
+        <label class="fbdRow">
+            <input type="checkbox" id="chkForce"    checked> Force, F
+        </label>
+        <label class="fbdRow">
+            <input type="checkbox" id="chkVelocity" checked> Velocity, v
+        </label>
+        <label class="fbdRow">
+            <input type="checkbox" id="chkNormal"   checked> Normal, N
+        </label>
+        <label class="fbdRow">
+            <input type="checkbox" id="chkWeight"   checked> Weight, mg
+        </label>
+    </div>
+
+    <!-- ── bottom buttons ── -->
+    <div id="menu">
+        <button id="bankBtn">BANKED ROAD</button>
+        <button id="pauseBtn">PAUSE</button>
+        <button id="theoryBtn">THEORY</button>
+
+        <div id="message-el">
+            Visualise the free-body diagram and adjust vehicle speed in the control panel. Use the BANKED ROAD button to toggle road banking.
+        </div>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — renderer / camera / scene
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ────────────────────────────────────────
+   Ferrari globals  (unchanged from original)
+──────────────────────────────────────── */
+let ferrariGroup   = new THREE.Group();
+let mechanicsGroup = new THREE.Group();          // replaces capacitorGroup
+
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ────────────────────────────────────────
+   Mechanics scene globals
+──────────────────────────────────────── */
+let mechModel, mechMixer, mechModelReady = false;
+let mechCar, carMaterial;
+let road;
+let weight, Wlabel, velocity, Vlabel;
+let force,  Flabel, normal,  Nlabel;
+let Nx, Nxlabel, Ny, Nylabel;
+
+let bank = false;
+let move = true;                                 // true = playing
+
+const mechActions = {};                          // animation clips
+let activeAction, previousAction;
+let activeVector, previousVector;
+
+const clock = new THREE.Clock();
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer ─────────────────────────── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera ────────────────────────────── */
+    camera = new THREE.PerspectiveCamera(
+        35, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* scene ─────────────────────────────── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* controls ──────────────────────────── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled      = false;
+    controls.enablePan    = true;
+    controls.enableZoom   = true;
+    controls.enableDamping  = true;
+    controls.dampingFactor  = 0.05;
+    controls.rotateSpeed    = 0.1;
+    controls.minDistance    = 0.1;
+    controls.maxDistance    = 5000;
+
+    /* build both scenes ─────────────────── */
+    createLights();
+    createFerrariShowroom();
+    createMechanicsScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (identical to original)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    /* extra fill light that the banking scene uses */
+    const fill = new THREE.DirectionalLight(0xffffff, 0.5);
+    fill.position.set(-1, -1, 1);
+    scene.add(fill);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (identical to original)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (identical to original)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (identical to original)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into mechanics scene ── */
+    const transition = moveCamera(70, 40, -85, 0, 0, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible    = false;
+            mechanicsGroup.visible  = true;
+
+            /* match banking scene background */
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* orbit controls — target matches banking scene origin */
+            controls.enabled = true;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* kick off mechanics animations once visible */
+            startMechanicsAnimations();
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   MECHANICS SCENE
+════════════════════════════════════════ */
+
+function createMechanicsScene() {
+
+    mechanicsGroup.visible = false;
+    scene.add(mechanicsGroup);
+
+    /* ground grid — same style as banking original */
+    const scaleHorizontal = new THREE.GridHelper(70, 70);
+    mechanicsGroup.add(scaleHorizontal);
+
+    /* load Banking.glb ─────────────────────────────────────── */
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'Banking.glb',
+        function (gltf) {
+
+            mechModel = gltf.scene;
+
+            /* grab named objects */
+            mechCar   = mechModel.getObjectByName('car');
+            carMaterial = mechCar ? mechCar.material : null;
+
+            weight  = mechModel.getObjectByName('weight');
+            Wlabel  = mechModel.getObjectByName('Wlabel');
+            velocity= mechModel.getObjectByName('velocity');
+            Vlabel  = mechModel.getObjectByName('Vlabel');
+            normal  = mechModel.getObjectByName('normal');
+            Nlabel  = mechModel.getObjectByName('Nlabel');
+            force   = mechModel.getObjectByName('force');
+            Flabel  = mechModel.getObjectByName('Flabel');
+            Nx      = mechModel.getObjectByName('nx');
+            Nxlabel = mechModel.getObjectByName('Nxlabel');
+            Ny      = mechModel.getObjectByName('ny');
+            Nylabel = mechModel.getObjectByName('Nylabel');
+            road    = mechModel.getObjectByName('road');
+
+            /* position to match banking original */
+            mechModel.position.set(0, 0, 15);
+            if (road && road.morphTargetInfluences) {
+                road.morphTargetInfluences[0] = 0;
+            }
+
+            /* hide component vectors until banking activated */
+            if (Nx)      Nx.visible      = false;
+            if (Nxlabel) Nxlabel.visible = false;
+            if (Ny)      Ny.visible      = false;
+            if (Nylabel) Nylabel.visible = false;
+
+            /* skinned meshes need frustum culling disabled */
+            mechModel.traverse((child) => {
+                if (child.type === 'SkinnedMesh') child.frustumCulled = false;
+            });
+
+            /* animation mixer */
+            mechMixer = new THREE.AnimationMixer(mechModel);
+            for (const clip of gltf.animations) {
+                const action = mechMixer.clipAction(clip);
+                mechActions[clip.name] = action;
+            }
+
+            /* loop all clips but clamp single-shot states */
+            const singleShots = ['polarity','Action','Action_knob','AC_connector','DC_connector'];
+            for (const name in mechActions) {
+                if (!singleShots.includes(name)) {
+                    mechActions[name].loop = THREE.LoopRepeat;
+                }
+            }
+
+            mechModelReady = true;
+
+            /* add to the mechanics group so it hides/shows together */
+            mechanicsGroup.add(mechModel);
+        },
+        undefined,
+        (e) => console.warn('Banking.glb not found – scene works without it.', e)
+    );
+
+    /* ── wire up UI ── */
+    setupMechanicsUI();
+}
+
+/* ════════════════════════════════════════
+   START MECHANICS ANIMATIONS
+   Called once the transition is complete
+════════════════════════════════════════ */
+
+function startMechanicsAnimations() {
+
+    if (!mechModelReady) {
+        /* model may still be loading; retry in 200 ms */
+        setTimeout(startMechanicsAnimations, 200);
+        return;
+    }
+
+    for (const key in mechActions) {
+        mechActions[key].play();
+    }
+
+    activeAction = mechActions['nobankMoving'] || null;
+    activeVector = mechActions['nxAction']     || null;
+
+    setTimeScale(0.6);
+}
+
+/* ════════════════════════════════════════
+   MECHANICS UI
+════════════════════════════════════════ */
+
+function setupMechanicsUI() {
+
+    /* ── BANKED ROAD toggle ── */
+    document.getElementById('bankBtn').addEventListener('click', () => {
+        bank = !bank;
+        addBanking();
+    });
+
+    /* ── PAUSE / CONTINUE ── */
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+        pauseContinue();
+    });
+
+    /* ── THEORY ── */
+    document.getElementById('theoryBtn').addEventListener('click', () => {
+        window.open('Mechanics_Banking_on_a_Road.html', '_self');
+    });
+
+    /* ── time scale slider ── */
+    const slowSlider   = document.getElementById('slowSlider');
+    const slowDisplay  = document.getElementById('slowDisplay');
+    slowSlider.addEventListener('input', () => {
+        const v = parseFloat(slowSlider.value);
+        slowDisplay.textContent = v.toFixed(2) + '×';
+        setTimeScale(v);
+    });
+
+    /* ── opacity slider ── */
+    document.getElementById('opacitySlider').addEventListener('input', (e) => {
+        carOpacity(parseFloat(e.target.value));
+    });
+
+    /* ── free-body checkboxes ── */
+    document.getElementById('chkForce').addEventListener('change', (e) => {
+        showHide(e.target.checked, force, Flabel);
+    });
+    document.getElementById('chkVelocity').addEventListener('change', (e) => {
+        showHide(e.target.checked, velocity, Vlabel);
+    });
+    document.getElementById('chkNormal').addEventListener('change', (e) => {
+        showHide(e.target.checked, normal, Nlabel);
+    });
+    document.getElementById('chkWeight').addEventListener('change', (e) => {
+        showHide(e.target.checked, weight, Wlabel);
+    });
+}
+
+/* ════════════════════════════════════════
+   MECHANICS HELPERS
+════════════════════════════════════════ */
+
+function setTimeScale(speed) {
+    if (mechMixer) mechMixer.timeScale = speed;
+}
+
+function pauseContinue() {
+    const pauseBtn = document.getElementById('pauseBtn');
+    if (move) {
+        for (const key in mechActions) mechActions[key].paused = true;
+        pauseBtn.textContent = 'CONTINUE';
+        move = false;
+    } else {
+        for (const key in mechActions) mechActions[key].paused = false;
+        pauseBtn.textContent = 'PAUSE';
+        move = true;
+    }
+}
+
+function addBanking() {
+
+    const bankBtn   = document.getElementById('bankBtn');
+    const messageEl = document.getElementById('message-el');
+
+    if (bank) {
+
+        setTimeScale(0.5);
+        carOpacity(1);
+
+        setTimeout(() => {
+            if (road && road.morphTargetInfluences) {
+                for (let i = 0; i <= 0.55; i += 0.0005) {
+                    road.morphTargetInfluences[0] = i;
+                }
+            }
+            bankBtn.textContent     = 'PARALLEL ROAD';
+            messageEl.textContent   = 'Road is now banked. Notice the normal force components.';
+
+            resetMechActions();
+            if (Nx)      Nx.visible      = true;
+            if (Nxlabel) Nxlabel.visible = true;
+            if (Ny)      Ny.visible      = true;
+            if (Nylabel) Nylabel.visible = true;
+
+        }, 500);
+
+    } else {
+
+        setTimeScale(0.5);
+        carOpacity(1);
+
+        setTimeout(() => {
+            if (road && road.morphTargetInfluences) {
+                for (let i = 0.55; i >= 0; i -= 0.0005) {
+                    road.morphTargetInfluences[0] = i;
+                }
+            }
+            bankBtn.textContent     = 'BANKED ROAD';
+            messageEl.textContent   = 'Road returned to parallel. Free-body diagram updated.';
+
+            resetMechActions();
+            if (Nx)      Nx.visible      = false;
+            if (Nxlabel) Nxlabel.visible = false;
+            if (Ny)      Ny.visible      = false;
+            if (Nylabel) Nylabel.visible = false;
+
+            fadeToAction('nobankMoving', 0.01);
+            fadeToVector('nocurveAction', 0.01);
+
+        }, 500);
+    }
+}
+
+function fadeToAction(name, duration) {
+    if (!mechActions[name]) return;
+    previousAction = activeAction;
+    activeAction   = mechActions[name];
+    if (previousAction && previousAction !== activeAction) {
+        previousAction.fadeOut(duration);
+    }
+    activeAction.reset()
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .fadeIn(duration)
+        .play();
+}
+
+function fadeToVector(name, duration) {
+    if (!mechActions[name]) return;
+    previousVector = activeVector;
+    activeVector   = mechActions[name];
+    if (previousVector && previousVector !== activeVector) {
+        previousVector.fadeOut(duration);
+    }
+    activeVector.reset()
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .fadeIn(duration)
+        .play();
+}
+
+function resetMechActions() {
+    const toReset = [
+        'bankMoving','nobankMoving','refAction',
+        'nocurveAction','curveAction','nxAction',
+        'forceAction','FlabelAction','NxlabelAction'
+    ];
+    for (const name of toReset) {
+        if (mechActions[name]) mechActions[name].reset();
+    }
+}
+
+function carOpacity(value) {
+    if (!carMaterial) return;
+    carMaterial.opacity     = value;
+    carMaterial.transparent = true;
+    carMaterial.format      = THREE.RGBAFormat;
+}
+
+function showHide(visible, vector, label) {
+    if (vector) vector.visible = visible;
+    if (label)  label.visible  = visible;
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (identical to original)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* tone mapping drift */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* mechanics animation mixer */
+    if (mechModelReady && mechMixer) {
+        mechMixer.update(clock.getDelta());
+    }
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

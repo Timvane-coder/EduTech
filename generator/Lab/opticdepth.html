@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Apparent Depth</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* bottom control bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:10px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:10px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        #menu label { color:#aaa; font-size:11px; }
+        #menu a     { color:#e07070; font-weight:600; }
+
+        #menu input[type=range]{
+            width:220px; accent-color:#c0392b;
+            vertical-align:middle;
+        }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+            background:#1a4e8f;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #menu button#theorybutton { background:#2a6e3f; }
+
+        /* CSS2D labels rendered by labelRenderer */
+        .label {
+            font-weight:bold;
+            font-size:12px;
+            color:#111;
+            background:rgba(255,255,255,0.6);
+            padding:1px 4px;
+            border-radius:3px;
+            pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ── optics lab UI (shown after transition) ── -->
+<div id="labUI">
+
+    <div id="topmenu">Apparent Depth</div>
+
+    <div id="menu">
+        <input type="range" id="incident" min="0" max="70" value="60" step=".5">
+        <label for="incident">
+            Angle of Incidence, <em>i</em> = <a id="incidentDisplay">60</a><sup>°</sup>
+        </label>
+        &nbsp;&nbsp;
+        <label>
+            Refractive Index of water, <em>n<sub>w</sub></em> = 1.333
+        </label>
+        &nbsp;&nbsp;
+        <label>
+            Angle of Refraction, <em>r</em> = <a id="refractDisplay"></a><sup>°</sup>
+        </label>
+        &nbsp;&nbsp;
+        <button id="apparent">Show Apparent Depth</button>
+        <button id="theorybutton">Laws of Refraction</button>
+    </div>
+
+</div><!-- /labUI -->
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS — SHARED
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── optics ── */
+let opticsGroup = new THREE.Group();
+let labelRenderer;
+
+let incidentRay, emergentRay, refractedRay;
+let incidentArrow, emergentArrow, refractedArrow;
+let iAngle, r1Angle;
+let normalRay1;
+let rayLine, rayArrow, eye, depth;
+
+const thickness = 5;
+let pointA, pointB, pointC, normal1;
+let irayLabel, rrayLabel, normal1Label, apparentLabel, realLabel;
+let itext, r1text;
+
+let group      = new THREE.Group();
+let labelGroup = new THREE.Group();
+
+const opticsParams = {
+    i      : (Math.PI / 180) * 60,
+    r      : (Math.PI / 180) * 40.5,
+    n      : 1.333,
+    ideg   : 60,
+    rdeg   : 40.5,
+    apparent: false
+};
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D label renderer (optics needs it) ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position     = 'absolute';
+    labelRenderer.domElement.style.top          = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    /* hide until transition completes */
+    labelRenderer.domElement.style.display = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera — Ferrari FOV to start ── */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── orbit controls — disabled during intro ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled      = false;
+    controls.enablePan    = true;
+    controls.enableZoom   = true;
+    controls.enableDamping  = true;
+    controls.dampingFactor  = 0.05;
+    controls.rotateSpeed    = 0.1;
+
+    createLights();
+    createFerrariShowroom();
+    createOpticsScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  — identical to original
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  — identical to original
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  — identical to original
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  — identical to original
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition now flies to optics camera position ── */
+    const transition = moveCamera(-15, 10, 18, 0, 2, -2, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            /* swap scenes */
+            ferrariGroup.visible = false;
+            opticsGroup.visible  = true;
+
+            /* swap background to optics blue */
+            scene.background = new THREE.Color(0xbfd1e5);
+            scene.environment = null;
+
+            /* show lab UI + CSS2D labels */
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+            labelRenderer.domElement.style.display              = 'block';
+
+            /* swap camera FOV to optics value */
+            camera.fov = 50;
+            camera.near = 0.1;
+            camera.far  = 1000;
+            camera.updateProjectionMatrix();
+
+            /* hand orbit controls to optics target */
+            controls.enabled = true;
+            controls.target.set(0, 2, -2);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   OPTICS SCENE
+════════════════════════════════════════ */
+
+function createOpticsScene() {
+
+    opticsGroup.visible = false;
+    scene.add(opticsGroup);
+    scene.add(group); /* CSS2D label group */
+
+    /* ground plane */
+    const plane = new THREE.Mesh(
+        new THREE.BoxGeometry(12, 1, 6).translate(0, -0.5, 0),
+        new THREE.MeshBasicMaterial({ color: 0x4F7942, side: THREE.DoubleSide })
+    );
+    opticsGroup.add(plane);
+
+    /* grid */
+    const scaleHorizontal = new THREE.GridHelper(70, 70);
+    opticsGroup.add(scaleHorizontal);
+
+    /* ── build ray diagram ── */
+    pointA  = new THREE.Vector3(0, 5, 0);
+    pointB  = new THREE.Vector3(thickness * Math.tan(opticsParams.r), 0, 0);
+    pointC  = new THREE.Vector3(0, 0, 0);
+    normal1 = new THREE.Vector3(0, 0, 0);
+
+    /* incident ray */
+    const iRayParts = addRays(6, 'blue');
+    incidentRay   = iRayParts.rayLine;
+    incidentArrow = iRayParts.rayArrow;
+    incidentRay.rotation.set(0, 0, -opticsParams.i);
+    incidentRay.position.copy(pointA);
+    incidentRay.add(incidentArrow);
+    scene.add(incidentRay);
+
+    /* eye icon on incident ray */
+    eye = eyeShow();
+    incidentRay.add(eye);
+    eye.position.set(0, 3, 0);
+
+    /* incident angle arc */
+    iAngle = addAngle(1.57, -opticsParams.i);
+    iAngle.position.copy(pointA);
+    scene.add(iAngle);
+
+    itext = document.createElement('div');
+    itext.className = 'label';
+    itext.innerHTML = opticsParams.ideg + '&deg;';
+    const iangleLabel = new CSS2DObject(itext);
+    iangleLabel.position.copy(new THREE.Vector3(0.6, 1, 0));
+    iAngle.add(iangleLabel);
+
+    /* normal */
+    normalRay1 = addRays(10, 'black').rayLine;
+    normalRay1.position.copy(normal1);
+    scene.add(normalRay1);
+
+    /* refracted ray */
+    const rRayParts = addRays(-thickness / Math.cos(opticsParams.r), 'green');
+    refractedRay   = rRayParts.rayLine;
+    refractedArrow = rRayParts.rayArrow;
+    refractedRay.position.copy(pointA);
+    refractedRay.rotation.set(0, 0, -opticsParams.r);
+    refractedRay.add(refractedArrow);
+    scene.add(refractedRay);
+
+    /* refracted angle arc */
+    r1Angle = addAngle(-1.57, -opticsParams.r);
+    r1Angle.position.copy(pointA);
+    scene.add(r1Angle);
+
+    r1text = document.createElement('div');
+    r1text.className = 'label';
+    r1text.innerHTML = opticsParams.rdeg + '&deg;';
+    const r1angleLabel = new CSS2DObject(r1text);
+    r1angleLabel.position.copy(new THREE.Vector3(-0.3, -1.4, 0));
+    r1Angle.add(r1angleLabel);
+
+    /* water slab */
+    const slab = new THREE.Mesh(
+        new THREE.BoxGeometry(10, thickness, 5).translate(0, thickness / 2, 0),
+        new THREE.MeshPhongMaterial({ color: 'aqua', transparent: true, opacity: 0.55 })
+    );
+    scene.add(slab);
+
+    /* emergent ray (apparent depth) */
+    const eRayParts = addRays(-thickness / Math.cos(opticsParams.i) + 5, 'red');
+    emergentRay   = eRayParts.rayLine;
+    emergentArrow = eRayParts.rayArrow;
+    emergentRay.position.copy(pointA);
+    emergentRay.rotation.set(0, 0, -opticsParams.i);
+    emergentRay.add(emergentArrow);
+    scene.add(emergentRay);
+
+    /* apparent depth plane */
+    depth = new THREE.Mesh(
+        new THREE.BoxGeometry(10, 0.2, 5),
+        new THREE.MeshPhongMaterial({ color: 'aqua', side: THREE.DoubleSide })
+    );
+    scene.add(depth);
+
+    const C = ((-thickness / Math.cos(opticsParams.i) + 5) * Math.sin(opticsParams.i)) / Math.tan(opticsParams.i);
+    depth.position.set(0, -C, 0);
+
+    apparentLabel = addLabels('Apparent Depth');
+    depth.add(apparentLabel);
+    apparentLabel.position.copy(new THREE.Vector3(0, 1, 2.5));
+
+    showLabels();
+    apparentDepth(); /* hidden by default */
+
+    /* ── wire up UI controls ── */
+    setupOpticsUI();
+}
+
+/* ────────────────────────────────────────
+   setupOpticsUI  (= buttonAction pattern)
+──────────────────────────────────────── */
+
+function setupOpticsUI() {
+
+    const incidentSlider  = document.getElementById('incident');
+    const incidentDisplay = document.getElementById('incidentDisplay');
+    const refractDisplay  = document.getElementById('refractDisplay');
+    const apparentBtn     = document.getElementById('apparent');
+    const theoryBtn       = document.getElementById('theorybutton');
+
+    /* initialise displays */
+    refractDisplay.innerHTML  = opticsParams.rdeg;
+    incidentDisplay.innerHTML = opticsParams.ideg;
+
+    incidentSlider.addEventListener('change', function () {
+        displayRefract();
+        opticsParams.apparent = false;
+        apparentDepth();
+    });
+
+    incidentSlider.addEventListener('input', function () {
+        displayRefract();
+    });
+
+    apparentBtn.addEventListener('click', function () {
+        opticsParams.apparent = !opticsParams.apparent;
+        apparentDepth();
+    });
+
+    theoryBtn.addEventListener('click', function () {
+        window.open('Optics_Refraction_of_Light.html', '_self');
+    });
+}
+
+/* ────────────────────────────────────────
+   addRays
+──────────────────────────────────────── */
+
+function addRays(length, col) {
+
+    const rayGeometry = new THREE.CylinderGeometry(0.05, 0.05, length)
+                            .translate(0, length / 2, 0);
+    rayLine  = new THREE.Mesh(rayGeometry,
+                   new THREE.MeshBasicMaterial({ color: col }));
+
+    const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 6)
+                             .translate(0, -length / 2, 0);
+    coneGeometry.rotateX(Math.PI);
+    rayArrow = new THREE.Mesh(coneGeometry,
+                   new THREE.MeshBasicMaterial({ color: 'red' }));
+
+    return { rayLine, rayArrow };
+}
+
+/* ────────────────────────────────────────
+   addAngle
+──────────────────────────────────────── */
+
+function addAngle(start, end) {
+
+    const angleGeometry = new THREE.RingGeometry(2.1, 2, 11, 1, start, end);
+    const angleMaterial = new THREE.MeshBasicMaterial({
+        color: 0x000000, side: THREE.DoubleSide
+    });
+    return new THREE.Mesh(angleGeometry, angleMaterial);
+}
+
+/* ────────────────────────────────────────
+   adjustAngle
+──────────────────────────────────────── */
+
+function adjustAngle(ang, start, end, text, value) {
+
+    ang.geometry.dispose();
+    ang.geometry = new THREE.RingGeometry(2.1, 2, 11, 1, start, end);
+    text.innerHTML = value + '&deg;';
+}
+
+/* ────────────────────────────────────────
+   adjustRefract
+──────────────────────────────────────── */
+
+function adjustRefract() {
+
+    refractedRay.geometry.dispose();
+    refractedRay.geometry = new THREE.CylinderGeometry(
+            0.05, 0.05, -thickness / Math.cos(opticsParams.r)
+        ).translate(0, (-thickness / Math.cos(opticsParams.r)) / 2, 0);
+    refractedRay.rotation.set(0, 0, -opticsParams.r);
+}
+
+/* ────────────────────────────────────────
+   displayRefract
+──────────────────────────────────────── */
+
+function displayRefract() {
+
+    const incidentSlider  = document.getElementById('incident');
+    const incidentDisplay = document.getElementById('incidentDisplay');
+    const refractDisplay  = document.getElementById('refractDisplay');
+
+    const X = Math.sin(incidentSlider.value * (Math.PI / 180)) / 1.333;
+    const Y = Math.asin(X);
+
+    opticsParams.i    = (Math.PI / 180) * incidentSlider.value;
+    opticsParams.r    = Y;
+    opticsParams.ideg = incidentSlider.value;
+    opticsParams.rdeg = ((Y * 180) / Math.PI).toFixed(1);
+
+    incidentDisplay.innerHTML = incidentSlider.value;
+    refractDisplay.innerHTML  = opticsParams.rdeg;
+
+    incidentRay.rotation.set(0, 0, -opticsParams.i);
+    emergentRay.rotation.set(0, 0, -opticsParams.i);
+
+    let C;
+    if (opticsParams.i === 0) {
+        C = 0;
+    } else {
+        C = ((-thickness / Math.cos(opticsParams.i) + 5) *
+              Math.sin(opticsParams.i)) / Math.tan(opticsParams.i);
+    }
+    depth.position.set(0, -C, 0);
+
+    adjustAngle(iAngle,  1.57,          -opticsParams.i, itext,  opticsParams.ideg);
+    adjustAngle(r1Angle, -1.57,         -opticsParams.r, r1text, opticsParams.rdeg);
+    adjustRefract();
+    showLabels();
+}
+
+/* ────────────────────────────────────────
+   apparentDepth
+──────────────────────────────────────── */
+
+function apparentDepth() {
+
+    emergentRay.visible   = opticsParams.apparent;
+    apparentLabel.visible = opticsParams.apparent;
+    depth.visible         = opticsParams.apparent;
+}
+
+/* ────────────────────────────────────────
+   showLabels
+──────────────────────────────────────── */
+
+function showLabels() {
+
+    irayLabel    = addLabels('Incident Ray');
+    rrayLabel    = addLabels('Refracted Ray');
+    normal1Label = addLabels('Normal');
+    realLabel    = addLabels('Real Depth');
+
+    const medium1Label = addLabels('Air');
+    const medium2Label = addLabels('Water');
+
+    irayLabel.position.copy(new THREE.Vector3(0, 6.5, 0));
+    incidentRay.add(irayLabel);
+
+    realLabel.position.copy(new THREE.Vector3(0, 0, 2.5));
+
+    rrayLabel.position.copy(new THREE.Vector3(0, -5, 0));
+    refractedRay.add(rrayLabel);
+
+    normal1Label.position.copy(new THREE.Vector3(0, 8, 0));
+    normalRay1.add(normal1Label);
+
+    scene.add(medium1Label);
+    medium1Label.position.copy(new THREE.Vector3(5, 10, 0));
+
+    scene.add(medium2Label);
+    medium2Label.position.copy(new THREE.Vector3(3, 3, 0));
+
+    scene.add(realLabel);
+}
+
+/* ────────────────────────────────────────
+   addLabels
+──────────────────────────────────────── */
+
+function addLabels(name) {
+
+    const text = document.createElement('div');
+    text.className = 'label';
+    text.innerHTML = name;
+    const label = new CSS2DObject(text);
+    group.add(label);
+    return label;
+}
+
+/* ────────────────────────────────────────
+   eyeShow
+──────────────────────────────────────── */
+
+function eyeShow() {
+
+    const eyeGeometry = new THREE.PlaneGeometry(2, 2).translate(0, 2.5, 0.1);
+    const texture     = new THREE.TextureLoader().load('./assets/img/eyeIconUp.png');
+    return new THREE.Mesh(
+        eyeGeometry,
+        new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            map: texture,
+            transparent: true
+        })
+    );
+}
+
+/* ════════════════════════════════════════
+   RESIZE  — identical to original
+════════════════════════════════════════ */
+
+function onResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE  — updated for optics
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* ── ferrari intro camera steering ── */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* main render */
+    renderer.render(scene, camera);
+
+    /* CSS2D labels — only after transition */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>
+

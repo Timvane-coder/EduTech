@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Photoelectric Effect Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── Top menu ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── Side menu (Quantum controls) ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:290px;
+            background:rgba(15,15,20,.90);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.85;
+        }
+        #sidemenu label {
+            color:#aaa; font-size:11px;
+            display:block; margin-top:10px;
+        }
+        #sidemenu input[type=range] {
+            width:100%; accent-color:#c0392b;
+            margin-top:3px; margin-bottom:2px;
+        }
+        #sidemenu a { color:#e07070; font-weight:600; }
+
+        /* I-V canvas overlay */
+        #drawing-canvas {
+            position:fixed; bottom:60px; right:12px;
+            border:1px solid rgba(255,255,255,.18);
+            border-radius:4px;
+            background:#fff;
+            z-index:101;
+            visibility:hidden;
+        }
+
+        /* ── Bottom menu ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12.5px;
+            padding:9px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:8px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a { color:#e07070; font-weight:600; }
+        #message-el {
+            flex:1 1 100%; font-size:11.5px;
+            color:#aaa; margin-top:2px;
+        }
+
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover  { filter:brightness(1.18); }
+        #menu button:disabled { opacity:.4; cursor:default; }
+        #wave-el  { background:rgb(164,26,26); }
+        #plot-el  { background:#2a6e3f; visibility:hidden; }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════  LAB UI  ═══════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Quantum Physics &mdash; The Photoelectric Effect</div>
+
+    <!-- Quantum controls side panel -->
+    <div id="sidemenu">
+
+        <label for="wavelength-sl">
+            Wavelength &lambda; = <a id="wavevalue">200</a> nm
+        </label>
+        <input type="range" id="wavelength-sl"
+               min="1" max="4.00" value="2.00" step="0.5">
+
+        <label for="intensity-sl">
+            Intensity = <a id="intensityValue">100</a> %
+        </label>
+        <input type="range" id="intensity-sl"
+               min="0.5" max="1" value="1" step="0.25">
+
+        <label for="voltage-sl">
+            Voltage = <a id="voltageValue">5</a> V
+        </label>
+        <input type="range" id="voltage-sl"
+               min="-5" max="10" value="5" step="0.1">
+
+    </div>
+
+    <!-- I-V / KE canvas -->
+    <canvas id="drawing-canvas" height="200" width="200"></canvas>
+
+    <!-- Bottom bar -->
+    <div id="menu">
+        <button id="wave-el">START</button>
+        <button id="plot-el">PLOT (K<sub>max</sub>)</button>
+        <div id="message-el">
+            Adjust wavelength, intensity and voltage, then press START
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── Ferrari ── */
+let ferrariGroup = new THREE.Group();
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── Quantum / Photoelectric lab ── */
+let quantumGroup = new THREE.Group();
+
+// TWEEN handles – imported lazily once lab is visible
+let QTween;
+
+// scene objects
+let qEmitter, qCathode, qCone;
+let qCurrentNeedle, qVoltageNeedle;
+let qGroup  = new THREE.Group();   // photon wave group
+let qElectrons = new THREE.Group();
+const qElectronList = [];
+const qPoints = [];                // wave curve sample points
+let qColorList = {};
+
+// tween chain refs
+let photon_to, photon_fro, photon_scaleDown, photon_scaleUp;
+let tween_to,  tween_fro,  tween_scaleDown,  tween_scaleUp;
+
+// state flags
+let qStop   = true;
+let qChange = false;
+let qCathodeX = 0;
+
+// physics constants & params
+const hc = 12.41e-7;   // eV·m
+const qParams = {
+    iValue    : 1,
+    intensity : 10,
+    workfn    : 4.20,
+    waveCut   : 295,
+    voltage   : 5,
+    light     : 2,
+    wave      : 0.75,
+    stopV     : 2,
+    wavelength: 200
+};
+
+// I-V data tables (same as original)
+const wave200V  = [-15,-10,-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,0,1,1.5,2,2.5,3,3.5,4,4.5,5,10,15,20,25,30,35];
+const wave200I  = [0,0,0,0,0,0,0,0,0.02,0.04,0.1,0.5,0.84,0.9,0.97,1.05,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1];
+const wave200I1 = [0,0,0,0,0,0,0,0,0.01,0.02,0.05,0.25,0.42,0.49,0.5,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55];
+const wave200I2 = [0,0,0,0,0,0,0,0,0.005,0.01,0.025,0.125,0.21,0.245,0.25,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275];
+const wave100V  = [-15,-10,-9,-8,-8.5,-8.2,-8,-7.5,-5,-3,-2,-1,0,1,2,3,7.5,8,8.2,8,8.5,9,10,15,20,25,30,35];
+const wave100I  = [0,0,0,0,0,0.02,0.04,0.1,0.4,0.7,0.84,0.9,0.99,1.04,1.061,1.08,1.095,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1,1.1];
+const wave100I1 = [0,0,0,0,0,0.01,0.01,0.05,0.2,0.35,0.42,0.45,0.495,0.52,0.53,0.54,0.547,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55];
+const wave100I2 = [0,0,0,0,0,0.005,0.005,0.025,0.1,0.175,0.21,0.225,0.2475,0.26,0.265,0.27,0.273,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275,0.275];
+const freqAl    = [30,25,20,15,10.2,8.5,-9];
+const kEnergyAl = [13.1,9.7,6.52,3.21,0,-1,-14];
+
+let voltageX = wave200V;
+let currentY = wave200I;
+let current1Y = wave200I1;
+let current2Y = wave200I2;
+
+// canvas
+const maxWidth  = 200;
+const maxHeight = 200;
+const halfWidth = maxWidth / 2;
+const xAxis = 25, yAxis = 150;
+let drawingCanvas, drawingContext;
+
+// DOM refs (populated in setupQuantumUI)
+let waveButton, plotButton;
+let messageEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── Camera  (FOV 55 matches quantum scene) ── */
+    camera = new THREE.PerspectiveCamera(
+        55, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── Scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── Controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled       = false;
+    controls.enablePan     = true;
+    controls.enableZoom    = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed   = 0.1;
+    controls.minDistance   = 0.1;
+    controls.maxDistance   = 5000;
+
+    createLights();
+    createFerrariShowroom();
+    createQuantumScene();
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── Transition to Quantum lab ── */
+    const transition = moveCamera(-15, 15, 45, -1, 9, 5, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            quantumGroup.visible = true;
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* Camera position & FOV tuned to quantum scene */
+            camera.position.set(-15, 15, 45);
+            camera.fov = 55;
+            camera.updateProjectionMatrix();
+
+            controls.enabled = true;
+            controls.target.set(-1, 9, 5);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* Lazy-load lil-gui and wire up the lab UI */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => { setupQuantumUI(GUI); })
+                .catch(() => { setupQuantumUI(null); });
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   QUANTUM SCENE
+════════════════════════════════════════ */
+
+function createQuantumScene() {
+
+    quantumGroup.visible = false;
+    scene.add(quantumGroup);
+
+    /* Ground grid */
+    const grid2 = new THREE.GridHelper(70, 70);
+    quantumGroup.add(grid2);
+
+    /* Build wave-curve sample points (used by waveChange) */
+    qBuildWavePoints();
+
+    /* Build colour palette for photon wavelengths */
+    qBuildColorList();
+
+    /* Calculate initial cutoff & KE */
+    qCalCutoff();
+    qCalKenergy(200);
+
+    /* Geometry: vacuum chamber, cathode, connectors, meters, photon source */
+    qVacuumChamber();
+    qCreateConnector();
+    qCreateMeasure();
+
+    const initCol = qColorList[qParams.light];
+    qPhotonSource(initCol);
+
+    /* Canvas for I-V / KE plot */
+    drawingCanvas  = document.getElementById('drawing-canvas');
+    drawingContext = drawingCanvas.getContext('2d');
+}
+
+/* ────────────────────────────────────────
+   qBuildWavePoints
+──────────────────────────────────────── */
+
+function qBuildWavePoints() {
+    for (let i = 0; i < 2 * Math.PI; i += 0.25) {
+        qPoints.push(new THREE.Vector3(i, 0.5 * Math.sin(4 * i), 0));
+    }
+}
+
+/* ────────────────────────────────────────
+   qBuildColorList
+──────────────────────────────────────── */
+
+function qBuildColorList() {
+    for (let i = 0; i < 10; i++) {
+        qColorList[i] = new THREE.Color(0.5 + i / 10, 1, 0.5 - i / 10);
+    }
+}
+
+/* ────────────────────────────────────────
+   qCalCutoff  /  qCalKenergy
+──────────────────────────────────────── */
+
+function qCalCutoff() {
+    const x = hc / qParams.workfn;
+    qParams.waveCut = Number((x * 1e9).toFixed(0));
+}
+
+function qCalKenergy(A) {
+    const x = hc / (A * 1e-9);
+    qParams.stopV = Number((x - qParams.workfn).toFixed(1));
+}
+
+/* ────────────────────────────────────────
+   qVacuumChamber
+──────────────────────────────────────── */
+
+function qVacuumChamber() {
+
+    const transBlueMat = new THREE.MeshPhongMaterial({
+        color: 'blue', side: THREE.BackSide,
+        transparent: true, opacity: 0.25
+    });
+
+    /* Dome cap */
+    const capGeo = new THREE.SphereGeometry(3, 16, 32, 0, 3.14, 0, 3.14)
+                       .translate(0, 0, 3);
+    const cap1   = new THREE.Mesh(capGeo, transBlueMat);
+    cap1.position.set(0, 10, 0);
+    cap1.rotation.set(-1.57, 0, 0);
+    scene.add(cap1);
+
+    /* Cylinder body */
+    const cylGeo = new THREE.CylinderGeometry(3, 3, 10, 32, 32, true).translate(0, 8, 0);
+    scene.add(new THREE.Mesh(cylGeo, transBlueMat));
+
+    /* Bottom cap (solid blue) */
+    const cap2 = new THREE.Mesh(
+        new THREE.CylinderGeometry(3, 3, 3, 32, 32).translate(0, 1.5, 0),
+        new THREE.MeshPhongMaterial({ color: 'blue' })
+    );
+    scene.add(cap2);
+
+    /* Emitter cylinder (open) */
+    qEmitter = new THREE.Mesh(
+        new THREE.CylinderGeometry(2, 2, 10, 16, 16, true, 0.4, 2.72).translate(0, 8, 0),
+        new THREE.MeshPhongMaterial({ color: 'aqua', side: THREE.DoubleSide })
+    );
+
+    /* Cathode plate */
+    qCathode = qMakeBox(0.25, 10, 1, 0x36454F, false, 1);
+    qCathode.position.set(-2, 3, 0);
+    scene.add(qEmitter, qCathode);
+
+    /* Terminal nodes on base cap */
+    const node1 = qMakeBox(0.5, 0.5, 0.5, 0x36454F, false, 1);
+    const node2 = qMakeBox(0.5, 0.5, 0.5, 0x36454F, false, 1);
+    cap2.add(node1, node2);
+    node1.position.set( 3.25, 1.5, 0);
+    node2.position.set(-3.25, 1.5, 0);
+
+    quantumGroup.add(cap1, cap2, qEmitter, qCathode);
+}
+
+/* ────────────────────────────────────────
+   qCreateConnector
+──────────────────────────────────────── */
+
+function qCreateConnector() {
+
+    const redMat = new THREE.MeshLambertMaterial({ color: 0xb00000 });
+
+    const splines = [
+        [
+            new THREE.Vector3( 3,  1.7,  0),
+            new THREE.Vector3( 5,  1.5,  0),
+            new THREE.Vector3( 8,  0.5,  4),
+            new THREE.Vector3( 7,  0.5, 12),
+            new THREE.Vector3( 5.7, 0.9, 12)
+        ],
+        [
+            new THREE.Vector3(-3,  1.7,  0),
+            new THREE.Vector3(-7,  1.5,  0),
+            new THREE.Vector3(-10, 1.2,  4),
+            new THREE.Vector3(-10, 2,   12),
+            new THREE.Vector3(-7,  0.8, 11.8)
+        ],
+        [
+            new THREE.Vector3(-6,  0.8, 11.8),
+            new THREE.Vector3(-1,  0.3, 12),
+            new THREE.Vector3(-0.6, 0.6, 12),
+            new THREE.Vector3( 0.3, 0.9, 12)
+        ]
+    ];
+
+    splines.forEach(pts => {
+        const curve = new THREE.CatmullRomCurve3(pts);
+        curve.curveType = 'centripetal';
+        const mesh = new THREE.Mesh(
+            new THREE.TubeGeometry(curve, 60, 0.1, 4, false),
+            redMat
+        );
+        scene.add(mesh);
+        quantumGroup.add(mesh);
+    });
+}
+
+/* ────────────────────────────────────────
+   qCreateMeasure  – ammeter + voltmeter
+──────────────────────────────────────── */
+
+function qCreateMeasure() {
+
+    /* ── Ammeter ── */
+    const ammeterTex = new THREE.TextureLoader()
+        .load('./assets/img/ammeterReading.png');
+    const ammeterMat = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide, map: ammeterTex, transparent: true
+    });
+
+    const ammeter      = qMakeBox(4.7, 4, 0.5, 0xEFb035, false, 1);
+    const ammeterPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(4.5, 3.4).translate(0, 2, 0.3),
+        ammeterMat
+    );
+    qCurrentNeedle = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.06, 1.4)
+            .translate(0, 0.7, 0).rotateZ(1.56),
+        new THREE.MeshBasicMaterial({ color: 0x000000 })
+    );
+
+    ammeter.position.set(3, 0, 12);
+    ammeter.add(ammeterPlane);
+    ammeterPlane.add(qCurrentNeedle);
+    qCurrentNeedle.position.set(0, 1.3, 0.4);
+
+    const posI = qMakeBox(0.5, 0.5, 0.5, 0x36454F, false, 1);
+    const negI = qMakeBox(0.5, 0.5, 0.5, 0x36454F, false, 1);
+    ammeter.add(posI, negI);
+    posI.position.set( 2.6, 0.7, 0);
+    negI.position.set(-2.6, 0.7, 0);
+
+    scene.add(ammeter);
+    quantumGroup.add(ammeter);
+
+    /* ── Voltmeter ── */
+    const voltageTex = new THREE.TextureLoader()
+        .load('./assets/img/voltageReading.png');
+    const voltageMat = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide, map: voltageTex, transparent: true
+    });
+
+    const voltmeter      = qMakeBox(7, 4, 2, 0xFF3500, false, 1);
+    const voltagePlane   = new THREE.Mesh(
+        new THREE.PlaneGeometry(4, 3).translate(0, 1.5, 0),
+        voltageMat
+    );
+    qVoltageNeedle = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.06, 1.6).translate(0, 0.8, 0.05),
+        new THREE.MeshBasicMaterial({ color: 0x000000 })
+    );
+
+    voltmeter.position.set(-5, 0, 10.5);
+    voltagePlane.position.set(1.3, 0.9, 1.05);
+    qVoltageNeedle.position.set(0, 0.8, 0);
+    qVoltageNeedle.rotation.set(0, 0, -qParams.voltage / 7);
+
+    voltmeter.add(voltagePlane);
+    voltagePlane.add(qVoltageNeedle);
+
+    const positive = qMakeBox(0.5, 0.5, 1, 0x36454F, false, 1);
+    const negative = qMakeBox(0.5, 0.5, 1, 0x36454F, false, 1);
+    voltmeter.add(positive, negative);
+    positive.position.set(-1, 0.5, 1);
+    negative.position.set(-2, 0.5, 1);
+
+    scene.add(voltmeter);
+    quantumGroup.add(voltmeter);
+}
+
+/* ────────────────────────────────────────
+   qPhotonSource
+──────────────────────────────────────── */
+
+function qPhotonSource(col) {
+    const geo = new THREE.CylinderGeometry(0.5, 1.5, 3, 8, 1, true);
+    const mat = new THREE.MeshPhongMaterial({
+        color: col, wireframe: false, side: THREE.DoubleSide
+    });
+    qCone = new THREE.Mesh(geo, mat);
+    qCone.position.set(-8, 19, -3);
+    qCone.rotation.set(0, -0.5, 0.75);
+    qCone.scale.set(2, 2, 2);
+    scene.add(qCone);
+    quantumGroup.add(qCone);
+}
+
+/* ────────────────────────────────────────
+   qMakeBox  – utility
+──────────────────────────────────────── */
+
+function qMakeBox(x, y, z, col, transparent, opacity) {
+    return new THREE.Mesh(
+        new THREE.BoxGeometry(x, y, z).translate(0, y / 2, 0),
+        new THREE.MeshPhongMaterial({
+            color: col, side: THREE.DoubleSide,
+            transparent, opacity
+        })
+    );
+}
+
+/* ════════════════════════════════════════
+   QUANTUM LAB UI
+   Called after lazy lil-gui load completes
+════════════════════════════════════════ */
+
+function setupQuantumUI(GUI) {
+
+    waveButton = document.getElementById('wave-el');
+    plotButton = document.getElementById('plot-el');
+    messageEl  = document.getElementById('message-el');
+
+    const waveInput      = document.getElementById('wavelength-sl');
+    const waveValue      = document.getElementById('wavevalue');
+    const intensityInput = document.getElementById('intensity-sl');
+    const intensityValue = document.getElementById('intensityValue');
+    const voltageInput   = document.getElementById('voltage-sl');
+    const voltageValue   = document.getElementById('voltageValue');
+
+    /* Initial display values */
+    waveValue.innerHTML      = 200;
+    intensityValue.innerHTML = qParams.intensity * 10;
+    voltageValue.innerHTML   = qParams.voltage;
+
+    /* Initial I-V canvas */
+    qCanvasAction();
+
+    /* Optional lil-gui dev panel */
+    if (GUI) {
+        const gui = new GUI({ width: 220, title: 'Camera' });
+        gui.close();
+        gui.add(camera.position, 'x', -100, 100);
+        gui.add(camera.position, 'y', -100, 100);
+        gui.add(camera.position, 'z', -100, 100);
+    }
+
+    /* ── START / STOP ── */
+    waveButton.addEventListener('click', () => {
+        qStop = !qStop;
+        if (qStop) {
+            drawingCanvas.style.visibility = 'hidden';
+            waveButton.textContent = 'START';
+            qStopAction();
+        } else {
+            drawingCanvas.style.visibility = 'visible';
+            plotButton.style.visibility    = 'visible';
+            waveButton.textContent = 'STOP';
+            qWaveAction();
+            qVoltageAction();
+        }
+    });
+
+    /* ── PLOT toggle ── */
+    plotButton.addEventListener('click', () => {
+        qChange = !qChange;
+        if (qChange) {
+            plotButton.innerHTML = 'PLOT I-V';
+            qCanvasEnergy();
+        } else {
+            plotButton.innerHTML = 'PLOT (K<sub>max</sub>)';
+            qCanvasAction();
+        }
+    });
+
+    /* ── Wavelength ── */
+    waveInput.addEventListener('change', () => {
+        const W = Math.ceil(waveInput.value * 1e2);
+        waveValue.innerHTML = W;
+        qParams.light      = Math.floor(waveInput.value);
+        qParams.wavelength = W;
+        const col = qColorList[qParams.light];
+        if (qCone) qCone.material.color.copy(col);
+
+        if (W <= qParams.waveCut) {
+            qParams.wave = 0.75 / waveInput.value;
+            qCalKenergy(W);
+        } else {
+            qParams.wave  = 0;
+            qParams.stopV = 'Not defined';
+        }
+        if (!qStop) qVoltageAction();
+
+        if (W < 180) {
+            voltageX = wave100V; currentY = wave100I;
+            current1Y = wave100I1; current2Y = wave100I2;
+        } else if (W > qParams.waveCut) {
+            voltageX = []; currentY = []; current1Y = []; current2Y = [];
+        } else {
+            voltageX = wave200V; currentY = wave200I;
+            current1Y = wave200I1; current2Y = wave200I2;
+        }
+        qCanvasAction();
+    });
+
+    /* ── Intensity ── */
+    intensityInput.addEventListener('change', () => {
+        qParams.intensity = intensityInput.value * 10;
+        intensityValue.innerHTML = qParams.intensity * 10;
+        qParams.iValue = Number(intensityInput.value);
+        qVoltageAction();
+    });
+
+    /* ── Voltage ── */
+    voltageInput.addEventListener('change', () => {
+        const X = voltageInput.value;
+        voltageValue.innerHTML = X;
+        qParams.voltage = Number(X);
+        qVoltageAction();
+    });
+}
+
+/* ════════════════════════════════════════
+   QUANTUM ACTION FUNCTIONS
+════════════════════════════════════════ */
+
+function qWaveAction() {
+
+    qGroup    = new THREE.Group();
+    qElectrons.children.length = 0;
+
+    qGroup.rotation.set(0, -0.5, 0.08);
+    qGroup.position.set(-1, 12.5, 0);
+
+    const col = qColorList[qParams.light];
+    qWaveChange(qParams.intensity, col);
+
+    const B = (qParams.intensity * qParams.iValue).toFixed(2);
+    qIntensityAction(B);
+    qPhotonChain(qGroup);
+
+    qCathodeX = qCathode ? qCathode.position.x : 1;
+}
+
+function qStopAction() {
+
+    while (qGroup.children.length > 0)     qGroup.children[0].parent.remove(qGroup.children[0]);
+    while (qElectrons.children.length > 0) qElectrons.children[0].parent.remove(qElectrons.children[0]);
+
+    if (!QTween) return;
+    setTimeout(() => {
+        new QTween(qCurrentNeedle.rotation)
+            .to({ z: 0 }, 2500)
+            .easing(QTween.Easing.Cubic.Out)
+            .start();
+    }, 500);
+}
+
+function qIntensityAction(value) {
+
+    if (qParams.wavelength > qParams.waveCut) return;
+
+    qCalKenergy(qParams.wavelength);
+
+    for (let i = 0; i < value; i++) {
+        const el = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(0.25, 0),
+            new THREE.MeshBasicMaterial({ color: 0xce00ff })
+        );
+        el.position.set(
+            0,
+            Math.random() * (5 + i / 5) - (2.5 + i / 10),
+            Math.random() * (1 + i / 5) - (0.5 + i / 10)
+        );
+        qElectronList.push(el);
+        qElectrons.add(el);
+    }
+
+    setTimeout(() => {
+        scene.add(qElectrons);
+        qElectrons.position.set(1, 8, 0);
+        qElectronChain(qElectrons);
+    }, 2500);
+}
+
+function qPhotonChain(photon) {
+    if (!QTween) return;
+
+    photon_to        = new QTween(photon.position).to({ x: 1,  y: 8    }, 2000);
+    photon_scaleDown = new QTween(photon.scale   ).to({ x: 0,  y: 0, z: 0 }, 50);
+    photon_fro       = new QTween(photon.position).to({ x: -1, y: 12.5 }, 1000);
+    photon_scaleUp   = new QTween(photon.scale   ).to({ x: 1,  y: 1, z: 1 }, 50);
+
+    photon_to.chain(photon_scaleDown);
+    photon_scaleDown.chain(photon_fro);
+    photon_fro.chain(photon_scaleUp);
+    photon_scaleUp.chain(photon_to);
+    photon_to.start();
+}
+
+function qElectronChain(A) {
+    if (!QTween) return;
+
+    tween_to        = new QTween(A.position).to({ x: qCathodeX, y: 8 }, 2000);
+    tween_scaleDown = new QTween(A.scale   ).to({ x: 0, y: 0, z: 0   }, 50);
+    tween_fro       = new QTween(A.position).to({ x: 1, y: 8         }, 1000);
+    tween_scaleUp   = new QTween(A.scale   ).to({ x: 1, y: 1, z: 1   }, 50);
+
+    tween_to.chain(tween_scaleDown);
+    tween_scaleDown.chain(tween_fro);
+    tween_fro.chain(tween_scaleUp);
+    tween_scaleUp.chain(tween_to);
+    tween_to.start();
+}
+
+function qVoltageAction() {
+
+    if (!QTween || !qVoltageNeedle) return;
+
+    const A = Number(qParams.voltage / 7);
+    new QTween(qVoltageNeedle.rotation)
+        .to({ z: -A }, 500)
+        .easing(QTween.Easing.Cubic.Out)
+        .start();
+
+    const clearGroups = () => {
+        while (qGroup.children.length > 0)     qGroup.children[0].parent.remove(qGroup.children[0]);
+        while (qElectrons.children.length > 0) qElectrons.children[0].parent.remove(qElectrons.children[0]);
+    };
+
+    if (qParams.voltage <= -qParams.workfn) {
+
+        clearGroups();
+        new QTween(qCurrentNeedle.rotation)
+            .to({ z: 0 }, 500)
+            .easing(QTween.Easing.Cubic.Out)
+            .start();
+
+    } else if (qParams.voltage >= qParams.workfn) {
+
+        clearGroups();
+        const I = -(qParams.iValue / 5) * qParams.intensity * qParams.wave;
+        qWaveAction();
+        setTimeout(() => {
+            new QTween(qCurrentNeedle.rotation)
+                .to({ z: I }, 500)
+                .easing(QTween.Easing.Cubic.Out)
+                .start();
+        }, 500);
+
+    } else {
+
+        clearGroups();
+        const base = (qParams.intensity / 5) * qParams.wave;
+        qParams.iValue = base / (1 + Math.pow(Math.E, -qParams.voltage));
+        setTimeout(() => {
+            new QTween(qCurrentNeedle.rotation)
+                .to({ z: -qParams.iValue }, 500)
+                .easing(QTween.Easing.Cubic.Out)
+                .start();
+        }, 500);
+        qWaveAction();
+    }
+}
+
+function qWaveChange(N, col) {
+
+    const lightWave = new THREE.CatmullRomCurve3(qPoints);
+    const tubeGeo   = new THREE.TubeGeometry(lightWave, 50, 0.07, 5, false);
+    const mat       = new THREE.MeshPhongMaterial({
+        color: col, wireframe: false, side: THREE.DoubleSide
+    });
+    const PHOTON = new THREE.Mesh(tubeGeo, mat);
+    if (qCone) qCone.material = mat;
+
+    for (let k = 0; k < Math.floor(N / 2); k++) {
+        const X = PHOTON.clone();
+        X.rotation.set(0, 0, 2.3);
+        X.position.set(0, (k + 0.2) / 3, k / 3);
+        qGroup.add(X);
+    }
+    for (let k = 0; k < Math.floor(N / 2) + 1; k++) {
+        const X = PHOTON.clone();
+        X.rotation.set(0, 0, 2.3);
+        X.position.set(0, ((k + 0.2) / 3) - 1, k / 3);
+        qGroup.add(X);
+    }
+    scene.add(qGroup);
+}
+
+/* ════════════════════════════════════════
+   CANVAS  – I-V and KE graphs
+════════════════════════════════════════ */
+
+function qSetupCanvas() {
+    drawingContext.clearRect(0, 0, maxWidth, maxHeight);
+    drawingContext.fillStyle = '#FFFFFF';
+    drawingContext.fillRect(0, 0, maxWidth, maxHeight);
+}
+
+function qDrawAxes(X, Y, A) {
+    drawingContext.beginPath();
+    drawingContext.lineWidth   = 2;
+    drawingContext.strokeStyle = 'black';
+    drawingContext.moveTo(X, 0);
+    drawingContext.lineTo(X, maxHeight);
+    drawingContext.moveTo(0, Y);
+    drawingContext.lineTo(maxWidth, Y);
+    qCanvasArrow(X - 10, 90, X - 10, 10);
+    qCanvasArrow(maxWidth - A, Y + 10, maxWidth - 5, Y + 10);
+    drawingContext.stroke();
+}
+
+function qCanvasArrow(fromx, fromy, tox, toy) {
+    const headlen = 10;
+    const dx = tox - fromx, dy = toy - fromy;
+    const angle = Math.atan2(dy, dx);
+    drawingContext.moveTo(fromx, fromy);
+    drawingContext.lineTo(tox, toy);
+    drawingContext.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+    drawingContext.moveTo(tox, toy);
+    drawingContext.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+}
+
+function qPlotGraph(x, y, r, col, x1, y1) {
+    drawingContext.beginPath();
+    drawingContext.arc(x1, y1, r, 0, 2 * Math.PI, false);
+    drawingContext.moveTo(x, y);
+    drawingContext.lineTo(x1, y1);
+    drawingContext.lineWidth   = 1;
+    drawingContext.fillStyle   = col;
+    drawingContext.strokeStyle = col;
+    drawingContext.fill();
+    drawingContext.stroke();
+}
+
+function qCanvasAction() {
+    if (!drawingContext) return;
+    qSetupCanvas();
+    qDrawAxes(80, yAxis, 70);
+
+    drawingContext.font      = '12px arial';
+    drawingContext.fillStyle = '#000000';
+    drawingContext.fillText('V (volts)', maxHeight - 5, yAxis - 5);
+    drawingContext.fillText('I (mA)', 82, 15);
+    drawingContext.fillText(qParams.wavelength + ' nm', xAxis + 160, yAxis + 45);
+    drawingContext.fillText(-qParams.stopV + ' V',      xAxis + 15,  yAxis + 25);
+
+    for (let i = 0; i < voltageX.length - 1; i++) {
+        qPlotGraph(xAxis + 60 + voltageX[i] * 5, yAxis - currentY[i]  * 120, 3, 'blue',
+                   xAxis + 60 + voltageX[i+1] * 5, yAxis - currentY[i+1]  * 120);
+        qPlotGraph(xAxis + 60 + voltageX[i] * 5, yAxis - current1Y[i] * 160, 3, 'red',
+                   xAxis + 60 + voltageX[i+1] * 5, yAxis - current1Y[i+1] * 160);
+        qPlotGraph(xAxis + 60 + voltageX[i] * 5, yAxis - current2Y[i] * 190, 3, 'green',
+                   xAxis + 60 + voltageX[i+1] * 5, yAxis - current2Y[i+1] * 190);
+    }
+}
+
+function qCanvasEnergy() {
+    if (!drawingContext) return;
+    qSetupCanvas();
+    qDrawAxes(50, halfWidth - 25, 40);
+
+    drawingContext.font      = '12px arial';
+    drawingContext.fillStyle = '#000000';
+    drawingContext.fillText('Freq (Hz)', maxHeight / 2, maxHeight / 2);
+    drawingContext.fillText('K.E (eV)',  10, 55);
+    drawingContext.fillText(-4.20 + ' eV', xAxis, yAxis - 10);
+
+    for (let i = 0; i < freqAl.length - 1; i++) {
+        qPlotGraph(
+            xAxis + 50 + freqAl[i]   * 3, yAxis - (kEnergyAl[i]   + 20) * 4, 3, 'green',
+            xAxis + 50 + freqAl[i+1] * 3, yAxis - (kEnergyAl[i+1] + 20) * 4
+        );
+    }
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* During Ferrari intro */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    /* Quantum lab: drive lazily-loaded TWEEN if present */
+    if (introFinished && QTween) QTween.update();
+
+    renderer.render(scene, camera);
+}
+
+/* ════════════════════════════════════════
+   LAZY TWEEN BOOTSTRAP
+   The quantum photon/electron chains use
+   @tweenjs/tween.js but need the class form
+   that supports `new TWEEN(...)`.
+   We re-use the already-imported TWEEN
+   namespace; individual Tween instances
+   are constructed with `new TWEEN.Tween()`
+   and updated via TWEEN.update() above.
+   QTween is just an alias for that namespace.
+════════════════════════════════════════ */
+
+/* Wire up QTween immediately – it uses the
+   same import as the Ferrari sequence */
+QTween = TWEEN;
+
+</script>
+</body>
+</html>
+

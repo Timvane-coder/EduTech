@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Concave Mirror Lab</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        #labUI { display:none; }
+
+        /* ── top bar ── */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(15,15,20,.93);
+            color:#e8e8e8; font-size:13px; letter-spacing:.12em;
+            text-transform:uppercase;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        /* ── side panel (sliders) ── */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:280px;
+            background:rgba(15,15,20,.92);
+            color:#d4d4d4; font-size:12px;
+            padding:14px 16px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:2;
+        }
+        #sidemenu label { color:#aaa; font-size:11px; display:block; margin-top:8px; }
+        #sidemenu input[type=range] {
+            width:100%; accent-color:#c0392b;
+            margin-top:3px; margin-bottom:2px;
+        }
+        #sidemenu a { color:#e07070; font-weight:600; }
+
+        /* ── bottom bar ── */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:rgba(15,15,20,.93);
+            color:#d4d4d4; font-size:12px;
+            padding:8px 18px;
+            display:flex; align-items:flex-start;
+            flex-wrap:wrap; gap:6px;
+            z-index:100;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        #menu a { color:#e07070; }
+
+        /* formula toggle panel inside bottom bar */
+        #formula {
+            display:none; width:100%;
+            font-size:12px; padding:4px 0 6px;
+            border-bottom:1px solid rgba(255,255,255,.08);
+            margin-bottom:4px;
+        }
+
+        /* live display row */
+        #display {
+            width:100%; font-size:11.5px;
+            display:flex; flex-wrap:wrap; align-items:center; gap:4px;
+        }
+        #message-el { width:100%; margin-top:4px; font-size:11px; color:#aaa; }
+        #message-el table td { padding:1px 4px; }
+
+        /* fractions */
+        .fraction {
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup { border-bottom:1px solid #aaa; padding:0 3px; }
+        .fdn { padding:0 3px; }
+        .bar { display:none; }
+
+        #menu button {
+            padding:6px 14px; border:none; border-radius:4px;
+            font-size:12px; font-weight:600; letter-spacing:.06em;
+            cursor:pointer; color:#fff; transition:filter .15s;
+        }
+        #menu button:hover { filter:brightness(1.18); }
+        #btnFormula { background:#2a6e3f; }
+
+        /* CSS2D labels */
+        .label {
+            color:#fff; font-size:11px; letter-spacing:.05em;
+            background:rgba(0,0,0,.65); padding:2px 6px;
+            border-radius:3px; pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
+
+<!-- ═══════════════════════════ LAB UI ═══════════════════════════ -->
+<div id="labUI">
+
+    <div id="topmenu">Image Formation with Concave Mirror</div>
+
+    <!-- side slider panel -->
+    <div id="sidemenu">
+        <label for="focal">Focal Length = <a id="focalDisplay">−7</a> cm</label>
+        <input type="range" id="focal" min="-25" max="-1" value="-7" step="0.5">
+
+        <label for="objectSlider">Object Distance = <a id="objectDisplay">−18</a> cm</label>
+        <input type="range" id="objectSlider" min="-50" max="-0.5" value="-18" step="0.5">
+
+        <label for="heightSlider">Object Height = <a id="heightDisplay">3</a> cm</label>
+        <input type="range" id="heightSlider" min="0.5" max="5" value="3" step="0.5">
+    </div>
+
+    <!-- bottom bar -->
+    <div id="menu">
+
+        <!-- toggleable formula -->
+        <div id="formula">
+            <strong>Formula:</strong>
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">f</span></div>
+            =
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">v</span></div>
+            +
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span class="fdn">u</span></div>
+            &nbsp; or &nbsp; v =
+            <div class="fraction"><span class="fup">u f</span><span class="bar">/</span><span class="fdn">(u−f)</span></div>
+            &nbsp;&nbsp;
+            <strong>Magnification:</strong> m = −
+            <div class="fraction"><span class="fup">v</span><span class="bar">/</span><span class="fdn">u</span></div>
+            =
+            <div class="fraction"><span class="fup">h<sub>i</sub></span><span class="bar">/</span><span class="fdn">h<sub>o</sub></span></div>
+        </div>
+
+        <!-- live calculation row -->
+        <div id="display">
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="ff-el" class="fdn"></span></div>
+            =
+            <div style="color:#e07070;" class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="fv-el" class="fdn"></span></div>
+            +
+            <div class="fraction"><span class="fup">1</span><span class="bar">/</span><span id="fu-el" class="fdn"></span></div>
+            &nbsp; m = −
+            <div class="fraction"><span style="color:#e07070;" id="mv-el" class="fup"></span><span class="bar">/</span><span id="mu-el" class="fdn"></span></div>
+            = <span id="mm-el"></span>
+
+            <div id="message-el">
+                <table>
+                    <tr>
+                        <td>Focal length, (f) = <b id="f-el"></b> cm</td>
+                        <td>&nbsp;&nbsp;</td>
+                        <td>Magnification, (m) = <b id="m-el"></b></td>
+                    </tr>
+                    <tr>
+                        <td>Object Distance, (u) = <b id="u-el"></b> cm</td>
+                        <td>&nbsp;&nbsp;</td>
+                        <td>Object Height, (h<sub>o</sub>) = <b id="ho-el"></b> cm</td>
+                    </tr>
+                    <tr>
+                        <td>Image Distance, (v) = <b style="color:#e07070;" id="v-el"></b> cm</td>
+                        <td>&nbsp;&nbsp;</td>
+                        <td>Image Height, h<sub>i</sub> = <b style="color:#e07070;" id="hi-el"></b> cm</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <button id="btnFormula">FORMULA</button>
+    </div>
+
+</div><!-- end #labUI -->
+
+
+<!-- ═══════════════════════════ IMPORTMAP ═══════════════════════════ -->
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, labelRenderer, camera, scene, controls;
+
+/* scene groups */
+let ferrariGroup        = new THREE.Group();
+let convergingMirrorGroup = new THREE.Group();   // replaces lensGroup
+
+/* ferrari */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── mirror lab state ── */
+// THREE objects
+let mirrorMesh;
+let pole, imagePoint;
+let object3D, objectTip, image3D, imageTip;
+let opticalAxis;
+let incidentRay1, incidentRay2, incidentRay3;
+let incidentArrow1, incidentArrow2, incidentArrow3;
+let reflectedRay1, reflectedRay2, reflectedRay3;
+let reflectedArrow1, reflectedArrow2, reflectedArrow3;
+let eyeSprite;
+let fPoint;
+let objLabel, imgLabel, virtualLabel, infinityLabel;
+
+// working vectors (updated by mirrorFormula)
+let pointP1, pointA, pointP2, pointB;
+
+// mirror formula params  (all in cm, negative = real-is-left convention)
+const mirrorParams = {
+    f  : -7,
+    ho : 3,
+    u  : -18,
+    m  : 0,
+    v  : 0,
+    hi : 0
+};
+
+/* DOM refs — filled by setupMirrorUI */
+let fEl, uEl, vEl, hoEl, mEl, hiEl;
+let ffEl, fvEl, fuEl, mvEl, muEl, mmEl;
+let focalDisplay, objectDisplay, heightDisplay;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* ── WebGL renderer ── */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* ── CSS2D renderer (for mirror labels) ── */
+    labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position      = 'absolute';
+    labelRenderer.domElement.style.top           = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    labelRenderer.domElement.style.zIndex        = '5';
+    document.body.appendChild(labelRenderer.domElement);
+
+    /* ── camera  (FOV 55 matches mirror scene) ── */
+    camera = new THREE.PerspectiveCamera(
+        55, window.innerWidth / window.innerHeight, 0.1, 50000
+    );
+
+    /* ── scene ── */
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    /* ── controls ── */
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createConvergingMirrorScene();   // build mirror scene objects (hidden)
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS  (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+    const amb = new THREE.HemisphereLight(0xddeeff, 0x202020, 4);
+    scene.add(amb);
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM  (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+            car.getObjectByName('body').material = new THREE.MeshPhysicalMaterial({
+                color: 0xff0000, metalness: 1, roughness: 0.35, clearcoat: 1
+            });
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS  (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC  (unchanged except onComplete)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into mirror lab ── */
+    const transition = moveCamera(-55, 0, 0, 0, 2, -2, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible          = false;
+            convergingMirrorGroup.visible = true;   // show mirror scene
+
+            scene.background = new THREE.Color(0xbfd1e5);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            controls.enabled = true;
+            controls.target.set(0, 2, -2);          // mirror-scene orbit target
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            setupMirrorUI();                         // wire up DOM after intro
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   CONVERGING (CONCAVE) MIRROR SCENE
+   replaces createLensScene()
+════════════════════════════════════════ */
+
+function createConvergingMirrorScene() {
+
+    convergingMirrorGroup.visible = false;
+    scene.add(convergingMirrorGroup);
+
+    /* ── compute initial values ── */
+    computeMirrorFormula();
+
+    /* ── grid ── */
+    const gridHelper = new THREE.GridHelper(70, 70);
+    convergingMirrorGroup.add(gridHelper);
+
+    /* ── concave mirror: spherical-cap geometry, BackSide = reflective face ── */
+    const mirrorGeo = new THREE.SphereGeometry(35, 16, 8, 0, Math.PI * 2, 0, 0.15)
+                          .translate(0, -35, 0);
+    mirrorMesh = new THREE.Mesh(
+        mirrorGeo,
+        new THREE.MeshStandardMaterial({ color: 0xffa500, side: THREE.BackSide })
+    );
+    mirrorMesh.rotation.set(Math.PI / 2, 0, 0);
+    convergingMirrorGroup.add(mirrorMesh);
+
+    /* dark backing (DoubleSide, semi-transparent) */
+    const mirrorBack = mirrorMesh.clone();
+    mirrorBack.material = new THREE.MeshStandardMaterial({
+        color: 0x000000, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+    });
+    mirrorBack.position.z = 0.15;
+    convergingMirrorGroup.add(mirrorBack);
+
+    /* ── pole ── */
+    const polGeo = new THREE.BufferGeometry();
+    polGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]), 3));
+    pole = new THREE.Points(polGeo, new THREE.PointsMaterial({ color: 0x8888ff, size: 0.01 }));
+    convergingMirrorGroup.add(pole);
+
+    /* ── imagePoint ── */
+    const ipGeo = new THREE.BufferGeometry();
+    ipGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]), 3));
+    imagePoint = new THREE.Points(ipGeo, new THREE.PointsMaterial({ color: 0x88ff88, size: 0.01 }));
+    imagePoint.position.set(0, mirrorParams.hi, mirrorParams.v);
+    convergingMirrorGroup.add(imagePoint);
+
+    /* ── working vectors ── */
+    pointP1 = new THREE.Vector3(0, mirrorParams.ho, 0);
+    pointA  = new THREE.Vector3(mirrorParams.u, mirrorParams.ho, 0);
+    pointP2 = new THREE.Vector3(0, mirrorParams.hi, 0);
+    pointB  = new THREE.Vector3(0, mirrorParams.hi, mirrorParams.v);
+
+    /* ── optical axis ── */
+    opticalAxis = makeMirrorCylinder(80, 0x000000);
+    opticalAxis.position.z = -40;
+    convergingMirrorGroup.add(opticalAxis);
+
+    /* ── object arrow ── */
+    object3D  = makeTube(mirrorParams.ho);
+    objectTip = makeCone(mirrorParams.ho);
+    object3D.position.z = mirrorParams.u;
+    object3D.add(objectTip);
+    convergingMirrorGroup.add(object3D);
+
+    /* ── image arrow ── */
+    image3D  = makeTube(mirrorParams.ho);
+    imageTip = makeCone(mirrorParams.ho);
+    image3D.position.z  = mirrorParams.v;
+    image3D.scale.set(mirrorParams.m, mirrorParams.m, mirrorParams.m);
+    image3D.add(imageTip);
+    convergingMirrorGroup.add(image3D);
+
+    /* ── focal point marker ── */
+    const fpGeo = new THREE.BufferGeometry();
+    fpGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]), 3));
+    fPoint = new THREE.Points(fpGeo, new THREE.PointsMaterial({ color: 0xff8888, size: 1 }));
+    fPoint.position.z = mirrorParams.f;
+    convergingMirrorGroup.add(fPoint);
+
+    /* ── ray diagram ── */
+    buildRayDiagram();
+
+    /* ── CSS2D labels ── */
+    objLabel = makeLabel('Object');
+    objLabel.position.y = mirrorParams.ho + 1;
+    objectTip.add(objLabel);
+
+    imgLabel = makeLabel('Real Image');
+    imgLabel.position.y = -mirrorParams.hi + 1.5;
+    imageTip.add(imgLabel);
+
+    virtualLabel = makeLabel('Virtual Image');
+    virtualLabel.position.y = -mirrorParams.hi + 1.5;
+    virtualLabel.visible = false;
+    imageTip.add(virtualLabel);
+
+    infinityLabel = makeLabel('Image at infinity');
+    infinityLabel.position.set(0, -1, -3);
+    infinityLabel.visible = false;
+    object3D.add(infinityLabel);
+
+    const fLbl = makeLabel('F');
+    fPoint.add(fLbl);
+
+    const axLbl = makeLabel('Optical Axis');
+    axLbl.position.set(0, -1, 45);
+    opticalAxis.add(axLbl);
+
+    const mirrorLbl = makeLabel('Concave Mirror');
+    mirrorLbl.position.y = -mirrorParams.f + 2;
+    convergingMirrorGroup.add(mirrorLbl);
+
+    /* ── eye icon ── */
+    const eyeTex = new THREE.TextureLoader().load(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Eye_of_the_Tiger.svg/240px-Eye_of_the_Tiger.svg.png'
+    );
+    eyeSprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: eyeTex, transparent: true })
+    );
+    eyeSprite.scale.set(5, 5, 5);
+    eyeSprite.position.set(0, -2, -10);
+    eyeSprite.visible = false;
+    convergingMirrorGroup.add(eyeSprite);
+}
+
+/* ════════════════════════════════════════
+   MIRROR SCENE — GEOMETRY HELPERS
+════════════════════════════════════════ */
+
+function makeMirrorCylinder(length, col) {
+    const geo = new THREE.CylinderGeometry(0.05, 0.05, length)
+                    .translate(0, length / 2, 0);
+    geo.rotateX(Math.PI / 2);
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
+}
+
+function makeRayMesh(length, col) {
+    const geo = new THREE.CylinderGeometry(0.05, 0.05, length)
+                    .translate(0, length / 2, 0);
+    geo.rotateX(Math.PI / 2);
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
+}
+
+function makeArrowConeMesh(pos, col) {
+    const geo = new THREE.ConeGeometry(0.3, 0.5, 6)
+                    .translate(0, pos / 2, 0);
+    geo.rotateX(Math.PI / 2);
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
+}
+
+function makeTube(h) {
+    const geo = new THREE.CylinderGeometry(0.1, 0.1, h).translate(0, h / 2, 0);
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+}
+
+function makeCone(h) {
+    const geo = new THREE.ConeGeometry(0.5, 1, 6).translate(0, h + 0.5, 0);
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x8b4513 }));
+}
+
+function makeLabel(text) {
+    const div = document.createElement('div');
+    div.className   = 'label';
+    div.textContent = text;
+    return new CSS2DObject(div);
+}
+
+/* ════════════════════════════════════════
+   MIRROR FORMULA
+   1/f = 1/v + 1/u  →  v = uf/(u−f)
+   m   = −v/u
+════════════════════════════════════════ */
+
+function computeMirrorFormula() {
+    const { f, u, ho } = mirrorParams;
+    mirrorParams.v  = (u * f) / (u - f);
+    mirrorParams.m  = -(mirrorParams.v / u);
+    mirrorParams.hi = mirrorParams.m * ho;
+}
+
+/* ════════════════════════════════════════
+   RAY DIAGRAM — BUILD (called once)
+════════════════════════════════════════ */
+
+function buildRayDiagram() {
+
+    const len1 = pointA.distanceTo(pointP1);
+    const len2 = pointA.distanceTo(pole.position);
+    const len3 = pointA.distanceTo(pointP2);
+
+    /* incident rays — parented to object3D so they travel with it */
+    incidentRay1   = makeRayMesh(len1, 0x0000ff);
+    incidentArrow1 = makeArrowConeMesh(len1, 0xff0000);
+    incidentRay1.add(incidentArrow1);
+
+    incidentRay2   = makeRayMesh(len2, 0x0000ff);
+    incidentArrow2 = makeArrowConeMesh(len2, 0xff0000);
+    incidentRay2.add(incidentArrow2);
+
+    incidentRay3   = makeRayMesh(len3, 0x0000ff);
+    incidentArrow3 = makeArrowConeMesh(len3, 0xff0000);
+    incidentRay3.add(incidentArrow3);
+
+    incidentRay1.position.set(0, mirrorParams.ho, 0);
+    incidentRay2.position.set(0, mirrorParams.ho, 0);
+    incidentRay3.position.set(0, mirrorParams.ho, 0);
+    object3D.add(incidentRay1, incidentRay2, incidentRay3);
+
+    /* reflected rays — parented to convergingMirrorGroup */
+    reflectedRay1   = makeRayMesh(pointP1.distanceTo(pointB), 0x0000ff);
+    reflectedArrow1 = makeArrowConeMesh(pointP1.distanceTo(pointB), 0xff0000);
+    reflectedRay1.position.copy(pointP1);
+    reflectedRay1.add(reflectedArrow1);
+    convergingMirrorGroup.add(reflectedRay1);
+
+    reflectedRay2   = makeRayMesh(pole.position.distanceTo(pointB), 0x0000ff);
+    reflectedArrow2 = makeArrowConeMesh(pole.position.distanceTo(pointB), 0xff0000);
+    reflectedRay2.position.copy(pole.position);
+    reflectedRay2.add(reflectedArrow2);
+    convergingMirrorGroup.add(reflectedRay2);
+
+    reflectedRay3   = makeRayMesh(pointP2.distanceTo(pointB), 0x0000ff);
+    reflectedArrow3 = makeArrowConeMesh(pointP2.distanceTo(pointB), 0xff0000);
+    reflectedRay3.position.copy(pointP2);
+    reflectedRay3.add(reflectedArrow3);
+    convergingMirrorGroup.add(reflectedRay3);
+
+    aimAllRays();
+}
+
+/* ════════════════════════════════════════
+   RAY DIAGRAM — AIM HELPERS
+════════════════════════════════════════ */
+
+function aimAllRays() {
+    incidentRay1.lookAt(reflectedRay1.position);
+    incidentRay2.lookAt(pole.position);
+    incidentRay3.lookAt(reflectedRay3.position);
+    reflectedRay1.lookAt(pointB);
+    reflectedRay2.lookAt(pointB);
+    reflectedRay3.lookAt(pointB);
+}
+
+/* ════════════════════════════════════════
+   RAY DIAGRAM — RESIZE (called on every param change)
+════════════════════════════════════════ */
+
+function adjustRayLength(mesh, length) {
+    mesh.geometry.dispose();
+    const geo = new THREE.CylinderGeometry(0.05, 0.05, length)
+                    .translate(0, length / 2, 0);
+    geo.rotateX(Math.PI / 2);
+    mesh.geometry = geo;
+}
+
+function adjustArrowPos(mesh, pos) {
+    mesh.geometry.dispose();
+    const geo = new THREE.ConeGeometry(0.3, 0.5, 6)
+                    .translate(0, pos / 2, 0);
+    geo.rotateX(Math.PI / 2);
+    mesh.geometry = geo;
+}
+
+function adjustTubeHeight(mesh, h) {
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.CylinderGeometry(0.1, 0.1, h).translate(0, h / 2, 0);
+}
+
+function adjustConeHeight(mesh, h) {
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.ConeGeometry(0.5, 1, 6).translate(0, h + 0.5, 0);
+}
+
+/* ════════════════════════════════════════
+   adjustDisplay — full ray/position update
+   (mirrors original adjustDisplay())
+════════════════════════════════════════ */
+
+function adjustDisplay() {
+
+    const { u, v, ho, hi, m, f } = mirrorParams;
+
+    /* move arrows */
+    object3D.position.z = u;
+    image3D.position.z  = v;
+    image3D.scale.set(m, m, m);
+
+    /* update working vectors */
+    pointP1 = new THREE.Vector3(0, ho, 0);
+    pointA  = new THREE.Vector3(u, ho, 0);
+    pointP2 = new THREE.Vector3(0, hi, 0);
+    pointB  = new THREE.Vector3(0, hi, v);
+
+    imagePoint.position.copy(pointB);
+    reflectedRay3.position.copy(pointP2);
+
+    /* incident rays (local to object3D) */
+    incidentRay1.position.set(0, ho, 0);
+    incidentRay2.position.set(0, ho, 0);
+    incidentRay3.position.set(0, ho, 0);
+
+    const len1 = pointA.distanceTo(pointP1);
+    const len2 = pointA.distanceTo(pole.position);
+    const len3 = pointA.distanceTo(pointP2);
+
+    adjustRayLength(incidentRay1, len1);
+    adjustRayLength(incidentRay2, len2);
+    adjustRayLength(incidentRay3, len3);
+    adjustArrowPos(incidentArrow1, len1);
+    adjustArrowPos(incidentArrow2, len2);
+    adjustArrowPos(incidentArrow3, len3);
+
+    /* reflected rays */
+    const rlen1 = pointP1.distanceTo(pointB);
+    const rlen2 = pole.position.distanceTo(pointB);
+    const rlen3 = pointP2.distanceTo(pointB);
+
+    adjustRayLength(reflectedRay1, rlen1);
+    adjustRayLength(reflectedRay2, rlen2);
+    adjustRayLength(reflectedRay3, rlen3);
+    adjustArrowPos(reflectedArrow1, rlen1);
+    adjustArrowPos(reflectedArrow2, rlen2);
+    adjustArrowPos(reflectedArrow3, rlen3);
+
+    reflectedRay1.position.copy(pointP1);
+    reflectedRay2.position.copy(pole.position);
+
+    fPoint.position.z = f;
+
+    aimAllRays();
+}
+
+/* ════════════════════════════════════════
+   changeElements — decide image type and
+   update visibility / materials
+   (mirrors original changeElements())
+════════════════════════════════════════ */
+
+function changeElements() {
+
+    computeMirrorFormula();
+    updateDOMDisplays();
+
+    const { u, f, ho, hi } = mirrorParams;
+    const absU = Math.abs(u);
+    const absF = Math.abs(f);
+
+    adjustTubeHeight(object3D, ho);
+    adjustConeHeight(objectTip, ho);
+    adjustTubeHeight(image3D, ho);
+    adjustConeHeight(imageTip, ho);
+
+    if (absU < absF) {
+        /* object inside focal length → virtual, erect, magnified image */
+        adjustDisplay();
+        infinityLabel.visible = false;
+        imgLabel.visible      = false;
+        virtualLabel.visible  = true;
+        incidentArrow3.visible  = false;
+        reflectedArrow1.visible = false;
+        reflectedArrow2.visible = false;
+        reflectedArrow3.visible = false;
+        incidentRay3.visible  = false;
+        reflectedRay3.visible = false;
+        eyeSprite.visible     = true;
+        const greenMat = new THREE.MeshBasicMaterial({ color: 0x00aa00 });
+        reflectedRay1.material = greenMat;
+        reflectedRay2.material = greenMat.clone();
+        reflectedRay3.material = greenMat.clone();
+
+    } else if (absU === absF) {
+        /* object at F → image at infinity */
+        infinityLabel.visible = true;
+        imgLabel.visible      = false;
+        virtualLabel.visible  = false;
+        fPoint.position.z = f;
+        pointP2 = new THREE.Vector3(0, 0, 0);
+        const orangeMat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+        reflectedRay1.material = orangeMat;
+        reflectedRay2.material = orangeMat.clone();
+        reflectedRay1.lookAt(new THREE.Vector3(0,  0,  f));
+        reflectedRay2.lookAt(new THREE.Vector3(0, -ho, f));
+        incidentRay3.visible  = false;
+        reflectedRay3.visible = false;
+
+    } else {
+        /* normal real image */
+        adjustDisplay();
+        infinityLabel.visible = false;
+        virtualLabel.visible  = false;
+        imgLabel.visible      = true;
+        eyeSprite.visible     = false;
+        const blueMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+        reflectedRay1.material = blueMat;
+        reflectedRay2.material = blueMat.clone();
+        reflectedRay3.material = blueMat.clone();
+        [incidentArrow1, incidentArrow2, incidentArrow3,
+         reflectedArrow1, reflectedArrow2, reflectedArrow3].forEach(x => x.visible = true);
+        incidentRay3.visible  = true;
+        reflectedRay3.visible = true;
+    }
+}
+
+/* ════════════════════════════════════════
+   DOM — wire up sliders and displays
+════════════════════════════════════════ */
+
+function setupMirrorUI() {
+
+    /* display elements */
+    fEl  = document.getElementById('f-el');
+    uEl  = document.getElementById('u-el');
+    vEl  = document.getElementById('v-el');
+    hoEl = document.getElementById('ho-el');
+    mEl  = document.getElementById('m-el');
+    hiEl = document.getElementById('hi-el');
+    ffEl = document.getElementById('ff-el');
+    fvEl = document.getElementById('fv-el');
+    fuEl = document.getElementById('fu-el');
+    mvEl = document.getElementById('mv-el');
+    muEl = document.getElementById('mu-el');
+    mmEl = document.getElementById('mm-el');
+    focalDisplay  = document.getElementById('focalDisplay');
+    objectDisplay = document.getElementById('objectDisplay');
+    heightDisplay = document.getElementById('heightDisplay');
+
+    /* initial DOM fill */
+    updateDOMDisplays();
+
+    /* sliders */
+    document.getElementById('focal').addEventListener('input', function () {
+        mirrorParams.f = this.valueAsNumber;
+        focalDisplay.textContent = this.value;
+        changeElements();
+    });
+
+    document.getElementById('objectSlider').addEventListener('input', function () {
+        mirrorParams.u = this.valueAsNumber;
+        objectDisplay.textContent = this.value;
+        changeElements();
+    });
+
+    document.getElementById('heightSlider').addEventListener('input', function () {
+        mirrorParams.ho = this.valueAsNumber;
+        heightDisplay.textContent = this.value;
+        changeElements();
+    });
+
+    /* formula toggle */
+    document.getElementById('btnFormula').addEventListener('click', () => {
+        const el = document.getElementById('formula');
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    });
+}
+
+function updateDOMDisplays() {
+    const { f, u, v, ho, hi, m } = mirrorParams;
+    if (!fEl) return;                   // guard — DOM not ready yet
+    fEl.innerHTML  = f;
+    uEl.innerHTML  = u;
+    vEl.innerHTML  = v.toFixed(2);
+    hoEl.innerHTML = ho;
+    mEl.innerHTML  = m.toFixed(2);
+    hiEl.innerHTML = hi.toFixed(2);
+    ffEl.innerHTML = f;
+    fuEl.innerHTML = u;
+    fvEl.innerHTML = v.toFixed(2);
+    mvEl.innerHTML = v.toFixed(2);
+    muEl.innerHTML = u;
+    mmEl.innerHTML = m.toFixed(2);
+}
+
+/* ════════════════════════════════════════
+   RESIZE  (unchanged, now also resizes labelRenderer)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    if (!introFinished) {
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+
+    /* CSS2D labels only during mirror lab */
+    if (introFinished) {
+        labelRenderer.render(scene, camera);
+    }
+}
+
+</script>
+</body>
+</html>

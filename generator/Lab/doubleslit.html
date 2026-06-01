@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Ferrari Intro → Young's Double Slit Experiment</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+        canvas { display:block; }
+
+        /* ── intro overlay ── */
+        #introTitle {
+            position:fixed; bottom:48px; left:50%;
+            transform:translateX(-50%);
+            color:#fff; font-size:13px; letter-spacing:.25em;
+            text-transform:uppercase; opacity:.55;
+            pointer-events:none; z-index:10;
+        }
+
+        /* ── lab UI hidden until transition ── */
+        #labUI { display:none; }
+
+        /* top bar */
+        #topmenu {
+            position:fixed; top:0; left:0; right:0; height:38px;
+            background:rgba(2,1,37,.93);
+            color:beige; font-size:13px; letter-spacing:.1em;
+            display:flex; align-items:center; padding:0 18px;
+            z-index:100;
+            border-bottom:1px solid rgba(255,255,255,.1);
+        }
+
+        /* left panel */
+        #sidemenu {
+            position:fixed; top:38px; left:0; width:290px;
+            background:rgba(2,1,37,.88);
+            color:beige; font-size:12px;
+            padding:16px 14px; z-index:100;
+            border-right:1px solid rgba(255,255,255,.07);
+            line-height:1.9;
+        }
+        #sidemenu p  { color:beige; margin-bottom:4px; }
+        #sidemenu label { color:#ccc; font-size:11px; }
+        #sidemenu a  { color:cornsilk; font-weight:600; }
+        #sidemenu input[type=range]{
+            width:100%; accent-color:#e63c1e;
+            margin-top:3px; margin-bottom:2px;
+        }
+
+        /* bottom formula bar */
+        #menu {
+            position:fixed; bottom:0; left:0; right:0;
+            background:beige;
+            color:#111; font-size:12.5px;
+            padding:8px 18px;
+            display:flex; align-items:center;
+            flex-wrap:wrap; gap:6px;
+            z-index:100;
+            border-top:2px solid rgba(0,0,0,.12);
+            text-align:center; justify-content:center;
+        }
+        #menu a { color:#c0392b; font-weight:700; }
+
+        /* fraction */
+        .fraction{
+            display:inline-flex; flex-direction:column;
+            align-items:center; vertical-align:middle;
+            font-size:11px; line-height:1.15; margin:0 2px;
+        }
+        .fup{ border-bottom:1px solid #555; padding:0 3px; }
+        .fdn{ padding:0 3px; }
+        .bar{ display:none; }
+
+        /* hidden canvas used for fringe texture */
+        #drawing-canvas { visibility:hidden; position:fixed; bottom:0; left:0; }
+    </style>
+</head>
+<body>
+
+<!-- ── intro overlay ── -->
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Optics Lab&hellip;</div>
+
+<!-- ── optics lab UI (shown after transition) ── -->
+<div id="labUI">
+
+    <div id="topmenu">Young's Double Slit Experiment</div>
+
+    <div id="sidemenu">
+        <p>Wavelength of light, &lambda; =
+            <a id="waveDisplay">560</a> nm
+        </p>
+        <p>
+            <label for="dist">Distance between the slits, d =</label>
+            <a id="distDisplay">1</a> mm<br>
+            <input type="range" id="dist" min="0" max="1" value="0" step="0.1">
+        </p>
+        <p>
+            <label for="length">Slits to screen, L =</label>
+            <a id="lengthDisplay">1</a> m<br>
+            <input type="range" id="length" min="0" max="1" value="0" step="0.1">
+        </p>
+    </div>
+
+    <div id="menu">
+        y<sub><em>bright</em></sub> =
+        <div class="fraction">
+            <span class="fup">&lambda; L</span>
+            <span class="bar">/</span>
+            <span class="fdn">d</span>
+        </div>
+        = <a id="calDisplay"></a> mm
+    </div>
+
+</div>
+
+<!-- fringe-pattern canvas (texture source, stays hidden) -->
+<canvas id="drawing-canvas" width="300" height="300"></canvas>
+
+
+<script type="importmap">
+{
+    "imports": {
+        "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "tween":         "https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE        from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
+import TWEEN             from 'tween';
+
+/* ════════════════════════════════════════
+   GLOBALS
+════════════════════════════════════════ */
+
+let renderer, camera, scene, controls;
+
+/* ── groups ── */
+let ferrariGroup = new THREE.Group();
+let opticsGroup  = new THREE.Group();   // replaces capacitorGroup
+
+/* ── ferrari ── */
+let car, grid;
+const wheels     = [];
+const lookTarget = new THREE.Vector3(0, 0.5, 0);
+const smoothLook = new THREE.Vector3(0, 0.5, 0);
+
+let introFinished      = false;
+let motionBlurStrength = 0;
+let currentExposure    = 1.1;
+
+/* ── optics scene objects ── */
+let opticsModel, opticsCube, opticsPlane1, opticsPlane2;
+let opticsMaterial;
+let opticsGroup3D   = new THREE.Group();   // holds GLTF + geometry
+let opticsLines     = new THREE.Group();   // rebuilt fringe lines
+const clock         = new THREE.Clock();
+
+/* ── optics params  (exact values from original) ── */
+const params = {
+    length  : 0,
+    vLength : 50,
+    wave    : 560,
+    spacing : 0,
+    vspacing: 1.7,
+    pos     : 3,
+    fringe  : 1
+};
+
+/* ── DOM refs – filled by setupOpticsUI ── */
+let lengthInput, lengthEl, distInput, distEl, calEl;
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+
+init();
+
+function init() {
+
+    /* renderer — identical to Ferrari-Capacitor version */
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    document.body.appendChild(renderer.domElement);
+
+    /* camera starts at Ferrari intro position;
+       FOV will feel consistent — optics scene uses FOV 45
+       so we start at 40 (Ferrari) and the optics target
+       camera is set in the transition onComplete          */
+    camera = new THREE.PerspectiveCamera(
+        40,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1500
+    );
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled    = false;
+    controls.enablePan  = true;
+    controls.enableZoom = true;
+
+    createLights();
+    createFerrariShowroom();
+    createOpticsScene();          // replaces createCapacitorScene()
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+}
+
+/* ════════════════════════════════════════
+   LIGHTS   (unchanged)
+════════════════════════════════════════ */
+
+function createLights() {
+
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+    const dir = new THREE.DirectionalLight(0xffffff, 4);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+}
+
+/* ════════════════════════════════════════
+   FERRARI SHOWROOM   (unchanged)
+════════════════════════════════════════ */
+
+function createFerrariShowroom() {
+
+    scene.add(ferrariGroup);
+
+    grid = new THREE.GridHelper(20, 40, 0xffffff, 0xffffff);
+    grid.material.opacity     = 0.15;
+    grid.material.transparent = true;
+    ferrariGroup.add(grid);
+
+    new RGBELoader()
+        .setDataType(THREE.UnsignedByteType)
+        .load(
+            'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+            function (texture) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                const env   = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = env;
+                texture.dispose();
+                pmrem.dispose();
+            }
+        );
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        'https://threejs.org/examples/models/gltf/ferrari.glb',
+        function (gltf) {
+            car = gltf.scene.children[0];
+
+            car.getObjectByName('body').material =
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
+                });
+
+            wheels.push(
+                car.getObjectByName('wheel_fl'),
+                car.getObjectByName('wheel_fr'),
+                car.getObjectByName('wheel_rl'),
+                car.getObjectByName('wheel_rr')
+            );
+
+            ferrariGroup.add(car);
+            startFerrariSequence();
+        }
+    );
+}
+
+/* ════════════════════════════════════════
+   CAMERA HELPERS   (unchanged)
+════════════════════════════════════════ */
+
+function moveCamera(x, y, z, tx, ty, tz, duration) {
+    return new TWEEN.Tween(camera.position)
+        .to({ x, y, z }, duration)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .onStart(() => {
+            new TWEEN.Tween(lookTarget)
+                .to({ x: tx, y: ty, z: tz }, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+        });
+}
+
+function bounceCar() {
+    return new TWEEN.Tween(car.position)
+        .to({ y: 0.15 }, 400)
+        .yoyo(true).repeat(1)
+        .easing(TWEEN.Easing.Quadratic.Out);
+}
+
+/* ════════════════════════════════════════
+   FERRARI CINEMATIC   (unchanged)
+════════════════════════════════════════ */
+
+function startFerrariSequence() {
+
+    camera.position.set(0, 25, -80);
+
+    const fly = moveCamera(0, 8, -18, 0, 0.5, 0, 2500)
+        .onStart(() => { motionBlurStrength = 0.25; });
+
+    const approach = moveCamera(0, 3, -8, 0, 0.5, 0, 2500)
+        .onComplete(() => { motionBlurStrength = 0.05; });
+
+    const orbitObj = { angle: 0 };
+    const orbit = new TWEEN.Tween(orbitObj)
+        .to({ angle: Math.PI * 2 }, 8000)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .onUpdate(() => {
+            camera.position.x = Math.cos(orbitObj.angle) * 8;
+            camera.position.z = Math.sin(orbitObj.angle) * 8;
+            camera.position.y = 2.5 + Math.sin(orbitObj.angle * 2) * 0.5;
+        });
+
+    const frontInspect = moveCamera( 2,  1.5,  4, 0, 0.5, 0, 2200);
+    const sideInspect  = moveCamera(-4,  1.2,  0, 0, 0.5, 0, 2200);
+    const rearInspect  = moveCamera( 0,  2,   -5, 0, 0.5, 0, 2200);
+    const bounce       = bounceCar();
+
+    const rise = moveCamera(0, 12, -14, 0, 0, 0, 3000)
+        .onStart(() => { motionBlurStrength = 0.12; });
+
+    /* ── transition into optics scene ── */
+    const transition = moveCamera(-25, 12, 25, 0, 1, 0, 5000)
+        .onStart(() => { motionBlurStrength = 0.4; })
+        .onComplete(() => {
+
+            ferrariGroup.visible = false;
+            opticsGroup.visible  = true;
+
+            /* optics scene background — deep-space blue */
+            scene.background = new THREE.Color(0x020125);
+
+            document.getElementById('introTitle').style.display = 'none';
+            document.getElementById('labUI').style.display      = 'block';
+
+            /* optics camera: FOV 45, matching original */
+            camera.fov = 45;
+            camera.updateProjectionMatrix();
+
+            /* orbit target matches original createControls(0,1,0) */
+            controls.enabled = true;
+            controls.target.set(0, 1, 0);
+            controls.update();
+
+            motionBlurStrength = 0;
+            introFinished      = true;
+
+            /* lazy-load lil-gui only now the lab is visible */
+            import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js')
+                .then(({ GUI }) => setupOpticsGUI(GUI));
+        });
+
+    fly.chain(approach);
+    approach.chain(orbit);
+    orbit.chain(frontInspect);
+    frontInspect.chain(sideInspect);
+    sideInspect.chain(rearInspect);
+    rearInspect.chain(bounce);
+    bounce.chain(rise);
+    rise.chain(transition);
+
+    fly.start();
+}
+
+/* ════════════════════════════════════════
+   OPTICS SCENE
+════════════════════════════════════════ */
+
+function createOpticsScene() {
+
+    opticsGroup.visible = false;
+    scene.add(opticsGroup);
+
+    /* optics-specific lights (spotlights from original) */
+    const spotLight = new THREE.SpotLight(0xff0000, 30);
+    spotLight.position.set(-10, 0, 0);
+    spotLight.angle   = Math.PI / 12;
+    spotLight.penumbra = 0.2;
+    spotLight.decay   = 20;
+    spotLight.distance = 5;
+    spotLight.castShadow = true;
+    const spotLight2 = spotLight.clone();
+    spotLight2.distance = 50;
+    opticsGroup.add(spotLight, spotLight2);
+
+    const ambientLight = new THREE.HemisphereLight(0xddeeff, 0x202020, 2);
+    const mainLight    = new THREE.DirectionalLight(0xffffff, 1);
+    mainLight.position.set(10, 10, 10);
+    opticsGroup.add(ambientLight, mainLight);
+
+    /* floor grid */
+    const scaleHorizontal = new THREE.GridHelper(20, 20);
+    scaleHorizontal.position.y = -2.05;
+    opticsGroup.add(scaleHorizontal);
+
+    /* static guide lines (incoming beam lines) */
+    opticsGroup.add(
+        addLine(new THREE.Vector3(-5,  0,  0), new THREE.Vector3(-3.3,  0,  0)),
+        addLine(new THREE.Vector3(-5,  1,  0), new THREE.Vector3(-3.3,  1,  0)),
+        addLine(new THREE.Vector3(-5, -1,  0), new THREE.Vector3(-3.3, -1,  0)),
+        addLine(new THREE.Vector3(-5,  0,  1), new THREE.Vector3(-3.3,  0,  1)),
+        addLine(new THREE.Vector3(-5,  0, -1), new THREE.Vector3(-3.3,  0, -1))
+    );
+
+    /* fringe lines group */
+    scene.add(opticsLines);   // added to scene so it persists independently
+
+    /* screen material (canvas texture) */
+    opticsMaterial = new THREE.MeshBasicMaterial({
+        color: 0xEF3523,
+        side : THREE.DoubleSide
+    });
+
+    /* initial fringe and canvas */
+    createFringe(1);
+    setupCanvasDrawing();
+
+    /* position the whole group (matches original group.position.y = -2.2) */
+    opticsGroup3D.position.y = -2.2;
+    opticsGroup.add(opticsGroup3D);
+
+    /* load GLTF double-slit model */
+    const loader = new GLTFLoader();
+    loader.setPath('./model/');
+    loader.load(
+        'doubleSlit.glb',
+        function (gltf) {
+            opticsModel = gltf.scene;
+
+            opticsCube   = gltf.scene.getObjectByName('Cube');
+            opticsPlane1 = gltf.scene.getObjectByName('Plane');
+            opticsPlane2 = gltf.scene.getObjectByName('PlaneA');
+
+            opticsCube.morphTargetInfluences[0]   = params.spacing;
+            opticsCube.morphTargetInfluences[1]    = params.length;
+            opticsPlane1.morphTargetInfluences[1]  = params.length;
+            opticsPlane2.morphTargetInfluences[1]  = params.length;
+
+            opticsPlane1.material = opticsMaterial;
+            opticsPlane2.material = opticsMaterial;
+
+            opticsGroup3D.add(opticsModel);
+        },
+        undefined,
+        (e) => console.warn('doubleSlit.glb not found.', e)
+    );
+
+    /* wire HTML sliders */
+    setupOpticsUI();
+}
+
+/* ------------------------------------------------ */
+/* createFringe                                      */
+/* ------------------------------------------------ */
+
+function createFringe(n) {
+
+    const A = calFringe(n);
+    params.fringe = A;
+
+    if (calEl) calEl.innerHTML = params.fringe.toFixed(2);
+
+    /* clear existing lines */
+    while (opticsLines.children.length > 0) {
+        opticsLines.children[0].parent.remove(opticsLines.children[0]);
+    }
+
+    opticsLines.add(
+        addLine(new THREE.Vector3(-3, 0,  params.vspacing), new THREE.Vector3(params.pos, 0,  A)),
+        addLine(new THREE.Vector3(-3, 0, -params.vspacing), new THREE.Vector3(params.pos, 0,  A)),
+        addLine(new THREE.Vector3(-3, 0,  params.vspacing), new THREE.Vector3(params.pos, 0, -A)),
+        addLine(new THREE.Vector3(-3, 0, -params.vspacing), new THREE.Vector3(params.pos, 0, -A)),
+        addLine(new THREE.Vector3(params.pos,  2, 0),       new THREE.Vector3(params.pos, -2,  0))
+    );
+}
+
+/* ------------------------------------------------ */
+/* setupCanvasDrawing                                */
+/* ------------------------------------------------ */
+
+function setupCanvasDrawing() {
+
+    const drawingCanvas = document.getElementById('drawing-canvas');
+    const ctx = drawingCanvas.getContext('2d');
+
+    ctx.clearRect(0, 0, 300, 300);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, 300, 300);
+
+    opticsMaterial.map = new THREE.CanvasTexture(drawingCanvas);
+
+    const gradient = ctx.createLinearGradient(0, 0, 300, 0);
+    const a = params.fringe / 4;
+    const N = params.vspacing > 2.5 ? 8 : 30;
+
+    gradient.addColorStop(0, '#e61212');
+
+    for (let i = 0; i < N; i++) {
+        if ((i + 0.5) * a > 1) break;
+        gradient.addColorStop(i * a, '#b81818');
+        gradient.addColorStop((i + 0.5) * a, 'black');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 300, 300);
+        opticsMaterial.map.needsUpdate = true;
+    }
+}
+
+/* ------------------------------------------------ */
+/* addLine  (helper — was addLines in original)     */
+/* ------------------------------------------------ */
+
+function addLine(v1, v2) {
+    const geo  = new THREE.BufferGeometry().setFromPoints([v1, v2]);
+    const mat  = new THREE.LineBasicMaterial({ color: 'red' });
+    return new THREE.Line(geo, mat);
+}
+
+/* ------------------------------------------------ */
+/* calFringe                                         */
+/* ------------------------------------------------ */
+
+function calFringe(n) {
+    return (params.wave * 1e-9 * params.vLength * n) / (params.vspacing * 1e-4);
+}
+
+/* ------------------------------------------------ */
+/* setupOpticsUI  (= inputAction in original)        */
+/* ------------------------------------------------ */
+
+function setupOpticsUI() {
+
+    lengthInput = document.getElementById('length');
+    lengthEl    = document.getElementById('lengthDisplay');
+    distInput   = document.getElementById('dist');
+    distEl      = document.getElementById('distDisplay');
+    calEl       = document.getElementById('calDisplay');
+
+    /* seed displays */
+    distEl.innerText   = params.vspacing.toFixed(3);
+    lengthEl.innerText = params.vLength.toFixed(1);
+    if (calEl) calEl.innerHTML = params.fringe.toFixed(2);
+
+    /* slit distance slider */
+    distInput.addEventListener('input', function () {
+        const X      = Number(distInput.value);
+        params.spacing  = X;
+        params.vspacing = 1.7 - X - 0.3 * X * X;
+        distEl.innerText = params.vspacing.toFixed(3);
+
+        if (opticsCube) opticsCube.morphTargetInfluences[0] = params.spacing;
+        setupCanvasDrawing();
+        createFringe(1);
+    });
+
+    /* screen distance slider */
+    lengthInput.addEventListener('input', function () {
+        const X      = Number(lengthInput.value);
+        params.length   = X;
+        params.vLength  = 50 + X * 50;
+        params.pos      = 3 + X * 4;
+        lengthEl.innerText = params.vLength.toFixed(1);
+
+        if (opticsCube)   opticsCube.morphTargetInfluences[1]  = params.length;
+        if (opticsPlane1) opticsPlane1.morphTargetInfluences[1] = params.length;
+        if (opticsPlane2) opticsPlane2.morphTargetInfluences[1] = params.length;
+        setupCanvasDrawing();
+        createFringe(1);
+    });
+}
+
+/* ------------------------------------------------ */
+/* setupOpticsGUI  (lazy-loaded lil-gui dev panel)   */
+/* ------------------------------------------------ */
+
+function setupOpticsGUI(GUI) {
+
+    const gui = new GUI();
+
+    gui.add(params, 'length', 0, 1, 0.05).name('Screen Distance').onChange(value => {
+        params.length  = value;
+        params.vLength = 50 + value * 50;
+        params.pos     = 3  + value * 4;
+        if (opticsCube)   opticsCube.morphTargetInfluences[1]  = value;
+        if (opticsPlane1) opticsPlane1.morphTargetInfluences[1] = value;
+        if (opticsPlane2) opticsPlane2.morphTargetInfluences[1] = value;
+        lengthEl.innerText = params.vLength.toFixed(1);
+        setupCanvasDrawing();
+        createFringe(1);
+    });
+
+    gui.add(params, 'spacing', 0, 1, 0.1).name('Slit Distance').onChange(value => {
+        params.spacing  = value;
+        params.vspacing = 1.7 - value - 0.3 * value * value;
+        if (opticsCube) opticsCube.morphTargetInfluences[0] = value;
+        distEl.innerText = params.vspacing.toFixed(3);
+        setupCanvasDrawing();
+        createFringe(1);
+    });
+
+    const camFolder = gui.addFolder('Camera');
+    camFolder.add(camera.position, 'x', -100, 100);
+    camFolder.add(camera.position, 'y', -100, 100);
+    camFolder.add(camera.position, 'z', -500, 500);
+
+    const ctrlFolder = gui.addFolder('Orbit Target');
+    ctrlFolder.add(controls.target, 'x', -100, 100);
+    ctrlFolder.add(controls.target, 'y', -100, 100);
+    ctrlFolder.add(controls.target, 'z', -100, 100);
+}
+
+/* ════════════════════════════════════════
+   RESIZE   (unchanged)
+════════════════════════════════════════ */
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    TWEEN.update();
+
+    /* intro camera steering */
+    if (!introFinished) {
+
+        smoothLook.lerp(lookTarget, 0.05);
+        camera.lookAt(smoothLook);
+
+        const time = -performance.now() / 1000;
+        grid.position.z = -(time) % 1;
+
+        for (let i = 0; i < wheels.length; i++) {
+            wheels[i].rotation.x = time * Math.PI * 2;
+        }
+    }
+
+    controls.update();
+
+    /* fake motion-blur via tone-mapping exposure */
+    currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
+    renderer.toneMappingExposure = currentExposure;
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

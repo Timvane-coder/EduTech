@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>Ferrari Intro → Capacitor Laboratory</title>
     <style>
-        /* ─── reset ─── */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { background:#111; overflow:hidden; font-family:'Segoe UI',sans-serif; }
         canvas { display:block; }
 
-        /* ─── intro title ─── */
         #introTitle {
             position:fixed; bottom:48px; left:50%;
             transform:translateX(-50%);
@@ -19,10 +17,8 @@
             pointer-events:none; z-index:10;
         }
 
-        /* ─── lab UI hidden until transition ─── */
         #labUI { display:none; }
 
-        /* top bar */
         #topmenu {
             position:fixed; top:0; left:0; right:0; height:38px;
             background:rgba(15,15,20,.93);
@@ -33,7 +29,6 @@
             border-bottom:1px solid rgba(255,255,255,.08);
         }
 
-        /* left panel */
         #sidemenu {
             position:fixed; top:38px; left:0; width:290px;
             background:rgba(15,15,20,.9);
@@ -55,7 +50,6 @@
         }
         #sidemenu a { color:#e07070; font-weight:600; }
 
-        /* bottom bar */
         #menu {
             position:fixed; bottom:0; left:0; right:0;
             background:rgba(15,15,20,.93);
@@ -72,7 +66,6 @@
             color:#aaa; margin-top:2px;
         }
 
-        /* fraction */
         .fraction{
             display:inline-flex; flex-direction:column;
             align-items:center; vertical-align:middle;
@@ -82,7 +75,6 @@
         .fdn{ padding:0 3px; }
         .bar{ display:none; }
 
-        /* buttons */
         #menu button{
             padding:6px 14px; border:none; border-radius:4px;
             font-size:12px; font-weight:600; letter-spacing:.06em;
@@ -99,22 +91,20 @@
 </head>
 <body>
 
-<!-- ─── intro overlay ─── -->
-<div id="introTitle">Ferrari SF90 Stradale &nbsp;·&nbsp; Loading Lab…</div>
+<div id="introTitle">Ferrari SF90 Stradale &nbsp;&middot;&nbsp; Loading Lab&hellip;</div>
 
-<!-- ─── lab UI (shown after transition) ─── -->
 <div id="labUI">
 
-    <div id="topmenu">Capacitor — Factors affecting capacitance</div>
+    <div id="topmenu">Capacitor &mdash; Factors affecting capacitance</div>
 
     <div id="sidemenu">
-        <label for="area">Area of plates, A = <a id="areaDisplay">1</a> m²</label>
+        <label for="area">Area of plates, A = <a id="areaDisplay">1</a> m&sup2;</label>
         <input type="range" id="area" min="5000" max="15000" value="10000" step="1000">
 
-        <label for="dist">Distance between plates, d = <a id="distDisplay">5</a> × 10⁻³ m</label>
+        <label for="dist">Distance between plates, d = <a id="distDisplay">5</a> &times; 10&sup3; m</label>
         <input type="range" id="dist" min="1" max="10" value="5" step="1">
 
-        <label for="dielectric-el">Dielectric constant, κ = <a id="dielectricDisplay"></a></label>
+        <label for="dielectric-el">Dielectric constant, &kappa; = <a id="dielectricDisplay"></a></label>
         <select id="dielectric-el"></select>
     </div>
 
@@ -124,9 +114,9 @@
             <div class="fraction">
                 <span class="fup">1</span>
                 <span class="bar">/</span>
-                <span class="fdn">2πfC</span>
+                <span class="fdn">2&pi;fC</span>
             </div>
-            = <a id="zDisplay"></a> Ω
+            = <a id="zDisplay"></a> &ohm;
         </div>
 
         C =
@@ -137,7 +127,7 @@
         </div>
         =
         <div class="fraction">
-            <span class="fup"><a id="factor-el">ε₀</a> A</span>
+            <span class="fup"><a id="factor-el">&epsilon;<sub>0</sub></a> A</span>
             <span class="bar">/</span>
             <span class="fdn">d</span>
         </div>
@@ -152,7 +142,7 @@
         </div>
     </div>
 
-</div><!-- /labUI -->
+</div>
 
 
 <script type="importmap">
@@ -174,13 +164,12 @@ import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
 import { RGBELoader }    from 'three/addons/loaders/RGBELoader.js';
 import TWEEN             from 'tween';
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    GLOBALS
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
 let renderer, camera, scene, controls;
 
-/* groups */
 let ferrariGroup   = new THREE.Group();
 let capacitorGroup = new THREE.Group();
 
@@ -190,31 +179,27 @@ const wheels     = [];
 const lookTarget = new THREE.Vector3(0, 0.5, 0);
 const smoothLook = new THREE.Vector3(0, 0.5, 0);
 
-/* transition state */
 let introFinished      = false;
 let motionBlurStrength = 0;
 let currentExposure    = 1.1;
 
-/* ── capacitor lab ── */
+/* capacitor */
 let plate1, plate2;
 let cMaterial;
 let connectorMaterial;
-let connector = new THREE.Group();
+let connector  = new THREE.Group();
 let dMaterial, dSlab;
-
 let redPoints, bluePoints;
 let drawCount  = 0;
 let drawCount1 = 0;
 let reqID, reqAC;
-
 let model, mixer, knob, plus, minus;
 let modelReady = false;
 let flow  = false;
 let acVolt = false;
 const actions = {};
 const clock   = new THREE.Clock();
-
-let A = 1; // used by periodicAction
+let A = 1;
 
 const params = {
     dist  : 50,
@@ -226,7 +211,7 @@ const params = {
     k     : 80,
     i     : 9,
     j     : 20,
-    points: 9 * 21   // i × 21
+    points: 9 * 21
 };
 
 const dielectric = {
@@ -241,23 +226,23 @@ const messages = {
     2: 'Click on the 3D model switch (ON) to visualise discharging of the capacitor for DC voltage',
     3: 'Click on the 3D model switch (OFF) to visualise the capacitor action for AC voltage',
     4: 'Charging of the capacitor stops after a while and no current flows through the circuit (open circuit)',
-    5: 'Charging – discharging of the capacitor, depends on the frequency of the AC voltage',
+    5: 'Charging - discharging of the capacitor, depends on the frequency of the AC voltage',
     6: 'Discharging of the capacitor happens for a while and then returns to its native state'
 };
 
-/* DOM refs – populated in setupLabUI() */
+/* DOM refs – filled by setupLabUI */
 let buttonFlow, buttonFlip, messageEl;
 let inputDist, inputArea;
 let distDisplay, areaDisplay, calDisplay, dielectricDisplay;
 let selectDielectric, factorElement, impedenceEl;
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    INIT
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
 init();
 
-function init(){
+function init() {
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -268,10 +253,7 @@ function init(){
     document.body.appendChild(renderer.domElement);
 
     camera = new THREE.PerspectiveCamera(
-        40,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        50000
+        40, window.innerWidth / window.innerHeight, 0.1, 50000
     );
 
     scene = new THREE.Scene();
@@ -291,11 +273,11 @@ function init(){
     window.addEventListener('resize', onResize);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    LIGHTS
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
-function createLights(){
+function createLights() {
 
     scene.add(new THREE.AmbientLight(0xffffff, 2));
 
@@ -304,11 +286,11 @@ function createLights(){
     scene.add(dir);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    FERRARI SHOWROOM
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
-function createFerrariShowroom(){
+function createFerrariShowroom() {
 
     scene.add(ferrariGroup);
 
@@ -321,7 +303,7 @@ function createFerrariShowroom(){
         .setDataType(THREE.UnsignedByteType)
         .load(
             'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
-            function(texture){
+            function (texture) {
                 const pmrem = new THREE.PMREMGenerator(renderer);
                 const env   = pmrem.fromEquirectangular(texture).texture;
                 scene.environment = env;
@@ -337,13 +319,13 @@ function createFerrariShowroom(){
     loader.setDRACOLoader(dracoLoader);
     loader.load(
         'https://threejs.org/examples/models/gltf/ferrari.glb',
-        function(gltf){
+        function (gltf) {
             car = gltf.scene.children[0];
 
             car.getObjectByName('body').material =
                 new THREE.MeshPhysicalMaterial({
-                    color:0xff0000, metalness:1,
-                    roughness:0.35, clearcoat:1
+                    color: 0xff0000, metalness: 1,
+                    roughness: 0.35, clearcoat: 1
                 });
 
             wheels.push(
@@ -359,34 +341,34 @@ function createFerrariShowroom(){
     );
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    CAMERA HELPERS
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
-function moveCamera(x, y, z, tx, ty, tz, duration){
+function moveCamera(x, y, z, tx, ty, tz, duration) {
     return new TWEEN.Tween(camera.position)
         .to({ x, y, z }, duration)
         .easing(TWEEN.Easing.Cubic.InOut)
         .onStart(() => {
             new TWEEN.Tween(lookTarget)
-                .to({ x:tx, y:ty, z:tz }, duration)
+                .to({ x: tx, y: ty, z: tz }, duration)
                 .easing(TWEEN.Easing.Cubic.InOut)
                 .start();
         });
 }
 
-function bounceCar(){
+function bounceCar() {
     return new TWEEN.Tween(car.position)
-        .to({ y:0.15 }, 400)
+        .to({ y: 0.15 }, 400)
         .yoyo(true).repeat(1)
         .easing(TWEEN.Easing.Quadratic.Out);
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    FERRARI CINEMATIC
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
-function startFerrariSequence(){
+function startFerrariSequence() {
 
     camera.position.set(0, 25, -80);
 
@@ -418,7 +400,6 @@ function startFerrariSequence(){
         .onStart(() => { motionBlurStrength = 0.4; })
         .onComplete(() => {
 
-            /* ── swap scenes ── */
             ferrariGroup.visible   = false;
             capacitorGroup.visible = true;
 
@@ -447,11 +428,11 @@ function startFerrariSequence(){
     fly.start();
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    CAPACITOR LAB
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
-function createCapacitorScene(){
+function createCapacitorScene() {
 
     capacitorGroup.visible = false;
     scene.add(capacitorGroup);
@@ -459,39 +440,31 @@ function createCapacitorScene(){
     const grid2 = new THREE.GridHelper(1000, 50);
     capacitorGroup.add(grid2);
 
-    /* connector material used throughout */
     connectorMaterial = new THREE.MeshPhongMaterial({
         color: 0xb87333,
         side : THREE.DoubleSide
     });
 
-    /* add connector group to scene (not capacitorGroup so geometry
-       rebuilds are independent of group visibility) */
-    
+    scene.add(connector);
 
-    /* build geometry */
     makeCapacitor(-250, 0, 0, params.l + 10, params.h + 10, params.dist, 5, 0xff7d7a, 'brown');
     makeConnector(92, 2, -20,  -250, 2, -250,  -params.dist);
     makeConnector(92, 2,  20,  -250, 2,  250,   params.dist);
     plusPoints();
     minusPoints();
     makeDielectric();
-
-    /* GLTF power supply */
     createModel();
-
-    /* wire HTML controls */
     setupLabUI();
 }
 
-/* ─────────────────────────────────────────
-   makeCapacitor
-───────────────────────────────────────── */
-function makeCapacitor(x, y, z, l, h, dist, t, col, col2){
+/* ------------------------------------------------ */
+/* makeCapacitor                                     */
+/* ------------------------------------------------ */
+
+function makeCapacitor(x, y, z, l, h, dist, t, col, col2) {
 
     const capacitor = new THREE.Group();
 
-    /* plate geometry – origin at bottom */
     const geo = new THREE.BoxGeometry(l, h, t).translate(0, h / 2, 0);
 
     cMaterial = new THREE.MeshPhongMaterial({
@@ -518,10 +491,11 @@ function makeCapacitor(x, y, z, l, h, dist, t, col, col2){
     scene.add(capacitor);
 }
 
-/* ─────────────────────────────────────────
-   makeConnector
-───────────────────────────────────────── */
-function makeConnector(x1, y1, z1, x2, y2, z2, gap){
+/* ------------------------------------------------ */
+/* makeConnector                                     */
+/* ------------------------------------------------ */
+
+function makeConnector(x1, y1, z1, x2, y2, z2, gap) {
 
     const curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(x1,      y1,     z1),
@@ -534,12 +508,13 @@ function makeConnector(x1, y1, z1, x2, y2, z2, gap){
     connector.add(new THREE.Mesh(tube, connectorMaterial));
 }
 
-/* ─────────────────────────────────────────
-   remakeConnection
-───────────────────────────────────────── */
-function remakeConnection(){
+/* ------------------------------------------------ */
+/* remakeConnection                                  */
+/* ------------------------------------------------ */
 
-    while(connector.children.length > 0){
+function remakeConnection() {
+
+    while (connector.children.length > 0) {
         const c = connector.children[0];
         c.geometry.dispose();
         c.parent.remove(c);
@@ -549,26 +524,27 @@ function remakeConnection(){
     makeConnector(92, 2,  20,  -250, 2,  250,   params.dist);
 }
 
-/* ─────────────────────────────────────────
-   makeDielectric
-───────────────────────────────────────── */
-function makeDielectric(){
+/* ------------------------------------------------ */
+/* makeDielectric                                    */
+/* ------------------------------------------------ */
+
+function makeDielectric() {
 
     const geo = new THREE.BoxGeometry(params.l, params.h + 10, 2 * params.dist)
                     .translate(0, params.h / 2, 0);
 
     dMaterial = new THREE.MeshPhongMaterial({ color: dielectric['Air'][1] });
-
-    dSlab = new THREE.Mesh(geo, dMaterial);
+    dSlab     = new THREE.Mesh(geo, dMaterial);
     dSlab.position.set(-250, 0, 0);
     dSlab.visible = false;
     scene.add(dSlab);
 }
 
-/* ─────────────────────────────────────────
-   plusPoints  – red charge dots on plate2 side
-───────────────────────────────────────── */
-function plusPoints(){
+/* ------------------------------------------------ */
+/* plusPoints                                        */
+/* ------------------------------------------------ */
+
+function plusPoints() {
 
     const geometry  = new THREE.BufferGeometry();
     const positions = new Float32Array(params.points * 3);
@@ -577,7 +553,7 @@ function plusPoints(){
 
     redPoints = new THREE.Points(
         geometry,
-        new THREE.PointsMaterial({ size:20, color:0xff0000 })
+        new THREE.PointsMaterial({ size: 20, color: 0xff0000 })
     );
     redPoints.position.z = params.dist;
     scene.add(redPoints);
@@ -585,21 +561,22 @@ function plusPoints(){
     let idx = 0, row = 0;
     let x = -250 - params.k, y = 10;
 
-    for(let j = 0; j < params.points; j++){
+    for (let j = 0; j < params.points; j++) {
         row++;
         y += (Math.random() - 0.5);
         positions[idx++] = x;
         positions[idx++] = y;
         positions[idx++] = 0;
         x += params.j;
-        if(row === params.i){ row = 0; x = -250 - params.k; y += 10; }
+        if (row === params.i) { row = 0; x = -250 - params.k; y += 10; }
     }
 }
 
-/* ─────────────────────────────────────────
-   minusPoints – blue charge dots on plate1 side
-───────────────────────────────────────── */
-function minusPoints(){
+/* ------------------------------------------------ */
+/* minusPoints                                       */
+/* ------------------------------------------------ */
+
+function minusPoints() {
 
     const geometry  = new THREE.BufferGeometry();
     const positions = new Float32Array(params.points * 3);
@@ -608,7 +585,7 @@ function minusPoints(){
 
     bluePoints = new THREE.Points(
         geometry,
-        new THREE.PointsMaterial({ size:20, color:0x0000ff })
+        new THREE.PointsMaterial({ size: 20, color: 0x0000ff })
     );
     bluePoints.position.z = -params.dist;
     scene.add(bluePoints);
@@ -616,46 +593,54 @@ function minusPoints(){
     let idx = 0, row = 0;
     let x = -250 - params.k, y = 10;
 
-    for(let j = 0; j < params.points; j++){
+    for (let j = 0; j < params.points; j++) {
         row++;
         y += (Math.random() - 0.5);
         positions[idx++] = x;
         positions[idx++] = y;
         positions[idx++] = 0;
         x += params.j;
-        if(row === params.i){ row = 0; x = -250 - params.k; y += 10; }
+        if (row === params.i) { row = 0; x = -250 - params.k; y += 10; }
     }
 
     updatePoints();
 }
 
-/* ─────────────────────────────────────────
-   pointsRecreate
-───────────────────────────────────────── */
-function pointsRecreate(){
+/* ------------------------------------------------ */
+/* pointsRecreate                                    */
+/* ------------------------------------------------ */
 
-    scene.remove(redPoints);  redPoints.geometry.dispose();  redPoints.material.dispose();
-    scene.remove(bluePoints); bluePoints.geometry.dispose(); bluePoints.material.dispose();
+function pointsRecreate() {
+
+    scene.remove(redPoints);
+    redPoints.geometry.dispose();
+    redPoints.material.dispose();
+
+    scene.remove(bluePoints);
+    bluePoints.geometry.dispose();
+    bluePoints.material.dispose();
 
     plusPoints();
     minusPoints();
     updatePoints();
 }
 
-/* ─────────────────────────────────────────
-   updatePoints  – hide all dots
-───────────────────────────────────────── */
-function updatePoints(){
+/* ------------------------------------------------ */
+/* updatePoints                                      */
+/* ------------------------------------------------ */
+
+function updatePoints() {
     redPoints.geometry.setDrawRange(0, 0);
     bluePoints.geometry.setDrawRange(0, 0);
 }
 
-/* ─────────────────────────────────────────
-   removePoints  – animate dots away
-───────────────────────────────────────── */
-function removePoints(){
+/* ------------------------------------------------ */
+/* removePoints                                      */
+/* ------------------------------------------------ */
 
-    if(drawCount1 >= 0){
+function removePoints() {
+
+    if (drawCount1 >= 0) {
         redPoints.geometry.setDrawRange(0, drawCount1);
         bluePoints.geometry.setDrawRange(0, drawCount1);
         reqID = requestAnimationFrame(removePoints);
@@ -665,97 +650,97 @@ function removePoints(){
     drawCount1--;
 }
 
-/* ─────────────────────────────────────────
-   addPoints  – animate dots appearing
-───────────────────────────────────────── */
-function addPoints(){
+/* ------------------------------------------------ */
+/* addPoints                                         */
+/* ------------------------------------------------ */
 
-    if(drawCount1 < params.points + 1){
+function addPoints() {
+
+    if (drawCount1 < params.points + 1) {
         redPoints.geometry.setDrawRange(0, drawCount1);
         bluePoints.geometry.setDrawRange(0, drawCount1);
         reqID = requestAnimationFrame(addPoints);
     } else {
-        if(plus)  plus.visible  = false;
-        if(minus) minus.visible = false;
+        if (plus)  plus.visible  = false;
+        if (minus) minus.visible = false;
         cancelAnimationFrame(reqID);
     }
     drawCount1++;
 }
 
-/* ─────────────────────────────────────────
-   chargeAction  – master dispatch
-───────────────────────────────────────── */
-function chargeAction(){
+/* ------------------------------------------------ */
+/* chargeAction                                      */
+/* ------------------------------------------------ */
+
+function chargeAction() {
 
     cancelAnimationFrame(reqAC);
 
-    if(flow && acVolt){
+    if (flow && acVolt) {
 
-        /* AC ON */
-        if(actions['Action']) actions['Action'].play();
-        cMaterial.transparent = true;
-        buttonFlow.innerText            = 'ON';
+        if (actions['Action']) actions['Action'].play();
+        cMaterial.transparent            = true;
+        buttonFlow.innerText             = 'ON';
         buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
-        buttonFlow.disabled = true;
+        buttonFlow.disabled              = true;
 
-        setTimeout(() => { if(knob) knob.rotation.y = -1.4; }, 500);
+        setTimeout(() => { if (knob) knob.rotation.y = -1.4; }, 500);
 
         setTimeout(() => {
             cMaterial.transparent = true;
             periodicAction();
-            buttonFlow.disabled = false;
+            buttonFlow.disabled   = false;
         }, 1500);
 
-    } else if(flow && !acVolt){
+    } else if (flow && !acVolt) {
 
-        /* DC ON */
         flowAction();
 
-    } else if(!flow && !acVolt){
+    } else if (!flow && !acVolt) {
 
-        /* DC OFF */
         removePoints();
         messageEl.innerHTML = messages[6];
-        if(actions['Action']) actions['Action'].reset().stop();
-        if(knob)  knob.rotation.y = 0;
-        if(plus)  plus.visible  = false;
-        if(minus) minus.visible = false;
-        cMaterial.transparent = true;
-        buttonFlow.innerText            = 'OFF';
+        if (actions['Action']) actions['Action'].reset().stop();
+        if (knob)  knob.rotation.y = 0;
+        if (plus)  plus.visible    = false;
+        if (minus) minus.visible   = false;
+        cMaterial.transparent            = true;
+        buttonFlow.innerText             = 'OFF';
         buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
         setTimeout(() => { cMaterial.transparent = false; }, 5000);
 
-    } else if(!flow && acVolt){
+    } else if (!flow && acVolt) {
 
-        /* AC OFF */
         removePoints();
         messageEl.innerHTML = messages[6];
-        drawCount = 0; A = 1;
-        if(actions['Action']) actions['Action'].reset().stop();
-        if(knob)  knob.rotation.y = 0;
-        if(plus)  plus.visible  = false;
-        if(minus) minus.visible = false;
-        buttonFlow.innerText            = 'OFF';
+        drawCount = 0;
+        A         = 1;
+        if (actions['Action']) actions['Action'].reset().stop();
+        if (knob)  knob.rotation.y = 0;
+        if (plus)  plus.visible    = false;
+        if (minus) minus.visible   = false;
+        buttonFlow.innerText             = 'OFF';
         buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
         setTimeout(() => { cMaterial.transparent = false; }, 3500);
     }
 }
 
-/* ─────────────────────────────────────────
-   flowAction  – DC charging sequence
-───────────────────────────────────────── */
-function flowAction(){
+/* ------------------------------------------------ */
+/* flowAction                                        */
+/* ------------------------------------------------ */
+
+function flowAction() {
 
     messageEl.innerHTML = messages[4];
-    if(actions['Action']) actions['Action'].play();
-    buttonFlow.innerText            = 'ON';
+    if (actions['Action']) actions['Action'].play();
+    buttonFlow.innerText             = 'ON';
     buttonFlow.style.backgroundColor = 'rgb(26,164,26)';
-    buttonFlow.disabled = true;
+    buttonFlow.disabled              = true;
 
     setTimeout(() => {
-        if(knob)  knob.rotation.y = -1.4;
-        if(plus)  plus.visible  = true;
-        if(minus) minus.visible = true;
+        if (knob)  knob.rotation.y = -1.4;
+        if (plus)  plus.visible    = true;
+        if (minus) minus.visible   = true;
     }, 500);
 
     setTimeout(() => {
@@ -769,14 +754,15 @@ function flowAction(){
     }, 3000);
 }
 
-/* ─────────────────────────────────────────
-   periodicAction  – AC oscillation
-───────────────────────────────────────── */
-function periodicAction(){
+/* ------------------------------------------------ */
+/* periodicAction                                    */
+/* ------------------------------------------------ */
+
+function periodicAction() {
 
     drawCount += A;
 
-    if(drawCount > 0 && drawCount < params.points + 1){
+    if (drawCount > 0 && drawCount < params.points + 1) {
 
         redPoints.geometry.setDrawRange(0, drawCount);
         bluePoints.geometry.setDrawRange(0, drawCount);
@@ -786,46 +772,46 @@ function periodicAction(){
 
         A *= -1;
 
-        if(A > 0){
-            /* swap red ↔ blue polarity */
-            const r = redPoints.material.color;
-            const b = bluePoints.material.color;
-            const swapR = r.r < 1 ? 1 : 0;
-            const swapB = r.b < 1 ? 1 : 0;
-            r.r = swapR;  r.b = swapB;
-            b.r = swapB;  b.b = swapR;
+        if (A > 0) {
+            const rm = redPoints.material.color;
+            const bm = bluePoints.material.color;
+            const newR = rm.r < 1 ? 1 : 0;
+            const newB = rm.b < 1 ? 1 : 0;
+            rm.r = newR;  rm.b = newB;
+            bm.r = newB;  bm.b = newR;
         }
 
         reqAC = requestAnimationFrame(periodicAction);
     }
 }
 
-/* ─────────────────────────────────────────
-   duringAction  – reset while sliders/buttons change
-───────────────────────────────────────── */
-function duringAction(){
+/* ------------------------------------------------ */
+/* duringAction                                      */
+/* ------------------------------------------------ */
+
+function duringAction() {
 
     flow = false;
-    buttonFlow.innerText            = 'OFF';
+    buttonFlow.innerText             = 'OFF';
     buttonFlow.style.backgroundColor = 'rgb(164,26,26)';
 
-    if(actions['Action']) actions['Action'].reset().stop();
-    if(knob)  knob.rotation.y = 0;
-    if(plus)  plus.visible  = false;
-    if(minus) minus.visible = false;
+    if (actions['Action']) actions['Action'].reset().stop();
+    if (knob)  knob.rotation.y = 0;
+    if (plus)  plus.visible    = false;
+    if (minus) minus.visible   = false;
 }
 
-/* ─────────────────────────────────────────
-   createModel  – load GLTF power supply
-───────────────────────────────────────── */
-function createModel(){
+/* ------------------------------------------------ */
+/* createModel                                       */
+/* ------------------------------------------------ */
+
+function createModel() {
 
     const loader = new GLTFLoader();
     loader.setPath('./model/');
     loader.load(
         'powersupply.glb',
-        function(gltf){
-
+        function (gltf) {
             model = gltf.scene;
             model.scale.set(100, 100, 100);
             scene.add(model);
@@ -834,147 +820,155 @@ function createModel(){
             plus  = model.getObjectByName('plus');
             minus = model.getObjectByName('minus');
 
-            if(knob)  knob.rotation.y = 0;
-            if(plus)  { plus.position.set(1, 0.2, 0.6);   plus.visible  = false; }
-            if(minus) { minus.position.set(1, 0.2, -0.6); minus.visible = false; }
+            if (knob)  knob.rotation.y = 0;
+            if (plus)  { plus.position.set(1, 0.2,  0.6); plus.visible  = false; }
+            if (minus) { minus.position.set(1, 0.2, -0.6); minus.visible = false; }
 
-            mixer = new THREE.AnimationMixer(model);
+            mixer      = new THREE.AnimationMixer(model);
             modelReady = true;
 
             const fixedStates = ['polarity','Action','Action_knob','AC_connector','DC_connector'];
 
-            for(const clip of gltf.animations){
+            for (const clip of gltf.animations) {
                 const action = mixer.clipAction(clip);
                 actions[clip.name] = action;
-                if(fixedStates.includes(clip.name)){
+                if (fixedStates.includes(clip.name)) {
                     action.clampWhenFinished = true;
                     action.loop = THREE.LoopOnce;
                 }
             }
         },
         undefined,
-        (e) => console.warn('powersupply.glb not found – continuing without model.', e)
+        (e) => console.warn('powersupply.glb not found – lab works without it.', e)
     );
 }
 
-/* ─────────────────────────────────────────
-   calCapacitance
-───────────────────────────────────────── */
-function calCapacitance(){
+/* ------------------------------------------------ */
+/* calCapacitance                                    */
+/* ------------------------------------------------ */
 
-    const e0 = 8.854e-12;
-    const k  = params.factor;
-    const a  = params.a;
-    const d  = params.dist;
-    const raw = (e0 * k * a) / d;
+function calCapacitance() {
 
+    const e0  = 8.854e-12;
+    const raw = (e0 * params.factor * params.a) / params.dist;
     const { num, count } = countPower(raw);
     return { C: num, exp: count };
 }
 
-/* ─────────────────────────────────────────
-   countPower
-───────────────────────────────────────── */
-function countPower(num){
+/* ------------------------------------------------ */
+/* countPower                                        */
+/* ------------------------------------------------ */
+
+function countPower(num) {
+
     let count = 0;
-    while(num < 1){ num *= 10; count++; }
+    while (num < 1) { num *= 10; count++; }
     return { num, count };
 }
 
-/* ─────────────────────────────────────────
-   extraSite  – navigate to understanding page
-───────────────────────────────────────── */
-function extraSite(){
-    window.open('capacitance.html', '_self');
+/* ------------------------------------------------ */
+/* extraSite                                         */
+/* ------------------------------------------------ */
+
+function extraSite() {
+    window.open('Electricity_Understanding_Capacitance.html', '_self');
 }
 
-/* ─────────────────────────────────────────
-   guiControls  – dev helper (call manually if needed)
-───────────────────────────────────────── */
-// function guiControls(){ ... }   // omitted from production; add lil-gui import to use
+/* ------------------------------------------------ */
+/* guiControls  (dev helper – uncomment to use)     */
+/* ------------------------------------------------ */
 
-/* ─────────────────────────────────────────
-   setupLabUI  – DOM event wiring  (= buttonAction in original)
-───────────────────────────────────────── */
-function setupLabUI(){
+// function guiControls() {
+//     import('https://unpkg.com/lil-gui@0.19.2/dist/lil-gui.esm.js').then(({ GUI }) => {
+//         const gui = new GUI();
+//         gui.add(camera.position, 'x', -3000, 3000);
+//         gui.add(camera.position, 'y', -1000, 1000);
+//         gui.add(camera.position, 'z', -10000, 10000);
+//     });
+// }
 
-    /* grab DOM refs */
-    buttonFlow       = document.getElementById('flow');
-    buttonFlip       = document.getElementById('flip');
-    messageEl        = document.getElementById('message-el');
-    inputDist        = document.getElementById('dist');
-    inputArea        = document.getElementById('area');
-    distDisplay      = document.getElementById('distDisplay');
-    areaDisplay      = document.getElementById('areaDisplay');
-    calDisplay       = document.getElementById('calDisplay');
+/* ------------------------------------------------ */
+/* setupLabUI  ( = buttonAction in original )        */
+/* ------------------------------------------------ */
+
+function setupLabUI() {
+
+    buttonFlow        = document.getElementById('flow');
+    buttonFlip        = document.getElementById('flip');
+    messageEl         = document.getElementById('message-el');
+    inputDist         = document.getElementById('dist');
+    inputArea         = document.getElementById('area');
+    distDisplay       = document.getElementById('distDisplay');
+    areaDisplay       = document.getElementById('areaDisplay');
+    calDisplay        = document.getElementById('calDisplay');
     dielectricDisplay = document.getElementById('dielectricDisplay');
     selectDielectric  = document.getElementById('dielectric-el');
     factorElement     = document.getElementById('factor-el');
     impedenceEl       = document.getElementById('z-el');
 
-    /* populate dielectric dropdown */
-    for(const key in dielectric){
+    /* populate dropdown */
+    for (const key in dielectric) {
         const opt = document.createElement('option');
         opt.textContent = opt.value = key;
         selectDielectric.appendChild(opt);
     }
     dielectricDisplay.innerHTML = dielectric['Air'][0];
-
-    /* initial capacitance readout */
     refreshCap();
 
-    /* ── FLOW button ── */
+    /* FLOW */
     buttonFlow.addEventListener('click', () => {
         flow = !flow;
         chargeAction();
     });
 
-    /* ── FLIP (DC / AC) button ── */
+    /* FLIP */
     buttonFlip.addEventListener('click', () => {
         acVolt = !acVolt;
         duringAction();
         buttonFlow.disabled = true;
 
-        if(acVolt){
+        if (acVolt) {
             cancelAnimationFrame(reqID);
             cMaterial.transparent = false;
-            if(actions['DC_connector']) actions['DC_connector'].reset().stop();
-            if(actions['AC_connector']) actions['AC_connector'].setDuration(2).play();
-            buttonFlip.innerText = 'AC VOLTAGE';
-            impedenceEl.style.visibility = 'visible';
-            messageEl.innerHTML = messages[3];
+            if (actions['DC_connector']) actions['DC_connector'].reset().stop();
+            if (actions['AC_connector']) actions['AC_connector'].setDuration(2).play();
+            buttonFlip.innerText             = 'AC VOLTAGE';
+            impedenceEl.style.visibility     = 'visible';
+            messageEl.innerHTML              = messages[3];
         } else {
             cancelAnimationFrame(reqAC);
-            if(actions['AC_connector']) actions['AC_connector'].reset().stop();
-            if(actions['DC_connector']) actions['DC_connector'].setDuration(2).play();
-            buttonFlip.innerText = 'DC VOLTAGE';
-            impedenceEl.style.visibility = 'hidden';
-            messageEl.innerHTML = messages[1];
+            if (actions['AC_connector']) actions['AC_connector'].reset().stop();
+            if (actions['DC_connector']) actions['DC_connector'].setDuration(2).play();
+            buttonFlip.innerText             = 'DC VOLTAGE';
+            impedenceEl.style.visibility     = 'hidden';
+            messageEl.innerHTML              = messages[1];
         }
 
         setTimeout(() => { buttonFlow.disabled = false; }, 3000);
     });
 
-    /* ── CAPACITANCE button ── */
+    /* CAPACITANCE */
     document.getElementById('cal').addEventListener('click', extraSite);
 
-    /* ── dielectric select ── */
+    /* dielectric */
     selectDielectric.addEventListener('input', () => {
         duringAction();
         const key = selectDielectric.value;
-        dielectricDisplay.innerHTML = dielectric[key][0];
-        params.factor = Number(dielectric[key][0]);
-        factorElement.innerHTML = key === 'Air' ? 'ε₀' : 'ε₀κ';
+        dielectricDisplay.innerHTML   = dielectric[key][0];
+        params.factor                 = Number(dielectric[key][0]);
+        factorElement.innerHTML       = key === 'Air'
+            ? '&epsilon;<sub>0</sub>'
+            : '&epsilon;<sub>0</sub>&kappa;';
         refreshCap();
         dSlab.visible = key !== 'Air';
         dSlab.material.color.copy(dielectric[key][1]);
     });
 
-    /* ── distance slider ── */
+    /* distance */
     inputDist.addEventListener('input', () => {
-        const X = Number(inputDist.value);
+        const X       = Number(inputDist.value);
         distDisplay.innerHTML = X;
-        params.dist = X * 10;
+        params.dist   = X * 10;
 
         plate1.position.z     = -params.dist;
         plate2.position.z     =  params.dist;
@@ -988,7 +982,7 @@ function setupLabUI(){
         refreshCap();
     });
 
-    /* ── area slider ── */
+    /* area */
     inputArea.addEventListener('input', () => {
         const val = Number(inputArea.value);
         areaDisplay.innerHTML = val / 1e4;
@@ -1000,9 +994,9 @@ function setupLabUI(){
         plate1.scale.y = plate2.scale.y = sy;
         dSlab.scale.x  = dSlab.scale.y  = sy;
 
-        params.a = val;
-        params.k = sy > 1 ? 81 * sy : 80 * sy;
-        params.i = sy > 0.6 ? Math.floor(9 * sy) : Math.ceil(9 * sy);
+        params.a      = val;
+        params.k      = sy > 1 ? 81 * sy : 80 * sy;
+        params.i      = sy > 0.6 ? Math.floor(9 * sy) : Math.ceil(9 * sy);
         params.points = params.i * Math.floor(21 * sy);
 
         duringAction();
@@ -1011,36 +1005,36 @@ function setupLabUI(){
     });
 }
 
-/* ─────────────────────────────────────────
-   refreshCap  – update calDisplay
-───────────────────────────────────────── */
-function refreshCap(){
+/* ------------------------------------------------ */
+/* refreshCap                                        */
+/* ------------------------------------------------ */
+
+function refreshCap() {
     const r = calCapacitance();
-    calDisplay.innerHTML = r.C.toFixed(2) + ' × 10 <sup>-' + r.exp + '</sup>';
+    calDisplay.innerHTML = r.C.toFixed(2) + ' &times; 10 <sup>-' + r.exp + '</sup>';
 }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    RESIZE
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 
-function onResize(){
+function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-/* ════════════════════════════════════════════
-   ANIMATION LOOP
-════════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════ */
 
-function animate(){
+function animate() {
 
     requestAnimationFrame(animate);
 
     TWEEN.update();
 
-    /* ── intro camera steering ── */
-    if(!introFinished){
+    if (!introFinished) {
 
         smoothLook.lerp(lookTarget, 0.05);
         camera.lookAt(smoothLook);
@@ -1048,19 +1042,17 @@ function animate(){
         const time = -performance.now() / 1000;
         grid.position.z = -(time) % 1;
 
-        for(let i = 0; i < wheels.length; i++){
+        for (let i = 0; i < wheels.length; i++) {
             wheels[i].rotation.x = time * Math.PI * 2;
         }
     }
 
     controls.update();
 
-    /* fake motion-blur via exposure */
     currentExposure += ((1.1 - motionBlurStrength) - currentExposure) * 0.03;
     renderer.toneMappingExposure = currentExposure;
 
-    /* GLTF mixer */
-    if(modelReady && mixer) mixer.update(clock.getDelta());
+    if (modelReady && mixer) mixer.update(clock.getDelta());
 
     renderer.render(scene, camera);
 }
@@ -1068,3 +1060,4 @@ function animate(){
 </script>
 </body>
 </html>
+
