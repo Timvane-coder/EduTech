@@ -1,0 +1,946 @@
+/**
+ * rebuildMachines.mjs
+ *
+ * Reconstructs the machinesJoined asset as separate named GLB nodes
+ * matching the exact world-space bounds of the original:
+ *
+ *   Overall size:            4.491W × 10.030H × 5.843D
+ *   Overall position offset: [-0.903, -3.547, -1.286]
+ *
+ * Coordinate system (Three.js / GLTF right-hand Y-up):
+ *   X  = left(-) → right(+)          (width  4.491, centre at -0.903)
+ *   Y  = down(-) → up(+)             (height 10.030, centre at -3.547)
+ *   Z  = into screen(-) → towards(-) (depth  5.843,  centre at -1.286)
+ *
+ * Origin is the GLTF scene origin (before the model.position.y = -3 shift
+ * applied in Three.js at runtime).
+ *
+ * Visual reference — 11 vertex-group colour labels from your screenshot:
+ *   Box Center (cyan)       Box Left (purple)    Box Rear-Left (light-purple)
+ *   Box Mid (dark-purple)   Box Rear (hot-pink)  Box Far-Left (salmon-pink)
+ *   Box Right (orange-red)  Distributor Hub (orange cable)
+ *   Dish/Solar (yellow — gantry beam, speaker box, angled panel, mast loop)
+ *   Pipes A (dark-green)    Pipes B (medium-green — catenary cables)
+ *   Rotating Hub (cyan flat disc, center floor)
+ *
+ * Outputs to: ./models/ramen-parts/machines-rebuilt/
+ * Each piece → one GLB with a descriptive name.
+ * Screen-frame empty rectangles are included so Three.js can position
+ * screens relative to their frames.
+ *
+ * Usage:
+ *   node rebuildMachines.mjs
+ *
+ * Dependencies:
+ *   npm install @gltf-transform/core @gltf-transform/extensions
+ *               @gltf-transform/functions draco3d
+ */
+
+import { Document, NodeIO, Primitive } from '@gltf-transform/core';
+import { ALL_EXTENSIONS }               from '@gltf-transform/extensions';
+import { promises as fs }               from 'fs';
+import path                             from 'path';
+import draco3d                          from 'draco3d';
+
+const OUTDIR = './models/ramen-parts/machines-rebuilt';
+
+// ─── Global bounds ────────────────────────────────────────────────────────────
+// World-space centre of the entire machinesJoined assembly.
+const CX = -0.903;   // X centre
+const CY = -3.547;   // Y centre  (note: runtime adds -3, so in Blender space ≈ -0.547)
+const CZ = -1.286;   // Z centre
+
+// Half-extents of the bounding box
+const HW = 4.491 / 2;   // 2.2455
+const HH = 10.030 / 2;  // 5.015
+const HD = 5.843 / 2;   // 2.9215
+
+// Derived extremes (world space as loaded by GLTFLoader before model.position.y=-3)
+const XMIN = CX - HW;   // -3.1485
+const XMAX = CX + HW;   //  1.3425
+const YMIN = CY - HH;   // -8.5620
+const YMAX = CY + HH;   //  1.4680
+const ZMIN = CZ - HD;   // -4.2075
+const ZMAX = CZ + HD;   //  1.6555
+
+// ─── Helper: build a flat-shaded box mesh in a new Document ──────────────────
+function buildBox(doc, name, cx, cy, cz, sx, sy, sz) {
+  const hx = sx / 2, hy = sy / 2, hz = sz / 2;
+
+  // 8 corners
+  const positions = new Float32Array([
+    cx-hx, cy-hy, cz-hz,   cx+hx, cy-hy, cz-hz,
+    cx+hx, cy+hy, cz-hz,   cx-hx, cy+hy, cz-hz,
+    cx-hx, cy-hy, cz+hz,   cx+hx, cy-hy, cz+hz,
+    cx+hx, cy+hy, cz+hz,   cx-hx, cy+hy, cz+hz,
+  ]);
+
+  // 12 triangles (2 per face × 6 faces)
+  const indices = new Uint16Array([
+    0,1,2, 0,2,3,   // -Z
+    5,4,7, 5,7,6,   // +Z
+    4,0,3, 4,3,7,   // -X
+    1,5,6, 1,6,2,   // +X
+    3,2,6, 3,6,7,   // +Y
+    4,5,1, 4,1,0,   // -Y
+  ]);
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(positions);
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(indices);
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: hollow rectangular frame (open-face rectangle border) ─────────
+// thickness = how thick the border tube is
+function buildFrame(doc, name, cx, cy, cz, outerW, outerH, thickness, axis = 'XY') {
+  // Build as 4 thin boxes forming the border
+  const positions = [];
+  const indices   = [];
+  let   vtxOffset = 0;
+
+  function pushBox(bx, by, bz, sx, sy, sz) {
+    const hx = sx/2, hy = sy/2, hz = sz/2;
+    const base = [
+      bx-hx, by-hy, bz-hz,  bx+hx, by-hy, bz-hz,
+      bx+hx, by+hy, bz-hz,  bx-hx, by+hy, bz-hz,
+      bx-hx, by-hy, bz+hz,  bx+hx, by-hy, bz+hz,
+      bx+hx, by+hy, bz+hz,  bx-hx, by+hy, bz+hz,
+    ];
+    positions.push(...base);
+    const b = vtxOffset;
+    indices.push(
+      b+0,b+1,b+2, b+0,b+2,b+3,
+      b+5,b+4,b+7, b+5,b+7,b+6,
+      b+4,b+0,b+3, b+4,b+3,b+7,
+      b+1,b+5,b+6, b+1,b+6,b+2,
+      b+3,b+2,b+6, b+3,b+6,b+7,
+      b+4,b+5,b+1, b+4,b+1,b+0,
+    );
+    vtxOffset += 8;
+  }
+
+  const depth = thickness; // extrusion depth (thin slab)
+
+  if (axis === 'XY') {
+    // top bar
+    pushBox(cx, cy + outerH/2 - thickness/2, cz, outerW,            thickness, depth);
+    // bottom bar
+    pushBox(cx, cy - outerH/2 + thickness/2, cz, outerW,            thickness, depth);
+    // left bar
+    pushBox(cx - outerW/2 + thickness/2, cy, cz, thickness, outerH - 2*thickness, depth);
+    // right bar
+    pushBox(cx + outerW/2 - thickness/2, cy, cz, thickness, outerH - 2*thickness, depth);
+  } else { // XZ (horizontal frame lying flat)
+    pushBox(cx, cy, cz + outerH/2 - thickness/2, outerW, depth, thickness);
+    pushBox(cx, cy, cz - outerH/2 + thickness/2, outerW, depth, thickness);
+    pushBox(cx - outerW/2 + thickness/2, cy, cz, thickness, depth, outerH - 2*thickness);
+    pushBox(cx + outerW/2 - thickness/2, cy, cz, thickness, depth, outerH - 2*thickness);
+  }
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(new Float32Array(positions));
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(new Uint16Array(indices));
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: cylinder (Y-axis, flat caps) ─────────────────────────────────
+function buildCylinder(doc, name, cx, cy, cz, radius, height, segments = 16) {
+  const positions = [];
+  const indices   = [];
+
+  // Top cap centre
+  positions.push(cx, cy + height/2, cz);
+  // Bottom cap centre
+  positions.push(cx, cy - height/2, cz);
+
+  const topRing    = 2;
+  const bottomRing = 2 + segments;
+
+  for (let i = 0; i < segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
+    const x = cx + Math.cos(a) * radius;
+    const z = cz + Math.sin(a) * radius;
+    positions.push(x, cy + height/2, z); // top ring
+  }
+  for (let i = 0; i < segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
+    const x = cx + Math.cos(a) * radius;
+    const z = cz + Math.sin(a) * radius;
+    positions.push(x, cy - height/2, z); // bottom ring
+  }
+
+  // Top cap triangles
+  for (let i = 0; i < segments; i++) {
+    indices.push(0, topRing + i, topRing + (i+1) % segments);
+  }
+  // Bottom cap triangles
+  for (let i = 0; i < segments; i++) {
+    indices.push(1, bottomRing + (i+1) % segments, bottomRing + i);
+  }
+  // Side quads
+  for (let i = 0; i < segments; i++) {
+    const t0 = topRing + i,       t1 = topRing + (i+1) % segments;
+    const b0 = bottomRing + i,    b1 = bottomRing + (i+1) % segments;
+    indices.push(t0, b0, b1,   t0, b1, t1);
+  }
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(new Float32Array(positions.flat()));
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(new Uint16Array(indices));
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: catenary cable (series of cylinder segments along a curve) ───
+function buildCatenary(doc, name, x0, y0, z0, x1, y1, z1, sag, segments = 12, radius = 0.03) {
+  // Parametric catenary approximated as quadratic bezier with midpoint sag
+  const positions = [];
+  const idx       = [];
+  const segVerts  = 8; // radial segments per cross-section
+
+  const pts = [];
+  for (let i = 0; i <= segments; i++) {
+    const t  = i / segments;
+    const mx = x0 + (x1-x0) * t;
+    const my = y0 + (y1-y0) * t - sag * 4 * t * (1-t); // sag dips below line
+    const mz = z0 + (z1-z0) * t;
+    pts.push([mx, my, mz]);
+  }
+
+  for (let i = 0; i < pts.length; i++) {
+    const [px, py, pz] = pts[i];
+    // tangent for orientation
+    let tx = 1, tz = 0;
+    if (i < pts.length - 1) {
+      tx = pts[i+1][0] - px;
+      tz = pts[i+1][2] - pz;
+      const len = Math.sqrt(tx*tx + tz*tz) || 1;
+      tx /= len; tz /= len;
+    }
+    const nx = -tz, nz = tx;
+
+    for (let j = 0; j < segVerts; j++) {
+      const a  = (j / segVerts) * Math.PI * 2;
+      const rx = Math.cos(a) * radius;
+      const ry = Math.sin(a) * radius;
+      positions.push(
+        px + nx * rx,
+        py + ry,
+        pz + nz * rx
+      );
+    }
+  }
+
+  for (let i = 0; i < segments; i++) {
+    for (let j = 0; j < segVerts; j++) {
+      const a = i * segVerts + j;
+      const b = i * segVerts + (j+1) % segVerts;
+      const c = (i+1) * segVerts + j;
+      const d = (i+1) * segVerts + (j+1) % segVerts;
+      idx.push(a, b, d,   a, d, c);
+    }
+  }
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(new Float32Array(positions));
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(new Uint16Array(idx));
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: speaker face (flat plane + 2 concentric rings) ───────────────
+function buildSpeaker(doc, name, cx, cy, cz, w, h, depth, faceDir = '-Z') {
+  const positions = [];
+  const indices   = [];
+  let   vtxOffset = 0;
+
+  function pushBox(bx, by, bz, sx, sy, sz) {
+    const hx=sx/2, hy=sy/2, hz=sz/2;
+    const vs=[
+      bx-hx,by-hy,bz-hz,  bx+hx,by-hy,bz-hz,
+      bx+hx,by+hy,bz-hz,  bx-hx,by+hy,bz-hz,
+      bx-hx,by-hy,bz+hz,  bx+hx,by-hy,bz+hz,
+      bx+hx,by+hy,bz+hz,  bx-hx,by+hy,bz+hz,
+    ];
+    positions.push(...vs);
+    const b=vtxOffset;
+    indices.push(
+      b+0,b+1,b+2, b+0,b+2,b+3,
+      b+5,b+4,b+7, b+5,b+7,b+6,
+      b+4,b+0,b+3, b+4,b+3,b+7,
+      b+1,b+5,b+6, b+1,b+6,b+2,
+      b+3,b+2,b+6, b+3,b+6,b+7,
+      b+4,b+5,b+1, b+4,b+1,b+0,
+    );
+    vtxOffset+=8;
+  }
+
+  // Cabinet body
+  pushBox(cx, cy, cz, w, h, depth);
+
+  // Outer ring (torus-like flat band on front face)
+  const fz = cz - depth/2 - 0.005;
+  const R1 = Math.min(w, h) * 0.38;
+  const R2 = R1 * 0.55;
+  const seg = 20;
+  for (let ring = 0; ring < 2; ring++) {
+    const R     = ring === 0 ? R1 : R2;
+    const thick = ring === 0 ? 0.04 : 0.03;
+    for (let i = 0; i < seg; i++) {
+      const a0 = (i/seg)*Math.PI*2, a1=((i+1)/seg)*Math.PI*2;
+      const x0=cx+Math.cos(a0)*R, z0=fz+Math.sin(a0)*R*0.05;
+      const x1=cx+Math.cos(a1)*R, z1=fz+Math.sin(a1)*R*0.05;
+      const y0=cy+Math.sin(a0)*R, y1=cy+Math.sin(a1)*R;
+      // just push small rectangles as proxy
+      const mx=(x0+x1)/2, my=(y0+y1)/2;
+      pushBox(mx, my, fz, thick, thick, 0.02);
+    }
+  }
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(new Float32Array(positions));
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(new Uint16Array(indices));
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: stacked slabs tower ─────────────────────────────────────────
+function buildStackedSlabs(doc, name, cx, cy, cz, w, d, slabH, slabGap, count) {
+  const positions = [];
+  const indices   = [];
+  let   vtxOffset = 0;
+  const totalH = (slabH + slabGap) * count - slabGap;
+  let   startY  = cy - totalH/2 + slabH/2;
+
+  for (let i = 0; i < count; i++) {
+    const sy = startY + i * (slabH + slabGap);
+    const hx=w/2, hy=slabH/2, hz=d/2;
+    const vs=[
+      cx-hx,sy-hy,cz-hz, cx+hx,sy-hy,cz-hz,
+      cx+hx,sy+hy,cz-hz, cx-hx,sy+hy,cz-hz,
+      cx-hx,sy-hy,cz+hz, cx+hx,sy-hy,cz+hz,
+      cx+hx,sy+hy,cz+hz, cx-hx,sy+hy,cz+hz,
+    ];
+    positions.push(...vs);
+    const b=vtxOffset;
+    indices.push(
+      b+0,b+1,b+2, b+0,b+2,b+3,
+      b+5,b+4,b+7, b+5,b+7,b+6,
+      b+4,b+0,b+3, b+4,b+3,b+7,
+      b+1,b+5,b+6, b+1,b+6,b+2,
+      b+3,b+2,b+6, b+3,b+6,b+7,
+      b+4,b+5,b+1, b+4,b+1,b+0,
+    );
+    vtxOffset+=8;
+  }
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(new Float32Array(positions));
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(new Uint16Array(indices));
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: fin pack (heat sink) ─────────────────────────────────────────
+function buildFinPack(doc, name, cx, cy, cz, totalW, totalH, totalD, count) {
+  const positions = [];
+  const indices   = [];
+  let   vtxOffset = 0;
+  const finW   = totalW / (count * 2 - 1);
+  const gap    = finW;
+
+  for (let i = 0; i < count; i++) {
+    const fx = cx - totalW/2 + finW/2 + i*(finW+gap);
+    const hx=finW/2, hy=totalH/2, hz=totalD/2;
+    const vs=[
+      fx-hx,cy-hy,cz-hz, fx+hx,cy-hy,cz-hz,
+      fx+hx,cy+hy,cz-hz, fx-hx,cy+hy,cz-hz,
+      fx-hx,cy-hy,cz+hz, fx+hx,cy-hy,cz+hz,
+      fx+hx,cy+hy,cz+hz, fx-hx,cy+hy,cz+hz,
+    ];
+    positions.push(...vs);
+    const b=vtxOffset;
+    indices.push(
+      b+0,b+1,b+2, b+0,b+2,b+3,
+      b+5,b+4,b+7, b+5,b+7,b+6,
+      b+4,b+0,b+3, b+4,b+3,b+7,
+      b+1,b+5,b+6, b+1,b+6,b+2,
+      b+3,b+2,b+6, b+3,b+6,b+7,
+      b+4,b+5,b+1, b+4,b+1,b+0,
+    );
+    vtxOffset+=8;
+  }
+
+  const mesh   = doc.createMesh(name);
+  const prim   = doc.createPrimitive();
+  const posAcc = doc.createAccessor().setType('VEC3').setArray(new Float32Array(positions));
+  const idxAcc = doc.createAccessor().setType('SCALAR').setArray(new Uint16Array(indices));
+  prim.setAttribute('POSITION', posAcc);
+  prim.setIndices(idxAcc);
+  mesh.addPrimitive(prim);
+  return mesh;
+}
+
+// ─── Helper: write one mesh as its own GLB ────────────────────────────────
+async function writeMeshGLB(io, mesh, nodeName, outPath) {
+  const doc  = mesh.getDocument();
+  const node = doc.createNode(nodeName).setMesh(mesh);
+  const scene = doc.createScene('scene').addChild(node);
+  doc.getRoot().setDefaultScene(scene);
+  await io.write(outPath, doc);
+  console.log(`  ✅  ${path.basename(outPath)}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN — define every piece with world-space coordinates derived from
+//         the known bounding box and visual analysis of both screenshots
+// ─────────────────────────────────────────────────────────────────────────────
+async function main() {
+  await fs.mkdir(OUTDIR, { recursive: true });
+
+  const io = new NodeIO()
+    .registerExtensions(ALL_EXTENSIONS)
+    .registerDependencies({
+      'draco3d.decoder': await draco3d.createDecoderModule(),
+      'draco3d.encoder': await draco3d.createEncoderModule(),
+    });
+
+  console.log('\n🔨  Rebuilding machinesJoined parts …');
+  console.log(`    Bounds: W=${(HW*2).toFixed(3)} H=${(HH*2).toFixed(3)} D=${(HD*2).toFixed(3)}`);
+  console.log(`    Centre: X=${CX} Y=${CY} Z=${CZ}\n`);
+
+  // ── Coordinate anchors ────────────────────────────────────────────────────
+  // The assembly sits with floor at YMIN (-8.562) and top of masts at YMAX (1.468)
+  // Chassis floor slab sits near YMIN.
+  // Machine bodies occupy roughly Y = -8.0 to -1.5
+  // Gantry crossbeam at Y ≈ -1.2
+  // Mast tops at Y ≈ 1.2
+  // Assembly left edge at XMIN (-3.148), right edge at XMAX (1.342)
+  // Assembly front at ZMAX (1.655), back at ZMIN (-4.207)
+
+  // ── Pieces list ──────────────────────────────────────────────────────────
+  // Format: { file, name, buildFn }  — each builds its own Document
+
+  const parts = [];
+
+  // ── 1. BOX CENTER — foundation chassis frame (large flat perimeter, cyan) ──
+  // The master floor-level rectangular frame spanning full width.
+  // Seen in image 1 as the low wide cyan loop at ground level.
+  {
+    const doc  = new Document();
+    const name = 'box_center_foundation_frame';
+    const mesh = buildFrame(doc, name,
+      CX,          // centred on assembly X
+      YMIN + 0.15, // just above floor
+      CZ,          // centred on assembly Z
+      HW * 2 * 0.95,   // full width minus margin
+      HD * 2 * 0.90,   // full depth minus margin
+      0.12,            // tube thickness
+      'XZ'             // horizontal frame lying flat
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 2. BOX CENTER — stacked slab tower (cyan plates, center-right) ─────────
+  // 6–8 thin horizontal slabs stacked with offsets, center of the scene.
+  {
+    const doc  = new Document();
+    const name = 'box_center_stacked_slabs';
+    const mesh = buildStackedSlabs(doc, name,
+      CX + 0.6,   // right of centre
+      CY - 1.5,   // mid-lower zone
+      CZ - 0.3,   // slightly rear
+      0.85,        // slab width
+      0.65,        // slab depth
+      0.08,        // slab height
+      0.05,        // gap between slabs
+      7            // count
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 3. BOX LEFT — left rear vertical frame (tall open rectangle, purple) ──
+  {
+    const doc  = new Document();
+    const name = 'box_left_rear_vertical_frame';
+    const mesh = buildFrame(doc, name,
+      XMIN + 0.8,          // left zone
+      CY + 0.8,            // upper half
+      CZ - 1.2,            // rear
+      1.0,                  // frame width
+      4.5,                  // frame height
+      0.10,                 // tube thickness
+      'XY'
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 4. BOX LEFT — lower left frame (secondary cage, purple) ───────────────
+  {
+    const doc  = new Document();
+    const name = 'box_left_lower_cage';
+    const mesh = buildFrame(doc, name,
+      XMIN + 0.8,
+      CY - 1.8,
+      CZ - 0.8,
+      0.85,
+      1.8,
+      0.10,
+      'XY'
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 5. BOX LEFT — rear gallows gantry (wide background frame, purple) ─────
+  // The large horizontal frame spanning the full rear of the assembly.
+  {
+    const doc  = new Document();
+    const name = 'box_left_rear_gallows_gantry';
+    const mesh = buildFrame(doc, name,
+      CX - 0.2,             // slightly left of centre
+      CY + 1.5,             // upper zone
+      ZMIN + 0.3,           // at rear wall
+      HW * 2 * 0.85,        // wide
+      HH * 0.55,            // medium tall
+      0.12,
+      'XY'
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 6. BOX REAR-LEFT — hanging tray left (light purple suspended slab) ───
+  {
+    const doc  = new Document();
+    const name = 'box_rear_left_hanging_tray_L';
+    const mesh = buildBox(doc, name,
+      CX - 0.55,     // left of centre
+      CY + 0.65,     // hanging below gantry
+      CZ - 0.9,      // mid depth
+      0.85, 0.22, 0.55  // w h d — shallow tray
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 7. BOX REAR-LEFT — hanging tray right ─────────────────────────────────
+  {
+    const doc  = new Document();
+    const name = 'box_rear_left_hanging_tray_R';
+    const mesh = buildBox(doc, name,
+      CX + 0.20,
+      CY + 0.65,
+      CZ - 0.9,
+      0.85, 0.22, 0.55
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 8. BOX REAR-LEFT — tray connector post left (cylinder) ────────────────
+  {
+    const doc  = new Document();
+    const name = 'box_rear_left_tray_connector_L';
+    const mesh = buildCylinder(doc, name,
+      CX - 0.55,
+      CY + 1.15,   // between gantry and tray
+      CZ - 0.9,
+      0.06, 0.55
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 9. BOX REAR-LEFT — tray connector post right ──────────────────────────
+  {
+    const doc  = new Document();
+    const name = 'box_rear_left_tray_connector_R';
+    const mesh = buildCylinder(doc, name,
+      CX + 0.20,
+      CY + 1.15,
+      CZ - 0.9,
+      0.06, 0.55
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 10. BOX MID — solid equipment block left (dark purple) ────────────────
+  {
+    const doc  = new Document();
+    const name = 'box_mid_equipment_block_L';
+    const mesh = buildBox(doc, name,
+      CX - 0.35,
+      CY + 0.3,
+      CZ - 0.7,
+      0.7, 0.55, 0.50
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 11. BOX MID — solid equipment block right (dark purple) ───────────────
+  {
+    const doc  = new Document();
+    const name = 'box_mid_equipment_block_R';
+    const mesh = buildBox(doc, name,
+      CX + 0.35,
+      CY + 0.3,
+      CZ - 0.7,
+      0.7, 0.55, 0.50
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 12. BOX REAR — left tower main column (hot pink, tallest left element) ─
+  {
+    const doc  = new Document();
+    const name = 'box_rear_left_tower_column';
+    const mesh = buildBox(doc, name,
+      XMIN + 0.55,
+      CY - 0.4,
+      CZ - 0.5,
+      0.75, 5.8, 0.65
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 13. BOX REAR — kettle/teapot at base (hot pink small shape) ──────────
+  // Small kettle visible in image 2 lower-left
+  {
+    const doc  = new Document();
+    const name = 'box_rear_kettle_base';
+    // body
+    const mesh = buildCylinder(doc, name,
+      XMIN + 0.65,
+      YMIN + 0.55,
+      CZ + 0.5,
+      0.18, 0.35, 12
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 14. BOX FAR-LEFT — heat sink fin pack (salmon pink, dense verticals) ──
+  {
+    const doc  = new Document();
+    const name = 'box_far_left_heat_sink_fins';
+    const mesh = buildFinPack(doc, name,
+      XMIN + 0.6,
+      CY - 0.0,
+      CZ - 1.5,
+      0.60,   // total width
+      2.2,    // total height
+      0.40,   // total depth
+      6       // fin count
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 15. BOX RIGHT — right equipment block (orange-red) ────────────────────
+  {
+    const doc  = new Document();
+    const name = 'box_right_equipment_block';
+    const mesh = buildBox(doc, name,
+      XMAX - 0.7,
+      CY - 1.2,
+      CZ - 0.4,
+      1.0, 2.2, 0.85
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 16. DISTRIBUTOR HUB — thick orange cable dropping to floor ────────────
+  // Originates at right side of assembly, drops in a large loop to near floor,
+  // re-enters the assembly base.
+  {
+    const doc  = new Document();
+    const name = 'distributor_hub_orange_conduit';
+    const mesh = buildCatenary(doc, name,
+      XMAX - 0.5,  CY - 0.8,  CZ + 0.5,  // start (entry from right block)
+      XMAX - 0.5,  YMIN + 0.3, CZ + 1.2,  // end (floor level front-right)
+      1.8,          // sag (large loop)
+      18, 0.055     // segments, radius (thick cable)
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 17. DISH/SOLAR — top gantry crossbeam (yellow horizontal spine) ───────
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_gantry_crossbeam';
+    const mesh = buildBox(doc, name,
+      CX + 0.1,
+      YMAX - 1.0,   // near top
+      CZ - 0.8,
+      HW * 2 * 0.78,  // spans most of width
+      0.14, 0.14       // thin rectangular beam
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 18. DISH/SOLAR — speaker/monitor box (yellow, right side, front face) ──
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_speaker_monitor';
+    const mesh = buildSpeaker(doc, name,
+      XMAX - 0.6,
+      YMAX - 1.35,
+      CZ - 0.6,
+      0.90, 0.90, 0.22   // w h depth
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 19. DISH/SOLAR — angled solar panel / dish (flat tilted rectangle) ────
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_angled_panel';
+    // Build as a flat box then we note it needs 30° X rotation in viewer
+    const mesh = buildBox(doc, name,
+      XMAX - 0.1,
+      YMAX - 1.8,
+      CZ - 0.1,
+      1.1, 0.06, 0.65   // wide, very thin, moderate depth
+    );
+    // Note: rotation.x = Math.PI * 0.17 (≈30°) should be applied in Three.js
+    parts.push({ doc, name, mesh, file: `${name}.glb`, rotX: Math.PI * 0.17 });
+  }
+
+  // ── 20. DISH/SOLAR — top-left mast suspension frame (small loop) ─────────
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_mast_top_frame';
+    const mesh = buildFrame(doc, name,
+      XMIN + 0.55,
+      YMAX - 0.35,
+      CZ - 1.0,
+      0.35, 0.35, 0.07, 'XY'
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 21. DISH/SOLAR — left vertical mast rod 1 (yellow pole) ─────────────
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_mast_rod_1';
+    const mesh = buildCylinder(doc, name,
+      XMIN + 0.45, CY + 1.0, CZ - 1.2, 0.045, 6.5
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 22. DISH/SOLAR — left vertical mast rod 2 ────────────────────────────
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_mast_rod_2';
+    const mesh = buildCylinder(doc, name,
+      XMIN + 0.65, CY + 1.0, CZ - 1.4, 0.045, 6.2
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 23. DISH/SOLAR — right vertical mast rod ─────────────────────────────
+  {
+    const doc  = new Document();
+    const name = 'dish_solar_mast_rod_3';
+    const mesh = buildCylinder(doc, name,
+      XMAX - 0.5, CY + 1.2, CZ - 1.0, 0.045, 6.0
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 24. PIPES A — horizontal pipe runs (dark green structural) ────────────
+  // Horizontal runs at mid-height from hub outward
+  {
+    const doc  = new Document();
+    const name = 'pipes_a_horizontal_run_left';
+    const mesh = buildCatenary(doc, name,
+      CX - 0.3,  CY - 1.4, CZ - 0.2,
+      XMIN + 0.9, CY - 1.4, CZ - 0.2,
+      0.0, 8, 0.04   // no sag (rigid pipe)
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  {
+    const doc  = new Document();
+    const name = 'pipes_a_horizontal_run_right';
+    const mesh = buildCatenary(doc, name,
+      CX + 0.3,  CY - 1.4, CZ - 0.2,
+      XMAX - 0.7, CY - 1.4, CZ - 0.2,
+      0.0, 8, 0.04
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 25. PIPES A — vertical drop pipe from gantry to tray connectors ───────
+  {
+    const doc  = new Document();
+    const name = 'pipes_a_vertical_drop_left';
+    const mesh = buildCylinder(doc, name,
+      CX - 0.55, CY + 0.9, CZ - 0.9, 0.035, 1.2
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  {
+    const doc  = new Document();
+    const name = 'pipes_a_vertical_drop_right';
+    const mesh = buildCylinder(doc, name,
+      CX + 0.20, CY + 0.9, CZ - 0.9, 0.035, 1.2
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 26. PIPES B — catenary cable 1 (main arc, left mast to gantry) ────────
+  {
+    const doc  = new Document();
+    const name = 'pipes_b_catenary_cable_1';
+    const mesh = buildCatenary(doc, name,
+      XMIN + 0.55, YMAX - 0.4,  CZ - 1.1,  // top-left mast loop
+      CX + 0.1,    YMAX - 1.0,  CZ - 0.8,  // gantry centre
+      0.55, 14, 0.032
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 27. PIPES B — catenary cable 2 (second arc) ──────────────────────────
+  {
+    const doc  = new Document();
+    const name = 'pipes_b_catenary_cable_2';
+    const mesh = buildCatenary(doc, name,
+      XMIN + 0.65, YMAX - 0.6,  CZ - 1.3,
+      XMAX - 0.6,  YMAX - 1.35, CZ - 0.6,
+      0.80, 16, 0.028
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 28. PIPES B — catenary cable 3 (shorter drop cable) ──────────────────
+  {
+    const doc  = new Document();
+    const name = 'pipes_b_catenary_cable_3';
+    const mesh = buildCatenary(doc, name,
+      XMIN + 0.55, YMAX - 0.4,  CZ - 1.1,
+      XMIN + 0.8,  CY + 0.5,    CZ - 0.8,
+      0.30, 10, 0.028
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 29. ROTATING HUB — flat cylindrical disc (center floor, cyan disc) ────
+  // Wide flat ring/turntable — clearly visible in image 2 dead center.
+  {
+    const doc  = new Document();
+    const name = 'rotating_hub_disc';
+    const mesh = buildCylinder(doc, name,
+      CX - 0.1,
+      YMIN + 0.65,   // sitting on chassis near floor
+      CZ + 0.2,
+      0.75,   // radius (wide disc)
+      0.18,   // very low height (flat)
+      24      // segments (smooth-ish)
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── 30. SCREEN FRAMES — empty rectangular bezels (so screens can be placed)
+  // Tilted screen frames visible in image 1 (yellow, angled ~45°)
+  {
+    const doc  = new Document();
+    const name = 'screen_frame_tilted_L';
+    const mesh = buildFrame(doc, name,
+      CX - 0.4,
+      CY + 0.8,
+      CZ - 0.5,
+      0.70, 0.55, 0.08, 'XY'
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb`, rotX: -Math.PI * 0.25 });
+  }
+
+  {
+    const doc  = new Document();
+    const name = 'screen_frame_tilted_R';
+    const mesh = buildFrame(doc, name,
+      CX + 0.25,
+      CY + 0.8,
+      CZ - 0.5,
+      0.70, 0.55, 0.08, 'XY'
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb`, rotX: -Math.PI * 0.25 });
+  }
+
+  // ── 31. FLOOR RAIL CHANNELS — structural channels under chassis ────────────
+  // Seen in image 1 as horizontal rectangular rails extending forward.
+  {
+    const doc  = new Document();
+    const name = 'floor_rail_channel_L';
+    const mesh = buildBox(doc, name,
+      CX - 0.7,
+      YMIN + 0.08,
+      CZ + 1.0,
+      0.12, 0.10, 1.5   // thin channel extending toward camera
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  {
+    const doc  = new Document();
+    const name = 'floor_rail_channel_R';
+    const mesh = buildBox(doc, name,
+      CX + 0.3,
+      YMIN + 0.08,
+      CZ + 1.0,
+      0.12, 0.10, 1.5
+    );
+    parts.push({ doc, name, mesh, file: `${name}.glb` });
+  }
+
+  // ── Write all parts ───────────────────────────────────────────────────────
+  console.log(`\n📦  Writing ${parts.length} parts to ${OUTDIR} …\n`);
+  for (const { doc, name, mesh, file, rotX } of parts) {
+    const node  = doc.createNode(name).setMesh(mesh);
+    if (rotX) node.setRotation(quaternionFromEulerX(rotX));
+    const scene = doc.createScene('scene').addChild(node);
+    doc.getRoot().setDefaultScene(scene);
+    await io.write(path.join(OUTDIR, file), doc);
+    console.log(`  ✅  ${file}`);
+  }
+
+  // Write manifest JSON for the viewer
+  const manifest = parts.map(p => ({
+    file:  p.file,
+    name:  p.name,
+    rotX:  p.rotX || 0,
+  }));
+  await fs.writeFile(
+    path.join(OUTDIR, 'manifest.json'),
+    JSON.stringify(manifest, null, 2)
+  );
+
+  console.log(`\n✅  manifest.json written`);
+  console.log(`🎉  All done! → ${OUTDIR}\n`);
+}
+
+function quaternionFromEulerX(rx) {
+  // rotation around X axis only
+  const s = Math.sin(rx / 2), c = Math.cos(rx / 2);
+  return [s, 0, 0, c]; // [x, y, z, w]
+}
+
+main().catch(err => { console.error('❌', err); process.exit(1); });

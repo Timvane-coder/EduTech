@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 08 — Sound | Ramen Shop</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0a0a0f; color:#e0e0e0; font-family:'Courier New',monospace; height:100vh; width:100vw; overflow:hidden; }
+    canvas { display:block; position:fixed; top:0; left:0; width:100%; height:100%; }
+    #topbar {
+      position:fixed; top:0; left:0; right:0; height:44px;
+      background:rgba(0,0,0,0.82); backdrop-filter:blur(8px);
+      border-bottom:1px solid #2a2a3a;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 14px; z-index:200;
+    }
+    #topbar .title  { font-size:11px; letter-spacing:2px; color:#ff7f00; text-transform:uppercase; }
+    #topbar .status { font-size:11px; color:#888; }
+    .btn { background:#1a1a2a; border:1px solid #3a3a5a; color:#ccc; border-radius:6px; padding:5px 12px; font-size:11px; font-family:'Courier New',monospace; cursor:pointer; transition:background 0.2s; }
+    .btn:hover  { background:#2a2a4a; }
+    .btn.active { background:#ff7f0033; border-color:#ff7f00; color:#ff7f00; }
+    #btn-row { position:fixed; top:52px; right:10px; display:flex; flex-direction:column; gap:6px; z-index:200; }
+    #log-panel {
+      position:fixed; top:52px; left:10px; right:10px; max-height:55vh; overflow-y:auto;
+      background:rgba(0,0,0,0.93); border:1px solid #2a2a3a; border-radius:10px;
+      padding:12px 14px; z-index:100; transition:opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity:0; pointer-events:none; transform:translateY(-8px); }
+    .log-entry { font-size:11px; line-height:1.85; padding:1px 0; border-bottom:1px solid #111; display:flex; gap:7px; word-break:break-all; }
+    .log-entry.ok      { color:#4eca8b; }
+    .log-entry.err     { color:#ff5f5f; font-weight:bold; }
+    .log-entry.info    { color:#f0c060; }
+    .log-entry.pending { color:#888; }
+    .log-entry.head    { color:#adf; font-weight:bold; }
+    .log-entry.click   { color:#ff7f00; font-weight:bold; }
+    .log-entry.screen  { color:#f4f; }
+    #progress-bar-wrap { margin-top:8px; height:4px; background:#1a1a2a; border-radius:3px; overflow:hidden; }
+    #progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#ff7f00,#00ff7f); transition:width 0.3s; }
+    #summary { margin-top:6px; font-size:10px; color:#666; }
+    #mode-indicator {
+      position:fixed; bottom:52px; left:50%; transform:translateX(-50%);
+      font-size:11px; letter-spacing:1px; text-transform:uppercase;
+      background:rgba(0,0,0,0.75); border:1px solid #333;
+      padding:5px 16px; border-radius:20px; z-index:100; pointer-events:none;
+    }
+    #subnav {
+      position:fixed; bottom:96px; left:50%; transform:translateX(-50%);
+      display:none; gap:8px; z-index:150; flex-wrap:wrap; justify-content:center;
+    }
+    #subnav.visible { display:flex; }
+    #subnav button {
+      background:#0a0a1a; border:1px solid #444; color:#aaa;
+      border-radius:14px; padding:6px 14px; font-size:11px;
+      font-family:'Courier New',monospace; cursor:pointer; transition:all 0.2s;
+    }
+    #subnav button:hover  { background:#1a1a2a; color:#fff; }
+    #subnav button.active { border-color:var(--sub-color,#00cfff); color:var(--sub-color,#00cfff); background:#0a0a2a; }
+    #back-btn { position:fixed; bottom:52px; left:14px; display:none; z-index:150; }
+    #back-btn button {
+      background:#1a1a2a; border:1px solid #ff7f00; color:#ff7f00;
+      border-radius:20px; padding:7px 18px; font-size:11px;
+      font-family:'Courier New',monospace; cursor:pointer;
+    }
+    #coord-debug {
+      position:fixed; bottom:130px; left:14px; font-size:10px; color:#ff7f00;
+      z-index:50; line-height:1.8; pointer-events:auto; cursor:pointer;
+      font-family:'Courier New',monospace; background:rgba(0,0,0,0.7);
+      padding:5px 9px; border-radius:6px;
+    }
+    #hint {
+      position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+      font-size:10px; color:#333; z-index:100; text-align:center;
+      background:rgba(0,0,0,0.5); padding:4px 14px; border-radius:20px; pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/",
+    "gsap":          "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 08 — Sound</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+<div id="btn-row">
+  <button class="btn active" id="btn-log" onclick="toggleLog()">📋 Log</button>
+</div>
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+<div id="mode-indicator" style="color:#888">● DEFAULT VIEW</div>
+<div id="subnav"></div>
+<div id="back-btn"><button onclick="goHome()">← Back</button></div>
+<div id="coord-debug">cam: —<br>tgt: —</div>
+<div id="hint">Click: Projects · About Me · Articles · Credits</div>
+
+<script>
+  function toggleLog() {
+    const p=document.getElementById('log-panel');
+    const b=document.getElementById('btn-log');
+    const h=p.classList.toggle('hidden');
+    b.classList.toggle('active',!h);
+  }
+  function hideAll() {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('btn-log').classList.remove('active');
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader }    from 'three/addons/loaders/KTX2Loader.js';
+import gsap              from 'gsap';
+
+const GLTF_SHOP   = './models/ramenShop.gltf';
+const GLTF_HOLO   = './models/ramenHologram.gltf';
+const DRACO_PATH  = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+const BASIS_PATH  = 'https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/libs/basis/';
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap=document.getElementById('log-entries');
+const barEl=document.getElementById('progress-bar');
+const summaryEl=document.getElementById('summary');
+const topStatus=document.getElementById('top-status');
+const modeEl=document.getElementById('mode-indicator');
+const backBtn=document.getElementById('back-btn');
+const subnavEl=document.getElementById('subnav');
+const coordEl=document.getElementById('coord-debug');
+const icons={pending:'⏳',ok:'✅',err:'❌',info:'📌',head:'──',click:'👆',screen:'🖥'};
+
+function log(msg,type='info'){
+  const d=document.createElement('div');
+  d.className=`log-entry ${type}`;
+  d.innerHTML=`<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(d); logWrap.scrollTop=logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct){barEl.style.width=pct+'%';}
+function setStatus(msg,col){topStatus.textContent=msg;topStatus.style.color=col||'#888';}
+
+window.addEventListener('error',e=>log('ERROR: '+e.message,'err'));
+window.addEventListener('unhandledrejection',e=>log('REJECT: '+(e.reason?.message||e.reason),'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas=document.createElement('canvas');
+document.body.prepend(canvas);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+scene.add(new THREE.GridHelper(100,40,0x111130,0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,0.1,2000);
+camera.position.set(-11,8,22);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,2,-2);
+controls.enableDamping=true; controls.dampingFactor=0.07;
+controls.maxPolarAngle=Math.PI/2;
+controls.minDistance=1; controls.maxDistance=300;
+controls.update();
+
+// ── FLOOR + BOX ──────────────────────────────────────────────
+const mshFloor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshPhongMaterial({color:0x444444}));
+mshFloor.rotation.x=-Math.PI*0.5; mshFloor.receiveShadow=true; mshFloor.position.set(0,-0.05,0); scene.add(mshFloor);
+const mshBox=new THREE.Mesh(new THREE.BoxGeometry(7.5,2.5,5.0),new THREE.MeshPhongMaterial({color:0xaaaaaa}));
+mshBox.castShadow=true; mshBox.receiveShadow=true; mshBox.position.set(0,15.5,0); scene.add(mshBox);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff,0.04));
+const shadowLight=new THREE.DirectionalLight(0xffffff,0.4);
+shadowLight.position.set(5,30,8); shadowLight.castShadow=true;
+shadowLight.shadow.mapSize.set(2048,2048);
+shadowLight.shadow.camera.near=1; shadowLight.shadow.camera.far=80;
+shadowLight.shadow.camera.left=-30; shadowLight.shadow.camera.right=30;
+shadowLight.shadow.camera.top=30; shadowLight.shadow.camera.bottom=-30;
+shadowLight.shadow.bias=-0.001;
+scene.add(shadowLight,shadowLight.target);
+const fillLight=new THREE.DirectionalLight(0xffffff,1.0);
+fillLight.position.set(-10,20,-10); scene.add(fillLight);
+
+// ── SPOTLIGHTS ───────────────────────────────────────────────
+function createSpotlight(color){
+  const l=new THREE.SpotLight(color,800);
+  l.castShadow=true;l.angle=0.3;l.penumbra=0.2;l.decay=2;l.distance=60; return l;
+}
+const spotLight1=createSpotlight(0xFF7F00);
+const spotLight2=createSpotlight(0x00FF7F);
+const spotLight3=createSpotlight(0x7F00FF);
+spotLight1.position.set(5,20,8); spotLight2.position.set(0,20,6); spotLight3.position.set(-5,20,8);
+spotLight1.target.position.set(2,0,0); spotLight2.target.position.set(0,0,0); spotLight3.target.position.set(-2,0,0);
+scene.add(spotLight1.target,spotLight2.target,spotLight3.target);
+const lh1=new THREE.SpotLightHelper(spotLight1);
+const lh2=new THREE.SpotLightHelper(spotLight2);
+const lh3=new THREE.SpotLightHelper(spotLight3);
+scene.add(spotLight1,spotLight2,spotLight3,lh1,lh2,lh3);
+setBar(4);
+
+// ── LOADERS ──────────────────────────────────────────────────
+const ktx2Loader=new KTX2Loader();
+ktx2Loader.setTranscoderPath(BASIS_PATH); ktx2Loader.detectSupport(renderer);
+const dracoLoader=new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH); dracoLoader.preload();
+const texLoader=new THREE.TextureLoader();
+const gltfLoader=new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader); gltfLoader.setKTX2Loader(ktx2Loader);
+setBar(6);
+
+// ── TEXTURE HELPERS ──────────────────────────────────────────
+const texCache={};
+function loadKTX2(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    ktx2Loader.load(path,t=>{texCache[path]=t;r(t);},undefined,
+      ()=>{const p=path.replace('.ktx2','.png');texLoader.load(p,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));});
+  });
+}
+function loadPNG(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    texLoader.load(path,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));
+  });
+}
+function loadBasis(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    ktx2Loader.load(path,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));
+  });
+}
+function applyMat(meshMap,name,material){
+  const t=meshMap[name];if(!t)return false;
+  t.traverse(o=>{if(o.isMesh)o.material=material;});return true;
+}
+function bakedMat(tex){tex.flipY=false;tex.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:tex});}
+function screenMat(tex){tex.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:tex});}
+function videoMat(src){
+  const v=document.createElement('video');
+  v.src=src;v.loop=true;v.muted=true;v.playsInline=true;v.crossOrigin='anonymous';v.play().catch(()=>{});
+  const t=new THREE.VideoTexture(v);t.colorSpace=THREE.SRGBColorSpace;
+  return new THREE.MeshBasicMaterial({map:t});
+}
+function cycleScreens(target,textures,intervalMs){
+  if(!textures.length)return;let idx=0;
+  const set=()=>{const m=new THREE.MeshBasicMaterial({map:textures[idx]});target.traverse(o=>{if(o.isMesh)o.material=m;});};
+  set();if(textures.length<2)return;
+  return setInterval(()=>{idx=(idx+1)%textures.length;set();},intervalMs);
+}
+
+// ── MATERIAL DATA (Steps 2-4) ────────────────────────────────
+const BAKED=[
+  ['ramenShopJoined',    './textures/baked/ramenShopBaked1024.ktx2'],
+  ['machinesJoined',     './textures/baked/machinesBaked1024.ktx2' ],
+  ['floor',              './textures/baked/floorBaked1024.ktx2'    ],
+  ['miscJoined',         './textures/baked/miscBaked1024.ktx2'     ],
+  ['graphicsJoined',     './textures/baked/graphicsBaked512.ktx2'  ],
+  ['jesseZhouJoined',    './textures/baked/ramenShopBaked1024.ktx2'],
+  ['chinese',            './textures/baked/ramenShopBaked1024.ktx2'],
+  ['easelFrontGraphic',  './textures/baked/ramenShopBaked1024.ktx2'],
+  ['vendingMachineLight','./textures/baked/machinesBaked1024.ktx2' ],
+  ['arcadeRim',          './textures/baked/machinesBaked1024.ktx2' ],
+  ['arcadeToken',        './textures/baked/machinesBaked1024.ktx2' ],
+  ['dishStand',          './textures/baked/ramenShopBaked1024.ktx2'],
+];
+const COLORS=[
+  ['projectsRed',0xe8003c],['projectsWhite',0xffffff],
+  ['aboutMeBlue',0x00cfff],['aboutMeBlack',0x111111],
+  ['articlesRed',0xff4400],['articlesWhite',0xffffff],
+  ['creditsOrange',0xff8800],['creditsBlack',0x111111],
+  ['jZhouPink',0xff44aa],['jZhouBlack',0x111111],
+  ['greenSignSquare',0x00cc44],['greenLED',0x00ff44],
+  ['redLED',0xff2200],['yellowRightLight',0xffee00],['whiteButton',0xffffff],
+];
+const MATCAPS=[
+  [['neonBlue'],                                           './textures/matcaps/neonBlueMatCap.ktx2', null],
+  [['neonGreen'],                                          './textures/matcaps/neonGreenMatCap.ktx2',null],
+  [['neonPink','neonYellow'],                              './textures/matcaps/neonBlueMatCap.ktx2', null],
+  [['fan1','fan2'],                                        './textures/matcaps/fanMatCap.ktx2',       null],
+  [['dish'],                                               './textures/matcaps/dishMatCap.ktx2',      null],
+  [['lampLights'],                                         null,'./textures/matcaps/lightMatcap.png'      ],
+  [['storageLight','portalLight','blueLights','poleLight'],'./textures/matcaps/neonBlueMatCap.ktx2', null],
+];
+const VIDEO_SCREENS=[
+  ['littleTVScreen','./textures/videosTextures/littleTVScreen.mp4'],
+  ['tallScreen',    './textures/videosTextures/tallScreen.mp4'    ],
+  ['tvScreen',      './textures/videosTextures/tvScreen.mp4'      ],
+  ['smallScreen3',  './textures/videosTextures/smallScreen3.mp4'  ],
+  ['smallScreen4',  './textures/videosTextures/smallScreen4.mp4'  ],
+  ['smallScreen5',  './textures/videosTextures/smallScreen5.mp4'  ],
+];
+const SIDE_PATHS=['sideScreen1','sideScreen2','sideScreen3'].map(n=>`./textures/screens/sideScreens/${n}.ktx2`);
+const SMALL1_PATHS=[1,2,3,4,5].map(i=>`./textures/screens/smallScreen1/${i}.basis`);
+const SMALL2_PATHS=[1,2,3,4,5].map(i=>`./textures/screens/smallScreen2/${i}.basis`);
+
+const SCREEN_TEX={};
+const SCREEN_LOAD_LIST=[
+  ['bigScreenDefault',     './textures/screens/aboutMeScreens/bigScreenDefault.ktx2'           ],
+  ['vendingDefault',       './textures/screens/vendingMachineScreens/vendingMachineDefault.ktx2'],
+  ['arcadeDefault',        './textures/screens/arcadeScreens/arcadeScreenDefault.ktx2'          ],
+  ['easelTouch',           './textures/screens/easel/easelTouch.ktx2'                           ],
+  ['bigScreenAbout',       './textures/screens/aboutMeScreens/bigScreenAbout.ktx2'              ],
+  ['bigScreenAboutMobile', './textures/screens/aboutMeScreens/bigScreenAboutMobile.ktx2'        ],
+  ['bigScreenSkills',      './textures/screens/aboutMeScreens/bigScreenSkills.ktx2'             ],
+  ['bigScreenSkillsMobile','./textures/screens/aboutMeScreens/bigScreenSkillsMobile.ktx2'       ],
+  ['bigScreenExperience',  './textures/screens/aboutMeScreens/bigScreenExperience.ktx2'         ],
+  ['bigScreenExpMobile',   './textures/screens/aboutMeScreens/bigScreenExperienceMobile.ktx2'   ],
+  ['vendingMenu',          './textures/screens/vendingMachineScreens/vendingMachineMenu.ktx2'   ],
+  ['project1',             './textures/screens/vendingMachineScreens/project1.ktx2'             ],
+  ['project2',             './textures/screens/vendingMachineScreens/project2.ktx2'             ],
+  ['project3',             './textures/screens/vendingMachineScreens/project3.ktx2'             ],
+  ['project4',             './textures/screens/vendingMachineScreens/project4.ktx2'             ],
+  ['project5',             './textures/screens/vendingMachineScreens/project5.ktx2'             ],
+  ['project6',             './textures/screens/vendingMachineScreens/project6.ktx2'             ],
+  ['project7',             './textures/screens/vendingMachineScreens/project7.ktx2'             ],
+  ['project8',             './textures/screens/vendingMachineScreens/project8.ktx2'             ],
+  ['arcadeCredits',        './textures/screens/arcadeScreens/arcadeScreenCredits.ktx2'          ],
+  ['arcadeThanks',         './textures/screens/arcadeScreens/arcadeScreenThanks.ktx2'           ],
+];
+
+let meshMap={};
+function setScreen(meshName,texKey){
+  const tex=SCREEN_TEX[texKey];if(!tex)return;
+  applyMat(meshMap,meshName,screenMat(tex));
+  log(`  🖥 ${meshName} → ${texKey}`,'screen');
+}
+const isMobile=innerWidth<600;
+function buildSubnav(tabs){
+  subnavEl.innerHTML='';
+  subnavEl.style.setProperty('--sub-color',tabs.color||'#00cfff');
+  tabs.buttons.forEach((btn,i)=>{
+    const el=document.createElement('button');
+    el.textContent=btn.label;
+    if(i===0)el.classList.add('active');
+    el.addEventListener('click',()=>{
+      subnavEl.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      el.classList.add('active');btn.action();
+    });
+    subnavEl.appendChild(el);
+  });
+  subnavEl.classList.add('visible');
+  if(tabs.buttons[0])tabs.buttons[0].action();
+}
+function hideSubnav(){subnavEl.classList.remove('visible');subnavEl.innerHTML='';}
+
+let sideInterval=null;
+let creditsTimer=null;
+
+function activateProjects(){
+  setScreen('vendingMachineScreen','vendingMenu');
+  buildSubnav({color:'#e8003c',buttons:[
+    // Menu button: bloop (UI nav)
+    {label:'📋 Menu',action:()=>{ playSound('bloop'); setScreen('vendingMachineScreen','vendingMenu'); }},
+    // Project slots: ding (vending machine dispense feel)
+    {label:'P1',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project1'); }},
+    {label:'P2',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project2'); }},
+    {label:'P3',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project3'); }},
+    {label:'P4',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project4'); }},
+    {label:'P5',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project5'); }},
+    {label:'P6',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project6'); }},
+    {label:'P7',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project7'); }},
+    {label:'P8',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project8'); }},
+  ]});
+}
+function activateAboutMe(){
+  const aKey=isMobile?'bigScreenAboutMobile':'bigScreenAbout';
+  const sKey=isMobile?'bigScreenSkillsMobile':'bigScreenSkills';
+  const eKey=isMobile?'bigScreenExpMobile':'bigScreenExperience';
+  buildSubnav({color:'#00cfff',buttons:[
+    // About Me tabs: bloop (soft UI transition)
+    {label:'👤 About',     action:()=>{ playSound('bloop'); setScreen('bigScreen',aKey); }},
+    {label:'🛠 Skills',    action:()=>{ playSound('bloop'); setScreen('bigScreen',sKey); }},
+    {label:'💼 Experience',action:()=>{ playSound('bloop'); setScreen('bigScreen',eKey); }},
+  ]});
+}
+function activateArticles(){
+  if(sideInterval){clearInterval(sideInterval);sideInterval=null;}
+  const tex=SCREEN_TEX['sideScreen1'];
+  if(tex)applyMat(meshMap,'sideScreen',new THREE.MeshBasicMaterial({map:tex}));
+  hideSubnav();
+}
+function activateCredits(){
+  setScreen('arcadeScreen','arcadeCredits');
+  playSound('arcade');   // arcade cabinet startup sound
+  if(creditsTimer)clearTimeout(creditsTimer);
+  creditsTimer=setTimeout(()=>setScreen('arcadeScreen','arcadeThanks'),4000);
+  hideSubnav();
+}
+function activateHome(){
+  setScreen('bigScreen','bigScreenDefault');
+  setScreen('vendingMachineScreen','vendingDefault');
+  setScreen('arcadeScreen','arcadeDefault');
+  if(sideInterval)clearInterval(sideInterval);
+  const sideTex=['sideScreen1','sideScreen2','sideScreen3'].map(k=>SCREEN_TEX[k]).filter(Boolean);
+  if(sideTex.length&&meshMap['sideScreen'])sideInterval=cycleScreens(meshMap['sideScreen'],sideTex,3000);
+  if(creditsTimer){clearTimeout(creditsTimer);creditsTimer=null;}
+  hideSubnav();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SOUND ENGINE
+//
+//  All audio is handled through the Web Audio API via
+//  THREE.AudioListener + THREE.Audio (non-positional).
+//  We don't use positional audio because the shop is small
+//  and all sounds should be heard at full volume regardless
+//  of camera position.
+//
+//  Sound map:
+//    cooking.mp3  — ambient background loop (quiet, always on)
+//    hologram.mp3 — ambient hologram hum loop (quiet, always on)
+//    whoosh.mp3   — camera fly transition (plays on every flyTo)
+//    click.mp3    — sign / screen tap (plays on valid raycast hit)
+//    ding.mp3     — vending machine project selection
+//    bloop.mp3    — sub-nav tab press (About/Skills/Experience, P1-P8)
+//    arcade.mp3   — plays when credits view activates
+//
+//  Browser autoplay policy: AudioContext must be resumed on the
+//  first user gesture. We resume on the first pointerdown and
+//  show a mute/unmute button in the UI.
+// ─────────────────────────────────────────────────────────────
+
+// AudioListener attaches to the camera — required by THREE.Audio
+const audioListener = new THREE.AudioListener();
+camera.add(audioListener);
+
+// Sound store: name → { audio, buffer }
+const SFX = {};
+const ambientSounds = [];   // loops that should respect mute state
+
+let audioReady   = false;   // true after first user gesture
+let isMuted      = false;
+let audioContext = audioListener.context;
+
+// ── Mute button ────────────────────────────────────────────
+const muteBtn = document.createElement('button');
+muteBtn.id        = 'mute-btn';
+muteBtn.className = 'btn';
+muteBtn.textContent = '🔊';
+muteBtn.style.cssText = 'position:fixed;bottom:52px;right:10px;z-index:200;font-size:14px;padding:5px 10px;';
+document.body.appendChild(muteBtn);
+
+muteBtn.addEventListener('click', () => {
+  isMuted = !isMuted;
+  muteBtn.textContent = isMuted ? '🔇' : '🔊';
+  // Mute/unmute all sounds via the listener gain
+  audioListener.setMasterVolume(isMuted ? 0 : 1);
+  log(isMuted ? 'Sound muted' : 'Sound unmuted', 'info');
+});
+
+// ── Load a sound ────────────────────────────────────────────
+function loadSound(name, path, { loop=false, volume=1.0 }={}) {
+  return new Promise(resolve => {
+    const audio  = new THREE.Audio(audioListener);
+    const loader = new THREE.AudioLoader();
+    loader.load(
+      path,
+      buffer => {
+        audio.setBuffer(buffer);
+        audio.setLoop(loop);
+        audio.setVolume(volume);
+        SFX[name] = audio;
+        if (loop) ambientSounds.push(audio);
+        log(`  ✓ sound loaded: ${name}`, 'ok');
+        resolve(audio);
+      },
+      undefined,
+      err => {
+        log(`  ✗ sound FAILED: ${name} — ${err?.message||'unknown'}`, 'err');
+        resolve(null);
+      }
+    );
+  });
+}
+
+// ── Play a one-shot sound ────────────────────────────────────
+// Stops and restarts if already playing so rapid taps work
+function playSound(name) {
+  if (!audioReady || isMuted) return;
+  const audio = SFX[name];
+  if (!audio) return;
+  if (audio.isPlaying) audio.stop();
+  audio.play();
+}
+
+// ── Start ambient loops ──────────────────────────────────────
+function startAmbient() {
+  if (!audioReady) return;
+  ['cooking', 'hologram'].forEach(name => {
+    const a = SFX[name];
+    if (a && !a.isPlaying) a.play();
+  });
+}
+
+// ── Resume AudioContext on first gesture ─────────────────────
+// Required by browser autoplay policy — context starts suspended
+function resumeAudio() {
+  if (audioReady) return;
+  audioContext.resume().then(() => {
+    audioReady = true;
+    startAmbient();
+    log('AudioContext resumed ✓ — ambient sounds started', 'ok');
+  });
+}
+
+// Hook into existing pointer handlers
+renderer.domElement.addEventListener('pointerdown', resumeAudio, { once: false });
+
+// ── Preload all sounds ───────────────────────────────────────
+async function loadAllSounds() {
+  log('── Sound loading ──', 'head');
+  await Promise.all([
+    loadSound('cooking',  './sound/cooking.mp3',  { loop:true,  volume:0.18 }),
+    loadSound('hologram', './sound/hologram.mp3', { loop:true,  volume:0.12 }),
+    loadSound('whoosh',   './sound/whoosh.mp3',   { loop:false, volume:0.7  }),
+    loadSound('click',    './sound/click.mp3',    { loop:false, volume:0.8  }),
+    loadSound('ding',     './sound/ding.mp3',     { loop:false, volume:0.9  }),
+    loadSound('bloop',    './sound/bloop.mp3',    { loop:false, volume:0.7  }),
+    loadSound('arcade',   './sound/arcade.mp3',   { loop:false, volume:0.75 }),
+  ]);
+  log('All sounds loaded ✓', 'ok');
+}
+
+// ── VIEWS ────────────────────────────────────────────────────
+const VIEWS={
+  home:{camPos:new THREE.Vector3(-11,8,22),target:new THREE.Vector3(0,2,-2),
+    label:'● DEFAULT VIEW',color:'#888',minPolar:0,maxPolar:Math.PI/2,minAzi:-Infinity,maxAzi:Infinity,minDist:5,maxDist:300,onArrive:activateHome},
+  projects:{camPos:new THREE.Vector3(1.65,2.91,7.53),target:new THREE.Vector3(0.57,1.05,0.20),
+    label:'🛒 PROJECTS',color:'#e8003c',minPolar:Math.PI*0.25,maxPolar:Math.PI*0.6,minAzi:-0.4,maxAzi:0.4,minDist:2,maxDist:14,onArrive:activateProjects},
+  aboutMe:{camPos:new THREE.Vector3(1.27,7.25,10.47),target:new THREE.Vector3(0.45,7.13,-2.00),
+    label:'👤 ABOUT ME',color:'#00cfff',minPolar:Math.PI*0.2,maxPolar:Math.PI*0.5,minAzi:-0.3,maxAzi:0.3,minDist:4,maxDist:20,onArrive:activateAboutMe},
+  articles:{camPos:new THREE.Vector3(-0.60,7.94,11.76),target:new THREE.Vector3(-0.00,2.00,-2.00),
+    label:'📰 ARTICLES',color:'#ff4400',minPolar:Math.PI*0.2,maxPolar:Math.PI*0.6,minAzi:-0.5,maxAzi:0.5,minDist:3,maxDist:18,onArrive:activateArticles},
+  credits:{camPos:new THREE.Vector3(-1.19,2.69,6.13),target:new THREE.Vector3(0.47,0.35,-0.12),
+    label:'🎮 CREDITS',color:'#ff8800',minPolar:Math.PI*0.25,maxPolar:Math.PI*0.6,minAzi:-0.5,maxAzi:0.5,minDist:2,maxDist:12,onArrive:activateCredits},
+};
+
+let currentMode='home',isTransitioning=false;
+
+function flyTo(viewKey){
+  if(isTransitioning||currentMode===viewKey)return;
+  isTransitioning=true; controls.enabled=false;
+  const view=VIEWS[viewKey];
+  const pp={x:camera.position.x,y:camera.position.y,z:camera.position.z};
+  const tp={x:controls.target.x,y:controls.target.y,z:controls.target.z};
+  gsap.to(pp,{x:view.camPos.x,y:view.camPos.y,z:view.camPos.z,duration:1.8,ease:'power2.inOut',
+    onUpdate(){camera.position.set(pp.x,pp.y,pp.z);}});
+  gsap.to(tp,{x:view.target.x,y:view.target.y,z:view.target.z,duration:1.8,ease:'power2.inOut',
+    onUpdate(){controls.target.set(tp.x,tp.y,tp.z);controls.update();},
+    onComplete(){
+      controls.minPolarAngle=view.minPolar; controls.maxPolarAngle=view.maxPolar;
+      controls.minAzimuthAngle=view.minAzi; controls.maxAzimuthAngle=view.maxAzi;
+      controls.minDistance=view.minDist; controls.maxDistance=view.maxDist;
+      controls.enabled=true; isTransitioning=false; currentMode=viewKey;
+      modeEl.textContent=view.label; modeEl.style.color=view.color;
+      backBtn.style.display=viewKey==='home'?'none':'block';
+      if(view.onArrive)view.onArrive();
+      log(`📍 Arrived: ${view.label}`,'click');
+    }
+  });
+  log(`🎬 Flying to: ${view.label}`,'click');
+  modeEl.textContent=view.label; modeEl.style.color=view.color;
+
+  // Whoosh on every camera transition
+  playSound('whoosh');
+}
+
+window.goHome=function(){
+  if(isTransitioning)return;
+  const prev=currentMode; currentMode='temp';
+  flyTo('home');
+  setTimeout(()=>{
+    controls.minPolarAngle=VIEWS.home.minPolar; controls.maxPolarAngle=VIEWS.home.maxPolar;
+    controls.minAzimuthAngle=VIEWS.home.minAzi; controls.maxAzimuthAngle=VIEWS.home.maxAzi;
+    controls.minDistance=VIEWS.home.minDist; controls.maxDistance=VIEWS.home.maxDist;
+    backBtn.style.display='none';
+  },2000);
+};
+
+// ── RAYCASTER ────────────────────────────────────────────────
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+let clickableMeshes=[];
+const CLICK_MAP={
+  'projectsRed':'projects','projectsWhite':'projects',
+  'aboutMeBlue':'aboutMe','aboutMeBlack':'aboutMe',
+  'articlesRed':'articles','articlesWhite':'articles',
+  'creditsOrange':'credits','creditsBlack':'credits',
+  'vendingMachineScreen':'projects','bigScreen':'aboutMe',
+  'arcadeScreen':'credits','sideScreen':'articles',
+};
+function onDown(e){pointer._dx=e.touches?e.touches[0].clientX:e.clientX;pointer._dy=e.touches?e.touches[0].clientY:e.clientY;}
+function onUp(e){
+  if(isTransitioning)return;
+  const cx=e.changedTouches?e.changedTouches[0].clientX:e.clientX;
+  const cy=e.changedTouches?e.changedTouches[0].clientY:e.clientY;
+  if(Math.abs(cx-(pointer._dx||0))>8||Math.abs(cy-(pointer._dy||0))>8)return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.x=((cx-rect.left)/rect.width)*2-1;
+  pointer.y=-((cy-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects(clickableMeshes,false);
+  if(hits.length){
+    const name=hits[0].object.userData.clickName||hits[0].object.name;
+    const vk=CLICK_MAP[name];
+    if(vk){
+      playSound('click');   // tap feedback on valid hit
+      log(`👆 ${name} → ${vk}`,'click');
+      flyTo(vk);
+    }
+  }
+}
+renderer.domElement.addEventListener('pointerdown',onDown);
+renderer.domElement.addEventListener('pointerup',onUp);
+renderer.domElement.addEventListener('touchstart',onDown,{passive:true});
+renderer.domElement.addEventListener('touchend',onUp,{passive:true});
+
+// ─────────────────────────────────────────────────────────────
+//  HOLOGRAM SHADER
+//
+//  Reconstructed from the original repo's hologramShaders/ and
+//  the Three.js Journey holographic shader lesson.
+//
+//  VERTEX SHADER — passes world-space position and surface
+//  normal (in view space) to the fragment stage.
+//  The normal is used for the Fresnel rim calculation.
+//
+//  FRAGMENT SHADER — four layered effects:
+//  1. Horizontal scan lines — fract(vPosition.y * lineCount + time)
+//     creates repeating bright bands that scroll upward over time.
+//  2. Fresnel rim glow — dot(vNormal, viewDir) gives 0 at edges,
+//     1 at centre. We invert so edges glow: (1 - dot)^power.
+//     This makes the silhouette rim burn brightest, fading toward
+//     the centre — the classic hologram edge effect.
+//  3. Pulsing opacity — sin(time) drives alpha so the hologram
+//     breathes in and out, never going fully transparent.
+//  4. Glitch flicker — occasional rapid sin(time*50) spike adds
+//     the sci-fi instability feel.
+//
+//  Hologram colour: #00eeff (cyan-teal) matching the original.
+//  Transparency: side=THREE.DoubleSide, depthWrite:false so the
+//  hologram composites over the scene without z-fighting.
+// ─────────────────────────────────────────────────────────────
+
+const holoVertexShader = /* glsl */`
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  void main() {
+    // World-space position — used for scan line Y coordinate
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+    vPosition = modelPosition.xyz;
+
+    // View-space normal — used for Fresnel dot product
+    // normalMatrix transforms normals correctly into view space
+    vNormal = normalize(normalMatrix * normal);
+
+    gl_Position = projectionMatrix * viewMatrix * modelPosition;
+  }
+`;
+
+const holoFragmentShader = /* glsl */`
+  uniform float uTime;
+  uniform vec3  uColor;
+  uniform float uLineCount;   // number of scan lines
+  uniform float uLineSpeed;   // scroll speed
+  uniform float uFresnelPow;  // rim sharpness (higher = thinner rim)
+  uniform float uOpacityMin;  // minimum alpha (never fully invisible)
+  uniform float uOpacityMax;  // maximum alpha peak
+
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  void main() {
+    // ── 1. Scan lines ──────────────────────────────────────
+    // fract creates the repeating 0→1 ramp. Multiplying by a
+    // step makes thin bright lines on a dark field.
+    float scanLine = fract(vPosition.y * uLineCount + uTime * uLineSpeed);
+    // Narrow bright band: values near 0 or 1 → bright
+    float line = step(0.85, scanLine);
+
+    // ── 2. Fresnel rim ─────────────────────────────────────
+    // vNormal is in view space; viewDir for view-space normals
+    // is always (0,0,1) — we don't need the actual camera vec.
+    float fresnel = dot(vNormal, vec3(0.0, 0.0, 1.0));
+    fresnel = clamp(fresnel, 0.0, 1.0);
+    // Invert so rim (low dot) is bright, centre is dark
+    float rim = pow(1.0 - fresnel, uFresnelPow);
+
+    // ── 3. Pulsing opacity ─────────────────────────────────
+    float pulse = sin(uTime * 1.5) * 0.5 + 0.5;   // 0→1
+    float alpha = mix(uOpacityMin, uOpacityMax, pulse);
+
+    // ── 4. Glitch flicker ──────────────────────────────────
+    // Rare fast flicker — abs(sin) creates sharp spikes
+    float glitch = abs(sin(uTime * 40.0));
+    glitch = step(0.98, glitch) * 0.4;   // fires ~2% of time
+
+    // ── Combine ─────────────────────────────────────────────
+    // Base: rim glow + scan lines
+    float intensity = rim * 0.6 + line * 0.4;
+    // Final alpha: base alpha * intensity + glitch spike
+    float finalAlpha = (alpha * intensity) + glitch;
+    finalAlpha = clamp(finalAlpha, 0.0, 1.0);
+
+    // Colour: hologram cyan, brightness driven by rim + lines
+    vec3 color = uColor * (rim + line * 0.5 + 0.1);
+
+    gl_FragColor = vec4(color, finalAlpha);
+  }
+`;
+
+// Create the hologram ShaderMaterial
+const holoUniforms = {
+  uTime:       { value: 0.0 },
+  uColor:      { value: new THREE.Color(0x00eeff) },
+  uLineCount:  { value: 80.0 },    // scan line density
+  uLineSpeed:  { value: 1.2 },     // scroll speed (upward)
+  uFresnelPow: { value: 2.0 },     // rim sharpness
+  uOpacityMin: { value: 0.15 },    // breath minimum
+  uOpacityMax: { value: 0.85 },    // breath maximum
+};
+
+const holoMaterial = new THREE.ShaderMaterial({
+  vertexShader:   holoVertexShader,
+  fragmentShader: holoFragmentShader,
+  uniforms:       holoUniforms,
+  transparent:    true,
+  depthWrite:     false,          // composites correctly over scene
+  side:           THREE.DoubleSide,
+  blending:       THREE.AdditiveBlending,  // glow adds to scene behind it
+});
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOAD — shop first, then hologram
+// ─────────────────────────────────────────────────────────────
+log('Fetching ramenShop.gltf …','pending');
+fetch(GLTF_SHOP)
+  .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.text();})
+  .then(()=>{log('Shop GLTF reachable ✓','ok');setBar(8);loadShop();})
+  .catch(err=>{log('FETCH FAILED: '+err.message,'err');setStatus('Error ❌','#ff5f5f');});
+
+function loadShop(){
+  log('Loading ramenShop.gltf …','pending');
+  gltfLoader.load(GLTF_SHOP, async(gltf)=>{
+    log('Shop GLTF parsed ✓','ok'); setBar(18);
+
+    const model=gltf.scene;
+    model.traverse(o=>{if(o.name)meshMap[o.name]=o;});
+    log(`${Object.keys(meshMap).length} named objects`,'ok');
+
+    // Load sounds in parallel while we process the model
+    loadAllSounds();
+
+    const bbox=new THREE.Box3().setFromObject(model);
+    const center=bbox.getCenter(new THREE.Vector3());
+    const size=bbox.getSize(new THREE.Vector3());
+    model.position.x-=center.x; model.position.z-=center.z; model.position.y-=bbox.min.y;
+    model.traverse(c=>{if(c.isMesh){c.receiveShadow=true;c.castShadow=false;}});
+    scene.add(model);
+
+    const sh=size.y;
+    mshBox.position.set(0,sh+3.5,0);
+    spotLight1.position.set(5,sh+14,8); spotLight2.position.set(0,sh+14,6); spotLight3.position.set(-5,sh+14,8);
+    log(`Shop: ${size.x.toFixed(1)}×${sh.toFixed(1)}×${size.z.toFixed(1)}`,'info');
+    setBar(22);
+
+    Object.keys(CLICK_MAP).forEach(name=>{
+      const obj=meshMap[name];if(!obj)return;
+      obj.traverse(o=>{if(o.isMesh){o.userData.clickName=name;clickableMeshes.push(o);}});
+    });
+
+    // ── Baked ──
+    log('── Baked textures ──','head');
+    for(const[name,ktx2]of BAKED){
+      const tex=await loadKTX2(ktx2);if(!tex)continue;
+      applyMat(meshMap,name,bakedMat(tex));
+    }
+    fillLight.intensity=0.0; setBar(38);
+
+    for(const[name,hex]of COLORS)applyMat(meshMap,name,new THREE.MeshBasicMaterial({color:hex}));
+    setBar(44);
+
+    log('── Matcaps ──','head');
+    for(const[names,ktx2,png]of MATCAPS){
+      const tex=ktx2?await loadKTX2(ktx2):await loadPNG(png);if(!tex)continue;
+      const mat=new THREE.MeshMatcapMaterial({matcap:tex});
+      names.forEach(n=>applyMat(meshMap,n,mat));
+    }
+    setBar(54);
+
+    for(const[name,src]of VIDEO_SCREENS)applyMat(meshMap,name,videoMat(src));
+    const s1=(await Promise.all(SMALL1_PATHS.map(loadBasis))).filter(Boolean);
+    s1.forEach(t=>{t.colorSpace=THREE.SRGBColorSpace;});
+    if(meshMap['smallScreen1']&&s1.length)cycleScreens(meshMap['smallScreen1'],s1,2000);
+    const s2=(await Promise.all(SMALL2_PATHS.map(loadBasis))).filter(Boolean);
+    s2.forEach(t=>{t.colorSpace=THREE.SRGBColorSpace;});
+    if(meshMap['smallScreen2']&&s2.length)cycleScreens(meshMap['smallScreen2'],s2,2000);
+    setBar(62);
+
+    log('── Screen textures ──','head');
+    const sideTex=[];
+    for(const p of SIDE_PATHS){
+      const tex=await loadKTX2(p);
+      if(tex){
+        tex.colorSpace=THREE.SRGBColorSpace;
+        const key=p.split('/').pop().replace('.ktx2','');
+        SCREEN_TEX[key]=tex; sideTex.push(tex);
+      }
+    }
+    if(meshMap['sideScreen']&&sideTex.length)sideInterval=cycleScreens(meshMap['sideScreen'],sideTex,3000);
+
+    let loaded=0;
+    for(const[key,path]of SCREEN_LOAD_LIST){
+      const tex=await loadKTX2(path);
+      if(tex){tex.colorSpace=THREE.SRGBColorSpace;SCREEN_TEX[key]=tex;loaded++;}
+      setBar(62+Math.round((loaded/SCREEN_LOAD_LIST.length)*18));
+    }
+    log(`${loaded}/${SCREEN_LOAD_LIST.length} screen textures ✓`,'ok');
+
+    setScreen('bigScreen','bigScreenDefault');
+    setScreen('vendingMachineScreen','vendingDefault');
+    setScreen('arcadeScreen','arcadeDefault');
+    if(SCREEN_TEX['easelTouch'])applyMat(meshMap,'easelFrontGraphic',screenMat(SCREEN_TEX['easelTouch']));
+    setBar(82);
+
+    // ── Now load hologram ──
+    loadHologram(sh);
+
+  },
+  (xhr)=>{if(xhr.total)setBar(8+Math.round((xhr.loaded/xhr.total)*10));},
+  (err)=>{log('Shop GLTFLoader ERROR: '+(err?.message||err),'err');setStatus('Error ❌','#ff5f5f');}
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HOLOGRAM LOAD
+//  The hologram model is 106.97×78.01×91.56 units — enormous.
+//  The shop is 49.9×10.09×49.9.
+//  We scale it down to fit above the neon sign.
+//
+//  Target: hologram ~2 units wide, ~1.5 units tall
+//  Scale factor ≈ 2 / 106.97 ≈ 0.0187
+//  Position: centred X, Y just above the neon sign (~7.5 units),
+//  Z slightly in front of the shop face (~-1)
+// ─────────────────────────────────────────────────────────────
+function loadHologram(shopHeight){
+  log('── Step 7: ramenHologram.gltf ──','head');
+  log('Fetching ramenHologram.gltf …','pending');
+
+  gltfLoader.load(
+    GLTF_HOLO,
+
+    (gltf)=>{
+      log('Hologram GLTF parsed ✓','ok');
+
+      const holo=gltf.scene;
+
+      // Measure raw size
+      const rawBox=new THREE.Box3().setFromObject(holo);
+      const rawSize=rawBox.getSize(new THREE.Vector3());
+      log(`Hologram raw: ${rawSize.x.toFixed(1)}×${rawSize.y.toFixed(1)}×${rawSize.z.toFixed(1)}`,'info');
+
+      // Scale so the widest dimension becomes ~2.5 units
+      const targetWidth = 2.5;
+      const scaleFactor = targetWidth / rawSize.x;
+      holo.scale.setScalar(scaleFactor);
+      log(`Scale factor: ${scaleFactor.toFixed(4)}`,'info');
+
+      // After scaling, re-centre and position above shop sign
+      // The neon sign is around Y=6.5–7.5 in the centred model
+      const scaledBox=new THREE.Box3().setFromObject(holo);
+      const scaledCenter=scaledBox.getCenter(new THREE.Vector3());
+      const scaledSize=scaledBox.getSize(new THREE.Vector3());
+
+      // Place: centred on X, above neon sign, slightly in front
+      holo.position.x -= scaledCenter.x;
+      holo.position.y  = 7.8 - scaledBox.min.y * scaleFactor;   // sit bottom at Y=7.8
+      holo.position.z  = -1.0;   // slightly in front of building face
+
+      log(`Hologram scaled size: ${scaledSize.x.toFixed(2)}×${scaledSize.y.toFixed(2)}×${scaledSize.z.toFixed(2)}`,'info');
+      log(`Hologram position: ${holo.position.x.toFixed(2)}, ${holo.position.y.toFixed(2)}, ${holo.position.z.toFixed(2)}`,'info');
+
+      // Apply hologram shader to every mesh in the model
+      let meshCount=0;
+      holo.traverse(child=>{
+        if(child.isMesh){
+          child.material  = holoMaterial;
+          child.castShadow    = false;
+          child.receiveShadow = false;
+          meshCount++;
+        }
+      });
+      log(`Hologram shader applied to ${meshCount} mesh(es) ✓`,'ok');
+
+      scene.add(holo);
+
+      // Store reference for animation loop
+      window._holoScene = holo;
+
+      setBar(100);
+      summaryEl.textContent='Steps 1–8 complete · Hologram + Sound live · Click any sign';
+      setStatus('✅ Step 8 complete — Sound live','#4eca8b');
+      log('▶ STEP 8 COMPLETE','ok');
+      log('Hologram ✓  Sounds ✓  Tap a sign to trigger audio','ok');
+      log('First tap resumes AudioContext (browser policy)','info');
+
+      setTimeout(()=>{
+        hideAll();
+        document.getElementById('hint').textContent=
+          '🔊 Tap anything to start audio  |  Projects · About Me · Articles · Credits';
+      },3000);
+    },
+
+    (xhr)=>{if(xhr.total)log(`Hologram: ${Math.round((xhr.loaded/xhr.total)*100)}%`,'pending');},
+
+    (err)=>{
+      log('Hologram GLTF ERROR: '+(err?.message||err),'err');
+      log('Continuing without hologram — check ./models/ramenHologram.gltf path','info');
+      setBar(100);
+      setStatus('⚠️ Hologram failed — shop OK','#f0c060');
+    }
+  );
+}
+
+// ── SPOTLIGHT TWEENS ─────────────────────────────────────────
+function tweenSpot(l){
+  new TWEEN.Tween(l).to({angle:(Math.random()*0.7)+0.1,penumbra:Math.random()+1},Math.random()*3000+2000).easing(TWEEN.Easing.Quadratic.Out).start();
+  const bY=l.position.y;
+  new TWEEN.Tween(l.position).to({x:(Math.random()*16)-8,y:bY+(Math.random()*4)-2,z:(Math.random()*16)-8},Math.random()*3000+2000).easing(TWEEN.Easing.Quadratic.Out).start();
+}
+function updateTweens(){tweenSpot(spotLight1);tweenSpot(spotLight2);tweenSpot(spotLight3);setTimeout(updateTweens,5000);}
+
+// ── COORD DEBUG ──────────────────────────────────────────────
+let showCoords=true;
+coordEl.addEventListener('click',()=>{showCoords=!showCoords;coordEl.style.opacity=showCoords?'1':'0.2';});
+
+// ── RENDER LOOP ───────────────────────────────────────────────
+const clock=new THREE.Clock();
+(function tick(){
+  requestAnimationFrame(tick);
+  const elapsed=clock.getElapsedTime();
+
+  // Advance hologram time uniform every frame
+  holoUniforms.uTime.value = elapsed;
+
+  // Slow Y-axis rotation of the hologram — floats in place
+  if(window._holoScene){
+    window._holoScene.rotation.y = elapsed * 0.4;
+    // Gentle hover bob: oscillate Y position
+    window._holoScene.position.y = 7.8 + Math.sin(elapsed * 1.2) * 0.08;
+  }
+
+  TWEEN.update(); controls.update();
+  lh1.update(); lh2.update(); lh3.update();
+  renderer.render(scene,camera);
+
+  if(showCoords){
+    const p=camera.position,t=controls.target;
+    coordEl.innerHTML=
+      `<span style="color:#adf">cam</span> ${p.x.toFixed(2)} ${p.y.toFixed(2)} ${p.z.toFixed(2)}<br>`+
+      `<span style="color:#fa0">tgt</span> ${t.x.toFixed(2)} ${t.y.toFixed(2)} ${t.z.toFixed(2)}<br>`+
+      `<span style="color:#555">${currentMode}</span>`;
+  }
+})();
+
+updateTweens();
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>

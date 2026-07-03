@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 02 — Baked KTX2 Textures | Ramen Shop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; overflow: hidden; }
+    canvas { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 44px;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(8px);
+      border-bottom: 1px solid #2a2a3a;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px; z-index: 200;
+    }
+    #topbar .title { font-size: 11px; letter-spacing: 2px; color: #ff7f00; text-transform: uppercase; }
+    #topbar .status { font-size: 11px; color: #4eca8b; }
+
+    .btn {
+      background: #1a1a2a; border: 1px solid #3a3a5a; color: #ccc;
+      border-radius: 6px; padding: 5px 12px; font-size: 11px;
+      font-family: 'Courier New', monospace; cursor: pointer; transition: background 0.2s;
+    }
+    .btn:hover { background: #2a2a4a; }
+    .btn.active { background: #ff7f0033; border-color: #ff7f00; color: #ff7f00; }
+
+    #btn-row {
+      position: fixed; top: 52px; right: 10px;
+      display: flex; flex-direction: column; gap: 6px; z-index: 200;
+    }
+
+    #log-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 60vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #2a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity: 0; pointer-events: none; transform: translateY(-8px); }
+
+    .log-entry { font-size: 11px; line-height: 1.85; padding: 1px 0; border-bottom: 1px solid #111; display: flex; gap: 7px; word-break: break-all; }
+    .log-entry.pending { color: #888; }
+    .log-entry.ok      { color: #4eca8b; }
+    .log-entry.err     { color: #ff5f5f; font-weight: bold; }
+    .log-entry.info    { color: #f0c060; }
+    .log-entry.step    { color: #adf; font-weight: bold; }
+
+    #progress-bar-wrap { margin-top: 8px; height: 4px; background: #1a1a2a; border-radius: 3px; overflow: hidden; }
+    #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#ff7f00,#00ff7f); transition: width 0.3s; }
+    #summary { margin-top: 6px; font-size: 10px; color: #666; }
+
+    #map-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 75vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #1a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100; display: none;
+    }
+    #map-panel h3 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #4df; margin-bottom: 10px; }
+    .map-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #111; font-size: 10px; }
+    .map-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .map-mesh { color: #4eca8b; font-weight: bold; min-width: 130px; }
+    .map-arrow { color: #555; }
+    .map-tex  { color: #f0c060; }
+    .map-status { margin-left: auto; font-size: 9px; }
+    .map-status.ok      { color: #4eca8b; }
+    .map-status.err     { color: #ff5f5f; }
+    .map-status.pending { color: #888; }
+
+    #scene-legend {
+      position: fixed; bottom: 50px; left: 14px;
+      font-size: 10px; color: #666; z-index: 100; line-height: 2.0; pointer-events: none;
+    }
+    #hint {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: #333; z-index: 100; text-align: center;
+      background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 20px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 02 — Baked KTX2 Textures</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+
+<div id="btn-row">
+  <button class="btn active" id="btn-log" onclick="toggle('log')">📋 Log</button>
+  <button class="btn"        id="btn-map" onclick="toggle('map')">🗺 Map</button>
+</div>
+
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+
+<div id="map-panel">
+  <h3>Baked texture → mesh mapping</h3>
+  <div id="map-rows"></div>
+</div>
+
+<div id="scene-legend">
+  <span style="color:#FF7F00">● Spot 1 (orange)</span><br>
+  <span style="color:#00FF7F">● Spot 2 (green)</span><br>
+  <span style="color:#7F00FF">● Spot 3 (violet)</span><br>
+  <span style="color:#888">■ Reference box (shadow caster)</span>
+</div>
+<div id="hint">Drag · Pinch · Scroll</div>
+
+<script>
+  let logVisible = true, mapVisible = false;
+  function toggle(which) {
+    const lp = document.getElementById('log-panel');
+    const mp = document.getElementById('map-panel');
+    const bl = document.getElementById('btn-log');
+    const bm = document.getElementById('btn-map');
+    if (which === 'log') {
+      logVisible = !logVisible;
+      lp.classList.toggle('hidden', !logVisible);
+      bl.classList.toggle('active', logVisible);
+      if (logVisible) { mapVisible=false; mp.style.display='none'; bm.classList.remove('active'); }
+    } else {
+      mapVisible = !mapVisible;
+      mp.style.display = mapVisible ? 'block' : 'none';
+      bm.classList.toggle('active', mapVisible);
+      if (mapVisible) { logVisible=false; lp.classList.add('hidden'); bl.classList.remove('active'); }
+    }
+  }
+  function hideAllPanels() {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('map-panel').style.display = 'none';
+    document.getElementById('btn-log').classList.remove('active');
+    document.getElementById('btn-map').classList.remove('active');
+    logVisible = false; mapVisible = false;
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader }    from 'three/addons/loaders/KTX2Loader.js';
+
+const GLTF_PATH  = './models/ramenShop.gltf';
+const DRACO_PATH = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+const BASIS_PATH = 'https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/libs/basis/';
+
+const BAKED_MAP = [
+  { tex: './textures/baked/ramenShopBaked1024', meshName: 'ramenShopJoined', label: 'ramenShop building'      },
+  { tex: './textures/baked/machinesBaked1024',  meshName: 'machinesJoined',  label: 'machines'                },
+  { tex: './textures/baked/graphicsBaked512',   meshName: 'graphicsJoined',  label: 'graphics / signs'        },
+  { tex: './textures/baked/miscBaked1024',      meshName: 'miscJoined',      label: 'misc objects'            },
+];
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap   = document.getElementById('log-entries');
+const barEl     = document.getElementById('progress-bar');
+const summaryEl = document.getElementById('summary');
+const topStatus = document.getElementById('top-status');
+const mapRowsEl = document.getElementById('map-rows');
+const icons     = { pending:'⏳', ok:'✅', err:'❌', info:'📌', step:'──' };
+
+function log(msg, type='info') {
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.innerHTML = `<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(div);
+  logWrap.scrollTop = logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct) { barEl.style.width = pct + '%'; }
+
+// Build map-panel rows
+const mapStatusEls = {};
+const dotColors = ['#ff7f00','#00ff7f','#7f00ff','#4df','#f0c060'];
+BAKED_MAP.forEach((entry, i) => {
+  const row = document.createElement('div');
+  row.className = 'map-row';
+  row.innerHTML = `
+    <div class="map-dot" style="background:${dotColors[i%dotColors.length]}"></div>
+    <div class="map-mesh">${entry.meshName}</div>
+    <div class="map-arrow">→</div>
+    <div class="map-tex">${entry.tex.split('/').pop()}.ktx2</div>
+    <div class="map-status pending" id="mstat-${i}">pending</div>
+  `;
+  mapRowsEl.appendChild(row);
+  mapStatusEls[i] = document.getElementById(`mstat-${i}`);
+});
+function setMapStatus(i, ok, msg) {
+  const el = mapStatusEls[i];
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `map-status ${ok ? 'ok' : 'err'}`;
+}
+
+window.addEventListener('unhandledrejection', e =>
+  log('UNHANDLED: ' + (e.reason?.message || e.reason), 'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas = document.createElement('canvas');
+document.body.prepend(canvas);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+scene.add(new THREE.GridHelper(100, 40, 0x111130, 0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 2000);
+camera.position.set(-8, 14, 28);
+
+// ── CONTROLS ─────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(2, 0, 0);
+controls.maxPolarAngle = Math.PI / 2;
+controls.minDistance = 1;
+controls.maxDistance = 300;
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.update();
+
+// ── FLOOR (shadow receiver — baked texture applied later) ────
+const mshFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshPhongMaterial({ color: 0x444444 })
+);
+mshFloor.rotation.x = -Math.PI * 0.5;
+mshFloor.receiveShadow = true;       // receives box shadow
+mshFloor.position.set(0, -0.05, 0);
+scene.add(mshFloor);
+
+// ── REFERENCE BOX ────────────────────────────────────────────
+const mshBox = new THREE.Mesh(
+  new THREE.BoxGeometry(7.5, 2.5, 5.0),
+  new THREE.MeshPhongMaterial({ color: 0xaaaaaa })
+);
+mshBox.castShadow    = true;    // box casts shadow down onto shop
+mshBox.receiveShadow = true;    // box receives spotlight colour
+mshBox.position.set(0, 15.5, 0);
+scene.add(mshBox);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+
+// 1. Very low ambient — just enough to see the baked mesh before
+//    textures load; will stay low after because baked maps own the light.
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+scene.add(ambientLight);
+
+// 2. SHADOW LIGHT — dedicated DirectionalLight whose only job is to
+//    cast the box shadow onto the scene below.
+//    This light stays ON after baked textures load.
+//    Intensity kept low so it doesn't wash out the baked colours.
+const shadowLight = new THREE.DirectionalLight(0xffffff, 0.4);
+shadowLight.position.set(5, 30, 8);     // above and slightly off-centre
+shadowLight.castShadow = true;
+shadowLight.shadow.mapSize.set(2048, 2048);
+shadowLight.shadow.camera.near   = 1;
+shadowLight.shadow.camera.far    = 80;
+// Frustum tightly wraps the shop (50×50 units) for sharp shadows
+shadowLight.shadow.camera.left   = -30;
+shadowLight.shadow.camera.right  =  30;
+shadowLight.shadow.camera.top    =  30;
+shadowLight.shadow.camera.bottom = -30;
+shadowLight.shadow.bias          = -0.001;   // prevents self-shadow acne
+scene.add(shadowLight);
+scene.add(shadowLight.target);               // target stays at (0,0,0)
+
+// 3. Fill light — pre-texture visibility only; zeroed after baked load
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+fillLight.position.set(-10, 20, -10);
+fillLight.castShadow = false;               // shadow light handles shadows
+scene.add(fillLight);
+
+log('Renderer · Scene · Lights ready ✓', 'ok');
+setBar(5);
+
+// ── SPOTLIGHTS (Step 1 config — preserved exactly) ───────────
+function createSpotlight(color) {
+  const light = new THREE.SpotLight(color, 800);
+  light.castShadow = true;
+  light.angle = 0.3; light.penumbra = 0.2;
+  light.decay = 2;   light.distance = 60;
+  return light;
+}
+const spotLight1 = createSpotlight(0xFF7F00);
+const spotLight2 = createSpotlight(0x00FF7F);
+const spotLight3 = createSpotlight(0x7F00FF);
+spotLight1.position.set( 5, 20, 8);
+spotLight2.position.set( 0, 20, 6);
+spotLight3.position.set(-5, 20, 8);
+spotLight1.target.position.set( 2, 0, 0);
+spotLight2.target.position.set( 0, 0, 0);
+spotLight3.target.position.set(-2, 0, 0);
+scene.add(spotLight1.target, spotLight2.target, spotLight3.target);
+const lh1 = new THREE.SpotLightHelper(spotLight1);
+const lh2 = new THREE.SpotLightHelper(spotLight2);
+const lh3 = new THREE.SpotLightHelper(spotLight3);
+scene.add(spotLight1, spotLight2, spotLight3, lh1, lh2, lh3);
+
+log('SpotLights ready ✓', 'ok');
+setBar(10);
+
+// ── KTX2 LOADER ──────────────────────────────────────────────
+const ktx2Loader = new KTX2Loader();
+ktx2Loader.setTranscoderPath(BASIS_PATH);
+ktx2Loader.detectSupport(renderer);
+log('KTX2Loader + Basis transcoder ready ✓', 'ok');
+setBar(12);
+
+// ── DRACO ────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH);
+dracoLoader.preload();
+log('DRACOLoader → CDN 1.5.6 ✓', 'ok');
+setBar(15);
+
+// ── GLTF ─────────────────────────────────────────────────────
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+gltfLoader.setKTX2Loader(ktx2Loader);
+
+log('Fetching GLTF …', 'pending');
+
+fetch(GLTF_PATH)
+  .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+  .then(() => { log('GLTF reachable ✓', 'ok'); setBar(20); loadGLTF(); })
+  .catch(err => {
+    log('FETCH FAILED: ' + err.message, 'err');
+    topStatus.textContent = 'Error ❌'; topStatus.style.color = '#ff5f5f';
+  });
+
+// ── loadTexture — KTX2 with PNG fallback ─────────────────────
+function loadTexture(basePath) {
+  return new Promise((resolve) => {
+    ktx2Loader.load(
+      basePath + '.ktx2',
+      (tex) => {
+        tex.flipY = false;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        resolve({ tex, format: 'KTX2' });
+      },
+      undefined,
+      () => {
+        log(`  KTX2 fallback → PNG for ${basePath.split('/').pop()}`, 'info');
+        new THREE.TextureLoader().load(
+          basePath + '.png',
+          (tex) => {
+            tex.flipY = false;
+            tex.colorSpace = THREE.SRGBColorSpace;
+            resolve({ tex, format: 'PNG' });
+          },
+          undefined,
+          (err) => resolve({ tex: null, format: 'FAILED', err })
+        );
+      }
+    );
+  });
+}
+
+// ── loadGLTF ─────────────────────────────────────────────────
+function loadGLTF() {
+  log('GLTFLoader parsing …', 'pending');
+
+  gltfLoader.load(
+    GLTF_PATH,
+
+    async (gltf) => {
+      log('GLTF parsed ✓', 'ok');
+      setBar(40);
+
+      const model = gltf.scene;
+
+      // Centre model, floor at y=0
+      const bbox   = new THREE.Box3().setFromObject(model);
+      const center = bbox.getCenter(new THREE.Vector3());
+      const size   = bbox.getSize(new THREE.Vector3());
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+      model.position.y -= bbox.min.y;
+
+      // Enable shadow receiving on every mesh in the shop
+      // (cast shadow false — baked meshes don't cast dynamic shadows,
+      //  only the reference box does)
+      model.traverse(child => {
+        if (child.isMesh) {
+          child.receiveShadow = true;
+          child.castShadow    = false;
+        }
+      });
+
+      scene.add(model);
+
+      const shopHeight = size.y;
+      // Reposition box and spots to match actual model height
+      mshBox.position.set(0, shopHeight + 3.5, 0);
+      spotLight1.position.set( 5, shopHeight + 14, 8);
+      spotLight2.position.set( 0, shopHeight + 14, 6);
+      spotLight3.position.set(-5, shopHeight + 14, 8);
+
+      log(`Model placed — ${size.x.toFixed(1)}×${shopHeight.toFixed(1)}×${size.z.toFixed(1)}`, 'info');
+
+      // Build name → object lookup
+      const nameMap = {};
+      model.traverse(obj => { if (obj.name) nameMap[obj.name] = obj; });
+
+      log('── Applying baked textures ──', 'step');
+      setBar(50);
+
+      let texLoaded = 0;
+      for (let i = 0; i < BAKED_MAP.length; i++) {
+        const entry = BAKED_MAP[i];
+        log(`Loading: ${entry.tex.split('/').pop()} …`, 'pending');
+        setMapStatus(i, false, 'loading…');
+
+        const { tex, format, err } = await loadTexture(entry.tex);
+
+        if (!tex) {
+          log(`  ❌ FAILED: ${entry.meshName} — ${err?.message||'unknown'}`, 'err');
+          setMapStatus(i, false, 'FAILED');
+          continue;
+        }
+
+        const target = nameMap[entry.meshName];
+        if (!target) {
+          log(`  ❌ Mesh not found: "${entry.meshName}"`, 'err');
+          setMapStatus(i, false, 'mesh not found');
+          tex.dispose();
+          continue;
+        }
+
+        // MeshBasicMaterial — correct for baked maps (no lighting calc needed)
+        const mat = new THREE.MeshBasicMaterial({ map: tex });
+
+        let applied = 0;
+        if (target.isMesh) {
+          target.material = mat; applied++;
+        } else {
+          target.traverse(child => {
+            if (child.isMesh) { child.material = mat; applied++; }
+          });
+        }
+
+        texLoaded++;
+        setBar(50 + Math.round(((i+1)/BAKED_MAP.length)*40));
+        log(`  ✅ ${entry.meshName} ← ${format} · ${applied} mesh(es)`, 'ok');
+        setMapStatus(i, true, `✓ ${format}`);
+      }
+
+      // ── After baked textures applied ─────────────────────
+      // Kill the fill light (was for pre-texture visibility only)
+      fillLight.intensity = 0.0;
+      // Keep ambient at 0.15 — just enough for the box to read
+      // Keep shadowLight at 0.4 — casts box shadow without washing bakes
+      log('Fill light off · shadow light + spots remain ✓', 'info');
+
+      setBar(100);
+      summaryEl.textContent =
+        `${texLoaded}/${BAKED_MAP.length} textures · ${size.x.toFixed(1)}×${shopHeight.toFixed(1)}×${size.z.toFixed(1)}`;
+      topStatus.textContent = `✅ ${texLoaded}/${BAKED_MAP.length} baked`;
+      topStatus.style.color = texLoaded === BAKED_MAP.length ? '#4eca8b' : '#f0c060';
+
+      log(`▶ STEP 2 COMPLETE — ${texLoaded}/${BAKED_MAP.length} baked textures applied`, 'ok');
+      log('Box shadow visible above roof · open 🗺 Map to verify', 'info');
+
+      setTimeout(() => {
+        hideAllPanels();
+        document.getElementById('hint').textContent =
+          'Drag · Pinch · Scroll  |  📋 Log   🗺 Map →';
+      }, 3000);
+    },
+
+    (xhr) => { if (xhr.total) setBar(20 + Math.round((xhr.loaded/xhr.total)*18)); },
+
+    (err) => {
+      log('GLTFLoader ERROR: ' + (err?.message || err), 'err');
+      topStatus.textContent = 'Error ❌'; topStatus.style.color = '#ff5f5f';
+    }
+  );
+}
+
+// ── SPOTLIGHT TWEENS (Step 1 — unchanged) ────────────────────
+function tweenSpot(light) {
+  new TWEEN.Tween(light)
+    .to({ angle:(Math.random()*0.7)+0.1, penumbra:Math.random()+1 },
+        Math.random()*3000+2000)
+    .easing(TWEEN.Easing.Quadratic.Out).start();
+  const baseY = light.position.y;
+  new TWEEN.Tween(light.position)
+    .to({ x:(Math.random()*16)-8, y:baseY+(Math.random()*4)-2, z:(Math.random()*16)-8 },
+        Math.random()*3000+2000)
+    .easing(TWEEN.Easing.Quadratic.Out).start();
+}
+function updateTweens() {
+  tweenSpot(spotLight1); tweenSpot(spotLight2); tweenSpot(spotLight3);
+  setTimeout(updateTweens, 5000);
+}
+
+// ── RENDER LOOP ───────────────────────────────────────────────
+(function tick() {
+  requestAnimationFrame(tick);
+  TWEEN.update();
+  controls.update();
+  lh1.update(); lh2.update(); lh3.update();
+  renderer.render(scene, camera);
+})();
+
+updateTweens();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

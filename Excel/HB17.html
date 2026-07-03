@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔍 HB17 — Solo Inspector</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; overflow: hidden; }
+
+  /* Canvas takes full screen always */
+  #canvas-container { position: fixed; inset: 0; }
+
+  /* ── Top bar ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 7px 12px;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #222;
+    z-index: 30;
+    display: flex; align-items: center; gap: 10px;
+  }
+  #title { color: #f97316; font-size: 11px; font-weight: bold; letter-spacing: 1px; flex: 1; }
+  #summary { font-size: 10px; color: #94a3b8; white-space: nowrap; }
+  #panel-toggle-btn {
+    background: #1a1a2e; border: 1px solid #f97316; border-radius: 5px;
+    color: #f97316; font-size: 10px; padding: 4px 10px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  #panel-toggle-btn:hover { background: #f97316; color: #000; }
+
+  /* ── Floating panel (hidden by default) ── */
+  #panel {
+    position: fixed; top: 42px; right: 8px;
+    width: 220px;
+    max-height: calc(100vh - 52px);
+    background: rgba(8,8,18,0.97);
+    border: 1px solid #333; border-radius: 8px;
+    display: flex; flex-direction: column;
+    z-index: 25;
+    transition: opacity 0.25s, transform 0.25s;
+    /* hidden state */
+    opacity: 0; transform: translateX(230px); pointer-events: none;
+  }
+  #panel.open {
+    opacity: 1; transform: translateX(0); pointer-events: auto;
+  }
+
+  /* ── Panel header ── */
+  #panel-header {
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid #222;
+    flex-shrink: 0;
+  }
+  #panel-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  #panel-header h3 { color: #f97316; font-size: 11px; }
+  #mesh-count { color: #555; font-size: 9px; margin-left: 4px; }
+  #panel-close {
+    background: none; border: none; color: #555; font-size: 13px;
+    cursor: pointer; line-height: 1;
+  }
+  #panel-close:hover { color: #f87171; }
+
+  #search {
+    width: 100%; padding: 4px 7px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 4px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 10px;
+    outline: none;
+  }
+  #search:focus { border-color: #f97316; }
+
+  /* ── Mode buttons ── */
+  #mode-bar {
+    display: flex; gap: 3px; margin-top: 5px;
+  }
+  .mode-btn {
+    flex: 1; padding: 3px 2px; font-size: 9px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 3px;
+    color: #94a3b8; cursor: pointer; font-family: 'Courier New', monospace;
+    transition: all 0.15s;
+  }
+  .mode-btn.active { background: #f97316; border-color: #f97316; color: #000; }
+  .mode-btn:hover:not(.active) { border-color: #f97316; color: #f97316; }
+
+  /* ── Mesh list ── */
+  #mesh-list-wrap {
+    flex: 1; overflow-y: auto; min-height: 0;
+  }
+  #mesh-list-wrap::-webkit-scrollbar { width: 3px; }
+  #mesh-list-wrap::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .mesh-item {
+    display: flex; align-items: center; gap: 5px;
+    padding: 3px 8px; font-size: 10px; cursor: pointer;
+    border-bottom: 1px solid #0f0f1a;
+    transition: background 0.1s; user-select: none;
+  }
+  .mesh-item:hover { background: #131325; }
+  .mesh-item.selected { background: #1a1a35; border-left: 2px solid #f97316; }
+  .mesh-item.hidden-mesh { opacity: 0.3; }
+
+  .eye-icon {
+    font-size: 10px; flex-shrink: 0; width: 13px;
+    text-align: center; cursor: pointer;
+  }
+  .mesh-name {
+    flex: 1; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; font-size: 10px;
+  }
+  .mesh-tag {
+    font-size: 7px; flex-shrink: 0;
+    border-radius: 2px; padding: 1px 3px;
+  }
+  .mesh-tag.named { color: #a78bfa; }
+  .mesh-tag.comp  { color: #38bdf8; }
+  .mesh-tag.num   { color: #4ade80; }
+
+  /* ── Bulk bar ── */
+  #bulk-bar {
+    border-top: 1px solid #222;
+    padding: 5px 7px;
+    display: flex; gap: 4px;
+    flex-shrink: 0;
+  }
+  .bulk-btn {
+    flex: 1; padding: 3px 2px; font-size: 8px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 3px;
+    color: #94a3b8; cursor: pointer; font-family: 'Courier New', monospace;
+    transition: all 0.15s;
+  }
+  .bulk-btn:hover { border-color: #06b6d4; color: #06b6d4; }
+
+  /* ── Info strip — fixed bottom of screen, small ── */
+  #info-strip {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.88);
+    border-top: 1px solid #222;
+    padding: 5px 14px;
+    font-size: 10px; color: #94a3b8;
+    z-index: 30;
+    display: flex; gap: 16px; flex-wrap: wrap;
+    align-items: center;
+    min-height: 28px;
+    transition: opacity 0.3s;
+  }
+  #info-strip .iname { color: #f97316; font-weight: bold; }
+  #info-strip .ival  { color: #e0e0e0; }
+  #info-strip.empty  { opacity: 0.4; }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(0,0,0,0.92); border: 1px solid #444;
+    border-radius: 5px; padding: 4px 9px;
+    font-size: 10px; color: #fff; z-index: 40; display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="topbar">
+  <span id="title">🔍 HB17 — SOLO INSPECTOR</span>
+  <span id="summary">Loading…</span>
+  <button id="panel-toggle-btn">🗂 Meshes</button>
+</div>
+
+<!-- Floating panel -->
+<div id="panel">
+  <div id="panel-header">
+    <div id="panel-header-row">
+      <h3>🗂 Mesh List <span id="mesh-count"></span></h3>
+      <button id="panel-close">✕</button>
+    </div>
+    <input id="search" type="text" placeholder="Search…" autocomplete="off" />
+    <div id="mode-bar">
+      <button class="mode-btn active" data-mode="solo">👁 Solo</button>
+      <button class="mode-btn" data-mode="toggle">☑ Toggle</button>
+      <button class="mode-btn" data-mode="inspect">🔎 Inspect</button>
+    </div>
+  </div>
+
+  <div id="mesh-list-wrap">
+    <div id="mesh-list"></div>
+  </div>
+
+  <div id="bulk-bar">
+    <button class="bulk-btn" id="btn-show-all">All</button>
+    <button class="bulk-btn" id="btn-hide-all">None</button>
+    <button class="bulk-btn" id="btn-show-named">Named</button>
+    <button class="bulk-btn" id="btn-invert">Invert</button>
+  </div>
+</div>
+
+<!-- Info strip at bottom -->
+<div id="info-strip" class="empty">
+  <span style="color:#444">Click a mesh to inspect</span>
+</div>
+
+<div id="tooltip"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+
+// ── SCENE ─────────────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d16);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 500);
+camera.position.set(0, 6, 18);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+const dir1 = new THREE.DirectionalLight(0xffffff, 0.9);
+dir1.position.set(5, 10, 7); scene.add(dir1);
+const dir2 = new THREE.DirectionalLight(0x8899ff, 0.4);
+dir2.position.set(-5, 4, -5); scene.add(dir2);
+const grid = new THREE.GridHelper(60, 60, 0x1a1a1a, 0x111111);
+scene.add(grid);
+
+// ── MATERIALS ─────────────────────────────────────────────────────────────────
+const matHighlight = new THREE.MeshStandardMaterial({
+  color: 0xf97316, roughness: 0.4, metalness: 0.1, emissive: 0x331100,
+});
+const matDim = new THREE.MeshStandardMaterial({
+  color: 0x111118, roughness: 1, transparent: true, opacity: 0.12,
+});
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const entries   = [];  // { obj, name, tag, origMats, visible, listEl }
+let selectedIdx = -1;
+let mode        = 'solo';
+let soloActive  = false;
+
+// ── TAG CLASSIFIER ────────────────────────────────────────────────────────────
+function tagOf(name) {
+  if (/^mesh_\d/.test(name) || /^\d+(_\d+)?$/.test(name)) return 'num';
+  if (/^Component#/.test(name) || /^Rám/.test(name))       return 'comp';
+  return 'named';
+}
+
+// ── MATERIAL HELPERS ──────────────────────────────────────────────────────────
+function getOrigMat(obj) {
+  // Store as array always for consistency
+  if (Array.isArray(obj.material)) return [...obj.material];
+  return [obj.material];
+}
+function setMat(obj, mat) {
+  if (Array.isArray(obj.material)) {
+    obj.material = obj.material.map(() => mat);
+  } else {
+    obj.material = mat;
+  }
+}
+function restoreMat(e) {
+  if (Array.isArray(e.obj.material)) {
+    e.obj.material = [...e.origMats];
+  } else {
+    e.obj.material = e.origMats[0];
+  }
+}
+
+// ── APPLY VISIBILITY ─────────────────────────────────────────────────────────
+function applyMaterials() {
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    if (!e.visible) { e.obj.visible = false; continue; }
+    e.obj.visible = true;
+    if (soloActive) {
+      if (i === selectedIdx) setMat(e.obj, matHighlight);
+      else                   setMat(e.obj, matDim);
+    } else if (i === selectedIdx) {
+      setMat(e.obj, matHighlight);
+    } else {
+      restoreMat(e);
+    }
+  }
+}
+
+function syncListItems() {
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    if (!e.listEl) continue;
+    e.listEl.classList.toggle('hidden-mesh', !e.visible);
+    e.listEl.classList.toggle('selected', i === selectedIdx);
+    e.listEl.querySelector('.eye-icon').textContent = e.visible ? '👁' : '🙈';
+  }
+}
+
+// ── INFO STRIP ───────────────────────────────────────────────────────────────
+function showInfo(e) {
+  const strip = document.getElementById('info-strip');
+  if (!e) {
+    strip.className = 'empty';
+    strip.innerHTML = `<span style="color:#444">Click a mesh to inspect</span>`;
+    return;
+  }
+  strip.className = '';
+  const bb = new THREE.Box3().setFromObject(e.obj);
+  const sz = bb.getSize(new THREE.Vector3());
+  const ct = bb.getCenter(new THREE.Vector3());
+  const verts = e.obj.geometry?.attributes?.position?.count ?? '—';
+  strip.innerHTML = `
+    <span class="iname">${e.name}</span>
+    <span><span style="color:#555">size </span><span class="ival">${sz.x.toFixed(2)}×${sz.y.toFixed(2)}×${sz.z.toFixed(2)}</span></span>
+    <span><span style="color:#555">ctr </span><span class="ival">${ct.x.toFixed(2)}, ${ct.y.toFixed(2)}, ${ct.z.toFixed(2)}</span></span>
+    <span><span style="color:#555">verts </span><span class="ival">${verts}</span></span>
+    <span><span style="color:#555">tag </span><span class="ival mesh-tag ${e.tag}">${e.tag}</span></span>`;
+}
+
+// ── SELECT ────────────────────────────────────────────────────────────────────
+function selectEntry(idx) {
+  const same = idx === selectedIdx;
+
+  if (mode === 'solo') {
+    if (same && soloActive) {
+      soloActive = false;       // second click de-solos
+    } else {
+      selectedIdx = idx;
+      soloActive = true;
+    }
+  } else if (mode === 'toggle') {
+    selectedIdx = idx;
+    entries[idx].visible = !entries[idx].visible;
+    soloActive = false;
+  } else {
+    // inspect
+    selectedIdx = idx;
+    soloActive = false;
+  }
+
+  applyMaterials();
+  syncListItems();
+  showInfo(selectedIdx >= 0 ? entries[selectedIdx] : null);
+
+  if (entries[idx]?.listEl) {
+    entries[idx].listEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+// ── BUILD LIST ────────────────────────────────────────────────────────────────
+function buildList(filter = '') {
+  const listEl = document.getElementById('mesh-list');
+  listEl.innerHTML = '';
+  const fl = filter.toLowerCase();
+  let shown = 0;
+
+  entries.forEach((e, idx) => {
+    if (fl && !e.name.toLowerCase().includes(fl)) return;
+    shown++;
+
+    const item = document.createElement('div');
+    item.className = 'mesh-item'
+      + (e.visible ? '' : ' hidden-mesh')
+      + (idx === selectedIdx ? ' selected' : '');
+    e.listEl = item;
+
+    const eye = document.createElement('span');
+    eye.className = 'eye-icon';
+    eye.textContent = e.visible ? '👁' : '🙈';
+    eye.addEventListener('click', ev => {
+      ev.stopPropagation();
+      e.visible = !e.visible;
+      if (!e.visible && soloActive && selectedIdx === idx) soloActive = false;
+      applyMaterials(); syncListItems();
+    });
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'mesh-name';
+    nameEl.textContent = e.name;
+    nameEl.title = e.name;
+
+    const tagEl = document.createElement('span');
+    tagEl.className = `mesh-tag ${e.tag}`;
+    tagEl.textContent = e.tag[0]; // just first letter to save space
+
+    item.appendChild(eye);
+    item.appendChild(nameEl);
+    item.appendChild(tagEl);
+    item.addEventListener('click', () => selectEntry(idx));
+    listEl.appendChild(item);
+  });
+
+  document.getElementById('mesh-count').textContent = `${shown}/${entries.length}`;
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', e => buildList(e.target.value));
+
+// ── PANEL TOGGLE ─────────────────────────────────────────────────────────────
+const panel = document.getElementById('panel');
+document.getElementById('panel-toggle-btn').addEventListener('click', () => {
+  panel.classList.toggle('open');
+});
+document.getElementById('panel-close').addEventListener('click', () => {
+  panel.classList.remove('open');
+});
+
+// ── MODE BUTTONS ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    soloActive = false;
+    applyMaterials(); syncListItems();
+  });
+});
+
+// ── BULK BUTTONS ─────────────────────────────────────────────────────────────
+document.getElementById('btn-show-all').addEventListener('click', () => {
+  entries.forEach(e => { e.visible = true; });
+  soloActive = false; selectedIdx = -1;
+  applyMaterials(); syncListItems(); showInfo(null);
+});
+document.getElementById('btn-hide-all').addEventListener('click', () => {
+  entries.forEach(e => { e.visible = false; });
+  soloActive = false; selectedIdx = -1;
+  applyMaterials(); syncListItems(); showInfo(null);
+});
+document.getElementById('btn-show-named').addEventListener('click', () => {
+  entries.forEach(e => { e.visible = e.tag === 'named'; });
+  soloActive = false;
+  applyMaterials(); syncListItems();
+});
+document.getElementById('btn-invert').addEventListener('click', () => {
+  entries.forEach(e => { e.visible = !e.visible; });
+  applyMaterials(); syncListItems();
+});
+
+// ── RAYCASTER ─────────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+
+renderer.domElement.addEventListener('click', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const targets = entries
+    .filter(e => e.obj.visible && e.obj.material !== matDim)
+    .map(e => e.obj);
+  const hits = raycaster.intersectObjects(targets, false);
+  if (hits.length) {
+    const idx = entries.findIndex(e => e.obj === hits[0].object);
+    if (idx >= 0) selectEntry(idx);
+  }
+});
+
+renderer.domElement.addEventListener('pointermove', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const targets = entries
+    .filter(e => e.obj.visible && e.obj.material !== matDim)
+    .map(e => e.obj);
+  const hits = raycaster.intersectObjects(targets, false);
+  if (hits.length) {
+    const en = entries.find(e => e.obj === hits[0].object);
+    if (en) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (ev.clientX + 14) + 'px';
+      tooltip.style.top  = (ev.clientY - 10) + 'px';
+      tooltip.textContent = en.name;
+    }
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+renderer.domElement.addEventListener('pointerleave', () => {
+  tooltip.style.display = 'none';
+});
+
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+loader.load(
+  './models/HB17.glb',
+  gltf => {
+    gltf.scene.traverse(obj => {
+      if (!obj.isMesh) return;
+      entries.push({
+        obj,
+        name: obj.name || '(unnamed)',
+        tag: tagOf(obj.name || ''),
+        origMats: getOrigMat(obj),
+        visible: true,
+        listEl: null,
+      });
+    });
+
+    scene.add(gltf.scene);
+
+    const box    = new THREE.Box3().setFromObject(gltf.scene);
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(center.x, center.y + maxDim * 0.5, center.z + maxDim * 1.3);
+    controls.target.copy(center);
+    controls.update();
+    grid.position.y = box.min.y;
+
+    buildList();
+    document.getElementById('summary').textContent = `✅ ${entries.length} meshes`;
+  },
+  xhr => {
+    if (xhr.total)
+      document.getElementById('summary').textContent =
+        `Loading… ${Math.round(xhr.loaded / xhr.total * 100)}%`;
+  },
+  err => {
+    document.getElementById('summary').textContent = '❌ Load failed';
+    console.error(err);
+  }
+);
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

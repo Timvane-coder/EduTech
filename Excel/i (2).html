@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 06 — Screen Swap | Ramen Shop</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0a0a0f; color:#e0e0e0; font-family:'Courier New',monospace; height:100vh; width:100vw; overflow:hidden; }
+    canvas { display:block; position:fixed; top:0; left:0; width:100%; height:100%; }
+
+    #topbar {
+      position:fixed; top:0; left:0; right:0; height:44px;
+      background:rgba(0,0,0,0.82); backdrop-filter:blur(8px);
+      border-bottom:1px solid #2a2a3a;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 14px; z-index:200;
+    }
+    #topbar .title  { font-size:11px; letter-spacing:2px; color:#ff7f00; text-transform:uppercase; }
+    #topbar .status { font-size:11px; color:#888; }
+
+    .btn { background:#1a1a2a; border:1px solid #3a3a5a; color:#ccc; border-radius:6px; padding:5px 12px; font-size:11px; font-family:'Courier New',monospace; cursor:pointer; transition:background 0.2s; }
+    .btn:hover  { background:#2a2a4a; }
+    .btn.active { background:#ff7f0033; border-color:#ff7f00; color:#ff7f00; }
+
+    #btn-row { position:fixed; top:52px; right:10px; display:flex; flex-direction:column; gap:6px; z-index:200; }
+
+    #log-panel {
+      position:fixed; top:52px; left:10px; right:10px; max-height:55vh; overflow-y:auto;
+      background:rgba(0,0,0,0.93); border:1px solid #2a2a3a; border-radius:10px;
+      padding:12px 14px; z-index:100; transition:opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity:0; pointer-events:none; transform:translateY(-8px); }
+
+    .log-entry { font-size:11px; line-height:1.85; padding:1px 0; border-bottom:1px solid #111; display:flex; gap:7px; word-break:break-all; }
+    .log-entry.ok      { color:#4eca8b; }
+    .log-entry.err     { color:#ff5f5f; font-weight:bold; }
+    .log-entry.info    { color:#f0c060; }
+    .log-entry.pending { color:#888; }
+    .log-entry.head    { color:#adf; font-weight:bold; }
+    .log-entry.click   { color:#ff7f00; font-weight:bold; }
+    .log-entry.screen  { color:#f4f; }
+
+    #progress-bar-wrap { margin-top:8px; height:4px; background:#1a1a2a; border-radius:3px; overflow:hidden; }
+    #progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#ff7f00,#00ff7f); transition:width 0.3s; }
+    #summary { margin-top:6px; font-size:10px; color:#666; }
+
+    /* ── MODE INDICATOR ── */
+    #mode-indicator {
+      position:fixed; bottom:52px; left:50%; transform:translateX(-50%);
+      font-size:11px; letter-spacing:1px; text-transform:uppercase;
+      background:rgba(0,0,0,0.75); border:1px solid #333;
+      padding:5px 16px; border-radius:20px; z-index:100;
+      pointer-events:none; transition:all 0.3s;
+    }
+
+    /* ── SUB-NAV (About Me tabs + Vending project back) ── */
+    #subnav {
+      position:fixed; bottom:96px; left:50%; transform:translateX(-50%);
+      display:none; gap:8px; z-index:150; flex-wrap:wrap; justify-content:center;
+    }
+    #subnav.visible { display:flex; }
+    #subnav button {
+      background:#0a0a1a; border:1px solid #444; color:#aaa;
+      border-radius:14px; padding:6px 14px; font-size:11px;
+      font-family:'Courier New',monospace; cursor:pointer; transition:all 0.2s;
+    }
+    #subnav button:hover   { background:#1a1a2a; color:#fff; }
+    #subnav button.active  { border-color:var(--sub-color,#00cfff); color:var(--sub-color,#00cfff); background:#0a0a2a; }
+
+    /* ── BACK BUTTON ── */
+    #back-btn {
+      position:fixed; bottom:52px; left:14px;
+      display:none; z-index:150;
+    }
+    #back-btn button {
+      background:#1a1a2a; border:1px solid #ff7f00; color:#ff7f00;
+      border-radius:20px; padding:7px 18px; font-size:11px;
+      font-family:'Courier New',monospace; cursor:pointer;
+    }
+    #back-btn button:hover { background:#2a1a0a; }
+
+    /* ── COORD DEBUG ── */
+    #coord-debug {
+      position:fixed; bottom:130px; left:14px;
+      font-size:10px; color:#ff7f00; z-index:50; line-height:1.8;
+      pointer-events:auto; cursor:pointer;
+      font-family:'Courier New',monospace;
+      background:rgba(0,0,0,0.7); padding:5px 9px; border-radius:6px;
+    }
+
+    #scene-legend {
+      position:fixed; bottom:50px; left:14px;
+      font-size:10px; color:#555; z-index:40; line-height:2.0; pointer-events:none;
+    }
+    #hint {
+      position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+      font-size:10px; color:#333; z-index:100; text-align:center;
+      background:rgba(0,0,0,0.5); padding:4px 14px; border-radius:20px; pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/",
+    "gsap":          "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 06 — Screen Swap</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+<div id="btn-row">
+  <button class="btn active" id="btn-log" onclick="toggleLog()">📋 Log</button>
+</div>
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+
+<div id="mode-indicator" style="color:#888">● DEFAULT VIEW</div>
+
+<!-- Sub-navigation: shown when in a section -->
+<div id="subnav">
+  <!-- populated by JS per section -->
+</div>
+
+<div id="back-btn">
+  <button onclick="goHome()">← Back</button>
+</div>
+
+<div id="coord-debug">cam: —<br>tgt: —</div>
+
+<div id="scene-legend">
+  <span style="color:#FF7F00">● Spot 1</span><br>
+  <span style="color:#00FF7F">● Spot 2</span><br>
+  <span style="color:#7F00FF">● Spot 3</span>
+</div>
+<div id="hint">Click: Projects · About Me · Articles · Credits</div>
+
+<script>
+  function toggleLog() {
+    const p = document.getElementById('log-panel');
+    const b = document.getElementById('btn-log');
+    const hidden = p.classList.toggle('hidden');
+    b.classList.toggle('active', !hidden);
+  }
+  function hideAll() {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('btn-log').classList.remove('active');
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader }    from 'three/addons/loaders/KTX2Loader.js';
+import gsap              from 'gsap';
+
+const GLTF_PATH  = './models/ramenShop.gltf';
+const DRACO_PATH = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+const BASIS_PATH = 'https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/libs/basis/';
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap   = document.getElementById('log-entries');
+const barEl     = document.getElementById('progress-bar');
+const summaryEl = document.getElementById('summary');
+const topStatus = document.getElementById('top-status');
+const modeEl    = document.getElementById('mode-indicator');
+const backBtn   = document.getElementById('back-btn');
+const subnavEl  = document.getElementById('subnav');
+const coordEl   = document.getElementById('coord-debug');
+const icons     = { pending:'⏳', ok:'✅', err:'❌', info:'📌', head:'──', click:'👆', screen:'🖥' };
+
+function log(msg, type='info') {
+  const d = document.createElement('div');
+  d.className = `log-entry ${type}`;
+  d.innerHTML = `<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(d);
+  logWrap.scrollTop = logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct)         { barEl.style.width = pct+'%'; }
+function setStatus(msg, col) { topStatus.textContent=msg; topStatus.style.color=col||'#888'; }
+
+window.addEventListener('error', e => log('ERROR: '+e.message,'err'));
+window.addEventListener('unhandledrejection', e => log('REJECT: '+(e.reason?.message||e.reason),'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas = document.createElement('canvas');
+document.body.prepend(canvas);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type    = THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+scene.add(new THREE.GridHelper(100, 40, 0x111130, 0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 2000);
+camera.position.set(-11, 8, 22);
+
+// ── CONTROLS ─────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 2, -2);
+controls.enableDamping = true; controls.dampingFactor = 0.07;
+controls.maxPolarAngle = Math.PI / 2;
+controls.minDistance = 1; controls.maxDistance = 300;
+controls.update();
+
+// ── FLOOR ────────────────────────────────────────────────────
+const mshFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshPhongMaterial({ color: 0x444444 })
+);
+mshFloor.rotation.x = -Math.PI*0.5; mshFloor.receiveShadow = true;
+mshFloor.position.set(0,-0.05,0); scene.add(mshFloor);
+
+// ── REFERENCE BOX ────────────────────────────────────────────
+const mshBox = new THREE.Mesh(
+  new THREE.BoxGeometry(7.5, 2.5, 5.0),
+  new THREE.MeshPhongMaterial({ color: 0xaaaaaa })
+);
+mshBox.castShadow=true; mshBox.receiveShadow=true;
+mshBox.position.set(0,15.5,0); scene.add(mshBox);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.04));
+const shadowLight = new THREE.DirectionalLight(0xffffff, 0.4);
+shadowLight.position.set(5,30,8); shadowLight.castShadow=true;
+shadowLight.shadow.mapSize.set(2048,2048);
+shadowLight.shadow.camera.near=1; shadowLight.shadow.camera.far=80;
+shadowLight.shadow.camera.left=-30; shadowLight.shadow.camera.right=30;
+shadowLight.shadow.camera.top=30; shadowLight.shadow.camera.bottom=-30;
+shadowLight.shadow.bias=-0.001;
+scene.add(shadowLight, shadowLight.target);
+const fillLight = new THREE.DirectionalLight(0xffffff,1.0);
+fillLight.position.set(-10,20,-10); scene.add(fillLight);
+
+// ── SPOTLIGHTS (Step 1 — preserved) ──────────────────────────
+function createSpotlight(color) {
+  const l=new THREE.SpotLight(color,800);
+  l.castShadow=true; l.angle=0.3; l.penumbra=0.2; l.decay=2; l.distance=60;
+  return l;
+}
+const spotLight1=createSpotlight(0xFF7F00);
+const spotLight2=createSpotlight(0x00FF7F);
+const spotLight3=createSpotlight(0x7F00FF);
+spotLight1.position.set(5,20,8); spotLight2.position.set(0,20,6); spotLight3.position.set(-5,20,8);
+spotLight1.target.position.set(2,0,0); spotLight2.target.position.set(0,0,0); spotLight3.target.position.set(-2,0,0);
+scene.add(spotLight1.target,spotLight2.target,spotLight3.target);
+const lh1=new THREE.SpotLightHelper(spotLight1);
+const lh2=new THREE.SpotLightHelper(spotLight2);
+const lh3=new THREE.SpotLightHelper(spotLight3);
+scene.add(spotLight1,spotLight2,spotLight3,lh1,lh2,lh3);
+setBar(4);
+
+// ── LOADERS ──────────────────────────────────────────────────
+const ktx2Loader=new KTX2Loader();
+ktx2Loader.setTranscoderPath(BASIS_PATH); ktx2Loader.detectSupport(renderer);
+const dracoLoader=new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH); dracoLoader.preload();
+const texLoader=new THREE.TextureLoader();
+const gltfLoader=new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader); gltfLoader.setKTX2Loader(ktx2Loader);
+setBar(6);
+
+// ── TEXTURE HELPERS ──────────────────────────────────────────
+const texCache={};
+function loadKTX2(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    ktx2Loader.load(path,t=>{texCache[path]=t;r(t);},undefined,
+      ()=>{const p=path.replace('.ktx2','.png');
+           texLoader.load(p,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));});
+  });
+}
+function loadPNG(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    texLoader.load(path,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));
+  });
+}
+function loadBasis(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    ktx2Loader.load(path,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));
+  });
+}
+function applyMat(meshMap,name,material){
+  const t=meshMap[name]; if(!t) return false;
+  t.traverse(o=>{if(o.isMesh) o.material=material;}); return true;
+}
+function bakedMat(tex){tex.flipY=false;tex.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:tex});}
+function screenMat(tex){tex.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:tex});}
+function videoMat(src){
+  const v=document.createElement('video');
+  v.src=src;v.loop=true;v.muted=true;v.playsInline=true;v.crossOrigin='anonymous';v.play().catch(()=>{});
+  const t=new THREE.VideoTexture(v);t.colorSpace=THREE.SRGBColorSpace;
+  return new THREE.MeshBasicMaterial({map:t});
+}
+function cycleScreens(target,textures,intervalMs){
+  if(!textures.length)return;let idx=0;
+  const set=()=>{const m=new THREE.MeshBasicMaterial({map:textures[idx]});target.traverse(o=>{if(o.isMesh)o.material=m;});};
+  set();if(textures.length<2)return;
+  return setInterval(()=>{idx=(idx+1)%textures.length;set();},intervalMs);
+}
+
+// ── MATERIAL DATA (Steps 2–4) ────────────────────────────────
+const BAKED=[
+  ['ramenShopJoined',    './textures/baked/ramenShopBaked1024.ktx2'],
+  ['machinesJoined',     './textures/baked/machinesBaked1024.ktx2' ],
+  ['floor',              './textures/baked/floorBaked1024.ktx2'    ],
+  ['miscJoined',         './textures/baked/miscBaked1024.ktx2'     ],
+  ['graphicsJoined',     './textures/baked/graphicsBaked512.ktx2'  ],
+  ['jesseZhouJoined',    './textures/baked/ramenShopBaked1024.ktx2'],
+  ['chinese',            './textures/baked/ramenShopBaked1024.ktx2'],
+  ['easelFrontGraphic',  './textures/baked/ramenShopBaked1024.ktx2'],
+  ['vendingMachineLight','./textures/baked/machinesBaked1024.ktx2' ],
+  ['arcadeRim',          './textures/baked/machinesBaked1024.ktx2' ],
+  ['arcadeToken',        './textures/baked/machinesBaked1024.ktx2' ],
+  ['dishStand',          './textures/baked/ramenShopBaked1024.ktx2'],
+];
+const COLORS=[
+  ['projectsRed',0xe8003c],['projectsWhite',0xffffff],
+  ['aboutMeBlue',0x00cfff],['aboutMeBlack',0x111111],
+  ['articlesRed',0xff4400],['articlesWhite',0xffffff],
+  ['creditsOrange',0xff8800],['creditsBlack',0x111111],
+  ['jZhouPink',0xff44aa],['jZhouBlack',0x111111],
+  ['greenSignSquare',0x00cc44],['greenLED',0x00ff44],
+  ['redLED',0xff2200],['yellowRightLight',0xffee00],['whiteButton',0xffffff],
+];
+const MATCAPS=[
+  [['neonBlue'],                                           './textures/matcaps/neonBlueMatCap.ktx2', null],
+  [['neonGreen'],                                          './textures/matcaps/neonGreenMatCap.ktx2',null],
+  [['neonPink','neonYellow'],                              './textures/matcaps/neonBlueMatCap.ktx2', null],
+  [['fan1','fan2'],                                        './textures/matcaps/fanMatCap.ktx2',       null],
+  [['dish'],                                               './textures/matcaps/dishMatCap.ktx2',      null],
+  [['lampLights'],                                         null,'./textures/matcaps/lightMatcap.png'      ],
+  [['storageLight','portalLight','blueLights','poleLight'],'./textures/matcaps/neonBlueMatCap.ktx2', null],
+];
+const VIDEO_SCREENS=[
+  ['littleTVScreen','./textures/videosTextures/littleTVScreen.mp4'],
+  ['tallScreen',    './textures/videosTextures/tallScreen.mp4'    ],
+  ['tvScreen',      './textures/videosTextures/tvScreen.mp4'      ],
+  ['smallScreen3',  './textures/videosTextures/smallScreen3.mp4'  ],
+  ['smallScreen4',  './textures/videosTextures/smallScreen4.mp4'  ],
+  ['smallScreen5',  './textures/videosTextures/smallScreen5.mp4'  ],
+];
+const SIDE_PATHS =['sideScreen1','sideScreen2','sideScreen3'].map(n=>`./textures/screens/sideScreens/${n}.ktx2`);
+const SMALL1_PATHS=[1,2,3,4,5].map(i=>`./textures/screens/smallScreen1/${i}.basis`);
+const SMALL2_PATHS=[1,2,3,4,5].map(i=>`./textures/screens/smallScreen2/${i}.basis`);
+
+// ─────────────────────────────────────────────────────────────
+//  SCREEN CONTENT — what plays on each screen per section
+// ─────────────────────────────────────────────────────────────
+// All screen textures are pre-loaded during init into this map
+const SCREEN_TEX = {};   // key → THREE.Texture (populated after load)
+
+const SCREEN_LOAD_LIST = [
+  // Default (home) slides
+  ['bigScreenDefault',      './textures/screens/aboutMeScreens/bigScreenDefault.ktx2'           ],
+  ['vendingDefault',        './textures/screens/vendingMachineScreens/vendingMachineDefault.ktx2'],
+  ['arcadeDefault',         './textures/screens/arcadeScreens/arcadeScreenDefault.ktx2'          ],
+  ['easelTouch',            './textures/screens/easel/easelTouch.ktx2'                           ],
+  // About Me slides
+  ['bigScreenAbout',        './textures/screens/aboutMeScreens/bigScreenAbout.ktx2'              ],
+  ['bigScreenAboutMobile',  './textures/screens/aboutMeScreens/bigScreenAboutMobile.ktx2'        ],
+  ['bigScreenSkills',       './textures/screens/aboutMeScreens/bigScreenSkills.ktx2'             ],
+  ['bigScreenSkillsMobile', './textures/screens/aboutMeScreens/bigScreenSkillsMobile.ktx2'       ],
+  ['bigScreenExperience',   './textures/screens/aboutMeScreens/bigScreenExperience.ktx2'         ],
+  ['bigScreenExpMobile',    './textures/screens/aboutMeScreens/bigScreenExperienceMobile.ktx2'   ],
+  // Vending machine menu + projects
+  ['vendingMenu',           './textures/screens/vendingMachineScreens/vendingMachineMenu.ktx2'   ],
+  ['project1',              './textures/screens/vendingMachineScreens/project1.ktx2'             ],
+  ['project2',              './textures/screens/vendingMachineScreens/project2.ktx2'             ],
+  ['project3',              './textures/screens/vendingMachineScreens/project3.ktx2'             ],
+  ['project4',              './textures/screens/vendingMachineScreens/project4.ktx2'             ],
+  ['project5',              './textures/screens/vendingMachineScreens/project5.ktx2'             ],
+  ['project6',              './textures/screens/vendingMachineScreens/project6.ktx2'             ],
+  ['project7',              './textures/screens/vendingMachineScreens/project7.ktx2'             ],
+  ['project8',              './textures/screens/vendingMachineScreens/project8.ktx2'             ],
+  // Arcade / credits
+  ['arcadeCredits',         './textures/screens/arcadeScreens/arcadeScreenCredits.ktx2'          ],
+  ['arcadeThanks',          './textures/screens/arcadeScreens/arcadeScreenThanks.ktx2'           ],
+];
+
+// ─────────────────────────────────────────────────────────────
+//  SCREEN SWAP ENGINE
+//  setScreen(meshMap, meshName, texKey) — applies a pre-loaded
+//  texture to a named mesh instantly (no GSAP needed for the
+//  texture itself; camera tween provides the animation feel).
+// ─────────────────────────────────────────────────────────────
+let meshMap = {};   // populated after GLTF loads
+
+function setScreen(meshName, texKey) {
+  const tex = SCREEN_TEX[texKey];
+  if (!tex) { log(`  ✗ setScreen: tex not loaded — ${texKey}`, 'err'); return; }
+  const hit = applyMat(meshMap, meshName, screenMat(tex));
+  log(`  🖥 ${meshName} → ${texKey}`, 'screen');
+  return hit;
+}
+
+// Is mobile? (for About Me slide variant selection)
+const isMobile = innerWidth < 600;
+
+// ─────────────────────────────────────────────────────────────
+//  SUBNAV BUILDER
+//  Builds the tab row shown after arriving at a section.
+// ─────────────────────────────────────────────────────────────
+function buildSubnav(tabs) {
+  subnavEl.innerHTML = '';
+  subnavEl.style.setProperty('--sub-color', tabs.color || '#00cfff');
+  tabs.buttons.forEach((btn, i) => {
+    const el = document.createElement('button');
+    el.textContent = btn.label;
+    if (i === 0) el.classList.add('active');
+    el.addEventListener('click', () => {
+      subnavEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      btn.action();
+    });
+    subnavEl.appendChild(el);
+  });
+  subnavEl.classList.add('visible');
+  // Trigger first tab immediately
+  if (tabs.buttons[0]) tabs.buttons[0].action();
+}
+
+function hideSubnav() {
+  subnavEl.classList.remove('visible');
+  subnavEl.innerHTML = '';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SECTION HANDLERS — called from flyTo onComplete
+// ─────────────────────────────────────────────────────────────
+
+// PROJECTS: show vending menu, clicking a project shows detail slide
+let currentProject = null;
+function activateProjects() {
+  setScreen('vendingMachineScreen', 'vendingMenu');
+  currentProject = null;
+
+  // Sub-nav: 8 project slots + "Menu" back button
+  buildSubnav({
+    color: '#e8003c',
+    buttons: [
+      { label: '📋 Menu',   action: () => { setScreen('vendingMachineScreen','vendingMenu'); currentProject=null; } },
+      { label: 'P1', action: () => { setScreen('vendingMachineScreen','project1'); currentProject=1; } },
+      { label: 'P2', action: () => { setScreen('vendingMachineScreen','project2'); currentProject=2; } },
+      { label: 'P3', action: () => { setScreen('vendingMachineScreen','project3'); currentProject=3; } },
+      { label: 'P4', action: () => { setScreen('vendingMachineScreen','project4'); currentProject=4; } },
+      { label: 'P5', action: () => { setScreen('vendingMachineScreen','project5'); currentProject=5; } },
+      { label: 'P6', action: () => { setScreen('vendingMachineScreen','project6'); currentProject=6; } },
+      { label: 'P7', action: () => { setScreen('vendingMachineScreen','project7'); currentProject=7; } },
+      { label: 'P8', action: () => { setScreen('vendingMachineScreen','project8'); currentProject=8; } },
+    ]
+  });
+  log('Projects: vending menu active', 'screen');
+}
+
+// ABOUT ME: bigScreen shows About/Skills/Experience tabs
+function activateAboutMe() {
+  const aboutKey = isMobile ? 'bigScreenAboutMobile'   : 'bigScreenAbout';
+  const skillKey = isMobile ? 'bigScreenSkillsMobile'  : 'bigScreenSkills';
+  const expKey   = isMobile ? 'bigScreenExpMobile'     : 'bigScreenExperience';
+
+  buildSubnav({
+    color: '#00cfff',
+    buttons: [
+      { label: '👤 About',      action: () => setScreen('bigScreen', aboutKey) },
+      { label: '🛠 Skills',     action: () => setScreen('bigScreen', skillKey) },
+      { label: '💼 Experience', action: () => setScreen('bigScreen', expKey)   },
+    ]
+  });
+  log('About Me: bigScreen tabs active', 'screen');
+}
+
+// ARTICLES: sideScreen shows static slide (stop the cycle)
+let sideInterval = null;
+function activateArticles() {
+  // Stop the ambient cycling interval
+  if (sideInterval) { clearInterval(sideInterval); sideInterval = null; }
+  // Show sideScreen1 as the static articles slide
+  const tex = SCREEN_TEX['sideScreen1'];
+  if (tex) {
+    applyMat(meshMap, 'sideScreen',
+      new THREE.MeshBasicMaterial({ map: tex, colorSpace: THREE.SRGBColorSpace }));
+  }
+  hideSubnav();
+  log('Articles: sideScreen static', 'screen');
+}
+
+// CREDITS: arcadeScreen plays credits → thanks sequence
+let creditsTimer = null;
+function activateCredits() {
+  setScreen('arcadeScreen', 'arcadeCredits');
+  // After 4 seconds switch to thanks screen
+  if (creditsTimer) clearTimeout(creditsTimer);
+  creditsTimer = setTimeout(() => {
+    setScreen('arcadeScreen', 'arcadeThanks');
+    log('Credits: arcadeScreen → Thanks slide', 'screen');
+  }, 4000);
+  hideSubnav();
+  log('Credits: arcadeScreen → Credits slide', 'screen');
+}
+
+// HOME: restore all defaults + restart side screen cycle
+function activateHome() {
+  setScreen('bigScreen',            'bigScreenDefault');
+  setScreen('vendingMachineScreen', 'vendingDefault'  );
+  setScreen('arcadeScreen',         'arcadeDefault'   );
+
+  // Restart side screen ambient cycle
+  if (sideInterval) clearInterval(sideInterval);
+  const sideTex = ['sideScreen1','sideScreen2','sideScreen3']
+    .map(k => SCREEN_TEX[k]).filter(Boolean);
+  if (sideTex.length && meshMap['sideScreen']) {
+    sideInterval = cycleScreens(meshMap['sideScreen'], sideTex, 3000);
+  }
+
+  if (creditsTimer) { clearTimeout(creditsTimer); creditsTimer = null; }
+  hideSubnav();
+  log('Home: all screens restored to defaults', 'screen');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  VIEWS (tuned coordinates from Step 5)
+// ─────────────────────────────────────────────────────────────
+const VIEWS = {
+  home: {
+    camPos: new THREE.Vector3(-11, 8, 22), target: new THREE.Vector3(0, 2, -2),
+    label:'● DEFAULT VIEW', color:'#888',
+    minPolar:0, maxPolar:Math.PI/2, minAzi:-Infinity, maxAzi:Infinity, minDist:5, maxDist:300,
+    onArrive: activateHome,
+  },
+  projects: {
+    camPos: new THREE.Vector3(1.65, 2.91, 7.53), target: new THREE.Vector3(0.57, 1.05, 0.20),
+    label:'🛒 PROJECTS', color:'#e8003c',
+    minPolar:Math.PI*0.25, maxPolar:Math.PI*0.6, minAzi:-0.4, maxAzi:0.4, minDist:2, maxDist:14,
+    onArrive: activateProjects,
+  },
+  aboutMe: {
+    camPos: new THREE.Vector3(1.27, 7.25, 10.47), target: new THREE.Vector3(0.45, 7.13, -2.00),
+    label:'👤 ABOUT ME', color:'#00cfff',
+    minPolar:Math.PI*0.2, maxPolar:Math.PI*0.5, minAzi:-0.3, maxAzi:0.3, minDist:4, maxDist:20,
+    onArrive: activateAboutMe,
+  },
+  articles: {
+    camPos: new THREE.Vector3(-0.60, 7.94, 11.76), target: new THREE.Vector3(-0.00, 2.00, -2.00),
+    label:'📰 ARTICLES', color:'#ff4400',
+    minPolar:Math.PI*0.2, maxPolar:Math.PI*0.6, minAzi:-0.5, maxAzi:0.5, minDist:3, maxDist:18,
+    onArrive: activateArticles,
+  },
+  credits: {
+    camPos: new THREE.Vector3(-1.19, 2.69, 6.13), target: new THREE.Vector3(0.47, 0.35, -0.12),
+    label:'🎮 CREDITS', color:'#ff8800',
+    minPolar:Math.PI*0.25, maxPolar:Math.PI*0.6, minAzi:-0.5, maxAzi:0.5, minDist:2, maxDist:12,
+    onArrive: activateCredits,
+  },
+};
+
+let currentMode     = 'home';
+let isTransitioning = false;
+
+// ─────────────────────────────────────────────────────────────
+//  CAMERA TWEEN  (same as Step 5 + onArrive screen swap)
+// ─────────────────────────────────────────────────────────────
+function flyTo(viewKey) {
+  if (isTransitioning) return;
+  if (currentMode === viewKey) return;
+
+  isTransitioning  = true;
+  controls.enabled = false;
+
+  const view     = VIEWS[viewKey];
+  const posProxy = { x:camera.position.x, y:camera.position.y, z:camera.position.z };
+  const tgtProxy = { x:controls.target.x, y:controls.target.y, z:controls.target.z };
+
+  gsap.to(posProxy, {
+    x:view.camPos.x, y:view.camPos.y, z:view.camPos.z,
+    duration:1.8, ease:'power2.inOut',
+    onUpdate(){ camera.position.set(posProxy.x, posProxy.y, posProxy.z); }
+  });
+
+  gsap.to(tgtProxy, {
+    x:view.target.x, y:view.target.y, z:view.target.z,
+    duration:1.8, ease:'power2.inOut',
+    onUpdate(){ controls.target.set(tgtProxy.x, tgtProxy.y, tgtProxy.z); controls.update(); },
+    onComplete(){
+      controls.minPolarAngle   = view.minPolar;
+      controls.maxPolarAngle   = view.maxPolar;
+      controls.minAzimuthAngle = view.minAzi;
+      controls.maxAzimuthAngle = view.maxAzi;
+      controls.minDistance     = view.minDist;
+      controls.maxDistance     = view.maxDist;
+      controls.enabled         = true;
+      isTransitioning          = false;
+      currentMode              = viewKey;
+
+      modeEl.textContent = view.label;
+      modeEl.style.color = view.color;
+      backBtn.style.display = viewKey==='home' ? 'none' : 'block';
+
+      // ── SCREEN SWAP happens here — after camera lands ──
+      if (view.onArrive) view.onArrive();
+
+      log(`📍 Arrived: ${view.label}`, 'click');
+    }
+  });
+
+  log(`🎬 Flying to: ${view.label}`, 'click');
+  modeEl.textContent = view.label;
+  modeEl.style.color = view.color;
+}
+
+window.goHome = function() {
+  if (isTransitioning) return;
+  const prev = currentMode;
+  currentMode = 'temp';   // allow flyTo to run even if currentMode was home
+  flyTo('home');
+  setTimeout(()=>{
+    controls.minPolarAngle=VIEWS.home.minPolar; controls.maxPolarAngle=VIEWS.home.maxPolar;
+    controls.minAzimuthAngle=VIEWS.home.minAzi; controls.maxAzimuthAngle=VIEWS.home.maxAzi;
+    controls.minDistance=VIEWS.home.minDist; controls.maxDistance=VIEWS.home.maxDist;
+    backBtn.style.display='none';
+  },2000);
+};
+
+// ── RAYCASTER ────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const pointer   = new THREE.Vector2();
+let clickableMeshes = [];
+
+const CLICK_MAP = {
+  'projectsRed':'projects','projectsWhite':'projects',
+  'aboutMeBlue':'aboutMe','aboutMeBlack':'aboutMe',
+  'articlesRed':'articles','articlesWhite':'articles',
+  'creditsOrange':'credits','creditsBlack':'credits',
+  'vendingMachineScreen':'projects',
+  'bigScreen':'aboutMe',
+  'arcadeScreen':'credits',
+  'sideScreen':'articles',
+};
+
+function onDown(e){ pointer._dx=e.touches?e.touches[0].clientX:e.clientX; pointer._dy=e.touches?e.touches[0].clientY:e.clientY; }
+function onUp(e){
+  if(isTransitioning)return;
+  const cx=e.changedTouches?e.changedTouches[0].clientX:e.clientX;
+  const cy=e.changedTouches?e.changedTouches[0].clientY:e.clientY;
+  if(Math.abs(cx-(pointer._dx||0))>8||Math.abs(cy-(pointer._dy||0))>8)return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.x=((cx-rect.left)/rect.width)*2-1;
+  pointer.y=-((cy-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects(clickableMeshes,false);
+  if(hits.length){
+    const name=hits[0].object.userData.clickName||hits[0].object.name;
+    const vk=CLICK_MAP[name];
+    if(vk){log(`👆 ${name} → ${vk}`,'click');flyTo(vk);}
+  }
+}
+renderer.domElement.addEventListener('pointerdown',onDown);
+renderer.domElement.addEventListener('pointerup',onUp);
+renderer.domElement.addEventListener('touchstart',onDown,{passive:true});
+renderer.domElement.addEventListener('touchend',onUp,{passive:true});
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOAD
+// ─────────────────────────────────────────────────────────────
+log('Fetching GLTF …','pending');
+fetch(GLTF_PATH)
+  .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.text();})
+  .then(()=>{log('GLTF reachable ✓','ok');setBar(8);loadGLTF();})
+  .catch(err=>{log('FETCH FAILED: '+err.message,'err');setStatus('Error ❌','#ff5f5f');});
+
+function loadGLTF(){
+  log('GLTFLoader parsing …','pending');
+  gltfLoader.load(GLTF_PATH, async(gltf)=>{
+    log('GLTF parsed ✓','ok'); setBar(18);
+
+    const model=gltf.scene;
+    model.traverse(o=>{if(o.name)meshMap[o.name]=o;});
+    log(`${Object.keys(meshMap).length} named objects`,'ok');
+
+    // Centre model
+    const bbox=new THREE.Box3().setFromObject(model);
+    const center=bbox.getCenter(new THREE.Vector3());
+    const size=bbox.getSize(new THREE.Vector3());
+    model.position.x-=center.x; model.position.z-=center.z; model.position.y-=bbox.min.y;
+    model.traverse(c=>{if(c.isMesh){c.receiveShadow=true;c.castShadow=false;}});
+    scene.add(model);
+
+    const sh=size.y;
+    mshBox.position.set(0,sh+3.5,0);
+    spotLight1.position.set(5,sh+14,8); spotLight2.position.set(0,sh+14,6); spotLight3.position.set(-5,sh+14,8);
+    setBar(22);
+
+    // Build clickable list
+    Object.keys(CLICK_MAP).forEach(name=>{
+      const obj=meshMap[name]; if(!obj)return;
+      obj.traverse(o=>{if(o.isMesh){o.userData.clickName=name;clickableMeshes.push(o);}});
+    });
+    log(`Raycaster: ${clickableMeshes.length} meshes`,'ok');
+
+    // ── BAKED ──────────────────────────────────────────────
+    log('── Baked ──','head');
+    for(const[name,ktx2]of BAKED){
+      const tex=await loadKTX2(ktx2);if(!tex)continue;
+      applyMat(meshMap,name,bakedMat(tex));
+    }
+    fillLight.intensity=0.0; setBar(38);
+
+    // ── COLOURS ────────────────────────────────────────────
+    for(const[name,hex]of COLORS) applyMat(meshMap,name,new THREE.MeshBasicMaterial({color:hex}));
+    setBar(44);
+
+    // ── MATCAPS ────────────────────────────────────────────
+    log('── Matcaps ──','head');
+    for(const[names,ktx2,png]of MATCAPS){
+      const tex=ktx2?await loadKTX2(ktx2):await loadPNG(png);if(!tex)continue;
+      const mat=new THREE.MeshMatcapMaterial({matcap:tex});
+      names.forEach(n=>applyMat(meshMap,n,mat));
+    }
+    setBar(54);
+
+    // ── VIDEO SCREENS ──────────────────────────────────────
+    log('── Video screens ──','head');
+    for(const[name,src]of VIDEO_SCREENS) applyMat(meshMap,name,videoMat(src));
+
+    // ── SMALL SCREENS (basis cycle) ────────────────────────
+    const s1=(await Promise.all(SMALL1_PATHS.map(loadBasis))).filter(Boolean);
+    s1.forEach(t=>{t.colorSpace=THREE.SRGBColorSpace;});
+    if(meshMap['smallScreen1']&&s1.length) cycleScreens(meshMap['smallScreen1'],s1,2000);
+    const s2=(await Promise.all(SMALL2_PATHS.map(loadBasis))).filter(Boolean);
+    s2.forEach(t=>{t.colorSpace=THREE.SRGBColorSpace;});
+    if(meshMap['smallScreen2']&&s2.length) cycleScreens(meshMap['smallScreen2'],s2,2000);
+    setBar(65);
+
+    // ── PRELOAD ALL SCREEN TEXTURES ────────────────────────
+    // Load side screen textures into SCREEN_TEX directly (used by cycleScreens + articles)
+    log('── Preloading screen textures ──','head');
+    const sideTexLoaded=[];
+    for(const p of SIDE_PATHS){
+      const tex=await loadKTX2(p);
+      if(tex){
+        tex.colorSpace=THREE.SRGBColorSpace;
+        // Key by filename without path and extension
+        const key=p.split('/').pop().replace('.ktx2','');
+        SCREEN_TEX[key]=tex;
+        sideTexLoaded.push(tex);
+      }
+    }
+    // Start ambient side screen cycle (stored interval for stop/restart)
+    if(meshMap['sideScreen']&&sideTexLoaded.length){
+      sideInterval=cycleScreens(meshMap['sideScreen'],sideTexLoaded,3000);
+      log(`  ✓ sideScreen cycling ${sideTexLoaded.length} slides`,'ok');
+    }
+
+    // Preload all named screen textures
+    let loaded=0;
+    for(const[key,path]of SCREEN_LOAD_LIST){
+      const tex=await loadKTX2(path);
+      if(tex){
+        tex.colorSpace=THREE.SRGBColorSpace;
+        SCREEN_TEX[key]=tex;
+        loaded++;
+      } else {
+        log(`  ✗ screen tex failed: ${key}`,'err');
+      }
+      setBar(65+Math.round((loaded/SCREEN_LOAD_LIST.length)*25));
+    }
+    log(`  ✓ ${loaded}/${SCREEN_LOAD_LIST.length} screen textures loaded`,'ok');
+
+    // Apply initial default screens
+    setScreen('bigScreen',            'bigScreenDefault');
+    setScreen('vendingMachineScreen', 'vendingDefault'  );
+    setScreen('arcadeScreen',         'arcadeDefault'   );
+    applyMat(meshMap,'easelFrontGraphic',screenMat(SCREEN_TEX['easelTouch']||new THREE.Texture()));
+
+    setBar(100);
+    summaryEl.textContent=`Steps 1–6 complete · ${loaded} screen textures · Click any sign`;
+    setStatus('✅ Step 6 complete','#4eca8b');
+    log('── Step 6 ready ──','head');
+    log('Click Projects / About Me / Articles / Credits to swap screens','ok');
+
+    setTimeout(()=>{
+      hideAll();
+      document.getElementById('hint').textContent=
+        'Click a sign  |  Sub-tabs appear after arriving  |  ← Back';
+    },3000);
+
+  },
+  (xhr)=>{if(xhr.total)setBar(8+Math.round((xhr.loaded/xhr.total)*10));},
+  (err)=>{log('GLTFLoader ERROR: '+(err?.message||err),'err');setStatus('Error ❌','#ff5f5f');}
+  );
+}
+
+// ── SPOTLIGHT TWEENS ─────────────────────────────────────────
+function tweenSpot(l){
+  new TWEEN.Tween(l).to({angle:(Math.random()*0.7)+0.1,penumbra:Math.random()+1},Math.random()*3000+2000).easing(TWEEN.Easing.Quadratic.Out).start();
+  const bY=l.position.y;
+  new TWEEN.Tween(l.position).to({x:(Math.random()*16)-8,y:bY+(Math.random()*4)-2,z:(Math.random()*16)-8},Math.random()*3000+2000).easing(TWEEN.Easing.Quadratic.Out).start();
+}
+function updateTweens(){ tweenSpot(spotLight1);tweenSpot(spotLight2);tweenSpot(spotLight3);setTimeout(updateTweens,5000); }
+
+// ── COORD DEBUG ──────────────────────────────────────────────
+let showCoords=true;
+coordEl.addEventListener('click',()=>{ showCoords=!showCoords; coordEl.style.opacity=showCoords?'1':'0.2'; });
+
+// ── RENDER LOOP ───────────────────────────────────────────────
+(function tick(){
+  requestAnimationFrame(tick);
+  TWEEN.update(); controls.update();
+  lh1.update(); lh2.update(); lh3.update();
+  renderer.render(scene,camera);
+  if(showCoords){
+    const p=camera.position,t=controls.target;
+    coordEl.innerHTML=
+      `<span style="color:#adf">cam</span> ${p.x.toFixed(2)} ${p.y.toFixed(2)} ${p.z.toFixed(2)}<br>`+
+      `<span style="color:#fa0">tgt</span> ${t.x.toFixed(2)} ${t.y.toFixed(2)} ${t.z.toFixed(2)}<br>`+
+      `<span style="color:#555">${currentMode}</span>`;
+  }
+})();
+
+updateTweens();
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>

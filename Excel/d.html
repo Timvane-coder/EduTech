@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 03 — Matcap Materials | Ramen Shop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; overflow: hidden; }
+    canvas { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 44px;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(8px);
+      border-bottom: 1px solid #2a2a3a;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px; z-index: 200;
+    }
+    #topbar .title { font-size: 11px; letter-spacing: 2px; color: #ff7f00; text-transform: uppercase; }
+    #topbar .status { font-size: 11px; color: #4eca8b; }
+
+    .btn {
+      background: #1a1a2a; border: 1px solid #3a3a5a; color: #ccc;
+      border-radius: 6px; padding: 5px 12px; font-size: 11px;
+      font-family: 'Courier New', monospace; cursor: pointer; transition: background 0.2s;
+    }
+    .btn:hover { background: #2a2a4a; }
+    .btn.active { background: #ff7f0033; border-color: #ff7f00; color: #ff7f00; }
+
+    #btn-row {
+      position: fixed; top: 52px; right: 10px;
+      display: flex; flex-direction: column; gap: 6px; z-index: 200;
+    }
+
+    #log-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 60vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #2a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity: 0; pointer-events: none; transform: translateY(-8px); }
+
+    .log-entry { font-size: 11px; line-height: 1.85; padding: 1px 0; border-bottom: 1px solid #111; display: flex; gap: 7px; word-break: break-all; }
+    .log-entry.pending { color: #888; }
+    .log-entry.ok      { color: #4eca8b; }
+    .log-entry.err     { color: #ff5f5f; font-weight: bold; }
+    .log-entry.info    { color: #f0c060; }
+    .log-entry.step    { color: #adf; font-weight: bold; }
+
+    #progress-bar-wrap { margin-top: 8px; height: 4px; background: #1a1a2a; border-radius: 3px; overflow: hidden; }
+    #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#ff7f00,#00ff7f); transition: width 0.3s; }
+    #summary { margin-top: 6px; font-size: 10px; color: #666; }
+
+    /* matcap map panel */
+    #map-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 75vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #1a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100; display: none;
+    }
+    #map-panel h3 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #f4f; margin-bottom: 10px; }
+    .map-section { margin-bottom: 10px; }
+    .map-section-title { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .map-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #0a0a0a; font-size: 10px; }
+    .map-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .map-mesh { color: #4eca8b; min-width: 140px; }
+    .map-arrow { color: #555; }
+    .map-tex  { color: #f4f; }
+    .map-status { margin-left: auto; font-size: 9px; }
+    .map-status.ok      { color: #4eca8b; }
+    .map-status.err     { color: #ff5f5f; }
+    .map-status.pending { color: #888; }
+
+    #scene-legend {
+      position: fixed; bottom: 50px; left: 14px;
+      font-size: 10px; color: #666; z-index: 100; line-height: 2.0; pointer-events: none;
+    }
+    #hint {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: #333; z-index: 100; text-align: center;
+      background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 20px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 03 — Matcap Materials</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+
+<div id="btn-row">
+  <button class="btn active" id="btn-log" onclick="toggle('log')">📋 Log</button>
+  <button class="btn"        id="btn-map" onclick="toggle('map')">🎨 Matcaps</button>
+</div>
+
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+
+<div id="map-panel">
+  <h3>Matcap → mesh assignments</h3>
+  <div id="map-rows"></div>
+</div>
+
+<div id="scene-legend">
+  <span style="color:#FF7F00">● Spot 1 (orange)</span><br>
+  <span style="color:#00FF7F">● Spot 2 (green)</span><br>
+  <span style="color:#7F00FF">● Spot 3 (violet)</span><br>
+  <span style="color:#888">■ Reference box (shadow caster)</span>
+</div>
+<div id="hint">Drag · Pinch · Scroll</div>
+
+<script>
+  let logVisible = true, mapVisible = false;
+  function toggle(which) {
+    const lp = document.getElementById('log-panel');
+    const mp = document.getElementById('map-panel');
+    const bl = document.getElementById('btn-log');
+    const bm = document.getElementById('btn-map');
+    if (which === 'log') {
+      logVisible = !logVisible;
+      lp.classList.toggle('hidden', !logVisible);
+      bl.classList.toggle('active', logVisible);
+      if (logVisible) { mapVisible=false; mp.style.display='none'; bm.classList.remove('active'); }
+    } else {
+      mapVisible = !mapVisible;
+      mp.style.display = mapVisible ? 'block' : 'none';
+      bm.classList.toggle('active', mapVisible);
+      if (mapVisible) { logVisible=false; lp.classList.add('hidden'); bl.classList.remove('active'); }
+    }
+  }
+  function hideAllPanels() {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('map-panel').style.display = 'none';
+    document.getElementById('btn-log').classList.remove('active');
+    document.getElementById('btn-map').classList.remove('active');
+    logVisible = false; mapVisible = false;
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader }    from 'three/addons/loaders/KTX2Loader.js';
+
+const GLTF_PATH  = './models/ramenShop.gltf';
+const DRACO_PATH = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+const BASIS_PATH = 'https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/libs/basis/';
+
+// ─────────────────────────────────────────────────────────────
+//  BAKED MAP  (Step 2 — unchanged)
+// ─────────────────────────────────────────────────────────────
+const BAKED_MAP = [
+  { tex: './textures/baked/ramenShopBaked1024', meshName: 'ramenShopJoined' },
+  { tex: './textures/baked/machinesBaked1024',  meshName: 'machinesJoined'  },
+  { tex: './textures/baked/graphicsBaked512',   meshName: 'graphicsJoined'  },
+  { tex: './textures/baked/miscBaked1024',      meshName: 'miscJoined'      },
+  { tex: './textures/baked/floorBaked1024',     meshName: 'floor'           },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  MATCAP MAP  (Step 3 — new)
+//
+//  MeshMatcapMaterial wraps the mesh normals against a sphere
+//  photo — no lights needed. The matcap image IS the lighting.
+//
+//  Groups of meshes that share a matcap are listed together.
+//  tex:    path to the matcap file (KTX2 or PNG)
+//  meshes: exact names from the GLTF traverse
+//  color:  dot color for the panel
+// ─────────────────────────────────────────────────────────────
+const MATCAP_MAP = [
+  {
+    label:  'Fan blades (metallic spin)',
+    tex:    './textures/matcaps/fanMatCap.ktx2',
+    isPng:  false,
+    color:  '#f4e04d',
+    meshes: ['fan1', 'fan2']
+  },
+  {
+    label:  'Neon blue glow',
+    tex:    './textures/matcaps/neonBlueMatCap.ktx2',
+    isPng:  false,
+    color:  '#4df',
+    meshes: [
+      'neonBlue',
+      'blueLights',
+      'portalLight',
+      'vendingMachineLight'
+    ]
+  },
+  {
+    label:  'Neon green glow',
+    tex:    './textures/matcaps/neonGreenMatCap.ktx2',
+    isPng:  false,
+    color:  '#0f8',
+    meshes: [
+      'neonGreen',
+      'storageLight',
+      'greenLED',
+      'greenSignSquare'
+    ]
+  },
+  {
+    label:  'Neon pink / yellow glow',
+    // pink and yellow neons share the neonBlue matcap in the original
+    // (the colour comes from the matcap sphere tone, not mesh colour)
+    tex:    './textures/matcaps/neonBlueMatCap.ktx2',
+    isPng:  false,
+    color:  '#f4f',
+    meshes: [
+      'neonPink',
+      'neonYellow',
+      'lampLights',
+      'poleLight'
+    ]
+  },
+  {
+    label:  'Dish + stand (ceramic)',
+    tex:    './textures/matcaps/dishMatCap.ktx2',
+    isPng:  false,
+    color:  '#faa',
+    meshes: ['dish', 'dishStand']
+  },
+  {
+    label:  'Light globes + small accents',
+    tex:    './textures/matcaps/lightMatcap.png',   // PNG — no KTX2 variant
+    isPng:  true,
+    color:  '#fff',
+    meshes: [
+      'arcadeRim',
+      'arcadeToken',
+      'whiteButton',
+      'redLED',
+      'yellowRightLight',
+      'jZhouPink'
+    ]
+  },
+];
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap   = document.getElementById('log-entries');
+const barEl     = document.getElementById('progress-bar');
+const summaryEl = document.getElementById('summary');
+const topStatus = document.getElementById('top-status');
+const mapRowsEl = document.getElementById('map-rows');
+const icons     = { pending:'⏳', ok:'✅', err:'❌', info:'📌', step:'──' };
+
+function log(msg, type='info') {
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.innerHTML = `<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(div);
+  logWrap.scrollTop = logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct) { barEl.style.width = pct + '%'; }
+
+// Build matcap panel rows
+const matcapStatusEls = {};
+MATCAP_MAP.forEach((group, gi) => {
+  const section = document.createElement('div');
+  section.className = 'map-section';
+  const title = document.createElement('div');
+  title.className = 'map-section-title';
+  title.style.color = group.color;
+  title.textContent = `${group.label}  ·  ${group.tex.split('/').pop()}`;
+  section.appendChild(title);
+
+  group.meshes.forEach((meshName, mi) => {
+    const key = `${gi}_${mi}`;
+    const row = document.createElement('div');
+    row.className = 'map-row';
+    row.innerHTML = `
+      <div class="map-dot" style="background:${group.color}"></div>
+      <div class="map-mesh">${meshName}</div>
+      <div class="map-arrow">→</div>
+      <div class="map-tex">${group.tex.split('/').pop()}</div>
+      <div class="map-status pending" id="mstat-${key}">pending</div>
+    `;
+    section.appendChild(row);
+    matcapStatusEls[key] = document.getElementById(`mstat-${key}`);
+  });
+  mapRowsEl.appendChild(section);
+});
+
+function setMatStatus(gi, mi, ok, msg) {
+  const el = matcapStatusEls[`${gi}_${mi}`];
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `map-status ${ok ? 'ok' : 'err'}`;
+}
+
+window.addEventListener('unhandledrejection', e =>
+  log('UNHANDLED: ' + (e.reason?.message || e.reason), 'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas = document.createElement('canvas');
+document.body.prepend(canvas);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+scene.add(new THREE.GridHelper(100, 40, 0x111130, 0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 2000);
+camera.position.set(-8, 14, 28);
+
+// ── CONTROLS ─────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(2, 0, 0);
+controls.maxPolarAngle = Math.PI / 2;
+controls.minDistance = 1;
+controls.maxDistance = 300;
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.update();
+
+// ── FLOOR ────────────────────────────────────────────────────
+const mshFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshPhongMaterial({ color: 0x444444 })
+);
+mshFloor.rotation.x = -Math.PI * 0.5;
+mshFloor.receiveShadow = true;
+mshFloor.position.set(0, -0.05, 0);
+scene.add(mshFloor);
+
+// ── REFERENCE BOX ────────────────────────────────────────────
+const mshBox = new THREE.Mesh(
+  new THREE.BoxGeometry(7.5, 2.5, 5.0),
+  new THREE.MeshPhongMaterial({ color: 0xaaaaaa })
+);
+mshBox.castShadow = true;
+mshBox.receiveShadow = true;
+mshBox.position.set(0, 15.5, 0);
+scene.add(mshBox);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+scene.add(ambientLight);
+
+// Shadow light — dedicated, stays ON after bakes load
+const shadowLight = new THREE.DirectionalLight(0xffffff, 0.4);
+shadowLight.position.set(5, 30, 8);
+shadowLight.castShadow = true;
+shadowLight.shadow.mapSize.set(2048, 2048);
+shadowLight.shadow.camera.near   = 1;
+shadowLight.shadow.camera.far    = 80;
+shadowLight.shadow.camera.left   = -30;
+shadowLight.shadow.camera.right  =  30;
+shadowLight.shadow.camera.top    =  30;
+shadowLight.shadow.camera.bottom = -30;
+shadowLight.shadow.bias          = -0.001;
+scene.add(shadowLight);
+scene.add(shadowLight.target);
+
+// Fill — for pre-texture visibility, zeroed after bakes
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+fillLight.position.set(-10, 20, -10);
+fillLight.castShadow = false;
+scene.add(fillLight);
+
+// ── SPOTLIGHTS (Step 1 config — preserved exactly) ───────────
+function createSpotlight(color) {
+  const light = new THREE.SpotLight(color, 800);
+  light.castShadow = true;
+  light.angle = 0.3; light.penumbra = 0.2;
+  light.decay = 2;   light.distance = 60;
+  return light;
+}
+const spotLight1 = createSpotlight(0xFF7F00);
+const spotLight2 = createSpotlight(0x00FF7F);
+const spotLight3 = createSpotlight(0x7F00FF);
+spotLight1.position.set( 5, 20, 8);
+spotLight2.position.set( 0, 20, 6);
+spotLight3.position.set(-5, 20, 8);
+spotLight1.target.position.set( 2, 0, 0);
+spotLight2.target.position.set( 0, 0, 0);
+spotLight3.target.position.set(-2, 0, 0);
+scene.add(spotLight1.target, spotLight2.target, spotLight3.target);
+const lh1 = new THREE.SpotLightHelper(spotLight1);
+const lh2 = new THREE.SpotLightHelper(spotLight2);
+const lh3 = new THREE.SpotLightHelper(spotLight3);
+scene.add(spotLight1, spotLight2, spotLight3, lh1, lh2, lh3);
+
+log('Renderer · Scene · Lights ready ✓', 'ok');
+setBar(5);
+
+// ── KTX2 LOADER ──────────────────────────────────────────────
+const ktx2Loader = new KTX2Loader();
+ktx2Loader.setTranscoderPath(BASIS_PATH);
+ktx2Loader.detectSupport(renderer);
+log('KTX2Loader ready ✓', 'ok');
+setBar(8);
+
+// ── DRACO ────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH);
+dracoLoader.preload();
+log('DRACOLoader → CDN 1.5.6 ✓', 'ok');
+setBar(10);
+
+// ── GLTF ─────────────────────────────────────────────────────
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+gltfLoader.setKTX2Loader(ktx2Loader);
+
+// ─────────────────────────────────────────────────────────────
+//  loadTexture — KTX2 with PNG fallback (same as Step 2)
+// ─────────────────────────────────────────────────────────────
+function loadTexture(basePath, forcePng = false) {
+  return new Promise((resolve) => {
+    if (forcePng) {
+      new THREE.TextureLoader().load(
+        basePath,
+        (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.needsUpdate = true;
+          resolve({ tex, format: 'PNG' });
+        },
+        undefined,
+        (err) => resolve({ tex: null, format: 'FAILED', err })
+      );
+      return;
+    }
+    ktx2Loader.load(
+      basePath,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        resolve({ tex, format: 'KTX2' });
+      },
+      undefined,
+      () => {
+        // KTX2 failed — try PNG variant
+        const pngPath = basePath.replace('.ktx2', '.png');
+        log(`  KTX2 fallback → PNG for ${basePath.split('/').pop()}`, 'info');
+        new THREE.TextureLoader().load(
+          pngPath,
+          (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            resolve({ tex, format: 'PNG' });
+          },
+          undefined,
+          (err) => resolve({ tex: null, format: 'FAILED', err })
+        );
+      }
+    );
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  loadBakedTexture — flipY:false for baked maps
+// ─────────────────────────────────────────────────────────────
+function loadBakedTexture(basePath) {
+  return new Promise((resolve) => {
+    ktx2Loader.load(
+      basePath + '.ktx2',
+      (tex) => {
+        tex.flipY = false;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        resolve({ tex, format: 'KTX2' });
+      },
+      undefined,
+      () => {
+        new THREE.TextureLoader().load(
+          basePath + '.png',
+          (tex) => {
+            tex.flipY = false;
+            tex.colorSpace = THREE.SRGBColorSpace;
+            resolve({ tex, format: 'PNG' });
+          },
+          undefined,
+          (err) => resolve({ tex: null, format: 'FAILED', err })
+        );
+      }
+    );
+  });
+}
+
+log('Fetching GLTF …', 'pending');
+
+fetch(GLTF_PATH)
+  .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+  .then(() => { log('GLTF reachable ✓', 'ok'); setBar(12); loadGLTF(); })
+  .catch(err => {
+    log('FETCH FAILED: ' + err.message, 'err');
+    topStatus.textContent = 'Error ❌'; topStatus.style.color = '#ff5f5f';
+  });
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOAD
+// ─────────────────────────────────────────────────────────────
+function loadGLTF() {
+  log('GLTFLoader parsing …', 'pending');
+
+  gltfLoader.load(GLTF_PATH, async (gltf) => {
+    log('GLTF parsed ✓', 'ok');
+    setBar(25);
+
+    const model = gltf.scene;
+
+    // Centre model
+    const bbox   = new THREE.Box3().setFromObject(model);
+    const center = bbox.getCenter(new THREE.Vector3());
+    const size   = bbox.getSize(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= bbox.min.y;
+
+    model.traverse(child => {
+      if (child.isMesh) {
+        child.receiveShadow = true;
+        child.castShadow    = false;
+      }
+    });
+
+    scene.add(model);
+
+    const shopHeight = size.y;
+    mshBox.position.set(0, shopHeight + 3.5, 0);
+    spotLight1.position.set( 5, shopHeight + 14, 8);
+    spotLight2.position.set( 0, shopHeight + 14, 6);
+    spotLight3.position.set(-5, shopHeight + 14, 8);
+
+    log(`Model placed — ${size.x.toFixed(1)}×${shopHeight.toFixed(1)}×${size.z.toFixed(1)}`, 'info');
+
+    // Build name → object lookup
+    const nameMap = {};
+    model.traverse(obj => { if (obj.name) nameMap[obj.name] = obj; });
+
+    // ── STEP 2: Apply baked textures ─────────────────────
+    log('── Step 2: Baked textures ──', 'step');
+    setBar(30);
+
+    for (let i = 0; i < BAKED_MAP.length; i++) {
+      const entry = BAKED_MAP[i];
+      const { tex, format } = await loadBakedTexture(entry.tex);
+      if (!tex) { log(`  ❌ Baked FAILED: ${entry.meshName}`, 'err'); continue; }
+
+      const target = nameMap[entry.meshName];
+      if (!target) { log(`  ❌ Mesh not found: ${entry.meshName}`, 'err'); continue; }
+
+      const mat = new THREE.MeshBasicMaterial({ map: tex });
+      if (target.isMesh) {
+        target.material = mat;
+      } else {
+        target.traverse(c => { if (c.isMesh) c.material = mat; });
+      }
+      log(`  ✅ ${entry.meshName} ← baked ${format}`, 'ok');
+      setBar(30 + Math.round(((i+1)/BAKED_MAP.length)*20));
+    }
+
+    // Kill fill after bakes
+    fillLight.intensity = 0.0;
+    log('Baked textures complete ✓', 'ok');
+
+    // ── STEP 3: Apply matcap materials ───────────────────
+    log('── Step 3: Matcap materials ──', 'step');
+    setBar(55);
+
+    let matcapApplied = 0;
+    let matcapFailed  = 0;
+
+    for (let gi = 0; gi < MATCAP_MAP.length; gi++) {
+      const group = MATCAP_MAP[gi];
+
+      // Load the matcap texture
+      // Matcap textures do NOT need flipY:false — they're sphere captures,
+      // not UV-mapped bakes. Default flipY:true is correct.
+      const { tex, format } = await loadTexture(group.tex, group.isPng);
+
+      if (!tex) {
+        log(`  ❌ Matcap FAILED: ${group.label}`, 'err');
+        group.meshes.forEach((_, mi) => setMatStatus(gi, mi, false, 'FAILED'));
+        matcapFailed += group.meshes.length;
+        continue;
+      }
+
+      log(`  Matcap loaded: ${group.tex.split('/').pop()} [${format}]`, 'info');
+
+      // Create ONE shared MeshMatcapMaterial per group
+      // MeshMatcapMaterial: ignores all scene lights, uses the matcap
+      // texture to simulate reflection/shading based on surface normals.
+      const mat = new THREE.MeshMatcapMaterial({ matcap: tex });
+
+      for (let mi = 0; mi < group.meshes.length; mi++) {
+        const meshName = group.meshes[mi];
+        const target   = nameMap[meshName];
+
+        if (!target) {
+          log(`    ❌ Mesh not found: "${meshName}"`, 'err');
+          setMatStatus(gi, mi, false, 'not found');
+          matcapFailed++;
+          continue;
+        }
+
+        if (target.isMesh) {
+          target.material = mat;
+        } else {
+          target.traverse(c => { if (c.isMesh) c.material = mat; });
+        }
+
+        setMatStatus(gi, mi, true, `✓ ${format}`);
+        matcapApplied++;
+        log(`    ✅ ${meshName} ← ${group.label}`, 'ok');
+      }
+
+      setBar(55 + Math.round(((gi+1)/MATCAP_MAP.length)*35));
+    }
+
+    setBar(100);
+
+    const total = MATCAP_MAP.reduce((s, g) => s + g.meshes.length, 0);
+    summaryEl.textContent =
+      `Baked: 5/5 · Matcaps: ${matcapApplied}/${total} applied · ${matcapFailed} failed`;
+    topStatus.textContent = `✅ Matcaps: ${matcapApplied}/${total}`;
+    topStatus.style.color = matcapFailed === 0 ? '#4eca8b' : '#f0c060';
+
+    log(`▶ STEP 3 COMPLETE — ${matcapApplied}/${total} matcap meshes`, 'ok');
+    log('Fans · Neons · Dish · Light accents should now have matcap sheen', 'info');
+    log('Open 🎨 Matcaps panel to verify each mesh', 'info');
+
+    setTimeout(() => {
+      hideAllPanels();
+      document.getElementById('hint').textContent =
+        'Drag · Pinch · Scroll  |  📋 Log   🎨 Matcaps →';
+    }, 3000);
+
+  },
+  (xhr) => { if (xhr.total) setBar(12 + Math.round((xhr.loaded/xhr.total)*12)); },
+  (err) => {
+    log('GLTFLoader ERROR: ' + (err?.message || err), 'err');
+    topStatus.textContent = 'Error ❌'; topStatus.style.color = '#ff5f5f';
+  });
+}
+
+// ── SPOTLIGHT TWEENS (Step 1 — unchanged) ────────────────────
+function tweenSpot(light) {
+  new TWEEN.Tween(light)
+    .to({ angle:(Math.random()*0.7)+0.1, penumbra:Math.random()+1 },
+        Math.random()*3000+2000)
+    .easing(TWEEN.Easing.Quadratic.Out).start();
+  const baseY = light.position.y;
+  new TWEEN.Tween(light.position)
+    .to({ x:(Math.random()*16)-8, y:baseY+(Math.random()*4)-2, z:(Math.random()*16)-8 },
+        Math.random()*3000+2000)
+    .easing(TWEEN.Easing.Quadratic.Out).start();
+}
+function updateTweens() {
+  tweenSpot(spotLight1); tweenSpot(spotLight2); tweenSpot(spotLight3);
+  setTimeout(updateTweens, 5000);
+}
+
+// ── RENDER LOOP ───────────────────────────────────────────────
+(function tick() {
+  requestAnimationFrame(tick);
+  TWEEN.update();
+  controls.update();
+  lh1.update(); lh2.update(); lh3.update();
+  renderer.render(scene, camera);
+})();
+
+updateTweens();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

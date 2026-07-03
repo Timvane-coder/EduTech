@@ -1,0 +1,33 @@
+import { NodeIO } from '@gltf-transform/core'
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
+import draco3d from 'draco3d'
+
+const target = process.env.TARGET
+if (!target) {
+  console.error('Usage: TARGET=ramenShopJoined node ramenShop-isolate.mjs')
+  process.exit(1)
+}
+
+const io = new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({
+    'draco3d.decoder': await draco3d.createDecoderModule(),
+    'draco3d.encoder': await draco3d.createEncoderModule(),
+  })
+
+const doc  = await io.read('ramenShop.glb')
+const root = doc.getRoot()
+
+const node = root.listNodes().find(n => n.getName() === target)
+if (!node) {
+  console.error(`Node "${target}" not found`)
+  process.exit(1)
+}
+
+node.setMesh(null)
+node.dispose()
+
+const outFile = `ramenShop-without-${target}.glb`
+await io.write(outFile, doc)
+console.log(`✅ Written: ${outFile}  — "${target}" completely removed`)
+console.log(`   Open in viewer. If canopy/bench/bowls gone → that is the target mesh.`)

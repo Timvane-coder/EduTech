@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 04 — Video Textures | Ramen Shop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; overflow: hidden; }
+    canvas { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 44px;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(8px);
+      border-bottom: 1px solid #2a2a3a;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px; z-index: 200;
+    }
+    #topbar .title { font-size: 11px; letter-spacing: 2px; color: #ff7f00; text-transform: uppercase; }
+    #topbar .status { font-size: 11px; color: #4eca8b; }
+
+    .btn {
+      background: #1a1a2a; border: 1px solid #3a3a5a; color: #ccc;
+      border-radius: 6px; padding: 5px 12px; font-size: 11px;
+      font-family: 'Courier New', monospace; cursor: pointer; transition: background 0.2s;
+    }
+    .btn:hover { background: #2a2a4a; }
+    .btn.active { background: #ff7f0033; border-color: #ff7f00; color: #ff7f00; }
+
+    #btn-row {
+      position: fixed; top: 52px; right: 10px;
+      display: flex; flex-direction: column; gap: 6px; z-index: 200;
+    }
+
+    #log-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 60vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #2a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity: 0; pointer-events: none; transform: translateY(-8px); }
+
+    .log-entry { font-size: 11px; line-height: 1.85; padding: 1px 0; border-bottom: 1px solid #111; display: flex; gap: 7px; word-break: break-all; }
+    .log-entry.pending { color: #888; }
+    .log-entry.ok      { color: #4eca8b; }
+    .log-entry.err     { color: #ff5f5f; font-weight: bold; }
+    .log-entry.info    { color: #f0c060; }
+    .log-entry.step    { color: #adf; font-weight: bold; }
+
+    #progress-bar-wrap { margin-top: 8px; height: 4px; background: #1a1a2a; border-radius: 3px; overflow: hidden; }
+    #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#ff7f00,#00ff7f); transition: width 0.3s; }
+    #summary { margin-top: 6px; font-size: 10px; color: #666; }
+
+    #map-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 75vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #1a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100; display: none;
+    }
+    #map-panel h3 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #f0c; margin-bottom: 10px; }
+    .map-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #0a0a0a; font-size: 10px; }
+    .map-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .map-mesh   { color: #4eca8b; min-width: 140px; }
+    .map-arrow  { color: #555; }
+    .map-tex    { color: #f0c060; flex: 1; }
+    .map-status { font-size: 9px; min-width: 70px; text-align: right; }
+    .map-status.ok      { color: #4eca8b; }
+    .map-status.err     { color: #ff5f5f; }
+    .map-status.pending { color: #888; }
+
+    /* video mute toggle */
+    #mute-btn {
+      position: fixed; bottom: 50px; right: 14px;
+      background: rgba(0,0,0,0.7); border: 1px solid #333;
+      color: #888; font-size: 18px; padding: 6px 10px;
+      border-radius: 8px; cursor: pointer; z-index: 200;
+    }
+
+    #scene-legend {
+      position: fixed; bottom: 50px; left: 14px;
+      font-size: 10px; color: #666; z-index: 100; line-height: 2.0; pointer-events: none;
+    }
+    #hint {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: #333; z-index: 100; text-align: center;
+      background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 20px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 04 — Video Textures</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+
+<div id="btn-row">
+  <button class="btn active" id="btn-log" onclick="toggle('log')">📋 Log</button>
+  <button class="btn"        id="btn-map" onclick="toggle('map')">📺 Videos</button>
+</div>
+
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+
+<div id="map-panel">
+  <h3>Video → mesh assignments</h3>
+  <div id="map-rows"></div>
+</div>
+
+<button id="mute-btn" title="Toggle video audio">🔇</button>
+
+<div id="scene-legend">
+  <span style="color:#FF7F00">● Spot 1 (orange)</span><br>
+  <span style="color:#00FF7F">● Spot 2 (green)</span><br>
+  <span style="color:#7F00FF">● Spot 3 (violet)</span>
+</div>
+<div id="hint">Drag · Pinch · Scroll</div>
+
+<script>
+  let logVisible = true, mapVisible = false;
+  function toggle(which) {
+    const lp = document.getElementById('log-panel');
+    const mp = document.getElementById('map-panel');
+    const bl = document.getElementById('btn-log');
+    const bm = document.getElementById('btn-map');
+    if (which === 'log') {
+      logVisible = !logVisible;
+      lp.classList.toggle('hidden', !logVisible);
+      bl.classList.toggle('active', logVisible);
+      if (logVisible) { mapVisible=false; mp.style.display='none'; bm.classList.remove('active'); }
+    } else {
+      mapVisible = !mapVisible;
+      mp.style.display = mapVisible ? 'block' : 'none';
+      bm.classList.toggle('active', mapVisible);
+      if (mapVisible) { logVisible=false; lp.classList.add('hidden'); bl.classList.remove('active'); }
+    }
+  }
+  function hideAllPanels() {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('map-panel').style.display = 'none';
+    document.getElementById('btn-log').classList.remove('active');
+    document.getElementById('btn-map').classList.remove('active');
+    logVisible = false; mapVisible = false;
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader }    from 'three/addons/loaders/KTX2Loader.js';
+
+const GLTF_PATH  = './models/ramenShop.gltf';
+const DRACO_PATH = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+const BASIS_PATH = 'https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/libs/basis/';
+
+// ─────────────────────────────────────────────────────────────
+//  BAKED MAP (Step 2)
+// ─────────────────────────────────────────────────────────────
+const BAKED_MAP = [
+  { tex: './textures/baked/ramenShopBaked1024', meshName: 'ramenShopJoined' },
+  { tex: './textures/baked/machinesBaked1024',  meshName: 'machinesJoined'  },
+  { tex: './textures/baked/graphicsBaked512',   meshName: 'graphicsJoined'  },
+  { tex: './textures/baked/miscBaked1024',      meshName: 'miscJoined'      },
+  { tex: './textures/baked/floorBaked1024',     meshName: 'floor'           },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  MATCAP MAP (Step 3)
+// ─────────────────────────────────────────────────────────────
+const MATCAP_MAP = [
+  { tex: './textures/matcaps/fanMatCap.ktx2',      isPng: false, meshes: ['fan1','fan2'] },
+  { tex: './textures/matcaps/neonBlueMatCap.ktx2', isPng: false, meshes: ['neonBlue','blueLights','portalLight','vendingMachineLight'] },
+  { tex: './textures/matcaps/neonGreenMatCap.ktx2',isPng: false, meshes: ['neonGreen','storageLight','greenLED','greenSignSquare'] },
+  { tex: './textures/matcaps/neonBlueMatCap.ktx2', isPng: false, meshes: ['neonPink','neonYellow','lampLights','poleLight'] },
+  { tex: './textures/matcaps/dishMatCap.ktx2',     isPng: false, meshes: ['dish','dishStand'] },
+  { tex: './textures/matcaps/lightMatcap.png',     isPng: true,  meshes: ['arcadeRim','arcadeToken','whiteButton','redLED','yellowRightLight','jZhouPink'] },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  VIDEO MAP (Step 4 — new)
+//
+//  Three categories:
+//
+//  1. CHROMA KEY screens  (littleTVScreen, tallScreen, tvScreen)
+//     — MP4 filmed on green background.
+//     — Custom GLSL shader removes the green at runtime so only
+//       the content pixels show, background is transparent.
+//
+//  2. SMALL AMBIENT screens  (smallScreen3–5)
+//     — Plain MP4 looping video, no chroma key needed.
+//     — MeshBasicMaterial with VideoTexture.
+//
+//  Note: smallScreen1 & smallScreen2 use .basis files (Step 6).
+//        vendingMachineScreen, bigScreen, arcadeScreen,
+//        sideScreen use KTX2 still images swapped by controller
+//        (Step 6). They are left untouched here.
+// ─────────────────────────────────────────────────────────────
+const VIDEO_MAP = [
+  // ── Chroma key screens ───────────────────────────────────
+  {
+    meshName:   'littleTVScreen',
+    src:        './textures/videosTextures/littleTVScreen.mp4',
+    chromaKey:  true,
+    // green-screen key colour — adjust if your footage uses a
+    // different shade. { r, g, b } in 0–1 range.
+    keyColor:   { r: 0.0, g: 1.0, b: 0.0 },
+    similarity: 0.4,   // how close to key colour counts as green
+    smoothness: 0.08,  // edge softness
+    color:      '#0f8',
+  },
+  {
+    meshName:   'tallScreen',
+    src:        './textures/videosTextures/tallScreen.mp4',
+    chromaKey:  true,
+    keyColor:   { r: 0.0, g: 1.0, b: 0.0 },
+    similarity: 0.4,
+    smoothness: 0.08,
+    color:      '#4df',
+  },
+  {
+    meshName:   'tvScreen',
+    src:        './textures/videosTextures/tvScreen.mp4',
+    chromaKey:  true,
+    keyColor:   { r: 0.0, g: 1.0, b: 0.0 },
+    similarity: 0.4,
+    smoothness: 0.08,
+    color:      '#f4f',
+  },
+  // ── Plain video screens ──────────────────────────────────
+  {
+    meshName:  'smallScreen3',
+    src:       './textures/videosTextures/smallScreen3.mp4',
+    chromaKey: false,
+    color:     '#fa4',
+  },
+  {
+    meshName:  'smallScreen4',
+    src:       './textures/videosTextures/smallScreen4.mp4',
+    chromaKey: false,
+    color:     '#fa4',
+  },
+  {
+    meshName:  'smallScreen5',
+    src:       './textures/videosTextures/smallScreen5.mp4',
+    chromaKey: false,
+    color:     '#fa4',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  CHROMA KEY GLSL SHADER
+//
+//  vertex: standard UV pass-through
+//  fragment: samples the video texture, measures distance of each
+//  pixel's colour from the key colour in RGB space, and sets alpha
+//  to 0 for pixels within the similarity threshold (green pixels).
+//  Smoothness controls the softness of the edge.
+// ─────────────────────────────────────────────────────────────
+const chromaVertexShader = /* glsl */`
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const chromaFragmentShader = /* glsl */`
+  uniform sampler2D uVideoTexture;
+  uniform vec3      uKeyColor;
+  uniform float     uSimilarity;
+  uniform float     uSmoothness;
+  varying vec2 vUv;
+
+  void main() {
+    vec4 videoColor = texture2D(uVideoTexture, vUv);
+
+    // Distance from this pixel's colour to the key colour
+    float dist = length(videoColor.rgb - uKeyColor);
+
+    // Map distance to alpha: pixels close to key → transparent
+    // pixels far from key → fully opaque
+    float alpha = smoothstep(uSimilarity, uSimilarity + uSmoothness, dist);
+
+    // Discard fully transparent pixels (avoids z-fighting artefacts)
+    if (alpha < 0.01) discard;
+
+    gl_FragColor = vec4(videoColor.rgb, alpha);
+  }
+`;
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap   = document.getElementById('log-entries');
+const barEl     = document.getElementById('progress-bar');
+const summaryEl = document.getElementById('summary');
+const topStatus = document.getElementById('top-status');
+const mapRowsEl = document.getElementById('map-rows');
+const icons     = { pending:'⏳', ok:'✅', err:'❌', info:'📌', step:'──' };
+
+function log(msg, type='info') {
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.innerHTML = `<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(div);
+  logWrap.scrollTop = logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct) { barEl.style.width = pct + '%'; }
+
+// Build video panel rows
+const videoStatusEls = {};
+VIDEO_MAP.forEach((entry, i) => {
+  const row = document.createElement('div');
+  row.className = 'map-row';
+  row.innerHTML = `
+    <div class="map-dot" style="background:${entry.color}"></div>
+    <div class="map-mesh">${entry.meshName}</div>
+    <div class="map-arrow">→</div>
+    <div class="map-tex">${entry.src.split('/').pop()}${entry.chromaKey ? ' 🟩 chroma' : ' 📹 plain'}</div>
+    <div class="map-status pending" id="vstat-${i}">pending</div>
+  `;
+  mapRowsEl.appendChild(row);
+  videoStatusEls[i] = document.getElementById(`vstat-${i}`);
+});
+function setVidStatus(i, ok, msg) {
+  const el = videoStatusEls[i];
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `map-status ${ok ? 'ok' : 'err'}`;
+}
+
+window.addEventListener('unhandledrejection', e =>
+  log('UNHANDLED: ' + (e.reason?.message || e.reason), 'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas = document.createElement('canvas');
+document.body.prepend(canvas);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+scene.add(new THREE.GridHelper(100, 40, 0x111130, 0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 2000);
+camera.position.set(-8, 14, 28);
+
+// ── CONTROLS ─────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(2, 0, 0);
+controls.maxPolarAngle = Math.PI / 2;
+controls.minDistance = 1;
+controls.maxDistance = 300;
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.update();
+
+// ── FLOOR ────────────────────────────────────────────────────
+const mshFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshPhongMaterial({ color: 0x444444 })
+);
+mshFloor.rotation.x = -Math.PI * 0.5;
+mshFloor.receiveShadow = true;
+mshFloor.position.set(0, -0.05, 0);
+scene.add(mshFloor);
+
+// ── REFERENCE BOX ────────────────────────────────────────────
+const mshBox = new THREE.Mesh(
+  new THREE.BoxGeometry(7.5, 2.5, 5.0),
+  new THREE.MeshPhongMaterial({ color: 0xaaaaaa })
+);
+mshBox.castShadow = true;
+mshBox.receiveShadow = true;
+mshBox.position.set(0, 15.5, 0);
+scene.add(mshBox);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+scene.add(ambientLight);
+
+const shadowLight = new THREE.DirectionalLight(0xffffff, 0.4);
+shadowLight.position.set(5, 30, 8);
+shadowLight.castShadow = true;
+shadowLight.shadow.mapSize.set(2048, 2048);
+shadowLight.shadow.camera.near   = 1;
+shadowLight.shadow.camera.far    = 80;
+shadowLight.shadow.camera.left   = -30;
+shadowLight.shadow.camera.right  =  30;
+shadowLight.shadow.camera.top    =  30;
+shadowLight.shadow.camera.bottom = -30;
+shadowLight.shadow.bias          = -0.001;
+scene.add(shadowLight, shadowLight.target);
+
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+fillLight.position.set(-10, 20, -10);
+fillLight.castShadow = false;
+scene.add(fillLight);
+
+// ── SPOTLIGHTS (Step 1 — preserved exactly) ──────────────────
+function createSpotlight(color) {
+  const light = new THREE.SpotLight(color, 800);
+  light.castShadow = true;
+  light.angle = 0.3; light.penumbra = 0.2;
+  light.decay = 2;   light.distance = 60;
+  return light;
+}
+const spotLight1 = createSpotlight(0xFF7F00);
+const spotLight2 = createSpotlight(0x00FF7F);
+const spotLight3 = createSpotlight(0x7F00FF);
+spotLight1.position.set( 5, 20, 8);
+spotLight2.position.set( 0, 20, 6);
+spotLight3.position.set(-5, 20, 8);
+spotLight1.target.position.set( 2, 0, 0);
+spotLight2.target.position.set( 0, 0, 0);
+spotLight3.target.position.set(-2, 0, 0);
+scene.add(spotLight1.target, spotLight2.target, spotLight3.target);
+const lh1 = new THREE.SpotLightHelper(spotLight1);
+const lh2 = new THREE.SpotLightHelper(spotLight2);
+const lh3 = new THREE.SpotLightHelper(spotLight3);
+scene.add(spotLight1, spotLight2, spotLight3, lh1, lh2, lh3);
+
+log('Renderer · Scene · Lights ready ✓', 'ok');
+setBar(5);
+
+// ── KTX2 + DRACO + GLTF loaders ──────────────────────────────
+const ktx2Loader = new KTX2Loader();
+ktx2Loader.setTranscoderPath(BASIS_PATH);
+ktx2Loader.detectSupport(renderer);
+
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH);
+dracoLoader.preload();
+
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+gltfLoader.setKTX2Loader(ktx2Loader);
+
+log('Loaders ready ✓', 'ok');
+setBar(8);
+
+// ─────────────────────────────────────────────────────────────
+//  Texture helpers (same as Steps 2 & 3)
+// ─────────────────────────────────────────────────────────────
+function loadBakedTex(basePath) {
+  return new Promise(resolve => {
+    ktx2Loader.load(basePath + '.ktx2',
+      tex => { tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; resolve({ tex, format: 'KTX2' }); },
+      undefined,
+      () => new THREE.TextureLoader().load(basePath + '.png',
+        tex => { tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace; resolve({ tex, format: 'PNG' }); },
+        undefined,
+        err => resolve({ tex: null, format: 'FAILED', err })
+      )
+    );
+  });
+}
+
+function loadMatcapTex(path, isPng) {
+  return new Promise(resolve => {
+    if (isPng) {
+      new THREE.TextureLoader().load(path,
+        tex => { tex.colorSpace = THREE.SRGBColorSpace; resolve({ tex, format: 'PNG' }); },
+        undefined,
+        err => resolve({ tex: null, format: 'FAILED', err })
+      );
+    } else {
+      ktx2Loader.load(path,
+        tex => { tex.colorSpace = THREE.SRGBColorSpace; resolve({ tex, format: 'KTX2' }); },
+        undefined,
+        () => new THREE.TextureLoader().load(path.replace('.ktx2', '.png'),
+          tex => { tex.colorSpace = THREE.SRGBColorSpace; resolve({ tex, format: 'PNG' }); },
+          undefined,
+          err => resolve({ tex: null, format: 'FAILED', err })
+        )
+      );
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  createVideoElement
+//  Creates a hidden <video> that loops silently and auto-plays.
+//  Browsers block autoplay with audio — muted is required.
+//  The mute button in the UI toggles audio after first play.
+// ─────────────────────────────────────────────────────────────
+const allVideoEls = [];   // track for mute toggle
+
+function createVideoElement(src) {
+  const vid = document.createElement('video');
+  vid.src      = src;
+  vid.loop     = true;
+  vid.muted    = true;       // required for autoplay
+  vid.playsInline = true;    // required on iOS
+  vid.crossOrigin = 'anonymous';
+  vid.style.display = 'none';
+  document.body.appendChild(vid);
+  allVideoEls.push(vid);
+  return vid;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  applyVideoTexture
+//  Creates a VideoTexture from the <video> element, then:
+//  - If chromaKey: builds a ShaderMaterial with the GLSL shader
+//  - If plain:     builds a MeshBasicMaterial
+//  Returns a promise that resolves when the video can play.
+// ─────────────────────────────────────────────────────────────
+function applyVideoTexture(mesh, entry) {
+  return new Promise((resolve, reject) => {
+    const vid = createVideoElement(entry.src);
+
+    vid.addEventListener('canplay', () => {
+      vid.play().catch(e => log(`  ⚠ Autoplay blocked: ${e.message}`, 'info'));
+
+      // VideoTexture updates every frame automatically
+      // flipY: false because video frames match UV orientation
+      const videoTex = new THREE.VideoTexture(vid);
+      videoTex.flipY = false;
+      videoTex.colorSpace = THREE.SRGBColorSpace;
+
+      let mat;
+
+      if (entry.chromaKey) {
+        // ── Chroma key ShaderMaterial ─────────────────────
+        mat = new THREE.ShaderMaterial({
+          uniforms: {
+            uVideoTexture: { value: videoTex },
+            uKeyColor:     { value: new THREE.Color(entry.keyColor.r, entry.keyColor.g, entry.keyColor.b) },
+            uSimilarity:   { value: entry.similarity },
+            uSmoothness:   { value: entry.smoothness },
+          },
+          vertexShader:   chromaVertexShader,
+          fragmentShader: chromaFragmentShader,
+          transparent:    true,   // needed so alpha from discard works
+          depthWrite:     false,  // prevents z-fighting on transparent areas
+          side:           THREE.DoubleSide,
+        });
+      } else {
+        // ── Plain video — MeshBasicMaterial ───────────────
+        mat = new THREE.MeshBasicMaterial({
+          map:  videoTex,
+          side: THREE.DoubleSide,
+        });
+      }
+
+      if (mesh.isMesh) {
+        mesh.material = mat;
+      } else {
+        mesh.traverse(c => { if (c.isMesh) c.material = mat; });
+      }
+
+      resolve(mat);
+    }, { once: true });
+
+    vid.addEventListener('error', (e) => {
+      reject(new Error(`Video load error: ${entry.src} — ${e.message || 'unknown'}`));
+    }, { once: true });
+
+    vid.load();
+  });
+}
+
+// ── Mute toggle button ────────────────────────────────────────
+let isMuted = true;
+document.getElementById('mute-btn').addEventListener('click', () => {
+  isMuted = !isMuted;
+  allVideoEls.forEach(v => { v.muted = isMuted; });
+  document.getElementById('mute-btn').textContent = isMuted ? '🔇' : '🔊';
+});
+
+// ── Fetch + load ─────────────────────────────────────────────
+log('Fetching GLTF …', 'pending');
+
+fetch(GLTF_PATH)
+  .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+  .then(() => { log('GLTF reachable ✓', 'ok'); setBar(10); loadGLTF(); })
+  .catch(err => {
+    log('FETCH FAILED: ' + err.message, 'err');
+    topStatus.textContent = 'Error ❌'; topStatus.style.color = '#ff5f5f';
+  });
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOAD
+// ─────────────────────────────────────────────────────────────
+function loadGLTF() {
+  log('GLTFLoader parsing …', 'pending');
+
+  gltfLoader.load(GLTF_PATH, async (gltf) => {
+    log('GLTF parsed ✓', 'ok');
+    setBar(20);
+
+    const model = gltf.scene;
+    const bbox  = new THREE.Box3().setFromObject(model);
+    const center = bbox.getCenter(new THREE.Vector3());
+    const size   = bbox.getSize(new THREE.Vector3());
+
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= bbox.min.y;
+    model.traverse(c => { if (c.isMesh) { c.receiveShadow = true; c.castShadow = false; } });
+    scene.add(model);
+
+    const shopHeight = size.y;
+    mshBox.position.set(0, shopHeight + 3.5, 0);
+    spotLight1.position.set( 5, shopHeight + 14, 8);
+    spotLight2.position.set( 0, shopHeight + 14, 6);
+    spotLight3.position.set(-5, shopHeight + 14, 8);
+    log(`Model placed — ${size.x.toFixed(1)}×${shopHeight.toFixed(1)}×${size.z.toFixed(1)}`, 'info');
+
+    const nameMap = {};
+    model.traverse(obj => { if (obj.name) nameMap[obj.name] = obj; });
+
+    // ── Step 2: Baked textures ────────────────────────────
+    log('── Step 2: Baked textures ──', 'step');
+    setBar(22);
+    for (const entry of BAKED_MAP) {
+      const { tex } = await loadBakedTex(entry.tex);
+      if (!tex) { log(`  ❌ ${entry.meshName}`, 'err'); continue; }
+      const target = nameMap[entry.meshName];
+      if (!target) { log(`  ❌ mesh not found: ${entry.meshName}`, 'err'); continue; }
+      const mat = new THREE.MeshBasicMaterial({ map: tex });
+      if (target.isMesh) target.material = mat;
+      else target.traverse(c => { if (c.isMesh) c.material = mat; });
+      log(`  ✅ ${entry.meshName}`, 'ok');
+    }
+    fillLight.intensity = 0.0;
+    setBar(40);
+    log('Baked textures done ✓', 'ok');
+
+    // ── Step 3: Matcap materials ──────────────────────────
+    log('── Step 3: Matcap materials ──', 'step');
+    for (const group of MATCAP_MAP) {
+      const { tex } = await loadMatcapTex(group.tex, group.isPng);
+      if (!tex) { log(`  ❌ matcap failed: ${group.tex}`, 'err'); continue; }
+      const mat = new THREE.MeshMatcapMaterial({ matcap: tex });
+      for (const meshName of group.meshes) {
+        const t = nameMap[meshName];
+        if (!t) { log(`  ❌ mesh not found: ${meshName}`, 'err'); continue; }
+        if (t.isMesh) t.material = mat;
+        else t.traverse(c => { if (c.isMesh) c.material = mat; });
+        log(`  ✅ ${meshName}`, 'ok');
+      }
+    }
+    setBar(60);
+    log('Matcap materials done ✓', 'ok');
+
+    // ── Step 4: Video textures ────────────────────────────
+    log('── Step 4: Video textures ──', 'step');
+    let vidOk = 0, vidFail = 0;
+
+    for (let i = 0; i < VIDEO_MAP.length; i++) {
+      const entry = VIDEO_MAP[i];
+      const target = nameMap[entry.meshName];
+
+      if (!target) {
+        log(`  ❌ Mesh not found: "${entry.meshName}"`, 'err');
+        setVidStatus(i, false, 'mesh not found');
+        vidFail++;
+        continue;
+      }
+
+      log(`  Loading video: ${entry.src.split('/').pop()} → ${entry.meshName}`, 'pending');
+
+      try {
+        await applyVideoTexture(target, entry);
+        vidOk++;
+        setVidStatus(i, true, entry.chromaKey ? '✓ chroma' : '✓ playing');
+        log(`  ✅ ${entry.meshName} [${entry.chromaKey ? 'chroma key' : 'plain'}]`, 'ok');
+      } catch(err) {
+        log(`  ❌ ${entry.meshName}: ${err.message}`, 'err');
+        setVidStatus(i, false, 'FAILED');
+        vidFail++;
+      }
+
+      setBar(60 + Math.round(((i+1)/VIDEO_MAP.length)*35));
+    }
+
+    setBar(100);
+    summaryEl.textContent =
+      `Videos: ${vidOk}/${VIDEO_MAP.length} playing · ${vidFail} failed`;
+    topStatus.textContent = `✅ ${vidOk}/${VIDEO_MAP.length} videos`;
+    topStatus.style.color = vidFail === 0 ? '#4eca8b' : '#f0c060';
+
+    log(`▶ STEP 4 COMPLETE — ${vidOk}/${VIDEO_MAP.length} video screens live`, 'ok');
+    log('Chroma screens: green bg removed · Plain: looping video', 'info');
+    log('Tap 🔇 bottom-right to toggle audio', 'info');
+
+    setTimeout(() => {
+      hideAllPanels();
+      document.getElementById('hint').textContent =
+        'Drag · Pinch · Scroll  |  📋 Log  📺 Videos  🔇 Audio →';
+    }, 3000);
+
+  },
+  (xhr) => { if (xhr.total) setBar(10 + Math.round((xhr.loaded/xhr.total)*10)); },
+  (err) => {
+    log('GLTFLoader ERROR: ' + (err?.message || err), 'err');
+    topStatus.textContent = 'Error ❌'; topStatus.style.color = '#ff5f5f';
+  });
+}
+
+// ── SPOTLIGHT TWEENS (Step 1 — unchanged) ────────────────────
+function tweenSpot(light) {
+  new TWEEN.Tween(light)
+    .to({ angle:(Math.random()*0.7)+0.1, penumbra:Math.random()+1 },
+        Math.random()*3000+2000)
+    .easing(TWEEN.Easing.Quadratic.Out).start();
+  const baseY = light.position.y;
+  new TWEEN.Tween(light.position)
+    .to({ x:(Math.random()*16)-8, y:baseY+(Math.random()*4)-2, z:(Math.random()*16)-8 },
+        Math.random()*3000+2000)
+    .easing(TWEEN.Easing.Quadratic.Out).start();
+}
+function updateTweens() {
+  tweenSpot(spotLight1); tweenSpot(spotLight2); tweenSpot(spotLight3);
+  setTimeout(updateTweens, 5000);
+}
+
+(function tick() {
+  requestAnimationFrame(tick);
+  TWEEN.update();
+  controls.update();
+  lh1.update(); lh2.update(); lh3.update();
+  renderer.render(scene, camera);
+})();
+
+updateTweens();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
