@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔍 HB17 — Parts Viewer + GLB Replacer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; overflow: hidden; }
+  #canvas-container { position: fixed; inset: 0; }
+
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #222; z-index: 30; flex-wrap: wrap;
+  }
+  #title { color: #f97316; font-size: 11px; font-weight: bold; flex: 1; }
+  #summary { font-size: 10px; color: #94a3b8; }
+
+  /* ── Tabs ── */
+  #tabs {
+    position: fixed; top: 36px; left: 0; right: 0;
+    background: rgba(0,0,0,0.92); border-bottom: 1px solid #2a2a2a;
+    display: flex; z-index: 29; padding: 0 10px; gap: 2px;
+  }
+  .tab {
+    padding: 5px 14px; font-size: 10px; cursor: pointer;
+    border-bottom: 2px solid transparent; color: #555;
+    font-family: 'Courier New', monospace;
+    transition: all 0.15s; user-select: none; white-space: nowrap;
+  }
+  .tab.active { color: #f97316; border-bottom-color: #f97316; }
+  .tab:hover:not(.active) { color: #94a3b8; }
+
+  /* ── Legend ── */
+  #legend {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.92);
+    padding: 6px 10px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    z-index: 20; border-top: 1px solid #1a1a1a;
+    max-height: 40vh; overflow-y: auto;
+  }
+  .legend-section {
+    width: 100%; font-size: 8px; color: #333;
+    padding: 3px 2px 1px; border-top: 1px solid #1a1a2e;
+    margin-top: 2px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .legend-section:first-child { border-top: none; margin-top: 0; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 12px;
+    font-size: 9px; border: 1px solid;
+    cursor: pointer; user-select: none;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .pill:hover { transform: scale(1.05); }
+  .pill.off { opacity: 0.25; }
+  .pill.loading { opacity: 0.5; font-style: italic; }
+  .pill.selected { box-shadow: 0 0 0 2px #fff; }
+  .pill.ramen-pill { border-style: dashed; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pill-count { font-size: 7px; opacity: 0.55; }
+
+  /* ── Replace panel ── */
+  #replace-panel {
+    position: fixed; top: 58px; right: 10px;
+    width: 272px;
+    background: rgba(8,8,18,0.97);
+    border: 1px solid #333; border-radius: 8px;
+    z-index: 25; font-size: 11px;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    transition: opacity 0.25s, transform 0.25s;
+    opacity: 0; transform: translateX(280px); pointer-events: none;
+  }
+  #replace-panel.open { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  #replace-panel::-webkit-scrollbar { width: 3px; }
+  #replace-panel::-webkit-scrollbar-thumb { background: #333; }
+
+  #rp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px 7px; border-bottom: 1px solid #222;
+    position: sticky; top: 0; background: rgba(8,8,18,0.98); z-index: 1;
+  }
+  #rp-header h3 { color: #f97316; font-size: 11px; }
+  #rp-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #rp-close:hover { color: #f87171; }
+
+  #rp-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .rp-field label {
+    color: #94a3b8; font-size: 9px; display: block; margin-bottom: 3px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .rp-field input[type=text] {
+    width: 100%; padding: 5px 8px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 4px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 10px; outline: none;
+  }
+  .rp-field input:focus { border-color: #f97316; }
+
+  .rp-info {
+    background: #060610; border: 1px solid #1a1a2e;
+    border-radius: 4px; padding: 7px 9px; font-size: 9px;
+    color: #94a3b8; line-height: 1.8;
+  }
+  .rp-info span { color: #e0e0e0; }
+  .rp-info .hi { color: #f97316; font-weight: bold; }
+
+  .slider-section {
+    background: #060610; border: 1px solid #1a1a2e;
+    border-radius: 5px; padding: 8px 9px;
+  }
+  .slider-section-title {
+    font-size: 9px; color: #f97316; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .slider-row {
+    display: flex; align-items: center; gap: 5px; margin-bottom: 5px;
+  }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-axis { font-size: 9px; color: #555; width: 12px; flex-shrink: 0; font-weight: bold; }
+  .slider-row input[type=range] { flex: 1; accent-color: #f97316; height: 3px; }
+  .slider-num {
+    font-size: 9px; color: #f97316; width: 44px;
+    text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace;
+  }
+  .slider-fine {
+    width: 54px; padding: 2px 4px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 3px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 9px; outline: none;
+  }
+  .slider-fine:focus { border-color: #f97316; }
+  .reset-btn {
+    background: none; border: 1px solid #333; border-radius: 3px;
+    color: #555; font-size: 8px; padding: 1px 5px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  .reset-btn:hover { border-color: #f97316; color: #f97316; }
+
+  #rp-copy-box {
+    background: #0a0a18; border: 1px solid #1a1a3a;
+    border-radius: 4px; padding: 7px 9px; font-size: 9px;
+    color: #4ade80; line-height: 1.8; font-family: 'Courier New', monospace;
+    display: none;
+  }
+
+  .rp-btn {
+    width: 100%; padding: 6px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    cursor: pointer; border: 1px solid; transition: all 0.15s;
+  }
+  .rp-btn.primary { background: #0f0f1e; border-color: #f97316; color: #f97316; }
+  .rp-btn.primary:hover { background: #f97316; color: #000; }
+  .rp-btn.secondary { background: #0f0f1e; border-color: #333; color: #94a3b8; }
+  .rp-btn.secondary:hover { border-color: #06b6d4; color: #06b6d4; }
+  .rp-btn.green { background: #0f0f1e; border-color: #4ade80; color: #4ade80; }
+  .rp-btn.green:hover { background: #4ade80; color: #000; }
+  .rp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  #rp-status { font-size: 9px; min-height: 14px; text-align: center; color: #94a3b8; }
+  #rp-status.ok  { color: #4ade80; }
+  #rp-status.err { color: #f87171; }
+
+  /* ── Log panel ── */
+  #log-panel {
+    position: fixed; top: 58px; left: 10px;
+    width: 210px; max-height: calc(100vh - 110px);
+    background: rgba(8,8,18,0.95);
+    border: 1px solid #333; border-radius: 8px;
+    display: flex; flex-direction: column; z-index: 24;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #log-panel.hidden { opacity: 0; transform: translateX(-220px); pointer-events: none; }
+  #log-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px 6px; border-bottom: 1px solid #1a1a2e; flex-shrink: 0;
+  }
+  #log-header h3 { color: #f97316; font-size: 11px; }
+  #log-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #log-close:hover { color: #f87171; }
+  #log-body { overflow-y: auto; padding: 7px 12px 10px; flex: 1; }
+  .log-line { padding: 2px 0; border-bottom: 1px solid #0f0f1a; line-height: 1.5; font-size: 9px; }
+  .ok { color: #4ade80; } .err { color: #f87171; }
+  .info { color: #94a3b8; } .warn { color: #fbbf24; }
+
+  #log-reopen {
+    position: fixed; top: 9px; left: 12px;
+    background: rgba(8,8,18,0.9); border: 1px solid #444; border-radius: 5px;
+    color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px;
+    padding: 4px 9px; cursor: pointer; z-index: 25;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  #log-reopen.visible { opacity: 1; pointer-events: auto; }
+  #log-reopen:hover { color: #f97316; border-color: #f97316; }
+
+  #tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(0,0,0,0.92); border: 1px solid #444;
+    border-radius: 5px; padding: 4px 9px;
+    font-size: 10px; color: #fff; z-index: 40; display: none;
+  }
+
+  #drop-overlay {
+    position: fixed; inset: 0;
+    background: rgba(249,115,22,0.08); border: 2px dashed #f97316;
+    z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    font-size: 16px; color: #f97316; pointer-events: none;
+  }
+  #drop-overlay.active { display: flex; }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="ui">
+  <span id="title">🔍 HB17 — PARTS VIEWER + GLB REPLACER</span>
+  <span id="summary">Loading…</span>
+</div>
+
+<div id="tabs">
+  <div class="tab active" data-tab="exhibit">⚙️ Exhibit Stand</div>
+  <div class="tab" data-tab="ramen">🍜 Ramen Shop</div>
+  <div class="tab" data-tab="all">🌐 All</div>
+</div>
+
+<!-- Log panel -->
+<div id="log-panel">
+  <div id="log-header"><h3>📋 Log</h3><button id="log-close">✕</button></div>
+  <div id="log-body"></div>
+</div>
+<button id="log-reopen">📋 Log</button>
+
+<!-- Replace panel -->
+<div id="replace-panel">
+  <div id="rp-header">
+    <h3 id="rp-title">🔄 Select a part</h3>
+    <button id="rp-close">✕</button>
+  </div>
+  <div id="rp-body">
+
+    <div class="rp-info" id="rp-current-info">
+      Click any legend pill or mesh to select a part.
+    </div>
+
+    <div class="rp-field">
+      <label>Replacement GLB path</label>
+      <input type="text" id="rp-path" placeholder="./models/my_part.glb" />
+    </div>
+
+    <button class="rp-btn primary" id="rp-load-btn" disabled>
+      🔄 Load &amp; Replace
+    </button>
+
+    <div class="slider-section">
+      <div class="slider-section-title">
+        📐 Scale
+        <button class="reset-btn" id="reset-scale">reset</button>
+      </div>
+      <div class="slider-row">
+        <span class="slider-axis" style="color:#f87171">X</span>
+        <input type="range" id="sx" min="0.01" max="5" step="0.01" value="1" />
+        <span class="slider-num" id="sx-val">1.000</span>
+        <input type="number" class="slider-fine" id="sx-fine" step="0.001" value="1" />
+      </div>
+      <div class="slider-row">
+        <span class="slider-axis" style="color:#4ade80">Y</span>
+        <input type="range" id="sy" min="0.01" max="5" step="0.01" value="1" />
+        <span class="slider-num" id="sy-val">1.000</span>
+        <input type="number" class="slider-fine" id="sy-fine" step="0.001" value="1" />
+      </div>
+      <div class="slider-row">
+        <span class="slider-axis" style="color:#38bdf8">Z</span>
+        <input type="range" id="sz" min="0.01" max="5" step="0.01" value="1" />
+        <span class="slider-num" id="sz-val">1.000</span>
+        <input type="number" class="slider-fine" id="sz-fine" step="0.001" value="1" />
+      </div>
+      <div class="slider-row" style="margin-top:4px; border-top:1px solid #1a1a2e; padding-top:5px">
+        <span class="slider-axis" style="color:#fbbf24">∀</span>
+        <input type="range" id="su" min="0.01" max="5" step="0.01" value="1" />
+        <span class="slider-num" id="su-val">1.000</span>
+        <input type="number" class="slider-fine" id="su-fine" step="0.001" value="1" />
+      </div>
+    </div>
+
+    <div class="slider-section">
+      <div class="slider-section-title">
+        📍 Position Offset
+        <button class="reset-btn" id="reset-pos">reset</button>
+      </div>
+      <div class="slider-row">
+        <span class="slider-axis" style="color:#f87171">X</span>
+        <input type="range" id="px" min="-20" max="20" step="0.05" value="0" />
+        <span class="slider-num" id="px-val">0.000</span>
+        <input type="number" class="slider-fine" id="px-fine" step="0.01" value="0" />
+      </div>
+      <div class="slider-row">
+        <span class="slider-axis" style="color:#4ade80">Y</span>
+        <input type="range" id="py" min="-20" max="20" step="0.05" value="0" />
+        <span class="slider-num" id="py-val">0.000</span>
+        <input type="number" class="slider-fine" id="py-fine" step="0.01" value="0" />
+      </div>
+      <div class="slider-row">
+        <span class="slider-axis" style="color:#38bdf8">Z</span>
+        <input type="range" id="pz" min="-20" max="20" step="0.05" value="0" />
+        <span class="slider-num" id="pz-val">0.000</span>
+        <input type="number" class="slider-fine" id="pz-fine" step="0.01" value="0" />
+      </div>
+    </div>
+
+    <button class="rp-btn green" id="rp-copy-btn">📋 Copy offset &amp; scale</button>
+    <div id="rp-copy-box"></div>
+
+    <button class="rp-btn secondary" id="rp-restore-btn" disabled>↩ Restore Original</button>
+    <button class="rp-btn secondary" id="rp-cancel-btn">✕ Deselect</button>
+    <div id="rp-status"></div>
+  </div>
+</div>
+
+<div id="legend"></div>
+<div id="tooltip"></div>
+<div id="drop-overlay">📦 Drop .glb to replace selected part</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+
+// ── EXHIBIT PARTS ─────────────────────────────────────────────────────────────
+const PARTS = [
+  { file: 'main_housing.glb',  label: 'Main Housing',  color: '#e2e8f0', section: 'Structure' },
+  { file: 'circular_box.glb',  label: 'Circular Box',  color: '#a855f7', section: 'Structure' },
+  { file: 'wallboard.glb',     label: 'Wallboard',     color: '#9333ea', section: 'Structure' },
+  { file: 'ram1.glb',          label: 'Rám 1',         color: '#38bdf8', section: 'Structure' },
+  { file: 'ram2.glb',          label: 'Rám 2',         color: '#4ade80', section: 'Structure' },
+  { file: 'ram3.glb',          label: 'Rám 3',         color: '#fbbf24', section: 'Structure' },
+  { file: 'mesh_1.glb',        label: 'Panel M1',      color: '#c084fc', section: 'Panels' },
+  { file: 'mesh_1_1.glb',      label: 'Panel M1.1',    color: '#d8b4fe', section: 'Panels' },
+  { file: 'mesh_11.glb',       label: 'TV Panel',      color: '#0ea5e9', section: 'Panels' },
+  { file: 'mesh_14.glb',       label: 'Panel M14',     color: '#f0abfc', section: 'Panels' },
+  { file: 'mesh_23.glb',       label: 'Panel M23',     color: '#e879f9', section: 'Panels' },
+  { file: 'mesh_24.glb',       label: 'Panel M24',     color: '#c026d3', section: 'Panels' },
+  { file: 'mesh_25.glb',       label: 'Signage 1',     color: '#dc2626', section: 'Panels' },
+  { file: 'mesh_26.glb',       label: 'Signage 2',     color: '#d97706', section: 'Panels' },
+  { file: 'mesh_27.glb',       label: 'Signage 3',     color: '#16a34a', section: 'Panels' },
+  { file: 'stolek_bar.glb',    label: 'Stolek Bar',    color: '#f59e0b', section: 'Seating' },
+  { file: 'stolek_bar_1.glb',  label: 'Stolek Bar 1',  color: '#f97316', section: 'Seating' },
+  { file: 'stolek_bar_2.glb',  label: 'Stolek Bar 2',  color: '#ef4444', section: 'Seating' },
+  { file: 'stolek_bar_3.glb',  label: 'Stolek Bar 3',  color: '#84cc16', section: 'Seating' },
+  { file: 'stolek_bar_4.glb',  label: 'Stolek Bar 4',  color: '#eab308', section: 'Seating' },
+  { file: 'stul.glb',          label: 'Stůl',          color: '#10b981', section: 'Seating' },
+  { file: 'bar.glb',           label: 'Bar',           color: '#ec4899', section: 'Seating' },
+  { file: 'tv_60.glb',         label: 'TV 60',         color: '#3b82f6', section: 'Screens' },
+  { file: 'tv_60_1.glb',       label: 'TV 60 (2)',     color: '#06b6d4', section: 'Screens' },
+  { file: 'tv_stand.glb',      label: 'TV Stand',      color: '#0891b2', section: 'Screens' },
+  { file: 'carpet.glb',        label: 'Carpet',        color: '#7c3aed', section: 'Floor' },
+  { file: 'skyla.glb',         label: 'Skyla Glass',   color: '#67e8f9', section: 'Decor' },
+  { file: 'balloons.glb',      label: 'Balloons',      color: '#f472b6', section: 'Decor' },
+  { file: 'flower.glb',        label: 'Flower',        color: '#fb7185', section: 'Decor' },
+  { file: 'misc.glb',          label: 'Misc',          color: '#6b7280', section: 'Decor' },
+];
+
+const EXHIBIT_BASE = './models/exhibit-parts/';
+const RAMEN_FILE   = './models/ramenShop-final.glb';
+
+// ── SCENE ─────────────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const renderer  = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d16);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 500);
+camera.position.set(0, 8, 22);
+const orbitControls = new OrbitControls(camera, renderer.domElement);
+orbitControls.enableDamping = true; orbitControls.dampingFactor = 0.07;
+
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+dir.position.set(5, 10, 7); scene.add(dir);
+scene.add(new THREE.GridHelper(60, 60, 0x1a1a1a, 0x111111));
+
+function makeMat(color) {
+  return new THREE.MeshStandardMaterial({
+    color: new THREE.Color(color), roughness: 0.65, metalness: 0.1,
+  });
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+const logBody   = document.getElementById('log-body');
+const logPanel  = document.getElementById('log-panel');
+const logClose  = document.getElementById('log-close');
+const logReopen = document.getElementById('log-reopen');
+const summaryEl = document.getElementById('summary');
+
+function log(msg, type = 'info') {
+  const d = document.createElement('div');
+  d.className = `log-line ${type}`;
+  d.textContent = msg;
+  logBody.appendChild(d);
+  logBody.scrollTop = logBody.scrollHeight;
+}
+logClose.addEventListener('click',  () => { logPanel.classList.add('hidden');    logReopen.classList.add('visible'); });
+logReopen.addEventListener('click', () => { logPanel.classList.remove('hidden'); logReopen.classList.remove('visible'); });
+
+// ── LOADERS ───────────────────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const partState  = {};   // label → { group, origGroup, origBox, basePos, visible, replaced, pill, color }
+let loadedCount  = 0;
+let totalMeshes  = 0;
+let selectedPart = null;
+let activeTab    = 'exhibit';
+
+// Ramen shop
+let ramenGroup   = null;
+let ramenVisible = false;
+let ramenPill    = null;
+
+// Transform state
+const T = { sx:1, sy:1, sz:1, px:0, py:0, pz:0 };
+
+// ── TAB LOGIC ─────────────────────────────────────────────────────────────────
+function applyTabVisibility() {
+  // Exhibit parts
+  for (const [label, s] of Object.entries(partState)) {
+    if (!s.group) continue;
+    if (activeTab === 'ramen') {
+      s.group.visible = false;
+    } else {
+      // exhibit or all — respect individual pill toggle
+      s.group.visible = s.visible;
+    }
+  }
+  // Ramen shop
+  if (ramenGroup) {
+    if (activeTab === 'exhibit') {
+      ramenGroup.visible = false;
+    } else if (activeTab === 'ramen') {
+      ramenGroup.visible = true;
+    } else {
+      // all — respect ramen pill toggle
+      ramenGroup.visible = ramenVisible;
+    }
+  }
+  // Hide replace panel when switching to ramen tab
+  if (activeTab === 'ramen') {
+    document.getElementById('replace-panel').classList.remove('open');
+  }
+  updateTabUI();
+  rebuildLegend();
+}
+
+function updateTabUI() {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === activeTab);
+  });
+  const visCount = Object.values(partState).filter(s => s.visible && s.group).length;
+  summaryEl.textContent = activeTab === 'exhibit'
+    ? `⚙️ Exhibit: ${visCount}/${PARTS.length} visible · Ramen hidden`
+    : activeTab === 'ramen'
+    ? '🍜 Ramen Shop · Exhibit hidden'
+    : `🌐 All · Exhibit: ${visCount}/${PARTS.length} · click pill to edit`;
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    activeTab = tab.dataset.tab;
+    // Deselect part when leaving exhibit tab
+    if (activeTab !== 'exhibit' && selectedPart) {
+      partState[selectedPart]?.pill?.classList.remove('selected');
+      selectedPart = null;
+      document.getElementById('replace-panel').classList.remove('open');
+    }
+    applyTabVisibility();
+  });
+});
+
+// ── LEGEND ────────────────────────────────────────────────────────────────────
+const legendEl = document.getElementById('legend');
+
+function rebuildLegend() {
+  legendEl.innerHTML = '';
+
+  if (activeTab === 'exhibit' || activeTab === 'all') {
+    // Group by section
+    const sections = {};
+    PARTS.forEach(p => {
+      if (!sections[p.section]) sections[p.section] = [];
+      sections[p.section].push(p);
+    });
+
+    Object.entries(sections).forEach(([sec, parts]) => {
+      const hdr = document.createElement('div');
+      hdr.className = 'legend-section';
+      hdr.textContent = sec;
+      legendEl.appendChild(hdr);
+      parts.forEach(p => {
+        const s    = partState[p.label];
+        const pill = buildExhibitPill(p, s);
+        if (s) s.pill = pill;
+        legendEl.appendChild(pill);
+      });
+    });
+  }
+
+  if (activeTab === 'ramen' || activeTab === 'all') {
+    const hdr = document.createElement('div');
+    hdr.className = 'legend-section';
+    hdr.textContent = 'Ramen Shop';
+    legendEl.appendChild(hdr);
+    ramenPill = buildRamenPill();
+    legendEl.appendChild(ramenPill);
+  }
+}
+
+function buildExhibitPill(part, s) {
+  const pill = document.createElement('div');
+  const isLoading  = !s?.group;
+  const isSelected = selectedPart === part.label;
+  const isOff      = s?.visible === false;
+
+  pill.className = 'pill'
+    + (isLoading  ? ' loading'  : '')
+    + (isSelected ? ' selected' : '')
+    + (isOff      ? ' off'      : '');
+  pill.style.borderColor = part.color;
+  pill.style.color       = part.color;
+
+  const cntId = 'cnt-' + part.label.replace(/[\s().]/g,'_');
+  pill.innerHTML =
+    `<span class="dot" style="background:${part.color}"></span>` +
+    `${part.label}` +
+    `<span class="pill-count" id="${cntId}">${s?.group ? ` ×${s.meshCount ?? '?'}` : ' …'}</span>`;
+
+  pill.addEventListener('click', e => {
+    const st = partState[part.label];
+    if (!st?.group) return;
+    if (e.shiftKey || activeTab === 'all') {
+      // shift+click OR in "all" tab → toggle visibility
+      st.visible = !st.visible;
+      if (activeTab !== 'ramen') st.group.visible = st.visible;
+      pill.classList.toggle('off', !st.visible);
+      updateTabUI();
+    } else {
+      // Normal click in exhibit tab → select for editing
+      selectPart(part.label);
+    }
+  });
+
+  pill.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const st = partState[part.label];
+    if (!st?.group) return;
+    st.visible = !st.visible;
+    if (activeTab !== 'ramen') st.group.visible = st.visible;
+    pill.classList.toggle('off', !st.visible);
+    updateTabUI();
+  });
+
+  return pill;
+}
+
+function buildRamenPill() {
+  const pill = document.createElement('div');
+  pill.className = 'pill ramen-pill' + (ramenGroup ? '' : ' loading') + (ramenVisible ? '' : ' off');
+  pill.style.borderColor = '#f97316';
+  pill.style.color       = '#f97316';
+  pill.innerHTML =
+    `<span class="dot" style="background:#f97316"></span>` +
+    `Ramen Shop` +
+    `<span class="pill-count">${ramenGroup ? ' ✓' : ' …'}</span>`;
+
+  pill.addEventListener('click', () => {
+    if (!ramenGroup) return;
+    ramenVisible = !ramenVisible;
+    if (activeTab !== 'exhibit') ramenGroup.visible = ramenVisible;
+    pill.classList.toggle('off', !ramenVisible);
+    updateTabUI();
+    log(`${ramenVisible ? '👁' : '🙈'} Ramen Shop`, 'info');
+  });
+  return pill;
+}
+
+// ── SLIDER WIRING ─────────────────────────────────────────────────────────────
+function wireSlider(id, axis) {
+  const slider = document.getElementById(id);
+  const val    = document.getElementById(id + '-val');
+  const fine   = document.getElementById(id + '-fine');
+  function apply(v) {
+    v = parseFloat(v);
+    T[axis] = v;
+    slider.value          = v;
+    fine.value            = v.toFixed(3);
+    val.textContent       = v.toFixed(3);
+    applyTransform();
+    updateCopyBox();
+  }
+  slider.addEventListener('input',  () => apply(slider.value));
+  fine.addEventListener('change',   () => apply(fine.value));
+}
+['sx','sy','sz','px','py','pz'].forEach(a => wireSlider(a, a));
+
+// Uniform scale
+const suSlider = document.getElementById('su');
+const suVal    = document.getElementById('su-val');
+const suFine   = document.getElementById('su-fine');
+function applyUniform(v) {
+  v = parseFloat(v);
+  T.sx = T.sy = T.sz = v;
+  suSlider.value = v; suFine.value = v.toFixed(3); suVal.textContent = v.toFixed(3);
+  ['sx','sy','sz'].forEach(a => {
+    document.getElementById(a).value               = v;
+    document.getElementById(a+'-fine').value        = v.toFixed(3);
+    document.getElementById(a+'-val').textContent   = v.toFixed(3);
+  });
+  applyTransform(); updateCopyBox();
+}
+suSlider.addEventListener('input',  () => applyUniform(suSlider.value));
+suFine.addEventListener('change',   () => applyUniform(suFine.value));
+
+document.getElementById('reset-scale').addEventListener('click', () => {
+  applyUniform(1);
+});
+document.getElementById('reset-pos').addEventListener('click', () => {
+  ['px','py','pz'].forEach(a => {
+    T[a] = 0;
+    document.getElementById(a).value               = 0;
+    document.getElementById(a+'-fine').value        = '0.000';
+    document.getElementById(a+'-val').textContent   = '0.000';
+  });
+  applyTransform(); updateCopyBox();
+});
+
+function applyTransform() {
+  if (!selectedPart) return;
+  const s = partState[selectedPart];
+  if (!s?.group) return;
+  s.group.scale.set(T.sx, T.sy, T.sz);
+  s.group.position.set(
+    (s.basePos?.x ?? 0) + T.px,
+    (s.basePos?.y ?? 0) + T.py,
+    (s.basePos?.z ?? 0) + T.pz,
+  );
+}
+
+function resetSliders() {
+  T.sx = T.sy = T.sz = 1; T.px = T.py = T.pz = 0;
+  ['sx','sy','sz'].forEach(a => {
+    document.getElementById(a).value             = 1;
+    document.getElementById(a+'-fine').value      = '1.000';
+    document.getElementById(a+'-val').textContent = '1.000';
+  });
+  suSlider.value = 1; suFine.value = '1.000'; suVal.textContent = '1.000';
+  ['px','py','pz'].forEach(a => {
+    document.getElementById(a).value             = 0;
+    document.getElementById(a+'-fine').value      = '0.000';
+    document.getElementById(a+'-val').textContent = '0.000';
+  });
+}
+
+// ── COPY BOX ──────────────────────────────────────────────────────────────────
+const copyBox = document.getElementById('rp-copy-box');
+function updateCopyBox() {
+  if (!selectedPart) return;
+  copyBox.style.display = 'block';
+  copyBox.textContent =
+    `// ${selectedPart}\n` +
+    `SCALE_X = ${T.sx.toFixed(4)}\nSCALE_Y = ${T.sy.toFixed(4)}\nSCALE_Z = ${T.sz.toFixed(4)}\n` +
+    `OFFSET_X = ${T.px.toFixed(4)}\nOFFSET_Y = ${T.py.toFixed(4)}\nOFFSET_Z = ${T.pz.toFixed(4)}`;
+}
+document.getElementById('rp-copy-btn').addEventListener('click', () => {
+  if (!copyBox.textContent) return;
+  navigator.clipboard.writeText(copyBox.textContent).then(() => {
+    document.getElementById('rp-copy-btn').textContent = '✅ Copied!';
+    setTimeout(() => {
+      document.getElementById('rp-copy-btn').textContent = '📋 Copy offset & scale';
+    }, 2000);
+  }).catch(() => alert(copyBox.textContent));
+});
+
+// ── SELECT PART ───────────────────────────────────────────────────────────────
+function selectPart(label) {
+  if (activeTab === 'ramen') return; // no editing in ramen tab
+  if (selectedPart && partState[selectedPart]) {
+    partState[selectedPart].pill?.classList.remove('selected');
+  }
+  selectedPart = label;
+  const s = partState[label];
+  if (!s?.group) return;
+
+  s.pill?.classList.add('selected');
+  document.getElementById('replace-panel').classList.add('open');
+
+  if (!s.basePos) s.basePos = s.group.position.clone();
+
+  T.sx = s.group.scale.x; T.sy = s.group.scale.y; T.sz = s.group.scale.z;
+  T.px = s.group.position.x - (s.basePos?.x ?? 0);
+  T.py = s.group.position.y - (s.basePos?.y ?? 0);
+  T.pz = s.group.position.z - (s.basePos?.z ?? 0);
+
+  ['sx','sy','sz','px','py','pz'].forEach(a => {
+    document.getElementById(a).value             = T[a];
+    document.getElementById(a+'-fine').value      = T[a].toFixed(3);
+    document.getElementById(a+'-val').textContent = T[a].toFixed(3);
+  });
+
+  const box    = new THREE.Box3().setFromObject(s.group);
+  const size   = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  document.getElementById('rp-title').textContent = `🔄 ${label}`;
+  document.getElementById('rp-current-info').innerHTML =
+    `<div>Part: <span>${label}</span></div>` +
+    `<div>Size: <span>${size.x.toFixed(3)}×${size.y.toFixed(3)}×${size.z.toFixed(3)}</span></div>` +
+    `<div>Ctr: <span>${center.x.toFixed(3)}, ${center.y.toFixed(3)}, ${center.z.toFixed(3)}</span></div>` +
+    `<div>Replaced: <span class="${s.replaced ? 'hi' : ''}">${s.replaced ? 'YES' : 'no'}</span></div>`;
+
+  document.getElementById('rp-load-btn').disabled    = false;
+  document.getElementById('rp-restore-btn').disabled = !s.replaced;
+  document.getElementById('rp-status').textContent   = '';
+  document.getElementById('rp-status').className     = '';
+  copyBox.style.display = 'none';
+  updateCopyBox();
+  log(`🎯 Selected: ${label}`, 'info');
+}
+
+// ── LOAD REPLACEMENT ──────────────────────────────────────────────────────────
+function loadReplacement(label, urlOrBlob) {
+  const s = partState[label];
+  if (!s) return;
+  const rpStatus = document.getElementById('rp-status');
+  rpStatus.textContent = '⏳ Loading…'; rpStatus.className = 'info';
+  document.getElementById('rp-load-btn').disabled = true;
+
+  const url = urlOrBlob instanceof Blob ? URL.createObjectURL(urlOrBlob) : urlOrBlob;
+  loader.load(url, gltf => {
+    const newGroup = gltf.scene;
+    newGroup.name  = label + '_replacement';
+    newGroup.traverse(obj => {
+      if (!obj.isMesh) return;
+      obj.material = makeMat(s.color);
+      obj.userData.partLabel = label;
+    });
+
+    const origCenter = s.origBox.getCenter(new THREE.Vector3());
+    s.basePos = origCenter.clone();
+    T.sx = T.sy = T.sz = 1; T.px = T.py = T.pz = 0;
+    resetSliders();
+
+    const newBox    = new THREE.Box3().setFromObject(newGroup);
+    const newCenter = newBox.getCenter(new THREE.Vector3());
+    newGroup.position.sub(newCenter).add(origCenter);
+
+    scene.remove(s.group);
+    scene.add(newGroup);
+    s.group    = newGroup;
+    s.replaced = true;
+
+    rpStatus.textContent = '✅ Loaded — use sliders to fit';
+    rpStatus.className   = 'ok';
+    document.getElementById('rp-load-btn').disabled    = false;
+    document.getElementById('rp-restore-btn').disabled = false;
+    if (urlOrBlob instanceof Blob) URL.revokeObjectURL(url);
+    log(`🔄 ${label} replaced`, 'ok');
+    selectPart(label);
+    updateCopyBox();
+  }, undefined, err => {
+    rpStatus.textContent = `❌ ${err.message || 'failed'}`;
+    rpStatus.className   = 'err';
+    document.getElementById('rp-load-btn').disabled = false;
+    if (urlOrBlob instanceof Blob) URL.revokeObjectURL(url);
+    log(`❌ ${err.message}`, 'err');
+  });
+}
+
+document.getElementById('rp-load-btn').addEventListener('click', () => {
+  const url = document.getElementById('rp-path').value.trim();
+  if (!url || !selectedPart) return;
+  loadReplacement(selectedPart, url);
+});
+
+document.getElementById('rp-restore-btn').addEventListener('click', () => {
+  if (!selectedPart) return;
+  const s = partState[selectedPart];
+  if (!s?.replaced) return;
+  scene.remove(s.group);
+  scene.add(s.origGroup);
+  s.group = s.origGroup; s.replaced = false; s.basePos = null;
+  resetSliders(); applyTransform();
+  document.getElementById('rp-restore-btn').disabled = true;
+  document.getElementById('rp-status').textContent   = '↩ Original restored';
+  document.getElementById('rp-status').className     = 'ok';
+  copyBox.style.display = 'none';
+  log(`↩ ${selectedPart} restored`, 'info');
+  selectPart(selectedPart);
+});
+
+document.getElementById('rp-cancel-btn').addEventListener('click', () => {
+  document.getElementById('replace-panel').classList.remove('open');
+  if (selectedPart) partState[selectedPart]?.pill?.classList.remove('selected');
+  selectedPart = null;
+});
+document.getElementById('rp-close').addEventListener('click', () => {
+  document.getElementById('replace-panel').classList.remove('open');
+});
+
+// ── DRAG & DROP ───────────────────────────────────────────────────────────────
+const dropOverlay = document.getElementById('drop-overlay');
+document.addEventListener('dragover', e => {
+  e.preventDefault();
+  if (selectedPart && activeTab !== 'ramen') dropOverlay.classList.add('active');
+});
+document.addEventListener('dragleave', e => {
+  if (!e.relatedTarget) dropOverlay.classList.remove('active');
+});
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  dropOverlay.classList.remove('active');
+  if (!selectedPart || activeTab === 'ramen') return;
+  const file = [...e.dataTransfer.files].find(f => f.name.endsWith('.glb'));
+  if (!file) return;
+  loadReplacement(selectedPart, file);
+});
+
+// ── LOAD EXHIBIT PARTS ────────────────────────────────────────────────────────
+function loadPart(part) {
+  return new Promise(resolve => {
+    loader.load(EXHIBIT_BASE + part.file, gltf => {
+      const group = gltf.scene;
+      group.name  = part.label;
+      let meshCount = 0;
+      group.traverse(obj => {
+        if (!obj.isMesh) return;
+        obj.material = makeMat(part.color);
+        obj.userData.partLabel = part.label;
+        meshCount++;
+      });
+      const box = new THREE.Box3().setFromObject(group);
+      scene.add(group);
+      group.visible = true; // exhibit tab is default
+
+      loadedCount++; totalMeshes += meshCount;
+      const s     = partState[part.label];
+      s.group     = group; s.origGroup = group;
+      s.origBox   = box;   s.basePos   = group.position.clone();
+      s.meshCount = meshCount;
+
+      // Rebuild pill with correct count
+      rebuildLegend();
+      log(`✅ ${part.label}  ×${meshCount}`, 'ok');
+      summaryEl.textContent = `${loadedCount}/${PARTS.length} · ${totalMeshes} meshes`;
+      resolve(group);
+    }, undefined, err => {
+      loadedCount++;
+      log(`❌ ${part.label}`, 'err');
+      const s = partState[part.label];
+      if (s?.pill) { s.pill.classList.remove('loading'); s.pill.classList.add('off'); }
+      resolve(null);
+    });
+  });
+}
+
+// ── LOAD RAMEN SHOP ───────────────────────────────────────────────────────────
+function loadRamenShop() {
+  return new Promise(resolve => {
+    log('⏳ Loading ramenShop-final.glb …', 'info');
+    loader.load(RAMEN_FILE, gltf => {
+      const ramenRoot = gltf.scene.getObjectByName('ramenShop_root');
+      ramenGroup = new THREE.Group();
+      ramenGroup.name = 'ramenShop_root';
+      if (ramenRoot) ramenGroup.add(ramenRoot);
+      else ramenGroup.add(gltf.scene);
+      scene.add(ramenGroup);
+      ramenGroup.visible = false; // starts hidden
+      ramenVisible       = false;
+      if (ramenPill) {
+        ramenPill.classList.remove('loading');
+        rebuildLegend();
+      }
+      log('✅ Ramen Shop loaded (hidden)', 'ok');
+      resolve(ramenGroup);
+    }, xhr => {
+      if (xhr.total) log(`⏳ Ramen ${Math.round(xhr.loaded/xhr.total*100)}%`, 'info');
+    }, err => {
+      log(`❌ Ramen Shop — ${err.message}`, 'err');
+      resolve(null);
+    });
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+PARTS.forEach(p => {
+  partState[p.label] = {
+    group: null, origGroup: null, origBox: null,
+    basePos: null, visible: true, replaced: false,
+    pill: null, color: p.color, meshCount: 0,
+  };
+});
+
+rebuildLegend();
+updateTabUI();
+log('🚀 Loading exhibit parts…', 'info');
+
+Promise.all([
+  ...PARTS.map(p => loadPart(p)),
+  loadRamenShop(),
+]).then(results => {
+  const loaded = results.filter(Boolean).length - 1; // minus ramen
+  log(`🎉 ${loaded}/${PARTS.length} exhibit parts + ramen shop ready`, 'ok');
+  updateTabUI();
+  rebuildLegend();
+
+  // Fit camera to exhibit stand
+  const box = new THREE.Box3();
+  scene.traverse(obj => {
+    if (obj.isMesh && obj.userData.partLabel) box.expandByObject(obj);
+  });
+  if (!box.isEmpty()) {
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(center.x, center.y + maxDim * 0.5, center.z + maxDim * 1.2);
+    orbitControls.target.copy(center);
+    orbitControls.update();
+  }
+
+  setTimeout(() => {
+    logPanel.classList.add('hidden');
+    logReopen.classList.add('visible');
+  }, 3000);
+});
+
+// ── RAYCASTER ─────────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+
+renderer.domElement.addEventListener('pointermove', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  scene.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const label = hits[0].object.userData.partLabel ?? '?';
+    tooltip.style.display = 'block';
+    tooltip.style.left    = (ev.clientX + 14) + 'px';
+    tooltip.style.top     = (ev.clientY - 10) + 'px';
+    tooltip.textContent   = label + (partState[label]?.replaced ? ' [R]' : '');
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+renderer.domElement.addEventListener('click', ev => {
+  if (activeTab === 'ramen') return; // no selection in ramen tab
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  scene.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const label = hits[0].object.userData.partLabel;
+    if (label && partState[label]?.group) selectPart(label);
+  }
+});
+
+renderer.domElement.addEventListener('pointerleave', () => {
+  tooltip.style.display = 'none';
+});
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  orbitControls.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

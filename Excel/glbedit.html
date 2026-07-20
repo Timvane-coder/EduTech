@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔍 Scene Editor — Exhibit + Ramen</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; overflow: hidden; }
+  #canvas-container { position: fixed; inset: 0; }
+
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 10px; padding: 7px 12px;
+    background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #222; z-index: 30; flex-wrap: wrap;
+  }
+  #title { color: #f97316; font-size: 11px; font-weight: bold; flex: 1; }
+  #summary { font-size: 10px; color: #94a3b8; }
+
+  /* ── Tabs ── */
+  #tabs {
+    position: fixed; top: 36px; left: 0; right: 0;
+    background: rgba(0,0,0,0.95); border-bottom: 1px solid #2a2a2a;
+    display: flex; z-index: 29; padding: 0 10px; gap: 2px;
+  }
+  .tab {
+    padding: 5px 16px; font-size: 10px; cursor: pointer;
+    border-bottom: 2px solid transparent; color: #555;
+    font-family: 'Courier New', monospace;
+    transition: all 0.15s; user-select: none; white-space: nowrap;
+  }
+  .tab.active { color: #f97316; border-bottom-color: #f97316; }
+  .tab:hover:not(.active) { color: #94a3b8; }
+
+  /* ── Legend ── */
+  #legend {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.93); border-top: 1px solid #1a1a1a;
+    padding: 6px 10px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    z-index: 20; max-height: 38vh; overflow-y: auto;
+  }
+  .legend-section {
+    width: 100%; font-size: 8px; color: #333;
+    padding: 3px 2px 1px; border-top: 1px solid #1a1a2e;
+    margin-top: 2px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .legend-section:first-child { border-top: none; margin-top: 0; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 12px; font-size: 9px; border: 1px solid;
+    cursor: pointer; user-select: none; transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .pill:hover { transform: scale(1.05); }
+  .pill.off { opacity: 0.22; }
+  .pill.loading { opacity: 0.5; font-style: italic; }
+  .pill.selected { box-shadow: 0 0 0 2px #fff; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pcnt { font-size: 7px; opacity: 0.55; }
+
+  /* ── Replace panel ── */
+  #replace-panel {
+    position: fixed; top: 58px; right: 10px; width: 276px;
+    background: rgba(8,8,18,0.97); border: 1px solid #333; border-radius: 8px;
+    z-index: 25; max-height: calc(100vh - 70px); overflow-y: auto;
+    transition: opacity 0.25s, transform 0.25s;
+    opacity: 0; transform: translateX(285px); pointer-events: none;
+  }
+  #replace-panel.open { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  #replace-panel::-webkit-scrollbar { width: 3px; }
+  #replace-panel::-webkit-scrollbar-thumb { background: #333; }
+
+  #rp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px 7px; border-bottom: 1px solid #222;
+    position: sticky; top: 0; background: rgba(8,8,18,0.98); z-index: 1;
+  }
+  #rp-header h3 { font-size: 11px; }
+  #rp-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #rp-close:hover { color: #f87171; }
+
+  #rp-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .rp-field label {
+    color: #94a3b8; font-size: 9px; display: block; margin-bottom: 3px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .rp-field input[type=text] {
+    width: 100%; padding: 5px 8px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 4px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 10px; outline: none;
+  }
+  .rp-field input:focus { border-color: #f97316; }
+
+  .rp-info {
+    background: #060610; border: 1px solid #1a1a2e;
+    border-radius: 4px; padding: 7px 9px; font-size: 9px;
+    color: #94a3b8; line-height: 1.8;
+  }
+  .rp-info span { color: #e0e0e0; }
+  .rp-info .hi { color: #f97316; font-weight: bold; }
+
+  /* Slider sections */
+  .slider-section {
+    background: #060610; border: 1px solid #1a1a2e; border-radius: 5px; padding: 8px 9px;
+  }
+  .ss-title {
+    font-size: 9px; color: #f97316; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sr {
+    display: flex; align-items: center; gap: 5px; margin-bottom: 5px;
+  }
+  .sr:last-child { margin-bottom: 0; }
+  .saxis { font-size: 9px; color: #555; width: 12px; flex-shrink: 0; font-weight: bold; }
+  .sr input[type=range] { flex: 1; accent-color: #f97316; height: 3px; }
+  .snum {
+    font-size: 9px; color: #f97316; width: 44px;
+    text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace;
+  }
+  .sfine {
+    width: 54px; padding: 2px 4px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 3px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 9px; outline: none;
+  }
+  .sfine:focus { border-color: #f97316; }
+  .reset-btn {
+    background: none; border: 1px solid #333; border-radius: 3px;
+    color: #555; font-size: 8px; padding: 1px 5px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  .reset-btn:hover { border-color: #f97316; color: #f97316; }
+  .divrow { border-top: 1px solid #1a1a2e; padding-top: 5px; margin-top: 4px; }
+
+  #rp-copy-box {
+    background: #0a0a18; border: 1px solid #1a1a3a; border-radius: 4px;
+    padding: 7px 9px; font-size: 9px; color: #4ade80; line-height: 1.8;
+    font-family: 'Courier New', monospace; display: none;
+  }
+
+  .rp-btn {
+    width: 100%; padding: 6px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    cursor: pointer; border: 1px solid; transition: all 0.15s;
+  }
+  .rp-btn.primary { background: #0f0f1e; border-color: #f97316; color: #f97316; }
+  .rp-btn.primary:hover { background: #f97316; color: #000; }
+  .rp-btn.secondary { background: #0f0f1e; border-color: #333; color: #94a3b8; }
+  .rp-btn.secondary:hover { border-color: #06b6d4; color: #06b6d4; }
+  .rp-btn.green { background: #0f0f1e; border-color: #4ade80; color: #4ade80; }
+  .rp-btn.green:hover { background: #4ade80; color: #000; }
+  .rp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  #rp-status { font-size: 9px; min-height: 14px; text-align: center; color: #94a3b8; }
+  #rp-status.ok  { color: #4ade80; }
+  #rp-status.err { color: #f87171; }
+
+  /* ── Log panel ── */
+  #log-panel {
+    position: fixed; top: 58px; left: 10px; width: 210px;
+    max-height: calc(100vh - 110px);
+    background: rgba(8,8,18,0.95); border: 1px solid #333; border-radius: 8px;
+    display: flex; flex-direction: column; z-index: 24;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #log-panel.hidden { opacity: 0; transform: translateX(-220px); pointer-events: none; }
+  #log-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px 6px; border-bottom: 1px solid #1a1a2e; flex-shrink: 0;
+  }
+  #log-header h3 { color: #f97316; font-size: 11px; }
+  #log-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #log-close:hover { color: #f87171; }
+  #log-body { overflow-y: auto; padding: 7px 12px 10px; flex: 1; }
+  .ll { padding: 2px 0; border-bottom: 1px solid #0f0f1a; line-height: 1.5; font-size: 9px; }
+  .ok { color: #4ade80; } .err { color: #f87171; }
+  .info { color: #94a3b8; } .warn { color: #fbbf24; }
+
+  #log-reopen {
+    position: fixed; top: 9px; left: 12px;
+    background: rgba(8,8,18,0.9); border: 1px solid #444; border-radius: 5px;
+    color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px;
+    padding: 4px 9px; cursor: pointer; z-index: 25;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  #log-reopen.visible { opacity: 1; pointer-events: auto; }
+  #log-reopen:hover { color: #f97316; border-color: #f97316; }
+
+  #tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(0,0,0,0.92); border: 1px solid #444;
+    border-radius: 5px; padding: 4px 9px; font-size: 10px; color: #fff;
+    z-index: 40; display: none;
+  }
+  #drop-overlay {
+    position: fixed; inset: 0; background: rgba(249,115,22,0.08);
+    border: 2px dashed #f97316; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    font-size: 16px; color: #f97316; pointer-events: none;
+  }
+  #drop-overlay.active { display: flex; }
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="ui">
+  <span id="title">🔍 SCENE EDITOR — EXHIBIT + RAMEN</span>
+  <span id="summary">Loading…</span>
+</div>
+<div id="tabs">
+  <div class="tab active" data-tab="exhibit">⚙️ Exhibit Stand</div>
+  <div class="tab" data-tab="ramen">🍜 Ramen Shop</div>
+  <div class="tab" data-tab="all">🌐 All</div>
+</div>
+
+<div id="log-panel">
+  <div id="log-header"><h3>📋 Log</h3><button id="log-close">✕</button></div>
+  <div id="log-body"></div>
+</div>
+<button id="log-reopen">📋 Log</button>
+
+<div id="replace-panel">
+  <div id="rp-header">
+    <h3 id="rp-title" style="color:#f97316">🔄 Select a part</h3>
+    <button id="rp-close">✕</button>
+  </div>
+  <div id="rp-body">
+    <div class="rp-info" id="rp-info">Click a pill or mesh to select.</div>
+
+    <div class="rp-field">
+      <label>Replacement GLB path</label>
+      <input type="text" id="rp-path" placeholder="./models/my_part.glb" />
+    </div>
+    <button class="rp-btn primary" id="rp-load-btn" disabled>🔄 Load &amp; Replace</button>
+
+    <!-- SCALE -->
+    <div class="slider-section">
+      <div class="ss-title">📐 Scale <button class="reset-btn" id="reset-scale">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="sx" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sx-v">1.000</span><input class="sfine" type="number" id="sx-f" step="0.001" value="1"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="sy" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sy-v">1.000</span><input class="sfine" type="number" id="sy-f" step="0.001" value="1"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="sz" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sz-v">1.000</span><input class="sfine" type="number" id="sz-f" step="0.001" value="1"></div>
+      <div class="sr divrow"><span class="saxis" style="color:#fbbf24">∀</span><input type="range" id="su" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="su-v">1.000</span><input class="sfine" type="number" id="su-f" step="0.001" value="1"></div>
+    </div>
+
+    <!-- POSITION -->
+    <div class="slider-section">
+      <div class="ss-title">📍 Position <button class="reset-btn" id="reset-pos">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="px" min="-30" max="30" step="0.05" value="0"><span class="snum" id="px-v">0.000</span><input class="sfine" type="number" id="px-f" step="0.01" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="py" min="-30" max="30" step="0.05" value="0"><span class="snum" id="py-v">0.000</span><input class="sfine" type="number" id="py-f" step="0.01" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="pz" min="-30" max="30" step="0.05" value="0"><span class="snum" id="pz-v">0.000</span><input class="sfine" type="number" id="pz-f" step="0.01" value="0"></div>
+    </div>
+
+    <!-- ROTATION -->
+    <div class="slider-section">
+      <div class="ss-title">🔄 Rotation (deg) <button class="reset-btn" id="reset-rot">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="rx" min="-180" max="180" step="1" value="0"><span class="snum" id="rx-v">0°</span><input class="sfine" type="number" id="rx-f" step="1" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="ry" min="-180" max="180" step="1" value="0"><span class="snum" id="ry-v">0°</span><input class="sfine" type="number" id="ry-f" step="1" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="rz" min="-180" max="180" step="1" value="0"><span class="snum" id="rz-v">0°</span><input class="sfine" type="number" id="rz-f" step="1" value="0"></div>
+    </div>
+
+    <button class="rp-btn green" id="rp-copy-btn">📋 Copy transform values</button>
+    <div id="rp-copy-box"></div>
+    <button class="rp-btn secondary" id="rp-restore-btn" disabled>↩ Restore Original</button>
+    <button class="rp-btn secondary" id="rp-cancel-btn">✕ Deselect</button>
+    <div id="rp-status"></div>
+  </div>
+</div>
+
+<div id="legend"></div>
+<div id="tooltip"></div>
+<div id="drop-overlay">📦 Drop .glb to replace selected part</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+
+// ── EXHIBIT PARTS ─────────────────────────────────────────────────────────────
+const EXHIBIT_PARTS = [
+  { file:'main_housing.glb', label:'Main Housing', color:'#e2e8f0', section:'Structure' },
+  { file:'circular_box.glb', label:'Circular Box', color:'#a855f7', section:'Structure' },
+  { file:'wallboard.glb',    label:'Wallboard',    color:'#9333ea', section:'Structure' },
+  { file:'ram1.glb',         label:'Rám 1',        color:'#38bdf8', section:'Structure' },
+  { file:'ram2.glb',         label:'Rám 2',        color:'#4ade80', section:'Structure' },
+  { file:'ram3.glb',         label:'Rám 3',        color:'#fbbf24', section:'Structure' },
+  { file:'mesh_1.glb',       label:'Panel M1',     color:'#c084fc', section:'Panels' },
+  { file:'mesh_1_1.glb',     label:'Panel M1.1',   color:'#d8b4fe', section:'Panels' },
+  { file:'mesh_11.glb',      label:'TV Panel',     color:'#0ea5e9', section:'Panels' },
+  { file:'mesh_14.glb',      label:'Panel M14',    color:'#f0abfc', section:'Panels' },
+  { file:'mesh_23.glb',      label:'Panel M23',    color:'#e879f9', section:'Panels' },
+  { file:'mesh_24.glb',      label:'Panel M24',    color:'#c026d3', section:'Panels' },
+  { file:'mesh_25.glb',      label:'Signage 1',    color:'#dc2626', section:'Panels' },
+  { file:'mesh_26.glb',      label:'Signage 2',    color:'#d97706', section:'Panels' },
+  { file:'mesh_27.glb',      label:'Signage 3',    color:'#16a34a', section:'Panels' },
+  { file:'stolek_bar.glb',   label:'Stolek Bar',   color:'#f59e0b', section:'Seating' },
+  { file:'stolek_bar_1.glb', label:'Stolek Bar 1', color:'#f97316', section:'Seating' },
+  { file:'stolek_bar_2.glb', label:'Stolek Bar 2', color:'#ef4444', section:'Seating' },
+  { file:'stolek_bar_3.glb', label:'Stolek Bar 3', color:'#84cc16', section:'Seating' },
+  { file:'stolek_bar_4.glb', label:'Stolek Bar 4', color:'#eab308', section:'Seating' },
+  { file:'stul.glb',         label:'Stůl',         color:'#10b981', section:'Seating' },
+  { file:'bar.glb',          label:'Bar',          color:'#ec4899', section:'Seating' },
+  { file:'tv_60.glb',        label:'TV 60',        color:'#3b82f6', section:'Screens' },
+  { file:'tv_60_1.glb',      label:'TV 60 (2)',    color:'#06b6d4', section:'Screens' },
+  { file:'tv_stand.glb',     label:'TV Stand',     color:'#0891b2', section:'Screens' },
+  { file:'carpet.glb',       label:'Carpet',       color:'#7c3aed', section:'Floor'   },
+  { file:'skyla.glb',        label:'Skyla Glass',  color:'#67e8f9', section:'Decor'   },
+  { file:'balloons.glb',     label:'Balloons',     color:'#f472b6', section:'Decor'   },
+  { file:'flower.glb',       label:'Flower',       color:'#fb7185', section:'Decor'   },
+];
+
+// ── RAMEN PARTS ───────────────────────────────────────────────────────────────
+const RAMEN_PARTS = [
+  { file:'ramenShopJoined.glb',     label:'Ramen Shop',        color:'#f97316', section:'Structure' },
+  { file:'roof.glb',                label:'Roof',              color:'#78716c', section:'Structure' },
+  { file:'floor.glb',               label:'Floor',             color:'#44403c', section:'Structure' },
+  { file:'miscJoined.glb',          label:'Misc Joined',       color:'#a8a29e', section:'Structure' },
+  { file:'graphicsJoined.glb',      label:'Graphics',          color:'#e2e8f0', section:'Structure' },
+  { file:'jesseZhouJoined.glb',     label:'Jesse Zhou',        color:'#cbd5e1', section:'Structure' },
+  { file:'machinesJoined.glb',      label:'Machines',          color:'#94a3b8', section:'Structure' },
+  // chunks
+  { file:'chunk_1.glb',  label:'Chunk 1',  color:'#64748b', section:'Chunks' },
+  { file:'chunk_2.glb',  label:'Chunk 2',  color:'#6b7280', section:'Chunks' },
+  { file:'chunk_3.glb',  label:'Chunk 3',  color:'#71717a', section:'Chunks' },
+  { file:'chunk_4.glb',  label:'Chunk 4',  color:'#737373', section:'Chunks' },
+  { file:'chunk_5.glb',  label:'Chunk 5',  color:'#78716c', section:'Chunks' },
+  { file:'chunk_6.glb',  label:'Chunk 6',  color:'#7c7b7a', section:'Chunks' },
+  { file:'chunk_7.glb',  label:'Chunk 7',  color:'#828282', section:'Chunks' },
+  { file:'chunk_8.glb',  label:'Chunk 8',  color:'#8a8a8a', section:'Chunks' },
+  { file:'chunk_9.glb',  label:'Chunk 9',  color:'#909090', section:'Chunks' },
+  { file:'chunk_10.glb', label:'Chunk 10', color:'#969696', section:'Chunks' },
+  { file:'chunk_11.glb', label:'Chunk 11', color:'#9ca3af', section:'Chunks' },
+  { file:'chunk_12.glb', label:'Chunk 12', color:'#a3a3a3', section:'Chunks' },
+  { file:'chunk_13.glb', label:'Chunk 13', color:'#aaaaaa', section:'Chunks' },
+  { file:'chunk_14.glb', label:'Chunk 14', color:'#b0b0b0', section:'Chunks' },
+  { file:'chunk_15.glb', label:'Chunk 15', color:'#b5b5b5', section:'Chunks' },
+  { file:'chunk_16.glb', label:'Chunk 16', color:'#bababa', section:'Chunks' },
+  { file:'chunk_17.glb', label:'Chunk 17', color:'#bfbfbf', section:'Chunks' },
+  { file:'chunk_18.glb', label:'Chunk 18', color:'#c5c5c5', section:'Chunks' },
+  // Neon / lights
+  { file:'neonPink.glb',        label:'Neon Pink',        color:'#f472b6', section:'Lights' },
+  { file:'neonBlue.glb',        label:'Neon Blue',        color:'#38bdf8', section:'Lights' },
+  { file:'neonGreen.glb',       label:'Neon Green',       color:'#4ade80', section:'Lights' },
+  { file:'neonYellow.glb',      label:'Neon Yellow',      color:'#fbbf24', section:'Lights' },
+  { file:'blueLights.glb',      label:'Blue Lights',      color:'#60a5fa', section:'Lights' },
+  { file:'redLED.glb',          label:'Red LED',          color:'#f87171', section:'Lights' },
+  { file:'greenLED.glb',        label:'Green LED',        color:'#86efac', section:'Lights' },
+  { file:'yellowRightLight.glb',label:'Yellow Light',     color:'#fde047', section:'Lights' },
+  { file:'lampLights.glb',      label:'Lamp Lights',      color:'#fef08a', section:'Lights' },
+  { file:'storageLight.glb',    label:'Storage Light',    color:'#fef9c3', section:'Lights' },
+  { file:'portalLight.glb',     label:'Portal Light',     color:'#ede9fe', section:'Lights' },
+  { file:'poleLight.glb',       label:'Pole Light',       color:'#ddd6fe', section:'Lights' },
+  { file:'greenSignSquare.glb', label:'Green Sign',       color:'#6ee7b7', section:'Lights' },
+  { file:'whiteButton.glb',     label:'White Button',     color:'#f1f5f9', section:'Lights' },
+  // Screens
+  { file:'bigScreen.glb',           label:'Big Screen',       color:'#3b82f6', section:'Screens' },
+  { file:'smallScreen1.glb',        label:'Screen 1',         color:'#2563eb', section:'Screens' },
+  { file:'smallScreen2.glb',        label:'Screen 2',         color:'#1d4ed8', section:'Screens' },
+  { file:'smallScreen3.glb',        label:'Screen 3',         color:'#1e40af', section:'Screens' },
+  { file:'smallScreen4.glb',        label:'Screen 4',         color:'#1e3a8a', section:'Screens' },
+  { file:'smallScreen5.glb',        label:'Screen 5',         color:'#172554', section:'Screens' },
+  { file:'tallScreen.glb',          label:'Tall Screen',      color:'#0ea5e9', section:'Screens' },
+  { file:'sideScreen.glb',          label:'Side Screen',      color:'#0284c7', section:'Screens' },
+  { file:'tvScreen.glb',            label:'TV Screen',        color:'#0369a1', section:'Screens' },
+  { file:'littleTVScreen.glb',      label:'Little TV',        color:'#075985', section:'Screens' },
+  { file:'vendingMachineScreen.glb',label:'Vending Screen',   color:'#0c4a6e', section:'Screens' },
+  { file:'vendingMachineLight.glb', label:'Vending Light',    color:'#155e75', section:'Screens' },
+  { file:'arcadeRim.glb',           label:'Arcade Rim',       color:'#a855f7', section:'Screens' },
+  { file:'arcadeScreen.glb',        label:'Arcade Screen',    color:'#9333ea', section:'Screens' },
+  { file:'arcadeToken.glb',         label:'Arcade Token',     color:'#7c3aed', section:'Screens' },
+  // Decor / signage
+  { file:'chinese.glb',       label:'Chinese',       color:'#ef4444', section:'Decor' },
+  { file:'easelFrontGraphic.glb',label:'Easel Graphic',color:'#f97316',section:'Decor'},
+  { file:'dish.glb',          label:'Dish',          color:'#f59e0b', section:'Decor' },
+  { file:'dishStand.glb',     label:'Dish Stand',    color:'#d97706', section:'Decor' },
+  { file:'fan1.glb',          label:'Fan 1',         color:'#6b7280', section:'Decor' },
+  { file:'fan2.glb',          label:'Fan 2',         color:'#9ca3af', section:'Decor' },
+  // Navigation labels
+  { file:'aboutMeBlack.glb',   label:'About Black',   color:'#1c1917', section:'Nav' },
+  { file:'aboutMeBlue.glb',    label:'About Blue',    color:'#1e40af', section:'Nav' },
+  { file:'projectsRed.glb',    label:'Projects Red',  color:'#b91c1c', section:'Nav' },
+  { file:'projectsWhite.glb',  label:'Projects White',color:'#f1f5f9', section:'Nav' },
+  { file:'articlesRed.glb',    label:'Articles Red',  color:'#dc2626', section:'Nav' },
+  { file:'articlesWhite.glb',  label:'Articles White',color:'#e2e8f0', section:'Nav' },
+  { file:'creditsOrange.glb',  label:'Credits Orange',color:'#ea580c', section:'Nav' },
+  { file:'creditsBlack.glb',   label:'Credits Black', color:'#292524', section:'Nav' },
+  { file:'jZhouPink.glb',      label:'JZhou Pink',    color:'#ec4899', section:'Nav' },
+  { file:'jZhouBlack.glb',     label:'JZhou Black',   color:'#1c1917', section:'Nav' },
+];
+
+const EXHIBIT_BASE = './models/exhibit-parts/';
+const RAMEN_BASE   = './models/parts/';
+
+// ── SCENE ─────────────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const renderer  = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d16);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 500);
+camera.position.set(0, 8, 22);
+const orbitCtrl = new OrbitControls(camera, renderer.domElement);
+orbitCtrl.enableDamping = true; orbitCtrl.dampingFactor = 0.07;
+
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+const dirL = new THREE.DirectionalLight(0xffffff, 0.9);
+dirL.position.set(5, 10, 7); scene.add(dirL);
+scene.add(new THREE.GridHelper(80, 80, 0x1a1a1a, 0x111111));
+
+function makeFlatMat(color) {
+  return new THREE.MeshStandardMaterial({ color: new THREE.Color(color), roughness:0.65, metalness:0.1 });
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+const logBody   = document.getElementById('log-body');
+const logPanel  = document.getElementById('log-panel');
+const logClose  = document.getElementById('log-close');
+const logReopen = document.getElementById('log-reopen');
+const summaryEl = document.getElementById('summary');
+function log(msg, type='info') {
+  const d = document.createElement('div');
+  d.className = `ll ${type}`; d.textContent = msg;
+  logBody.appendChild(d); logBody.scrollTop = logBody.scrollHeight;
+}
+logClose.addEventListener('click',  () => { logPanel.classList.add('hidden');    logReopen.classList.add('visible'); });
+logReopen.addEventListener('click', () => { logPanel.classList.remove('hidden'); logReopen.classList.remove('visible'); });
+
+// ── LOADERS ───────────────────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+// Each entry: { group, origGroup, origMats, origBox, basePos,
+//               visible, replaced, pill, color, tab, meshCount }
+const STATE  = {};   // label → entry
+let selectedPart = null;
+let activeTab    = 'exhibit';
+
+// Transform sliders state
+const T = { sx:1,sy:1,sz:1, px:0,py:0,pz:0, rx:0,ry:0,rz:0 };
+
+// ── ORIGINAL MATERIAL STORE ───────────────────────────────────────────────────
+function storeOrigMats(group) {
+  const map = new Map();
+  group.traverse(obj => {
+    if (!obj.isMesh) return;
+    map.set(obj.uuid, Array.isArray(obj.material) ? [...obj.material] : obj.material);
+  });
+  return map;
+}
+function restoreOrigMats(group, map) {
+  group.traverse(obj => {
+    if (!obj.isMesh || !map.has(obj.uuid)) return;
+    obj.material = map.get(obj.uuid);
+  });
+}
+function applyFlatMats(group, color) {
+  const mat = makeFlatMat(color);
+  group.traverse(obj => {
+    if (obj.isMesh) { obj.material = mat; obj.userData.partColor = color; }
+  });
+}
+
+// ── TAB LOGIC ─────────────────────────────────────────────────────────────────
+function applyTabVisibility() {
+  for (const [label, s] of Object.entries(STATE)) {
+    if (!s.group) continue;
+    const isExhibit = s.tab === 'exhibit';
+    const isRamen   = s.tab === 'ramen';
+
+    if (activeTab === 'exhibit') {
+      s.group.visible = isExhibit ? s.visible : false;
+      if (isExhibit) applyFlatMats(s.group, s.color);
+
+    } else if (activeTab === 'ramen') {
+      s.group.visible = isRamen ? s.visible : false;
+      if (isRamen) applyFlatMats(s.group, s.color);
+
+    } else {
+      // all — show both, restore original materials
+      s.group.visible = s.visible;
+      if (s.origMats) restoreOrigMats(s.group, s.origMats);
+    }
+  }
+
+  // Hide replace panel on 'all' tab
+  if (activeTab === 'all') {
+    document.getElementById('replace-panel').classList.remove('open');
+    if (selectedPart) {
+      STATE[selectedPart]?.pill?.classList.remove('selected');
+      selectedPart = null;
+    }
+  }
+  updateTabUI();
+  rebuildLegend();
+}
+
+function updateTabUI() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+  const ev = Object.values(STATE).filter(s => s.tab === 'exhibit' && s.visible && s.group).length;
+  const rv = Object.values(STATE).filter(s => s.tab === 'ramen'   && s.visible && s.group).length;
+  const et = EXHIBIT_PARTS.length;
+  const rt = RAMEN_PARTS.length;
+  summaryEl.textContent = activeTab === 'exhibit'
+    ? `⚙️ Exhibit: ${ev}/${et} · Ramen hidden`
+    : activeTab === 'ramen'
+    ? `🍜 Ramen: ${rv}/${rt} · Exhibit hidden`
+    : `🌐 All · Exhibit: ${ev}/${et} · Ramen: ${rv}/${rt}`;
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    activeTab = tab.dataset.tab;
+    applyTabVisibility();
+  });
+});
+
+// ── LEGEND ────────────────────────────────────────────────────────────────────
+const legendEl = document.getElementById('legend');
+
+function rebuildLegend() {
+  legendEl.innerHTML = '';
+  const parts = activeTab === 'exhibit' ? EXHIBIT_PARTS
+              : activeTab === 'ramen'   ? RAMEN_PARTS
+              : [...EXHIBIT_PARTS, ...RAMEN_PARTS];
+
+  const sections = {};
+  parts.forEach(p => {
+    const sec = (activeTab === 'all' && p.tab === 'ramen' ? '🍜 ' : '') + (p.section ?? 'Other');
+    if (!sections[sec]) sections[sec] = [];
+    sections[sec].push(p);
+  });
+
+  // Tag parts with their tab for 'all' mode
+  EXHIBIT_PARTS.forEach(p => { p.tab = 'exhibit'; });
+  RAMEN_PARTS.forEach(p  => { p.tab = 'ramen';   });
+
+  Object.entries(sections).forEach(([sec, parts]) => {
+    const hdr = document.createElement('div');
+    hdr.className = 'legend-section';
+    hdr.textContent = sec;
+    legendEl.appendChild(hdr);
+    parts.forEach(p => {
+      const s    = STATE[p.label];
+      const pill = buildPill(p, s);
+      if (s) s.pill = pill;
+      legendEl.appendChild(pill);
+    });
+  });
+}
+
+function buildPill(part, s) {
+  const pill = document.createElement('div');
+  pill.className = 'pill'
+    + (!s?.group   ? ' loading'  : '')
+    + (!s?.visible ? ' off'      : '')
+    + (selectedPart === part.label ? ' selected' : '');
+  pill.style.borderColor = part.color;
+  pill.style.color       = part.color;
+
+  const cntId = 'cnt-' + part.label.replace(/[\s().]/g,'_');
+  pill.innerHTML =
+    `<span class="dot" style="background:${part.color}"></span>` +
+    `${part.label}` +
+    `<span class="pcnt" id="${cntId}">${s?.group ? ` ×${s.meshCount}` : ' …'}</span>`;
+
+  pill.addEventListener('click', e => {
+    const st = STATE[part.label];
+    if (!st?.group) return;
+    if (activeTab === 'all' || e.shiftKey) {
+      // toggle in all tab, or shift+click in edit tabs
+      st.visible = !st.visible;
+      st.group.visible = st.visible;
+      pill.classList.toggle('off', !st.visible);
+      updateTabUI();
+    } else {
+      selectPart(part.label);
+    }
+  });
+  pill.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const st = STATE[part.label];
+    if (!st?.group) return;
+    st.visible = !st.visible;
+    st.group.visible = st.visible;
+    pill.classList.toggle('off', !st.visible);
+    updateTabUI();
+  });
+
+  return pill;
+}
+
+// ── SLIDER WIRING ─────────────────────────────────────────────────────────────
+function wireSlider(id, key, isRot) {
+  const sl = document.getElementById(id);
+  const vl = document.getElementById(id + '-v');
+  const fn = document.getElementById(id + '-f');
+  function apply(v) {
+    v = parseFloat(v);
+    T[key] = v;
+    sl.value = v;
+    fn.value = v.toFixed(isRot ? 0 : 3);
+    vl.textContent = isRot ? v + '°' : v.toFixed(3);
+    applyTransform(); updateCopyBox();
+  }
+  sl.addEventListener('input',  () => apply(sl.value));
+  fn.addEventListener('change', () => apply(fn.value));
+}
+['sx','sy','sz','px','py','pz'].forEach(k => wireSlider(k, k, false));
+['rx','ry','rz'].forEach(k => wireSlider(k, k, true));
+
+// Uniform scale
+const suSl = document.getElementById('su');
+const suVl = document.getElementById('su-v');
+const suFn = document.getElementById('su-f');
+function applyUniform(v) {
+  v = parseFloat(v);
+  T.sx = T.sy = T.sz = v;
+  suSl.value = v; suFn.value = v.toFixed(3); suVl.textContent = v.toFixed(3);
+  ['sx','sy','sz'].forEach(k => {
+    document.getElementById(k).value            = v;
+    document.getElementById(k+'-f').value        = v.toFixed(3);
+    document.getElementById(k+'-v').textContent  = v.toFixed(3);
+  });
+  applyTransform(); updateCopyBox();
+}
+suSl.addEventListener('input',  () => applyUniform(suSl.value));
+suFn.addEventListener('change', () => applyUniform(suFn.value));
+
+document.getElementById('reset-scale').addEventListener('click', () => applyUniform(1));
+document.getElementById('reset-pos').addEventListener('click', () => {
+  ['px','py','pz'].forEach(k => {
+    T[k] = 0;
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0.000';
+    document.getElementById(k+'-v').textContent = '0.000';
+  });
+  applyTransform(); updateCopyBox();
+});
+document.getElementById('reset-rot').addEventListener('click', () => {
+  ['rx','ry','rz'].forEach(k => {
+    T[k] = 0;
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0';
+    document.getElementById(k+'-v').textContent = '0°';
+  });
+  applyTransform(); updateCopyBox();
+});
+
+const DEG2RAD = Math.PI / 180;
+
+function applyTransform() {
+  if (!selectedPart) return;
+  const s = STATE[selectedPart];
+  if (!s?.group) return;
+  s.group.scale.set(T.sx, T.sy, T.sz);
+  s.group.position.set(
+    (s.basePos?.x ?? 0) + T.px,
+    (s.basePos?.y ?? 0) + T.py,
+    (s.basePos?.z ?? 0) + T.pz,
+  );
+  s.group.rotation.set(T.rx * DEG2RAD, T.ry * DEG2RAD, T.rz * DEG2RAD);
+}
+
+function resetSliders() {
+  T.sx=T.sy=T.sz=1; T.px=T.py=T.pz=0; T.rx=T.ry=T.rz=0;
+  ['sx','sy','sz'].forEach(k => {
+    document.getElementById(k).value           = 1;
+    document.getElementById(k+'-f').value       = '1.000';
+    document.getElementById(k+'-v').textContent = '1.000';
+  });
+  suSl.value=1; suFn.value='1.000'; suVl.textContent='1.000';
+  ['px','py','pz'].forEach(k => {
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0.000';
+    document.getElementById(k+'-v').textContent = '0.000';
+  });
+  ['rx','ry','rz'].forEach(k => {
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0';
+    document.getElementById(k+'-v').textContent = '0°';
+  });
+}
+
+// ── COPY BOX ──────────────────────────────────────────────────────────────────
+const copyBox = document.getElementById('rp-copy-box');
+function updateCopyBox() {
+  if (!selectedPart) return;
+  copyBox.style.display = 'block';
+  copyBox.textContent =
+    `// ${selectedPart}\n` +
+    `SCALE_X=${T.sx.toFixed(4)} SCALE_Y=${T.sy.toFixed(4)} SCALE_Z=${T.sz.toFixed(4)}\n` +
+    `OFFSET_X=${T.px.toFixed(4)} OFFSET_Y=${T.py.toFixed(4)} OFFSET_Z=${T.pz.toFixed(4)}\n` +
+    `ROT_X=${T.rx.toFixed(1)}° ROT_Y=${T.ry.toFixed(1)}° ROT_Z=${T.rz.toFixed(1)}°`;
+}
+document.getElementById('rp-copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(copyBox.textContent).then(() => {
+    document.getElementById('rp-copy-btn').textContent = '✅ Copied!';
+    setTimeout(() => { document.getElementById('rp-copy-btn').textContent = '📋 Copy transform values'; }, 2000);
+  }).catch(() => alert(copyBox.textContent));
+});
+
+// ── SELECT PART ───────────────────────────────────────────────────────────────
+function selectPart(label) {
+  if (activeTab === 'all') return;
+  if (selectedPart && STATE[selectedPart]) STATE[selectedPart].pill?.classList.remove('selected');
+  selectedPart = label;
+  const s = STATE[label];
+  if (!s?.group) return;
+
+  s.pill?.classList.add('selected');
+  document.getElementById('replace-panel').classList.add('open');
+
+  const rpTitle = document.getElementById('rp-title');
+  rpTitle.textContent = `🔄 ${label}`;
+  rpTitle.style.color = s.color;
+
+  if (!s.basePos) s.basePos = s.group.position.clone();
+
+  // Sync sliders to current transform
+  T.sx = s.group.scale.x;    T.sy = s.group.scale.y;    T.sz = s.group.scale.z;
+  T.px = s.group.position.x - (s.basePos?.x ?? 0);
+  T.py = s.group.position.y - (s.basePos?.y ?? 0);
+  T.pz = s.group.position.z - (s.basePos?.z ?? 0);
+  T.rx = s.group.rotation.x / DEG2RAD;
+  T.ry = s.group.rotation.y / DEG2RAD;
+  T.rz = s.group.rotation.z / DEG2RAD;
+
+  ['sx','sy','sz','px','py','pz','rx','ry','rz'].forEach(k => {
+    const isRot = ['rx','ry','rz'].includes(k);
+    document.getElementById(k).value           = T[k];
+    document.getElementById(k+'-f').value       = isRot ? T[k].toFixed(0) : T[k].toFixed(3);
+    document.getElementById(k+'-v').textContent = isRot ? T[k].toFixed(1)+'°' : T[k].toFixed(3);
+  });
+
+  const box    = new THREE.Box3().setFromObject(s.group);
+  const size   = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  document.getElementById('rp-info').innerHTML =
+    `<div>Tab: <span>${s.tab}</span>  Replaced: <span class="${s.replaced?'hi':''}">${s.replaced?'YES':'no'}</span></div>` +
+    `<div>Size: <span>${size.x.toFixed(2)}×${size.y.toFixed(2)}×${size.z.toFixed(2)}</span></div>` +
+    `<div>Ctr: <span>${center.x.toFixed(2)}, ${center.y.toFixed(2)}, ${center.z.toFixed(2)}</span></div>`;
+
+  document.getElementById('rp-load-btn').disabled    = false;
+  document.getElementById('rp-restore-btn').disabled = !s.replaced;
+  document.getElementById('rp-status').textContent   = '';
+  copyBox.style.display = 'none';
+  updateCopyBox();
+}
+
+// ── LOAD REPLACEMENT ──────────────────────────────────────────────────────────
+function loadReplacement(label, urlOrBlob) {
+  const s = STATE[label];
+  if (!s) return;
+  const rpStatus = document.getElementById('rp-status');
+  rpStatus.textContent = '⏳ Loading…'; rpStatus.className = 'info';
+  document.getElementById('rp-load-btn').disabled = true;
+  const url = urlOrBlob instanceof Blob ? URL.createObjectURL(urlOrBlob) : urlOrBlob;
+
+  loader.load(url, gltf => {
+    const ng = gltf.scene;
+    ng.name  = label + '_replacement';
+    // Store original mats from new GLB for 'all' tab
+    s.origMats = storeOrigMats(ng);
+    applyFlatMats(ng, s.color);
+    ng.traverse(obj => { if (obj.isMesh) obj.userData.partLabel = label; });
+
+    const origCenter = s.origBox.getCenter(new THREE.Vector3());
+    s.basePos = origCenter.clone();
+    resetSliders(); T.sx=T.sy=T.sz=1; T.px=T.py=T.pz=0; T.rx=T.ry=T.rz=0;
+
+    const newBox = new THREE.Box3().setFromObject(ng);
+    ng.position.sub(newBox.getCenter(new THREE.Vector3())).add(origCenter);
+
+    scene.remove(s.group);
+    scene.add(ng);
+    s.group = ng; s.replaced = true;
+
+    rpStatus.textContent = '✅ Loaded — adjust sliders';
+    rpStatus.className   = 'ok';
+    document.getElementById('rp-load-btn').disabled    = false;
+    document.getElementById('rp-restore-btn').disabled = false;
+    if (urlOrBlob instanceof Blob) URL.revokeObjectURL(url);
+    log(`🔄 ${label} replaced`, 'ok');
+    selectPart(label);
+  }, undefined, err => {
+    rpStatus.textContent = `❌ ${err.message}`;
+    rpStatus.className   = 'err';
+    document.getElementById('rp-load-btn').disabled = false;
+    if (urlOrBlob instanceof Blob) URL.revokeObjectURL(url);
+    log(`❌ ${err.message}`, 'err');
+  });
+}
+
+document.getElementById('rp-load-btn').addEventListener('click', () => {
+  const url = document.getElementById('rp-path').value.trim();
+  if (!url || !selectedPart) return;
+  loadReplacement(selectedPart, url);
+});
+
+document.getElementById('rp-restore-btn').addEventListener('click', () => {
+  if (!selectedPart) return;
+  const s = STATE[selectedPart];
+  if (!s?.replaced) return;
+  scene.remove(s.group);
+  scene.add(s.origGroup);
+  s.group    = s.origGroup;
+  s.replaced = false;
+  s.basePos  = null;
+  resetSliders(); applyTransform();
+  document.getElementById('rp-restore-btn').disabled = true;
+  document.getElementById('rp-status').textContent   = '↩ Restored';
+  document.getElementById('rp-status').className     = 'ok';
+  copyBox.style.display = 'none';
+  log(`↩ ${selectedPart} restored`, 'info');
+  selectPart(selectedPart);
+});
+
+document.getElementById('rp-cancel-btn').addEventListener('click', () => {
+  document.getElementById('replace-panel').classList.remove('open');
+  if (selectedPart) STATE[selectedPart]?.pill?.classList.remove('selected');
+  selectedPart = null;
+});
+document.getElementById('rp-close').addEventListener('click', () => {
+  document.getElementById('replace-panel').classList.remove('open');
+});
+
+// ── DRAG & DROP ───────────────────────────────────────────────────────────────
+const dropOverlay = document.getElementById('drop-overlay');
+document.addEventListener('dragover', e => {
+  e.preventDefault();
+  if (selectedPart && activeTab !== 'all') dropOverlay.classList.add('active');
+});
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) dropOverlay.classList.remove('active'); });
+document.addEventListener('drop', e => {
+  e.preventDefault(); dropOverlay.classList.remove('active');
+  if (!selectedPart || activeTab === 'all') return;
+  const file = [...e.dataTransfer.files].find(f => f.name.endsWith('.glb'));
+  if (file) loadReplacement(selectedPart, file);
+});
+
+// ── LOAD PART ─────────────────────────────────────────────────────────────────
+function loadPart(part, base, tabName) {
+  return new Promise(resolve => {
+    loader.load(base + part.file, gltf => {
+      const group = gltf.scene;
+      group.name  = part.label;
+      let meshCount = 0;
+      const origMats = storeOrigMats(group);
+      group.traverse(obj => {
+        if (!obj.isMesh) return;
+        obj.userData.partLabel = part.label;
+        meshCount++;
+      });
+      applyFlatMats(group, part.color);
+      const box = new THREE.Box3().setFromObject(group);
+
+      scene.add(group);
+      group.visible = (tabName === 'exhibit'); // exhibit shows on load, ramen hidden
+
+      const s = STATE[part.label];
+      s.group     = group; s.origGroup = group;
+      s.origMats  = origMats; s.origBox = box;
+      s.basePos   = group.position.clone();
+      s.meshCount = meshCount;
+
+      rebuildLegend();
+      log(`✅ [${tabName}] ${part.label} ×${meshCount}`, 'ok');
+      resolve(group);
+    }, undefined, err => {
+      log(`❌ [${tabName}] ${part.label}`, 'err');
+      const s = STATE[part.label];
+      if (s?.pill) { s.pill.classList.remove('loading'); s.pill.classList.add('off'); }
+      resolve(null);
+    });
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+EXHIBIT_PARTS.forEach(p => {
+  p.tab = 'exhibit';
+  STATE[p.label] = { group:null, origGroup:null, origMats:null, origBox:null,
+    basePos:null, visible:true, replaced:false, pill:null, color:p.color,
+    tab:'exhibit', meshCount:0 };
+});
+RAMEN_PARTS.forEach(p => {
+  p.tab = 'ramen';
+  STATE[p.label] = { group:null, origGroup:null, origMats:null, origBox:null,
+    basePos:null, visible:true, replaced:false, pill:null, color:p.color,
+    tab:'ramen', meshCount:0 };
+});
+
+rebuildLegend();
+updateTabUI();
+log('🚀 Loading exhibit parts…', 'info');
+
+// Load exhibit and ramen in parallel
+const exhibitLoads = EXHIBIT_PARTS.map(p => loadPart(p, EXHIBIT_BASE, 'exhibit'));
+const ramenLoads   = RAMEN_PARTS.map(p  => loadPart(p, RAMEN_BASE,   'ramen'));
+
+Promise.all([...exhibitLoads, ...ramenLoads]).then(results => {
+  const ok = results.filter(Boolean).length;
+  log(`🎉 ${ok}/${results.length} parts loaded`, 'ok');
+  updateTabUI();
+  rebuildLegend();
+
+  // Fit camera to exhibit stand (visible on load)
+  const box = new THREE.Box3();
+  scene.traverse(obj => {
+    if (obj.isMesh && obj.visible && STATE[obj.userData.partLabel]?.tab === 'exhibit')
+      box.expandByObject(obj);
+  });
+  if (!box.isEmpty()) {
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(center.x, center.y + maxDim * 0.5, center.z + maxDim * 1.2);
+    orbitCtrl.target.copy(center);
+    orbitCtrl.update();
+  }
+
+  summaryEl.textContent = `✅ ${ok}/${results.length} parts ready`;
+  setTimeout(() => { logPanel.classList.add('hidden'); logReopen.classList.add('visible'); }, 4000);
+});
+
+// ── RAYCASTER ─────────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+
+renderer.domElement.addEventListener('pointermove', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  scene.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const label = hits[0].object.userData.partLabel ?? '?';
+    tooltip.style.display = 'block';
+    tooltip.style.left    = (ev.clientX + 14) + 'px';
+    tooltip.style.top     = (ev.clientY - 10) + 'px';
+    tooltip.textContent   = label + (STATE[label]?.replaced ? ' [R]' : '');
+  } else { tooltip.style.display = 'none'; }
+});
+
+renderer.domElement.addEventListener('click', ev => {
+  if (activeTab === 'all') return;
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  scene.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const label = hits[0].object.userData.partLabel;
+    if (label && STATE[label]?.group) {
+      // Only select if the part belongs to the active tab
+      if (STATE[label].tab === activeTab) selectPart(label);
+    }
+  }
+});
+
+renderer.domElement.addEventListener('pointerleave', () => { tooltip.style.display = 'none'; });
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  orbitCtrl.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
