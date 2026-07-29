@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🖥️ Scene Part Editor — Textured Parts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; overflow: hidden; }
+  #canvas-container { position: fixed; inset: 0; }
+
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 10px; padding: 7px 12px;
+    background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #222; z-index: 30; flex-wrap: wrap;
+  }
+  #title { color: #f97316; font-size: 11px; font-weight: bold; flex: 1; }
+  #summary { font-size: 10px; color: #94a3b8; }
+
+  #legend {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.93); border-top: 1px solid #1a1a1a;
+    padding: 6px 10px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    z-index: 20; max-height: 38vh; overflow-y: auto;
+  }
+  .legend-section {
+    width: 100%; font-size: 8px; color: #333;
+    padding: 3px 2px 1px; border-top: 1px solid #1a1a2e;
+    margin-top: 2px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .legend-section:first-child { border-top: none; margin-top: 0; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 12px; font-size: 9px; border: 1px solid;
+    cursor: pointer; user-select: none; transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .pill:hover { transform: scale(1.05); }
+  .pill.off { opacity: 0.22; }
+  .pill.selected { box-shadow: 0 0 0 2px #fff; }
+  .pill.edited { border-style: dashed; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pcnt { font-size: 7px; opacity: 0.55; }
+
+  #replace-panel {
+    position: fixed; top: 36px; right: 10px; width: 276px;
+    background: rgba(8,8,18,0.97); border: 1px solid #333; border-radius: 8px;
+    z-index: 25; max-height: calc(100vh - 46px); overflow-y: auto;
+    transition: opacity 0.25s, transform 0.25s;
+    opacity: 0; transform: translateX(285px); pointer-events: none;
+  }
+  #replace-panel.open { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  #replace-panel::-webkit-scrollbar { width: 3px; }
+  #replace-panel::-webkit-scrollbar-thumb { background: #333; }
+
+  #rp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px 7px; border-bottom: 1px solid #222;
+    position: sticky; top: 0; background: rgba(8,8,18,0.98); z-index: 1;
+  }
+  #rp-header h3 { font-size: 11px; }
+  #rp-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #rp-close:hover { color: #f87171; }
+
+  #rp-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .rp-info {
+    background: #060610; border: 1px solid #1a1a2e;
+    border-radius: 4px; padding: 7px 9px; font-size: 9px;
+    color: #94a3b8; line-height: 1.8;
+  }
+  .rp-info span { color: #e0e0e0; }
+  .rp-info .hi { color: #f97316; font-weight: bold; }
+
+  .slider-section {
+    background: #060610; border: 1px solid #1a1a2e; border-radius: 5px; padding: 8px 9px;
+  }
+  .ss-title {
+    font-size: 9px; color: #f97316; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sr { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+  .sr:last-child { margin-bottom: 0; }
+  .saxis { font-size: 9px; color: #555; width: 12px; flex-shrink: 0; font-weight: bold; }
+  .sr input[type=range] { flex: 1; accent-color: #f97316; height: 3px; }
+  .snum {
+    font-size: 9px; color: #f97316; width: 44px;
+    text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace;
+  }
+  .sfine {
+    width: 54px; padding: 2px 4px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 3px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 9px; outline: none;
+  }
+  .sfine:focus { border-color: #f97316; }
+  .reset-btn {
+    background: none; border: 1px solid #333; border-radius: 3px;
+    color: #555; font-size: 8px; padding: 1px 5px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  .reset-btn:hover { border-color: #f97316; color: #f97316; }
+  .divrow { border-top: 1px solid #1a1a2e; padding-top: 5px; margin-top: 4px; }
+
+  /* ── Turn buttons ── */
+  .turn-btn {
+    background: #0f0f1e; border: 1px solid #334155; border-radius: 4px;
+    color: #94a3b8; font-size: 10px;
+    width: 24px; height: 24px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s; flex-shrink: 0; user-select: none;
+  }
+  .turn-btn:hover  { border-color: #f97316; color: #f97316; background: #1a0800; }
+  .turn-btn:active { background: #f97316; color: #000; transform: scale(0.9); }
+
+  /* ── Step buttons ── */
+  .step-btn {
+    background: #0f0f1e; border: 1px solid #334155; border-radius: 4px;
+    color: #64748b; font-size: 8px; padding: 3px 6px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+    transition: all 0.1s; user-select: none;
+  }
+  .step-btn:hover  { border-color: #f97316; color: #f97316; }
+  .step-btn.active { border-color: #f97316; color: #f97316; background: rgba(249,115,22,0.12); }
+
+  #rp-copy-box {
+    background: #0a0a18; border: 1px solid #1a1a3a; border-radius: 4px;
+    padding: 7px 9px; font-size: 9px; color: #4ade80; line-height: 1.8;
+    font-family: 'Courier New', monospace; display: none;
+  }
+
+  .rp-btn {
+    width: 100%; padding: 6px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    cursor: pointer; border: 1px solid; transition: all 0.15s;
+  }
+  .rp-btn.secondary { background: #0f0f1e; border-color: #333; color: #94a3b8; }
+  .rp-btn.secondary:hover { border-color: #06b6d4; color: #06b6d4; }
+  .rp-btn.green     { background: #0f0f1e; border-color: #4ade80; color: #4ade80; }
+  .rp-btn.green:hover { background: #4ade80; color: #000; }
+  .rp-btn:disabled  { opacity: 0.35; cursor: not-allowed; }
+
+  #rp-status { font-size: 9px; min-height: 14px; text-align: center; color: #94a3b8; }
+  #rp-status.ok  { color: #4ade80; }
+  #rp-status.err { color: #f87171; }
+
+  #log-panel {
+    position: fixed; top: 36px; left: 10px; width: 210px;
+    max-height: calc(100vh - 80px);
+    background: rgba(8,8,18,0.95); border: 1px solid #333; border-radius: 8px;
+    display: flex; flex-direction: column; z-index: 24;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #log-panel.hidden { opacity: 0; transform: translateX(-220px); pointer-events: none; }
+  #log-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px 6px; border-bottom: 1px solid #1a1a2e; flex-shrink: 0;
+  }
+  #log-header h3 { color: #f97316; font-size: 11px; }
+  #log-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #log-close:hover { color: #f87171; }
+  #log-body { overflow-y: auto; padding: 7px 12px 10px; flex: 1; }
+  .ll { padding: 2px 0; border-bottom: 1px solid #0f0f1a; line-height: 1.5; font-size: 9px; }
+  .ok  { color: #4ade80; } .err { color: #f87171; }
+  .info{ color: #94a3b8; } .warn{ color: #fbbf24; }
+
+  #log-reopen {
+    position: fixed; top: 9px; left: 12px;
+    background: rgba(8,8,18,0.9); border: 1px solid #444; border-radius: 5px;
+    color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px;
+    padding: 4px 9px; cursor: pointer; z-index: 25;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  #log-reopen.visible { opacity: 1; pointer-events: auto; }
+  #log-reopen:hover { color: #f97316; border-color: #f97316; }
+
+  #tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(0,0,0,0.92); border: 1px solid #444;
+    border-radius: 5px; padding: 4px 9px; font-size: 10px; color: #fff;
+    z-index: 40; display: none;
+  }
+
+  #export-panel {
+    position: fixed; bottom: 42vh; left: 50%; transform: translateX(-50%);
+    background: rgba(8,8,18,0.97); border: 1px solid #4ade80; border-radius: 6px;
+    padding: 8px 12px; z-index: 26; display: none; max-width: 90vw;
+  }
+  #export-panel.open { display: block; }
+  #export-panel textarea {
+    width: 420px; max-width: 80vw; height: 160px;
+    background: #0a0a18; border: 1px solid #1a1a3a; border-radius: 4px;
+    color: #4ade80; font-family: 'Courier New', monospace; font-size: 9px;
+    padding: 6px; resize: vertical;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="ui">
+  <span id="title">🖥️ SCENE PART EDITOR — textured-parts-retextured-2.glb</span>
+  <span id="summary">Loading…</span>
+  <button class="rp-btn secondary" id="export-all-btn" style="width:auto;padding:4px 10px;">📤 Export all edits</button>
+</div>
+
+<div id="log-panel">
+  <div id="log-header"><h3>📋 Log</h3><button id="log-close">✕</button></div>
+  <div id="log-body"></div>
+</div>
+<button id="log-reopen">📋 Log</button>
+
+<div id="replace-panel">
+  <div id="rp-header">
+    <h3 id="rp-title" style="color:#f97316">🔧 Select a mesh</h3>
+    <button id="rp-close">✕</button>
+  </div>
+  <div id="rp-body">
+    <div class="rp-info" id="rp-info">Click a pill or mesh in the scene to select it.</div>
+
+    <!-- SCALE -->
+    <div class="slider-section">
+      <div class="ss-title">📐 Scale <button class="reset-btn" id="reset-scale">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="sx" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sx-v">1.000</span><input class="sfine" type="number" id="sx-f" step="0.001" value="1"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="sy" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sy-v">1.000</span><input class="sfine" type="number" id="sy-f" step="0.001" value="1"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="sz" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sz-v">1.000</span><input class="sfine" type="number" id="sz-f" step="0.001" value="1"></div>
+      <div class="sr divrow"><span class="saxis" style="color:#fbbf24">∀</span><input type="range" id="su" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="su-v">1.000</span><input class="sfine" type="number" id="su-f" step="0.001" value="1"></div>
+    </div>
+
+    <!-- POSITION -->
+    <div class="slider-section">
+      <div class="ss-title">📍 Position <button class="reset-btn" id="reset-pos">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="px" min="-30" max="30" step="0.05" value="0"><span class="snum" id="px-v">0.000</span><input class="sfine" type="number" id="px-f" step="0.01" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="py" min="-30" max="30" step="0.05" value="0"><span class="snum" id="py-v">0.000</span><input class="sfine" type="number" id="py-f" step="0.01" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="pz" min="-30" max="30" step="0.05" value="0"><span class="snum" id="pz-v">0.000</span><input class="sfine" type="number" id="pz-f" step="0.01" value="0"></div>
+    </div>
+
+    <!-- ROTATION — click-turn buttons -->
+    <div class="slider-section">
+      <div class="ss-title">🔄 Rotation (deg) <button class="reset-btn" id="reset-rot">reset</button></div>
+
+      <!-- X -->
+      <div class="sr">
+        <span class="saxis" style="color:#f87171">X</span>
+        <div style="display:flex;gap:3px;flex-shrink:0;">
+          <button class="turn-btn" data-axis="rx" data-dir="-1">◀</button>
+          <button class="turn-btn" data-axis="rx" data-dir="1">▶</button>
+        </div>
+        <span class="snum" id="rx-v" style="width:42px">0.0°</span>
+        <input class="sfine" type="number" id="rx-f" step="1" value="0">
+      </div>
+
+      <!-- Y -->
+      <div class="sr">
+        <span class="saxis" style="color:#4ade80">Y</span>
+        <div style="display:flex;gap:3px;flex-shrink:0;">
+          <button class="turn-btn" data-axis="ry" data-dir="-1">◀</button>
+          <button class="turn-btn" data-axis="ry" data-dir="1">▶</button>
+        </div>
+        <span class="snum" id="ry-v" style="width:42px">0.0°</span>
+        <input class="sfine" type="number" id="ry-f" step="1" value="0">
+      </div>
+
+      <!-- Z -->
+      <div class="sr">
+        <span class="saxis" style="color:#38bdf8">Z</span>
+        <div style="display:flex;gap:3px;flex-shrink:0;">
+          <button class="turn-btn" data-axis="rz" data-dir="-1">◀</button>
+          <button class="turn-btn" data-axis="rz" data-dir="1">▶</button>
+        </div>
+        <span class="snum" id="rz-v" style="width:42px">0.0°</span>
+        <input class="sfine" type="number" id="rz-f" step="1" value="0">
+      </div>
+
+      <!-- Step size -->
+      <div class="sr divrow" style="justify-content:space-between;align-items:center;">
+        <span style="font-size:9px;color:#475569;">Step</span>
+        <div style="display:flex;gap:3px;">
+          <button class="step-btn active" data-step="1">1°</button>
+          <button class="step-btn" data-step="5">5°</button>
+          <button class="step-btn" data-step="15">15°</button>
+          <button class="step-btn" data-step="45">45°</button>
+          <button class="step-btn" data-step="90">90°</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="rp-btn green" id="rp-copy-btn">📋 Copy transform values</button>
+    <div id="rp-copy-box"></div>
+    <button class="rp-btn secondary" id="rp-restore-btn" disabled>↩ Reset this mesh</button>
+    <button class="rp-btn secondary" id="rp-cancel-btn">✕ Deselect</button>
+    <div id="rp-status"></div>
+  </div>
+</div>
+
+<div id="export-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span style="color:#4ade80;font-size:10px;">📤 All edited meshes (JSON)</span>
+    <button class="rp-btn secondary" id="export-close-btn" style="width:auto;padding:2px 8px;">✕</button>
+  </div>
+  <textarea id="export-textarea" readonly></textarea>
+  <button class="rp-btn green" id="export-copy-btn" style="margin-top:6px;">📋 Copy JSON</button>
+</div>
+
+<div id="legend"></div>
+<div id="tooltip"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+// Single source GLB — all "parts" are top-level named nodes inside it.
+const SCENE_URL = './models/parts/textured-parts-retextured-2.glb';
+
+// Node names we treat as editable "parts", grouped into sections for the
+// legend. These are the actual glTF node names from the retextured scene
+// (mesh-bearing leaf nodes). Colors are just for pill/flat-shading identity —
+// original materials/textures are preserved on the real meshes; the flat
+// color is NOT applied here (unlike the GLB-replacement viewer) since we
+// want to see the retextured result, not a placeholder.
+// NOTE: These are the ACTUAL names Three.js's GLTFLoader resolves at
+// runtime — NOT the raw glTF node names. GLTFLoader mangles names on
+// import: spaces become underscores, dots are stripped entirely, and
+// duplicate leaf names get de-duplicated. Confirmed via on-page diagnostic
+// log against textured-parts-retextured-2.glb. If you re-export the GLB
+// with different tooling/versions, re-run the diagnostic (see the
+// "RAW MESH NAMES FROM LOADER" block in the log panel on load) before
+// assuming this list still matches.
+const PART_SECTIONS = [
+  {
+    section: 'Case Fans',
+    color: '#38bdf8',
+    nodes: [
+      'aorus_case_fans_aorus_case_fans_0',
+      'aorus_case_fans001_aorus_case_fans_0',
+      'aorus_case_fans002_aorus_case_fans_0',
+      'aorus_case_fans003_aorus_case_fans_0',
+      'aorus_case_fans004_aorus_case_fans_0',
+      'aorus_case_fans005_aorus_case_fans_0',
+      'aorus_case_fans006_aorus_case_fans_0',
+      'aorus_case_fans007_aorus_case_fans_0',
+      'aorus_case_fans008_aorus_case_fans_0',
+      'aorus_case_fans009_aorus_case_fans_0',
+    ],
+  },
+  {
+    section: 'Decals / Logos',
+    color: '#f472b6',
+    nodes: [
+      'rgb-hdd-cover-aorus-v1_rgb-hdd-cover-aorus-v1_0',
+      'maxresdefault_(1)_maxresdefault_(1)_0',
+      'NVIDIA_LOGO_NVIDIA_LOGO_0',
+      'Torus_Material013_0',
+      'Torus001_Material032_0',
+      'Text_Material046_0',
+      'geforcertx_Material056_0',
+      'aorus_logotranspa_aorus_logotranspa_0',
+      'Color-PewDiePie-Logo_Color-PewDiePie-Logo_0',
+      'Text001_Material097_0',
+      'gigabyte-logo_gigabyte-logo_0',
+      'gigabyte-logo001_gigabyte-logo_0',
+    ],
+  },
+  {
+    section: 'Peripherals',
+    color: '#4ade80',
+    nodes: [
+      'test-aorus-m2-souris-aorus-rgb2_test-aorus-m2-souris-aorus-rgb2_0',
+      'gallerymodel_gallerymodel_0',
+    ],
+  },
+];
+
+// Flatten into a lookup { nodeName -> {label, color, section} }
+const PART_LOOKUP = {};
+PART_SECTIONS.forEach(sec => {
+  sec.nodes.forEach(nodeName => {
+    PART_LOOKUP[nodeName] = { label: nodeName, color: sec.color, section: sec.section };
+  });
+});
+
+// ── SCENE ─────────────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const renderer  = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a14);
+scene.fog = new THREE.Fog(0x0a0a14, 40, 100);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 300);
+camera.position.set(0, 8, 20);
+
+const orbitCtrl = new OrbitControls(camera, renderer.domElement);
+orbitCtrl.enableDamping = true;
+orbitCtrl.dampingFactor = 0.07;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const dirL = new THREE.DirectionalLight(0xffffff, 1.2);
+dirL.position.set(5, 10, 7); dirL.castShadow = true; scene.add(dirL);
+const fillL = new THREE.DirectionalLight(0x8888ff, 0.4);
+fillL.position.set(-5, 3, -5); scene.add(fillL);
+scene.add(new THREE.GridHelper(40, 40, 0x1a1a1a, 0x111111));
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+const logBody   = document.getElementById('log-body');
+const logPanel  = document.getElementById('log-panel');
+const summaryEl = document.getElementById('summary');
+
+function log(msg, type = 'info') {
+  const d = document.createElement('div');
+  d.className = `ll ${type}`; d.textContent = msg;
+  logBody.appendChild(d); logBody.scrollTop = logBody.scrollHeight;
+}
+document.getElementById('log-close').addEventListener('click', () => {
+  logPanel.classList.add('hidden');
+  document.getElementById('log-reopen').classList.add('visible');
+});
+document.getElementById('log-reopen').addEventListener('click', () => {
+  logPanel.classList.remove('hidden');
+  document.getElementById('log-reopen').classList.remove('visible');
+});
+
+// ── LOADERS ───────────────────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/libs/draco/');
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+// STATE[label] = { object3D, basePos, baseScale (Vector3), baseRot (Euler),
+//                  visible, edited, pill, color, section }
+const STATE = {};
+let selectedPart = null;
+const DEG2RAD = Math.PI / 180;
+const T = { sx:1, sy:1, sz:1, px:0, py:0, pz:0, rx:0, ry:0, rz:0 };
+
+// ── LEGEND ────────────────────────────────────────────────────────────────────
+const legendEl = document.getElementById('legend');
+
+function rebuildLegend() {
+  legendEl.innerHTML = '';
+  PART_SECTIONS.forEach(sec => {
+    const hdr = document.createElement('div');
+    hdr.className = 'legend-section'; hdr.textContent = sec.section;
+    legendEl.appendChild(hdr);
+    sec.nodes.forEach(nodeName => {
+      const s = STATE[nodeName];
+      const pill = buildPill(nodeName, s);
+      if (s) s.pill = pill;
+      legendEl.appendChild(pill);
+    });
+  });
+}
+
+function shortLabel(nodeName) {
+  // Trim the repeated "<name>_<name>_0" / "<name>_MaterialNNN_0" suffix
+  // pattern for a cleaner pill label. Names here are GLTFLoader's resolved
+  // (mangled) names, not raw glTF names — see PART_SECTIONS note above.
+  return nodeName.replace(/_Material\d+_0$/, '').replace(/_[^_]+_0$/, '');
+}
+
+function buildPill(label, s) {
+  const info = PART_LOOKUP[label];
+  const pill = document.createElement('div');
+  pill.className = 'pill'
+    + (!s?.object3D ? ' loading' : '')
+    + (!s?.visible  ? ' off'     : '')
+    + (s?.edited    ? ' edited'  : '')
+    + (selectedPart === label ? ' selected' : '');
+  pill.style.borderColor = info.color;
+  pill.style.color       = info.color;
+  pill.innerHTML =
+    `<span class="dot" style="background:${info.color}"></span>` +
+    `${shortLabel(label)}`;
+
+  pill.addEventListener('click', e => {
+    const st = STATE[label];
+    if (!st?.object3D) return;
+    if (e.shiftKey) {
+      st.visible = !st.visible;
+      st.object3D.visible = st.visible;
+      pill.classList.toggle('off', !st.visible);
+    } else {
+      selectPart(label);
+    }
+  });
+  pill.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const st = STATE[label];
+    if (!st?.object3D) return;
+    st.visible = !st.visible;
+    st.object3D.visible = st.visible;
+    pill.classList.toggle('off', !st.visible);
+  });
+  return pill;
+}
+
+// ── SCALE + POSITION SLIDERS ──────────────────────────────────────────────────
+function wireSlider(id, key) {
+  const sl = document.getElementById(id);
+  const vl = document.getElementById(id + '-v');
+  const fn = document.getElementById(id + '-f');
+  function apply(v) {
+    v = parseFloat(v);
+    T[key] = v;
+    sl.value = v;
+    fn.value = v.toFixed(3);
+    vl.textContent = v.toFixed(3);
+    applyTransform(); updateCopyBox(); markEdited();
+  }
+  sl.addEventListener('input',  () => apply(sl.value));
+  fn.addEventListener('change', () => apply(fn.value));
+}
+['sx','sy','sz','px','py','pz'].forEach(k => wireSlider(k, k));
+
+// Uniform scale
+const suSl = document.getElementById('su');
+const suVl = document.getElementById('su-v');
+const suFn = document.getElementById('su-f');
+function applyUniform(v) {
+  v = parseFloat(v);
+  T.sx = T.sy = T.sz = v;
+  suSl.value = v; suFn.value = v.toFixed(3); suVl.textContent = v.toFixed(3);
+  ['sx','sy','sz'].forEach(k => {
+    document.getElementById(k).value           = v;
+    document.getElementById(k+'-f').value       = v.toFixed(3);
+    document.getElementById(k+'-v').textContent = v.toFixed(3);
+  });
+  applyTransform(); updateCopyBox(); markEdited();
+}
+suSl.addEventListener('input',  () => applyUniform(suSl.value));
+suFn.addEventListener('change', () => applyUniform(suFn.value));
+
+document.getElementById('reset-scale').addEventListener('click', () => applyUniform(1));
+
+document.getElementById('reset-pos').addEventListener('click', () => {
+  ['px','py','pz'].forEach(k => {
+    T[k] = 0;
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0.000';
+    document.getElementById(k+'-v').textContent = '0.000';
+  });
+  applyTransform(); updateCopyBox(); markEdited();
+});
+
+// ── ROTATION — click-turn buttons ─────────────────────────────────────────────
+let rotStep = 1;
+
+document.querySelectorAll('.step-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    rotStep = parseInt(btn.dataset.step);
+    document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+function setRotAxis(axis, deg) {
+  deg = ((deg + 180) % 360 + 360) % 360 - 180;
+  T[axis] = deg;
+  document.getElementById(axis + '-v').textContent = deg.toFixed(1) + '°';
+  document.getElementById(axis + '-f').value = deg.toFixed(0);
+  applyTransform();
+  updateCopyBox();
+  markEdited();
+}
+
+document.querySelectorAll('.turn-btn').forEach(btn => {
+  const axis = btn.dataset.axis;
+  const dir  = parseInt(btn.dataset.dir);
+
+  btn.addEventListener('click', () => setRotAxis(axis, T[axis] + dir * rotStep));
+
+  let holdTimer = null;
+  let holdInterval = null;
+  const startHold = () => {
+    holdTimer = setTimeout(() => {
+      holdInterval = setInterval(() => {
+        setRotAxis(btn.dataset.axis, T[btn.dataset.axis] + parseInt(btn.dataset.dir) * rotStep);
+      }, 80);
+    }, 400);
+  };
+  const stopHold = () => { clearTimeout(holdTimer); clearInterval(holdInterval); };
+
+  btn.addEventListener('mousedown',  startHold);
+  btn.addEventListener('mouseup',    stopHold);
+  btn.addEventListener('mouseleave', stopHold);
+  btn.addEventListener('touchstart', startHold, { passive: true });
+  btn.addEventListener('touchend',   stopHold);
+});
+
+['rx','ry','rz'].forEach(axis => {
+  document.getElementById(axis + '-f').addEventListener('change', e => {
+    setRotAxis(axis, parseFloat(e.target.value) || 0);
+  });
+});
+
+document.getElementById('reset-rot').addEventListener('click', () => {
+  ['rx','ry','rz'].forEach(axis => setRotAxis(axis, 0));
+});
+
+// ── APPLY TRANSFORM ───────────────────────────────────────────────────────────
+function applyTransform() {
+  if (!selectedPart) return;
+  const s = STATE[selectedPart];
+  if (!s?.object3D) return;
+  s.object3D.scale.set(
+    (s.baseScale?.x ?? 1) * T.sx,
+    (s.baseScale?.y ?? 1) * T.sy,
+    (s.baseScale?.z ?? 1) * T.sz,
+  );
+  s.object3D.position.set(
+    (s.basePos?.x ?? 0) + T.px,
+    (s.basePos?.y ?? 0) + T.py,
+    (s.basePos?.z ?? 0) + T.pz,
+  );
+  s.object3D.rotation.set(
+    (s.baseRot?.x ?? 0) + T.rx * DEG2RAD,
+    (s.baseRot?.y ?? 0) + T.ry * DEG2RAD,
+    (s.baseRot?.z ?? 0) + T.rz * DEG2RAD,
+  );
+}
+
+function markEdited() {
+  if (!selectedPart) return;
+  const s = STATE[selectedPart];
+  const isDefault = T.sx===1 && T.sy===1 && T.sz===1 && T.px===0 && T.py===0 && T.pz===0 && T.rx===0 && T.ry===0 && T.rz===0;
+  s.edited = !isDefault;
+  s.lastTransform = { ...T };
+  s.pill?.classList.toggle('edited', s.edited);
+  document.getElementById('rp-restore-btn').disabled = !s.edited;
+}
+
+function resetSliders() {
+  T.sx=T.sy=T.sz=1; T.px=T.py=T.pz=0; T.rx=T.ry=T.rz=0;
+  ['sx','sy','sz'].forEach(k => {
+    document.getElementById(k).value           = 1;
+    document.getElementById(k+'-f').value       = '1.000';
+    document.getElementById(k+'-v').textContent = '1.000';
+  });
+  suSl.value=1; suFn.value='1.000'; suVl.textContent='1.000';
+  ['px','py','pz'].forEach(k => {
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0.000';
+    document.getElementById(k+'-v').textContent = '0.000';
+  });
+  ['rx','ry','rz'].forEach(axis => {
+    document.getElementById(axis + '-v').textContent = '0.0°';
+    document.getElementById(axis + '-f').value = '0';
+  });
+}
+
+// ── COPY BOX ──────────────────────────────────────────────────────────────────
+const copyBox = document.getElementById('rp-copy-box');
+function updateCopyBox() {
+  if (!selectedPart) return;
+  copyBox.style.display = 'block';
+  copyBox.textContent =
+    `// ${selectedPart}\n` +
+    `SCALE_X=${T.sx.toFixed(4)} SCALE_Y=${T.sy.toFixed(4)} SCALE_Z=${T.sz.toFixed(4)}\n` +
+    `OFFSET_X=${T.px.toFixed(4)} OFFSET_Y=${T.py.toFixed(4)} OFFSET_Z=${T.pz.toFixed(4)}\n` +
+    `ROT_X=${T.rx.toFixed(1)}° ROT_Y=${T.ry.toFixed(1)}° ROT_Z=${T.rz.toFixed(1)}°`;
+}
+document.getElementById('rp-copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(copyBox.textContent).then(() => {
+    document.getElementById('rp-copy-btn').textContent = '✅ Copied!';
+    setTimeout(() => {
+      document.getElementById('rp-copy-btn').textContent = '📋 Copy transform values';
+    }, 2000);
+  }).catch(() => alert(copyBox.textContent));
+});
+
+// ── EXPORT ALL EDITED ─────────────────────────────────────────────────────────
+document.getElementById('export-all-btn').addEventListener('click', () => {
+  const out = {};
+  Object.entries(STATE).forEach(([label, s]) => {
+    if (s.edited && s.lastTransform) {
+      out[label] = {
+        scale:  { x: s.lastTransform.sx, y: s.lastTransform.sy, z: s.lastTransform.sz },
+        offset: { x: s.lastTransform.px, y: s.lastTransform.py, z: s.lastTransform.pz },
+        rotationDeg: { x: s.lastTransform.rx, y: s.lastTransform.ry, z: s.lastTransform.rz },
+      };
+    }
+  });
+  document.getElementById('export-textarea').value = JSON.stringify(out, null, 2);
+  document.getElementById('export-panel').classList.add('open');
+});
+document.getElementById('export-close-btn').addEventListener('click', () => {
+  document.getElementById('export-panel').classList.remove('open');
+});
+document.getElementById('export-copy-btn').addEventListener('click', () => {
+  const ta = document.getElementById('export-textarea');
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = document.getElementById('export-copy-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy JSON'; }, 2000);
+  }).catch(() => { ta.select(); document.execCommand('copy'); });
+});
+
+// ── SELECT PART ───────────────────────────────────────────────────────────────
+function selectPart(label) {
+  if (selectedPart && STATE[selectedPart]) STATE[selectedPart].pill?.classList.remove('selected');
+  selectedPart = label;
+  const s = STATE[label];
+  if (!s?.object3D) return;
+
+  s.pill?.classList.add('selected');
+  document.getElementById('replace-panel').classList.add('open');
+
+  const rpTitle = document.getElementById('rp-title');
+  rpTitle.textContent = `🔧 ${shortLabel(label)}`;
+  rpTitle.style.color = s.color;
+
+  // Restore last edit for this mesh (or defaults if never touched)
+  const t = s.lastTransform || { sx:1, sy:1, sz:1, px:0, py:0, pz:0, rx:0, ry:0, rz:0 };
+  Object.assign(T, t);
+
+  ['sx','sy','sz','px','py','pz'].forEach(k => {
+    document.getElementById(k).value           = T[k];
+    document.getElementById(k+'-f').value       = T[k].toFixed(3);
+    document.getElementById(k+'-v').textContent = T[k].toFixed(3);
+  });
+  suSl.value = T.sx; suFn.value = T.sx.toFixed(3); suVl.textContent = T.sx.toFixed(3);
+  ['rx','ry','rz'].forEach(axis => {
+    document.getElementById(axis + '-v').textContent = T[axis].toFixed(1) + '°';
+    document.getElementById(axis + '-f').value = T[axis].toFixed(0);
+  });
+
+  applyTransform();
+
+  const box    = new THREE.Box3().setFromObject(s.object3D);
+  const size   = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  document.getElementById('rp-info').innerHTML =
+    `<div>Mesh: <span>${shortLabel(label)}</span></div>` +
+    `<div>Section: <span>${s.section}</span>  Edited: <span class="${s.edited?'hi':''}">${s.edited?'YES':'no'}</span></div>` +
+    `<div>Size: <span>${size.x.toFixed(2)}×${size.y.toFixed(2)}×${size.z.toFixed(2)}</span></div>` +
+    `<div>Ctr: <span>${center.x.toFixed(2)}, ${center.y.toFixed(2)}, ${center.z.toFixed(2)}</span></div>`;
+
+  document.getElementById('rp-restore-btn').disabled = !s.edited;
+  document.getElementById('rp-status').textContent   = '';
+  copyBox.style.display = 'none';
+  updateCopyBox();
+}
+
+document.getElementById('rp-restore-btn').addEventListener('click', () => {
+  if (!selectedPart) return;
+  const s = STATE[selectedPart];
+  resetSliders();
+  Object.assign(T, { sx:1, sy:1, sz:1, px:0, py:0, pz:0, rx:0, ry:0, rz:0 });
+  applyTransform();
+  s.edited = false;
+  s.lastTransform = null;
+  s.pill?.classList.remove('edited');
+  document.getElementById('rp-restore-btn').disabled = true;
+  document.getElementById('rp-status').textContent   = '↩ Reset to original transform';
+  document.getElementById('rp-status').className     = 'ok';
+  copyBox.style.display = 'none';
+  log(`↩ ${shortLabel(selectedPart)} reset`, 'info');
+  selectPart(selectedPart);
+});
+
+document.getElementById('rp-cancel-btn').addEventListener('click', () => {
+  document.getElementById('replace-panel').classList.remove('open');
+  if (selectedPart) STATE[selectedPart]?.pill?.classList.remove('selected');
+  selectedPart = null;
+});
+document.getElementById('rp-close').addEventListener('click', () => {
+  document.getElementById('replace-panel').classList.remove('open');
+});
+
+// ── LOAD SCENE ─────────────────────────────────────────────────────────────────
+log('🚀 Loading scene…', 'info');
+
+loader.load(SCENE_URL, gltf => {
+  const root = gltf.scene;
+  scene.add(root);
+
+  // DIAGNOSTIC (disabled): uncomment if you re-export the GLB and pill
+  // matching breaks again — dumps every actual resolved mesh name into
+  // the on-page log panel so you can update PART_SECTIONS above.
+  // log('── RAW MESH NAMES FROM LOADER ──', 'warn');
+  // root.traverse(obj => { if (obj.isMesh) log(JSON.stringify(obj.name), 'info'); });
+  // log('── END RAW NAMES ──', 'warn');
+
+  let matched = 0;
+  root.traverse(obj => {
+    if (!obj.isObject3D) return;
+    const info = PART_LOOKUP[obj.name];
+    if (!info) return;
+
+    obj.userData.partLabel = obj.name;
+    STATE[obj.name] = {
+      object3D: obj,
+      basePos:   obj.position.clone(),
+      baseScale: obj.scale.clone(),
+      baseRot:   obj.rotation.clone(),
+      visible: true,
+      edited: false,
+      lastTransform: null,
+      pill: null,
+      color: info.color,
+      section: info.section,
+    };
+    matched++;
+  });
+
+  rebuildLegend();
+
+  log(`🎉 ${matched}/${Object.keys(PART_LOOKUP).length} target meshes matched`, matched > 0 ? 'ok' : 'err');
+  const missing = Object.keys(PART_LOOKUP).filter(n => !STATE[n]);
+  if (missing.length) {
+    log(`⚠️  ${missing.length} node(s) not found in GLB:`, 'warn');
+    missing.forEach(n => log(`   • ${n}`, 'warn'));
+  }
+  summaryEl.textContent = `✅ ${matched} meshes ready`;
+
+  const box = new THREE.Box3().setFromObject(root);
+  if (!box.isEmpty()) {
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    camera.position.set(center.x, center.y + maxDim * 0.6, center.z + maxDim * 1.2);
+    orbitCtrl.target.copy(center);
+    orbitCtrl.update();
+  }
+
+  setTimeout(() => {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('log-reopen').classList.add('visible');
+  }, 3000);
+}, undefined, err => {
+  log(`❌ Failed to load scene — ${err.message || err}`, 'err');
+  summaryEl.textContent = '❌ Load failed';
+});
+
+// ── RAYCASTER ─────────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+
+function findPartLabel(obj) {
+  // Walk up the hierarchy until we hit a node with a registered partLabel
+  let cur = obj;
+  while (cur) {
+    if (cur.userData?.partLabel) return cur.userData.partLabel;
+    cur = cur.parent;
+  }
+  return null;
+}
+
+renderer.domElement.addEventListener('pointermove', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  scene.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const label = findPartLabel(hits[0].object);
+    if (label) {
+      tooltip.style.display = 'block';
+      tooltip.style.left    = (ev.clientX + 14) + 'px';
+      tooltip.style.top     = (ev.clientY - 10) + 'px';
+      tooltip.textContent   = shortLabel(label) + (STATE[label]?.edited ? ' [edited]' : '');
+    } else {
+      tooltip.style.display = 'none';
+    }
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+renderer.domElement.addEventListener('click', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  scene.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const label = findPartLabel(hits[0].object);
+    if (label && STATE[label]?.object3D) selectPart(label);
+  }
+});
+
+renderer.domElement.addEventListener('pointerleave', () => {
+  tooltip.style.display = 'none';
+});
+
+// ── RENDER LOOP ───────────────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  orbitCtrl.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

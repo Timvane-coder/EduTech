@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🍜 Scene Editor — scene-optimized.glb</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; overflow: hidden; }
+
+  #canvas-container { position: fixed; inset: 0; }
+
+  /* ── Top bar ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #2a2a2a;
+    z-index: 20;
+  }
+  #title { color: #f97316; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+  #status { font-size: 11px; color: #64748b; }
+
+  /* ── Side panel ── */
+  #panel {
+    position: fixed; top: 41px; right: 0; bottom: 0;
+    width: 260px;
+    background: rgba(8,8,16,0.95);
+    border-left: 1px solid #1e1e2e;
+    display: flex; flex-direction: column;
+    z-index: 10;
+    transition: transform 0.3s ease;
+  }
+  #panel.collapsed { transform: translateX(260px); }
+
+  #panel-toggle {
+    position: fixed; top: 50%; right: 260px;
+    transform: translateY(-50%);
+    background: rgba(8,8,16,0.95);
+    border: 1px solid #1e1e2e;
+    border-right: none;
+    color: #64748b;
+    font-size: 11px;
+    padding: 8px 5px;
+    cursor: pointer;
+    border-radius: 6px 0 0 6px;
+    writing-mode: vertical-rl;
+    letter-spacing: 1px;
+    z-index: 11;
+    transition: right 0.3s ease;
+  }
+  #panel-toggle.collapsed { right: 0; }
+  #panel-toggle:hover { color: #f97316; }
+
+  #panel-title {
+    padding: 12px 14px 8px;
+    font-size: 11px;
+    color: #f97316;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #1e1e2e;
+    flex-shrink: 0;
+  }
+
+  #object-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 0;
+  }
+
+  .obj-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 10px;
+    height: 34px;
+    cursor: pointer;
+    border-bottom: 1px solid #0f0f1a;
+    transition: background 0.15s;
+  }
+  .obj-row:hover { background: #0f0f20; }
+  .obj-row.selected { background: #1a1a35; border-left: 2px solid #f97316; }
+
+  .obj-eye {
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+    border-radius: 4px;
+  }
+  .obj-eye:hover { opacity: 1; background: #1e1e30; }
+  .obj-eye.hidden-eye { opacity: 0.3; }
+
+  .obj-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin: 0 8px 0 4px;
+    flex-shrink: 0;
+  }
+
+  .obj-name {
+    font-size: 11px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #cbd5e1;
+  }
+  .obj-row.selected .obj-name { color: #f97316; }
+
+  .obj-count {
+    font-size: 10px;
+    color: #334155;
+    flex-shrink: 0;
+  }
+
+  /* ── Action bar ── */
+  #actions {
+    padding: 10px;
+    border-top: 1px solid #1e1e2e;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  #actions .section-label {
+    font-size: 10px;
+    color: #475569;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  .btn-row { display: flex; gap: 6px; }
+
+  .btn {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    border-radius: 5px;
+    border: 1px solid #2a2a3a;
+    background: #0f0f1e;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .btn:hover { border-color: #f97316; color: #f97316; }
+  .btn:active { background: #1a1020; }
+  .btn.danger:hover  { border-color: #f87171; color: #f87171; }
+  .btn.success:hover { border-color: #4ade80; color: #4ade80; }
+  .btn.blue:hover    { border-color: #38bdf8; color: #38bdf8; }
+  .btn.purple:hover  { border-color: #a78bfa; color: #a78bfa; }
+
+  /* Rotation slider */
+  #rot-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0;
+  }
+  #rot-label { font-size: 10px; color: #475569; width: 28px; }
+  #rot-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 3px;
+    background: #1e293b;
+    border-radius: 2px;
+    outline: none;
+  }
+  #rot-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: #f97316;
+    cursor: pointer;
+  }
+  #rot-val { font-size: 10px; color: #64748b; width: 34px; text-align: right; }
+
+  /* Highlight colour picker */
+  #color-row {
+    display: flex; align-items: center; gap: 8px;
+  }
+  #color-label { font-size: 10px; color: #475569; }
+  .color-swatch {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid #334155;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .color-swatch:hover { transform: scale(1.2); }
+  .color-swatch.active { border-color: #fff; }
+
+  /* ── Info toast ── */
+  #toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: rgba(15,15,30,0.95);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 11px;
+    color: #94a3b8;
+    z-index: 30;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── Selected name badge ── */
+  #selected-badge {
+    position: fixed; bottom: 20px; left: 20px;
+    background: rgba(249,115,22,0.15);
+    border: 1px solid rgba(249,115,22,0.4);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #f97316;
+    z-index: 20;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="topbar">
+  <span id="title">🍜 SCENE EDITOR</span>
+  <span id="status">Loading…</span>
+</div>
+
+<div id="panel">
+  <div id="panel-title">📦 OBJECTS</div>
+  <div id="object-list"></div>
+  <div id="actions">
+
+    <div class="section-label">VISIBILITY</div>
+    <div class="btn-row">
+      <div class="btn success" id="btn-show">👁 Show</div>
+      <div class="btn danger"  id="btn-hide">🙈 Hide</div>
+      <div class="btn blue"    id="btn-isolate">🔍 Isolate</div>
+      <div class="btn"         id="btn-showall">☰ All</div>
+    </div>
+
+    <div class="section-label" style="margin-top:4px;">HIGHLIGHT</div>
+    <div id="color-row">
+      <span id="color-label">Colour:</span>
+      <div class="color-swatch active" style="background:#f97316" data-color="#f97316"></div>
+      <div class="color-swatch" style="background:#38bdf8" data-color="#38bdf8"></div>
+      <div class="color-swatch" style="background:#4ade80" data-color="#4ade80"></div>
+      <div class="color-swatch" style="background:#f472b6" data-color="#f472b6"></div>
+      <div class="color-swatch" style="background:#facc15" data-color="#facc15"></div>
+      <div class="color-swatch" style="background:#a78bfa" data-color="#a78bfa"></div>
+      <div class="btn purple" id="btn-highlight" style="flex:0;padding:6px 10px;">✦ Apply</div>
+      <div class="btn danger"  id="btn-unhighlight" style="flex:0;padding:6px 10px;">✕</div>
+    </div>
+
+    <div class="section-label" style="margin-top:4px;">ROTATE Y-AXIS</div>
+    <div id="rot-row">
+      <span id="rot-label">Y°</span>
+      <input type="range" id="rot-slider" min="-180" max="180" value="0" step="1" />
+      <span id="rot-val">0°</span>
+    </div>
+    <div class="btn-row">
+      <div class="btn" id="btn-reset-rot">↺ Reset Rotation</div>
+      <div class="btn danger" id="btn-delete">✕ Remove</div>
+    </div>
+
+    <div class="section-label" style="margin-top:4px;">SCENE</div>
+    <div class="btn-row">
+      <div class="btn" id="btn-reset-cam">⌂ Reset Camera</div>
+      <div class="btn blue" id="btn-focus">⊙ Focus Selected</div>
+    </div>
+
+  </div>
+</div>
+
+<button id="panel-toggle">OBJECTS</button>
+
+<div id="toast"></div>
+<div id="selected-badge"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls }  from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }     from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }    from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ── RENDERER ──────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const renderer  = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping      = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+// ── SCENE ─────────────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a14);
+
+// Nice environment lighting (no flat ambient)
+const pmremGen = new THREE.PMREMGenerator(renderer);
+const envTex   = pmremGen.fromScene(new RoomEnvironment()).texture;
+scene.environment      = envTex;
+scene.environmentIntensity = 0.8;
+
+// Subtle directional for shadows
+const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+sun.position.set(8, 12, 6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+scene.add(sun);
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+
+const grid = new THREE.GridHelper(40, 40, 0x1a1a2e, 0x111120);
+scene.add(grid);
+
+// ── CAMERA + CONTROLS ─────────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 500);
+camera.position.set(0, 8, 20);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping  = true;
+controls.dampingFactor  = 0.07;
+controls.minDistance    = 0.5;
+controls.maxDistance    = 200;
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const groups      = {};          // name → THREE.Group
+const groupMeta   = {};          // name → { meshCount, color, highlighted, originalMaterials }
+let   selectedName = null;
+let   highlightColor = '#f97316';
+
+const GROUP_COLORS = [
+  '#f97316','#38bdf8','#4ade80','#f472b6','#facc15',
+  '#a78bfa','#fb923c','#94a3b8','#6b7280','#34d399',
+  '#e879f9','#22d3ee','#f87171','#a3e635','#fbbf24',
+];
+
+// ── LOAD GLB ──────────────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/libs/draco/');
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+document.getElementById('status').textContent = 'Loading scene-optimized.glb …';
+
+loader.load(
+  './models/scene-optimized.glb',
+  gltf => {
+    const root = gltf.scene;
+    scene.add(root);
+
+    // Walk top-level children of the GLTF scene — these are our named groups
+    let colorIdx = 0;
+    root.children.forEach(child => {
+      const name = child.name || `object_${colorIdx}`;
+      groups[name] = child;
+
+      let meshCount = 0;
+      child.traverse(o => { if (o.isMesh) meshCount++; });
+
+      groupMeta[name] = {
+        meshCount,
+        color: GROUP_COLORS[colorIdx % GROUP_COLORS.length],
+        highlighted: false,
+        visible: true,
+        originalMaterials: new Map(), // mesh.uuid → original material
+        rotationY: 0,
+      };
+      colorIdx++;
+    });
+
+    // Fit camera
+    const box    = new THREE.Box3().setFromObject(root);
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(center.x, center.y + maxDim * 0.5, center.z + maxDim * 1.1);
+    controls.target.copy(center);
+    controls.update();
+    grid.position.y = box.min.y;
+
+    document.getElementById('status').textContent =
+      `✅ ${Object.keys(groups).length} objects · ${root.children.length} groups`;
+
+    buildObjectList();
+    toast(`Loaded ${Object.keys(groups).length} named groups`);
+  },
+  xhr => {
+    const pct = xhr.total ? Math.round(xhr.loaded / xhr.total * 100) : '…';
+    document.getElementById('status').textContent = `Loading… ${pct}%`;
+  },
+  err => {
+    document.getElementById('status').textContent = `❌ ${err.message}`;
+    toast(`Error: ${err.message}`, 4000);
+  }
+);
+
+// ── OBJECT LIST ───────────────────────────────────────────────────────────
+function buildObjectList() {
+  const list = document.getElementById('object-list');
+  list.innerHTML = '';
+
+  Object.entries(groups).forEach(([name, group]) => {
+    const meta = groupMeta[name];
+    const row  = document.createElement('div');
+    row.className = 'obj-row';
+    row.dataset.name = name;
+
+    row.innerHTML = `
+      <div class="obj-eye" data-name="${name}" title="Toggle visibility">👁</div>
+      <div class="obj-dot" style="background:${meta.color}"></div>
+      <div class="obj-name">${name}</div>
+      <div class="obj-count">${meta.meshCount}</div>
+    `;
+
+    // Eye toggle
+    row.querySelector('.obj-eye').addEventListener('click', e => {
+      e.stopPropagation();
+      toggleVisibility(name);
+    });
+
+    // Row select
+    row.addEventListener('click', () => selectObject(name));
+
+    list.appendChild(row);
+  });
+}
+
+function refreshList() {
+  Object.entries(groupMeta).forEach(([name, meta]) => {
+    const row = document.querySelector(`.obj-row[data-name="${name}"]`);
+    if (!row) return;
+    row.classList.toggle('selected', name === selectedName);
+    const eye = row.querySelector('.obj-eye');
+    eye.textContent = meta.visible ? '👁' : '🙈';
+    eye.classList.toggle('hidden-eye', !meta.visible);
+  });
+}
+
+// ── SELECTION ─────────────────────────────────────────────────────────────
+function selectObject(name) {
+  selectedName = name;
+  refreshList();
+
+  const badge = document.getElementById('selected-badge');
+  badge.style.display = 'block';
+  badge.textContent   = `◎ ${name}  (${groupMeta[name].meshCount} meshes)`;
+
+  // Reset slider to current rotation
+  const deg = Math.round(THREE.MathUtils.radToDeg(groups[name].rotation.y));
+  document.getElementById('rot-slider').value = deg;
+  document.getElementById('rot-val').textContent = `${deg}°`;
+}
+
+// ── VISIBILITY ────────────────────────────────────────────────────────────
+function toggleVisibility(name) {
+  const group = groups[name];
+  const meta  = groupMeta[name];
+  meta.visible  = !meta.visible;
+  group.visible = meta.visible;
+  refreshList();
+  toast(`${name}: ${meta.visible ? 'visible' : 'hidden'}`);
+}
+
+function setVisibility(name, visible) {
+  groups[name].visible   = visible;
+  groupMeta[name].visible = visible;
+}
+
+// ── HIGHLIGHT ─────────────────────────────────────────────────────────────
+function highlightObject(name, hexColor) {
+  const group = groups[name];
+  const meta  = groupMeta[name];
+  const color = new THREE.Color(hexColor);
+
+  group.traverse(o => {
+    if (!o.isMesh) return;
+    if (!meta.originalMaterials.has(o.uuid)) {
+      meta.originalMaterials.set(o.uuid, o.material);
+    }
+    o.material = new THREE.MeshStandardMaterial({
+      color,
+      emissive: color,
+      emissiveIntensity: 0.25,
+      roughness: 0.4,
+      metalness: 0.1,
+    });
+  });
+  meta.highlighted = true;
+  toast(`Highlighted: ${name}`);
+}
+
+function unhighlightObject(name) {
+  const group = groups[name];
+  const meta  = groupMeta[name];
+
+  group.traverse(o => {
+    if (!o.isMesh) return;
+    if (meta.originalMaterials.has(o.uuid)) {
+      o.material = meta.originalMaterials.get(o.uuid);
+    }
+  });
+  meta.originalMaterials.clear();
+  meta.highlighted = false;
+  toast(`Restored: ${name}`);
+}
+
+// ── REMOVE (from scene, reversible via page reload) ───────────────────────
+function removeObject(name) {
+  const group = groups[name];
+  group.visible = false;
+  groupMeta[name].visible = false;
+
+  // Actually remove from scene graph
+  group.parent?.remove(group);
+  delete groups[name];
+  delete groupMeta[name];
+
+  const row = document.querySelector(`.obj-row[data-name="${name}"]`);
+  if (row) row.remove();
+
+  if (selectedName === name) {
+    selectedName = null;
+    document.getElementById('selected-badge').style.display = 'none';
+  }
+  toast(`Removed: ${name} (reload to restore)`);
+}
+
+// ── FOCUS CAMERA ON SELECTED ──────────────────────────────────────────────
+function focusSelected(name) {
+  const group = groups[name];
+  const box   = new THREE.Box3().setFromObject(group);
+  if (box.isEmpty()) return;
+  const center = box.getCenter(new THREE.Vector3());
+  const size   = box.getSize(new THREE.Vector3());
+  const dist   = Math.max(size.x, size.y, size.z) * 1.8;
+  camera.position.set(center.x, center.y + dist * 0.4, center.z + dist);
+  controls.target.copy(center);
+  controls.update();
+}
+
+// ── BUTTON HANDLERS ───────────────────────────────────────────────────────
+document.getElementById('btn-show').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  setVisibility(selectedName, true);
+  refreshList();
+  toast(`Shown: ${selectedName}`);
+});
+
+document.getElementById('btn-hide').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  setVisibility(selectedName, false);
+  refreshList();
+  toast(`Hidden: ${selectedName}`);
+});
+
+document.getElementById('btn-isolate').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  Object.keys(groups).forEach(n => setVisibility(n, n === selectedName));
+  refreshList();
+  toast(`Isolated: ${selectedName}`);
+});
+
+document.getElementById('btn-showall').addEventListener('click', () => {
+  Object.keys(groups).forEach(n => setVisibility(n, true));
+  refreshList();
+  toast('All objects visible');
+});
+
+document.getElementById('btn-highlight').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  highlightObject(selectedName, highlightColor);
+});
+
+document.getElementById('btn-unhighlight').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  unhighlightObject(selectedName);
+});
+
+document.getElementById('btn-delete').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  if (confirm(`Remove "${selectedName}" from scene?\n(Reload page to restore)`)) {
+    removeObject(selectedName);
+  }
+});
+
+document.getElementById('btn-reset-rot').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  groups[selectedName].rotation.y = 0;
+  document.getElementById('rot-slider').value = 0;
+  document.getElementById('rot-val').textContent = '0°';
+  toast(`Rotation reset: ${selectedName}`);
+});
+
+document.getElementById('btn-reset-cam').addEventListener('click', () => {
+  camera.position.set(0, 8, 20);
+  controls.target.set(0, 0, 0);
+  controls.update();
+});
+
+document.getElementById('btn-focus').addEventListener('click', () => {
+  if (!selectedName) return toast('Select an object first');
+  focusSelected(selectedName);
+});
+
+// Rotation slider
+document.getElementById('rot-slider').addEventListener('input', e => {
+  if (!selectedName) return;
+  const deg = parseInt(e.target.value, 10);
+  document.getElementById('rot-val').textContent = `${deg}°`;
+  groups[selectedName].rotation.y = THREE.MathUtils.degToRad(deg);
+});
+
+// Highlight colour swatches
+document.querySelectorAll('.color-swatch').forEach(swatch => {
+  swatch.addEventListener('click', () => {
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+    highlightColor = swatch.dataset.color;
+  });
+});
+
+// Panel toggle
+const panelEl  = document.getElementById('panel');
+const toggleEl = document.getElementById('panel-toggle');
+toggleEl.addEventListener('click', () => {
+  panelEl.classList.toggle('collapsed');
+  toggleEl.classList.toggle('collapsed');
+});
+
+// Click on canvas to deselect
+renderer.domElement.addEventListener('click', e => {
+  // Only deselect if not dragging
+  if (controls.enabled && e.target === renderer.domElement) {
+    // Raycasting to select objects by clicking on them
+    const rect   = renderer.domElement.getBoundingClientRect();
+    const mouse  = new THREE.Vector2(
+      ((e.clientX - rect.left) / rect.width)  *  2 - 1,
+      ((e.clientY - rect.top)  / rect.height) * -2 + 1,
+    );
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(mouse, camera);
+    const hits = ray.intersectObjects(Object.values(groups), true);
+    if (hits.length > 0) {
+      // Walk up to find which top-level group was hit
+      let obj = hits[0].object;
+      while (obj.parent && !groups[obj.name] && obj.parent !== scene) {
+        // Check if this object's parent is one of our groups
+        const parentName = Object.keys(groups).find(n => groups[n] === obj.parent);
+        if (parentName) { selectObject(parentName); return; }
+        obj = obj.parent;
+      }
+      const hitName = Object.keys(groups).find(n => groups[n] === obj || groups[n].getObjectById(obj.id));
+      if (hitName) selectObject(hitName);
+    }
+  }
+});
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, duration = 2000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ── RENDER LOOP ───────────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
+
