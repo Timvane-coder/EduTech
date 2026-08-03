@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 09 — Inductor | Ramen Shop</title>        <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0a0a0f; color:#e0e0e0; font-family:'Courier New',monospace; height:100vh; width:100vw; overflow:hidden; }
+    canvas { display:block; position:fixed; top:0; left:0; width:100%; height:100%; }
+    #topbar {                                            position:fixed; top:0; left:0; right:0; height:44px;
+      background:rgba(0,0,0,0.82); backdrop-filter:blur(8px);
+      border-bottom:1px solid #2a2a3a;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 14px; z-index:200;
+    }
+    #topbar .title  { font-size:11px; letter-spacing:2px; color:#ff7f00; text-transform:uppercase; }
+    #topbar .status { font-size:11px; color:#888; }
+    .btn { background:#1a1a2a; border:1px solid #3a3a5a; color:#ccc; border-radius:6px; padding:5px 12px; font-size:11px; font-family:'Courier New',monospace; cursor:pointer; transition:background 0.2s; }
+    .btn:hover  { background:#2a2a4a; }
+    .btn.active { background:#ff7f0033; border-color:#ff7f00; color:#ff7f00; }
+    #btn-row { position:fixed; top:52px; right:10px; display:flex; flex-direction:column; gap:6px; z-index:200; }
+    #log-panel {
+      position:fixed; top:52px; left:10px; right:10px; max-height:55vh; overflow-y:auto;
+      background:rgba(0,0,0,0.93); border:1px solid #2a2a3a; border-radius:10px;
+      padding:12px 14px; z-index:100; transition:opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity:0; pointer-events:none; transform:translateY(-8px); }
+    .log-entry { font-size:11px; line-height:1.85; padding:1px 0; border-bottom:1px solid #111; display:flex; gap:7px; word-break:break-all; }
+    .log-entry.ok      { color:#4eca8b; }
+    .log-entry.err     { color:#ff5f5f; font-weight:bold; }
+    .log-entry.info    { color:#f0c060; }
+    .log-entry.pending { color:#888; }
+    .log-entry.head    { color:#adf; font-weight:bold; }
+    .log-entry.click   { color:#ff7f00; font-weight:bold; }
+    .log-entry.screen  { color:#f4f; }
+    .log-entry.ind     { color:#ff3333; font-weight:bold; }
+    #progress-bar-wrap { margin-top:8px; height:4px; background:#1a1a2a; border-radius:3px; overflow:hidden; }
+    #progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#ff7f00,#00ff7f); transition:width 0.3s; }
+    #summary { margin-top:6px; font-size:10px; color:#666; }
+    #mode-indicator {
+      position:fixed; bottom:52px; left:50%; transform:translateX(-50%);
+      font-size:11px; letter-spacing:1px; text-transform:uppercase;
+      background:rgba(0,0,0,0.75); border:1px solid #333;
+      padding:5px 16px; border-radius:20px; z-index:100; pointer-events:none;
+    }
+    #subnav {
+      position:fixed; bottom:96px; left:50%; transform:translateX(-50%);
+      display:none; gap:8px; z-index:150; flex-wrap:wrap; justify-content:center;
+    }
+    #subnav.visible { display:flex; }
+    #subnav button {
+      background:#0a0a1a; border:1px solid #444; color:#aaa;
+      border-radius:14px; padding:6px 14px; font-size:11px;
+      font-family:'Courier New',monospace; cursor:pointer; transition:all 0.2s;
+    }
+    #subnav button:hover  { background:#1a1a2a; color:#fff; }
+    #subnav button.active { border-color:var(--sub-color,#00cfff); color:var(--sub-color,#00cfff); background:#0a0a2a; }
+    #back-btn { position:fixed; bottom:52px; left:14px; display:none; z-index:150; }
+    #back-btn button {
+      background:#1a1a2a; border:1px solid #ff7f00; color:#ff7f00;
+      border-radius:20px; padding:7px 18px; font-size:11px;
+      font-family:'Courier New',monospace; cursor:pointer;
+    }
+    #coord-debug {
+      position:fixed; bottom:130px; left:14px; font-size:10px; color:#ff7f00;
+      z-index:50; line-height:1.8; pointer-events:auto; cursor:pointer;
+      font-family:'Courier New',monospace; background:rgba(0,0,0,0.7);
+      padding:5px 9px; border-radius:6px;
+    }
+    #hint {
+      position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+      font-size:10px; color:#333; z-index:100; text-align:center;
+      background:rgba(0,0,0,0.5); padding:4px 14px; border-radius:20px; pointer-events:none;
+    }
+    /* ── Step 09: Inductor demo panel ── */
+    #inductor-panel {
+      position:fixed; top:52px; right:10px; display:none; flex-direction:column; gap:6px; z-index:210;
+      background:rgba(0,0,0,0.85); border:1px solid #ff3333; border-radius:10px; padding:10px;
+      width:150px;
+    }
+    #inductor-panel.visible { display:flex; }
+    #inductor-panel .ind-title { font-size:10px; color:#ff3333; letter-spacing:1px; margin-bottom:4px; }
+    #inductor-panel button {
+      background:#1a1a2a; border:1px solid #3a3a5a; color:#ccc; border-radius:6px;
+      padding:6px 10px; font-size:11px; font-family:'Courier New',monospace; cursor:pointer;
+    }
+    #inductor-panel button.flow-off { background-color:rgb(80,20,20); }
+    #inductor-panel button.flow-on  { background-color:rgb(20,80,20); }
+    #inductor-panel #freqRow { display:none; gap:4px; }
+    #inductor-panel #freqRow.visible { display:flex; }
+    #inductor-panel #freqRow button { flex:1; padding:5px 4px; font-size:10px; }
+  </style>
+</head>
+<body>
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/",
+    "gsap":          "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 09 — Inductor</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+<div id="btn-row">
+  <button class="btn active" id="btn-log" onclick="toggleLog()">📋 Log</button>
+</div>
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+<div id="mode-indicator" style="color:#888">● DEFAULT VIEW</div>
+<div id="subnav"></div>
+<div id="back-btn"><button onclick="goHome()">← Back</button></div>
+<div id="coord-debug">cam: —<br>tgt: —</div>
+<div id="hint">Click: Projects · About Me · Articles · Credits</div>
+
+<!-- Step 09: Inductor demo control panel -->
+<div id="inductor-panel">
+  <div class="ind-title">⚡ INDUCTOR DEMO</div>
+  <button id="ind-flip">DC VOLTAGE</button>
+  <button id="ind-flow" class="flow-off">OFF</button>
+  <div id="freqRow">
+    <button id="ind-lowF">LOW f</button>
+    <button id="ind-highF">HIGH f</button>
+  </div>
+</div>
+
+<script>
+  function toggleLog() {
+    const p=document.getElementById('log-panel');
+    const b=document.getElementById('btn-log');
+    const h=p.classList.toggle('hidden');
+    b.classList.toggle('active',!h);
+  }
+  function hideAll() {
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('btn-log').classList.remove('active');
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+import { KTX2Loader }    from 'three/addons/loaders/KTX2Loader.js';
+import gsap              from 'gsap';
+
+const GLTF_SHOP   = './models/ramenShop_uvrestored_v2_cleaned.glb';
+const GLTF_HOLO   = './models/ramenHologram.gltf';
+const DRACO_PATH  = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+const BASIS_PATH  = 'https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/libs/basis/';
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap=document.getElementById('log-entries');
+const barEl=document.getElementById('progress-bar');
+const summaryEl=document.getElementById('summary');
+const topStatus=document.getElementById('top-status');
+const modeEl=document.getElementById('mode-indicator');
+const backBtn=document.getElementById('back-btn');
+const subnavEl=document.getElementById('subnav');
+const coordEl=document.getElementById('coord-debug');
+const icons={pending:'⏳',ok:'✅',err:'❌',info:'📌',head:'──',click:'👆',screen:'🖥',ind:'⚡'};
+
+function log(msg,type='info'){
+  const d=document.createElement('div');
+  d.className=`log-entry ${type}`;
+  d.innerHTML=`<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(d); logWrap.scrollTop=logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct){barEl.style.width=pct+'%';}
+function setStatus(msg,col){topStatus.textContent=msg;topStatus.style.color=col||'#888';}
+
+window.addEventListener('error',e=>log('ERROR: '+e.message,'err'));
+window.addEventListener('unhandledrejection',e=>log('REJECT: '+(e.reason?.message||e.reason),'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas=document.createElement('canvas');
+document.body.prepend(canvas);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+scene.add(new THREE.GridHelper(100,40,0x111130,0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,0.1,2000);
+camera.position.set(-11,8,22);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,2,-2);
+controls.enableDamping=true; controls.dampingFactor=0.07;
+controls.maxPolarAngle=Math.PI/2;
+controls.minDistance=1; controls.maxDistance=300;
+controls.update();
+
+// ── FLOOR + BOX ──────────────────────────────────────────────
+const mshFloor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshPhongMaterial({color:0x444444}));
+mshFloor.rotation.x=-Math.PI*0.5; mshFloor.receiveShadow=true; mshFloor.position.set(0,-0.05,0); scene.add(mshFloor);
+const mshBox=new THREE.Mesh(new THREE.BoxGeometry(7.5,2.5,5.0),new THREE.MeshPhongMaterial({color:0xaaaaaa}));
+mshBox.castShadow=true; mshBox.receiveShadow=true; mshBox.position.set(0,15.5,0); scene.add(mshBox);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff,0.04));
+const shadowLight=new THREE.DirectionalLight(0xffffff,0.4);
+shadowLight.position.set(5,30,8); shadowLight.castShadow=true;
+shadowLight.shadow.mapSize.set(2048,2048);
+shadowLight.shadow.camera.near=1; shadowLight.shadow.camera.far=80;
+shadowLight.shadow.camera.left=-30; shadowLight.shadow.camera.right=30;
+shadowLight.shadow.camera.top=30; shadowLight.shadow.camera.bottom=-30;
+shadowLight.shadow.bias=-0.001;
+scene.add(shadowLight,shadowLight.target);
+const fillLight=new THREE.DirectionalLight(0xffffff,1.0);
+fillLight.position.set(-10,20,-10); scene.add(fillLight);
+
+// ── SPOTLIGHTS ───────────────────────────────────────────────
+function createSpotlight(color){
+  const l=new THREE.SpotLight(color,800);
+  l.castShadow=true;l.angle=0.3;l.penumbra=0.2;l.decay=2;l.distance=60; return l;
+}
+const spotLight1=createSpotlight(0xFF7F00);
+const spotLight2=createSpotlight(0x00FF7F);
+const spotLight3=createSpotlight(0x7F00FF);
+spotLight1.position.set(5,20,8); spotLight2.position.set(0,20,6); spotLight3.position.set(-5,20,8);
+spotLight1.target.position.set(2,0,0); spotLight2.target.position.set(0,0,0); spotLight3.target.position.set(-2,0,0);
+scene.add(spotLight1.target,spotLight2.target,spotLight3.target);
+const lh1=new THREE.SpotLightHelper(spotLight1);
+const lh2=new THREE.SpotLightHelper(spotLight2);
+const lh3=new THREE.SpotLightHelper(spotLight3);
+scene.add(spotLight1,spotLight2,spotLight3,lh1,lh2,lh3);
+setBar(4);
+
+// ── LOADERS ──────────────────────────────────────────────────
+const ktx2Loader=new KTX2Loader();
+ktx2Loader.setTranscoderPath(BASIS_PATH); ktx2Loader.detectSupport(renderer);
+const dracoLoader=new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH); dracoLoader.preload();
+const texLoader=new THREE.TextureLoader();
+const gltfLoader=new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader); gltfLoader.setKTX2Loader(ktx2Loader);
+setBar(6);
+
+// ── TEXTURE HELPERS ──────────────────────────────────────────
+const texCache={};
+function loadKTX2(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    ktx2Loader.load(path,t=>{texCache[path]=t;r(t);},undefined,
+      ()=>{const p=path.replace('.ktx2','.png');texLoader.load(p,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));});
+  });
+}
+function loadPNG(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    texLoader.load(path,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));
+  });
+}
+function loadBasis(path){
+  return new Promise(r=>{
+    if(texCache[path]){r(texCache[path]);return;}
+    ktx2Loader.load(path,t=>{texCache[path]=t;r(t);},undefined,()=>r(null));
+  });
+}
+function applyMat(meshMap,name,material){
+  const t=meshMap[name];if(!t)return false;
+  t.traverse(o=>{if(o.isMesh)o.material=material;});return true;
+}
+function bakedMat(tex){tex.flipY=false;tex.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:tex});}
+function screenMat(tex) {
+  tex.flipY = false              // ← add this
+  tex.colorSpace = THREE.SRGBColorSpace
+  return new THREE.MeshBasicMaterial({ map: tex })
+}
+
+function vendingScreenMat(tex) {
+  tex.flipY = false
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.repeat.set(0.854, 1.0)
+  tex.offset.set(0.0, 0.0)
+  tex.wrapS = THREE.ClampToEdgeWrapping
+  tex.wrapT = THREE.ClampToEdgeWrapping
+  tex.needsUpdate = true
+  return new THREE.MeshBasicMaterial({ map: tex })
+}
+
+function videoMat(src){
+  const v=document.createElement('video');
+  v.src=src;v.loop=true;v.muted=true;v.playsInline=true;v.crossOrigin='anonymous';v.play().catch(()=>{});
+  const t=new THREE.VideoTexture(v);t.colorSpace=THREE.SRGBColorSpace;
+  return new THREE.MeshBasicMaterial({map:t});
+}
+function cycleScreens(target,textures,intervalMs){
+  if(!textures.length)return;let idx=0;
+  const set=()=>{const m=new THREE.MeshBasicMaterial({map:textures[idx]});target.traverse(o=>{if(o.isMesh)o.material=m;});};
+  set();if(textures.length<2)return;
+  return setInterval(()=>{idx=(idx+1)%textures.length;set();},intervalMs);
+}
+
+// ── MATERIAL DATA (Steps 2-4) ────────────────────────────────
+const BAKED=[
+  ['ramenShopJoined',    './textures/baked/ramenShopBaked1024.ktx2'],
+  ['machinesJoined',     './textures/baked/machinesBaked1024.ktx2' ],
+  ['floor',              './textures/baked/floorBaked1024.ktx2'    ],
+  ['miscJoined',         './textures/baked/machinesBaked1024.ktx2'     ],
+  ['graphicsJoined',     './textures/baked/graphicsBaked512.ktx2'  ],
+  ['jesseZhouJoined',    './textures/baked/ramenShopBaked1024.ktx2'],
+  ['chinese',            './textures/baked/ramenShopBaked1024.ktx2'],
+  ['easelFrontGraphic',  './textures/baked/ramenShopBaked1024.ktx2'],
+  ['vendingMachineLight','./textures/baked/machinesBaked1024.ktx2' ],
+  ['arcadeRim',          './textures/baked/machinesBaked1024.ktx2' ],
+  ['arcadeToken',        './textures/baked/machinesBaked1024.ktx2' ],
+  ['dishStand',          './textures/baked/ramenShopBaked1024.ktx2'],
+];
+const COLORS=[
+  ['projectsRed',0xe8003c],['projectsWhite',0xffffff],
+  ['aboutMeBlue',0x00cfff],['aboutMeBlack',0x111111],
+  ['articlesRed',0xff4400],['articlesWhite',0xffffff],
+  ['creditsOrange',0xff8800],['creditsBlack',0x111111],
+  ['jZhouPink',0xff44aa],['jZhouBlack',0x111111],
+  ['greenSignSquare',0x00cc44],['greenLED',0x00ff44],
+  ['redLED',0xff2200],['yellowRightLight',0xffee00],['whiteButton',0xffffff],
+];
+const MATCAPS=[
+  [['neonBlue'],                                           './textures/matcaps/neonBlueMatCap.ktx2', null],
+  [['neonGreen'],                                          './textures/matcaps/neonGreenMatCap.ktx2',null],
+  [['neonPink','neonYellow'],                              './textures/matcaps/neonBlueMatCap.ktx2', null],
+  [['fan1','fan2'],                                        './textures/matcaps/fanMatCap.ktx2',       null],
+  [['dish'],                                               './textures/matcaps/dishMatCap.ktx2',      null],
+  [['lampLights'],                                         null,'./textures/matcaps/lightMatcap.png'      ],
+  [['storageLight','portalLight','blueLights','poleLight'],'./textures/matcaps/neonBlueMatCap.ktx2', null],
+];
+const VIDEO_SCREENS=[
+  ['littleTVScreen','./textures/videosTextures/littleTVScreen.mp4'],
+  ['tallScreen',    './textures/videosTextures/tallScreen.mp4'    ],
+  ['tvScreen',      './textures/videosTextures/tvScreen.mp4'      ],
+  ['smallScreen3',  './textures/videosTextures/smallScreen3.mp4'  ],
+  ['smallScreen4',  './textures/videosTextures/smallScreen4.mp4'  ],
+  ['smallScreen5',  './textures/videosTextures/smallScreen5.mp4'  ],
+];
+const SIDE_PATHS=['sideScreen1','sideScreen2','sideScreen3'].map(n=>`./textures/screens/sideScreens/${n}.ktx2`);
+const SMALL1_PATHS=[1,2,3,4,5].map(i=>`./textures/screens/smallScreen1/${i}.basis`);
+const SMALL2_PATHS=[1,2,3,4,5].map(i=>`./textures/screens/smallScreen2/${i}.basis`);
+
+const SCREEN_TEX={};
+const SCREEN_LOAD_LIST=[
+  ['bigScreenDefault',     './textures/screens/aboutMeScreens/bigScreenDefault.ktx2'           ],
+  ['vendingDefault',       './textures/screens/vendingMachineScreens/vendingMachineDefault.ktx2'],
+  ['arcadeDefault',        './textures/screens/arcadeScreens/arcadeScreenDefault.ktx2'          ],
+  ['easelTouch',           './textures/screens/easel/easelTouch.ktx2'                           ],
+  ['bigScreenAbout',       './textures/screens/aboutMeScreens/bigScreenAbout.ktx2'              ],
+  ['bigScreenAboutMobile', './textures/screens/aboutMeScreens/bigScreenAboutMobile.ktx2'        ],
+  ['bigScreenSkills',      './textures/screens/aboutMeScreens/bigScreenSkills.ktx2'             ],
+  ['bigScreenSkillsMobile','./textures/screens/aboutMeScreens/bigScreenSkillsMobile.ktx2'       ],
+  ['bigScreenExperience',  './textures/screens/aboutMeScreens/bigScreenExperience.ktx2'         ],
+  ['bigScreenExpMobile',   './textures/screens/aboutMeScreens/bigScreenExperienceMobile.ktx2'   ],
+  ['vendingMenu',          './textures/screens/vendingMachineScreens/vendingMachineMenu.ktx2'   ],
+  ['project1',             './textures/screens/vendingMachineScreens/project1.ktx2'             ],
+  ['project2',             './textures/screens/vendingMachineScreens/project2.ktx2'             ],
+  ['project3',             './textures/screens/vendingMachineScreens/project3.ktx2'             ],
+  ['project4',             './textures/screens/vendingMachineScreens/project4.ktx2'             ],
+  ['project5',             './textures/screens/vendingMachineScreens/project5.ktx2'             ],
+  ['project6',             './textures/screens/vendingMachineScreens/project6.ktx2'             ],
+  ['project7',             './textures/screens/vendingMachineScreens/project7.ktx2'             ],
+  ['project8',             './textures/screens/vendingMachineScreens/project8.ktx2'             ],
+  ['arcadeCredits',        './textures/screens/arcadeScreens/arcadeScreenCredits.ktx2'          ],
+  ['arcadeThanks',         './textures/screens/arcadeScreens/arcadeScreenThanks.ktx2'           ],
+];
+
+let meshMap={};
+function setScreen(meshName,texKey){
+  const tex=SCREEN_TEX[texKey];if(!tex)return;
+  applyMat(meshMap,meshName,screenMat(tex));
+  log(`  🖥 ${meshName} → ${texKey}`,'screen');
+}
+const isMobile=innerWidth<600;
+function buildSubnav(tabs){
+  subnavEl.innerHTML='';
+  subnavEl.style.setProperty('--sub-color',tabs.color||'#00cfff');
+  tabs.buttons.forEach((btn,i)=>{
+    const el=document.createElement('button');
+    el.textContent=btn.label;
+    if(i===0)el.classList.add('active');
+    el.addEventListener('click',()=>{
+      subnavEl.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      el.classList.add('active');btn.action();
+    });
+    subnavEl.appendChild(el);
+  });
+  subnavEl.classList.add('visible');
+  if(tabs.buttons[0])tabs.buttons[0].action();
+}
+function hideSubnav(){subnavEl.classList.remove('visible');subnavEl.innerHTML='';}
+
+let sideInterval=null;
+let creditsTimer=null;
+
+function activateProjects(){
+  const _vt = SCREEN_TEX['vendingDefault']
+  if (_vt) applyMat(meshMap, 'vendingMachineScreen', vendingScreenMat(_vt))
+  buildSubnav({color:'#e8003c',buttons:[
+    // Menu button: bloop (UI nav)
+    {label:'📋 Menu',action:()=>{ playSound('bloop'); setScreen('vendingMachineScreen','vendingMenu'); }},
+    // Project slots: ding (vending machine dispense feel)
+    {label:'P1',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project1'); }},
+    {label:'P2',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project2'); }},
+    {label:'P3',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project3'); }},
+    {label:'P4',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project4'); }},
+    {label:'P5',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project5'); }},
+    {label:'P6',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project6'); }},
+    {label:'P7',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project7'); }},
+    {label:'P8',action:()=>{ playSound('ding'); setScreen('vendingMachineScreen','project8'); }},
+  ]});
+}
+function activateAboutMe(){
+  const aKey=isMobile?'bigScreenAboutMobile':'bigScreenAbout';
+  const sKey=isMobile?'bigScreenSkillsMobile':'bigScreenSkills';
+  const eKey=isMobile?'bigScreenExpMobile':'bigScreenExperience';
+  buildSubnav({color:'#00cfff',buttons:[
+    // About Me tabs: bloop (soft UI transition)
+    {label:'👤 About',     action:()=>{ playSound('bloop'); setScreen('bigScreen',aKey); }},
+    {label:'🛠 Skills',    action:()=>{ playSound('bloop'); setScreen('bigScreen',sKey); }},
+    {label:'💼 Experience',action:()=>{ playSound('bloop'); setScreen('bigScreen',eKey); }},
+  ]});
+}
+function activateArticles(){
+  if(sideInterval){clearInterval(sideInterval);sideInterval=null;}
+  const tex=SCREEN_TEX['sideScreen1'];
+  if(tex)applyMat(meshMap,'sideScreen',new THREE.MeshBasicMaterial({map:tex}));
+  hideSubnav();
+}
+function activateCredits(){
+  setScreen('arcadeScreen','arcadeCredits');
+  playSound('arcade');   // arcade cabinet startup sound
+  if(creditsTimer)clearTimeout(creditsTimer);
+  creditsTimer=setTimeout(()=>setScreen('arcadeScreen','arcadeThanks'),4000);
+  hideSubnav();
+}
+function activateHome(){
+  setScreen('bigScreen','bigScreenDefault');
+  setScreen('vendingMachineScreen','vendingDefault');
+  setScreen('arcadeScreen','arcadeDefault');
+  if(sideInterval)clearInterval(sideInterval);
+  const sideTex=['sideScreen1','sideScreen2','sideScreen3'].map(k=>SCREEN_TEX[k]).filter(Boolean);
+  if(sideTex.length&&meshMap['sideScreen'])sideInterval=cycleScreens(meshMap['sideScreen'],sideTex,3000);
+  if(creditsTimer){clearTimeout(creditsTimer);creditsTimer=null;}
+  hideSubnav();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SOUND ENGINE
+//
+//  All audio is handled through the Web Audio API via
+//  THREE.AudioListener + THREE.Audio (non-positional).
+//  We don't use positional audio because the shop is small
+//  and all sounds should be heard at full volume regardless
+//  of camera position.
+//
+//  Sound map:
+//    cooking.mp3  — ambient background loop (quiet, always on)
+//    hologram.mp3 — ambient hologram hum loop (quiet, always on)
+//    whoosh.mp3   — camera fly transition (plays on every flyTo)
+//    click.mp3    — sign / screen tap (plays on valid raycast hit)
+//    ding.mp3     — vending machine project selection
+//    bloop.mp3    — sub-nav tab press (About/Skills/Experience, P1-P8)
+//    arcade.mp3   — plays when credits view activates
+//
+//  Browser autoplay policy: AudioContext must be resumed on the
+//  first user gesture. We resume on the first pointerdown and
+//  show a mute/unmute button in the UI.
+// ─────────────────────────────────────────────────────────────
+
+// AudioListener attaches to the camera — required by THREE.Audio
+const audioListener = new THREE.AudioListener();
+camera.add(audioListener);
+
+// Sound store: name → { audio, buffer }
+const SFX = {};
+const ambientSounds = [];   // loops that should respect mute state
+
+let audioReady   = false;   // true after first user gesture
+let isMuted      = false;
+let audioContext = audioListener.context;
+
+// ── Mute button ────────────────────────────────────────────
+const muteBtn = document.createElement('button');
+muteBtn.id        = 'mute-btn';
+muteBtn.className = 'btn';
+muteBtn.textContent = '🔊';
+muteBtn.style.cssText = 'position:fixed;bottom:52px;right:10px;z-index:200;font-size:14px;padding:5px 10px;';
+document.body.appendChild(muteBtn);
+
+muteBtn.addEventListener('click', () => {
+  isMuted = !isMuted;
+  muteBtn.textContent = isMuted ? '🔇' : '🔊';
+  // Mute/unmute all sounds via the listener gain
+  audioListener.setMasterVolume(isMuted ? 0 : 1);
+  log(isMuted ? 'Sound muted' : 'Sound unmuted', 'info');
+});
+
+// ── Load a sound ────────────────────────────────────────────
+function loadSound(name, path, { loop=false, volume=1.0 }={}) {
+  return new Promise(resolve => {
+    const audio  = new THREE.Audio(audioListener);
+    const loader = new THREE.AudioLoader();
+    loader.load(
+      path,
+      buffer => {
+        audio.setBuffer(buffer);
+        audio.setLoop(loop);
+        audio.setVolume(volume);
+        SFX[name] = audio;
+        if (loop) ambientSounds.push(audio);
+        log(`  ✓ sound loaded: ${name}`, 'ok');
+        resolve(audio);
+      },
+      undefined,
+      err => {
+        log(`  ✗ sound FAILED: ${name} — ${err?.message||'unknown'}`, 'err');
+        resolve(null);
+      }
+    );
+  });
+}
+
+// ── Play a one-shot sound ────────────────────────────────────
+// Stops and restarts if already playing so rapid taps work
+function playSound(name) {
+  if (!audioReady || isMuted) return;
+  const audio = SFX[name];
+  if (!audio) return;
+  if (audio.isPlaying) audio.stop();
+  audio.play();
+}
+
+// ── Start ambient loops ──────────────────────────────────────
+function startAmbient() {
+  if (!audioReady) return;
+  ['cooking', 'hologram'].forEach(name => {
+    const a = SFX[name];
+    if (a && !a.isPlaying) a.play();
+  });
+}
+
+// ── Resume AudioContext on first gesture ─────────────────────
+// Required by browser autoplay policy — context starts suspended
+function resumeAudio() {
+  if (audioReady) return;
+  audioContext.resume().then(() => {
+    audioReady = true;
+    startAmbient();
+    log('AudioContext resumed ✓ — ambient sounds started', 'ok');
+  });
+}
+
+// Hook into existing pointer handlers
+renderer.domElement.addEventListener('pointerdown', resumeAudio, { once: false });
+
+// ── Preload all sounds ───────────────────────────────────────
+async function loadAllSounds() {
+  log('── Sound loading ──', 'head');
+  await Promise.all([
+    loadSound('cooking',  './sound/cooking.mp3',  { loop:true,  volume:0.18 }),
+    loadSound('hologram', './sound/hologram.mp3', { loop:true,  volume:0.12 }),
+    loadSound('whoosh',   './sound/whoosh.mp3',   { loop:false, volume:0.7  }),
+    loadSound('click',    './sound/click.mp3',    { loop:false, volume:0.8  }),
+    loadSound('ding',     './sound/ding.mp3',     { loop:false, volume:0.9  }),
+    loadSound('bloop',    './sound/bloop.mp3',    { loop:false, volume:0.7  }),
+    loadSound('arcade',   './sound/arcade.mp3',   { loop:false, volume:0.75 }),
+  ]);
+  log('All sounds loaded ✓', 'ok');
+}
+
+// ── VIEWS ────────────────────────────────────────────────────
+const VIEWS={
+  home:{camPos:new THREE.Vector3(-11,8,22),target:new THREE.Vector3(0,2,-2),
+    label:'● DEFAULT VIEW',color:'#888',minPolar:0,maxPolar:Math.PI/2,minAzi:-Infinity,maxAzi:Infinity,minDist:5,maxDist:300,onArrive:activateHome},
+  projects:{camPos:new THREE.Vector3(1.65,2.91,7.53),target:new THREE.Vector3(0.57,1.05,0.20),
+    label:'🛒 PROJECTS',color:'#e8003c',minPolar:Math.PI*0.25,maxPolar:Math.PI*0.6,minAzi:-0.4,maxAzi:0.4,minDist:2,maxDist:14,onArrive:activateProjects},
+  aboutMe:{camPos:new THREE.Vector3(1.27,7.25,10.47),target:new THREE.Vector3(0.45,7.13,-2.00),
+    label:'👤 ABOUT ME',color:'#00cfff',minPolar:Math.PI*0.2,maxPolar:Math.PI*0.5,minAzi:-0.3,maxAzi:0.3,minDist:4,maxDist:20,onArrive:activateAboutMe},
+  articles:{camPos:new THREE.Vector3(-0.60,7.94,11.76),target:new THREE.Vector3(-0.00,2.00,-2.00),
+    label:'📰 ARTICLES',color:'#ff4400',minPolar:Math.PI*0.2,maxPolar:Math.PI*0.6,minAzi:-0.5,maxAzi:0.5,minDist:3,maxDist:18,onArrive:activateArticles},
+  credits:{camPos:new THREE.Vector3(-1.19,2.69,6.13),target:new THREE.Vector3(0.47,0.35,-0.12),
+    label:'🎮 CREDITS',color:'#ff8800',minPolar:Math.PI*0.25,maxPolar:Math.PI*0.6,minAzi:-0.5,maxAzi:0.5,minDist:2,maxDist:12,onArrive:activateCredits},
+};
+
+let currentMode='home',isTransitioning=false;
+
+function flyTo(viewKey){
+  if(isTransitioning||currentMode===viewKey)return;
+  isTransitioning=true; controls.enabled=false;
+  const view=VIEWS[viewKey];
+  const pp={x:camera.position.x,y:camera.position.y,z:camera.position.z};
+  const tp={x:controls.target.x,y:controls.target.y,z:controls.target.z};
+  gsap.to(pp,{x:view.camPos.x,y:view.camPos.y,z:view.camPos.z,duration:1.8,ease:'power2.inOut',
+    onUpdate(){camera.position.set(pp.x,pp.y,pp.z);}});
+  gsap.to(tp,{x:view.target.x,y:view.target.y,z:view.target.z,duration:1.8,ease:'power2.inOut',
+    onUpdate(){controls.target.set(tp.x,tp.y,tp.z);controls.update();},
+    onComplete(){
+      controls.minPolarAngle=view.minPolar; controls.maxPolarAngle=view.maxPolar;
+      controls.minAzimuthAngle=view.minAzi; controls.maxAzimuthAngle=view.maxAzi;
+      controls.minDistance=view.minDist; controls.maxDistance=view.maxDist;
+      controls.enabled=true; isTransitioning=false; currentMode=viewKey;
+      modeEl.textContent=view.label; modeEl.style.color=view.color;
+      backBtn.style.display=viewKey==='home'?'none':'block';
+      if(view.onArrive)view.onArrive();
+      log(`📍 Arrived: ${view.label}`,'click');
+    }
+  });
+  log(`🎬 Flying to: ${view.label}`,'click');
+  modeEl.textContent=view.label; modeEl.style.color=view.color;
+
+  // Whoosh on every camera transition
+  playSound('whoosh');
+}
+
+window.goHome=function(){
+  if(isTransitioning)return;
+  const prev=currentMode; currentMode='temp';
+  flyTo('home');
+  setTimeout(()=>{
+    controls.minPolarAngle=VIEWS.home.minPolar; controls.maxPolarAngle=VIEWS.home.maxPolar;
+    controls.minAzimuthAngle=VIEWS.home.minAzi; controls.maxAzimuthAngle=VIEWS.home.maxAzi;
+    controls.minDistance=VIEWS.home.minDist; controls.maxDistance=VIEWS.home.maxDist;
+    backBtn.style.display='none';
+  },2000);
+};
+
+// ── RAYCASTER ────────────────────────────────────────────────
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+let clickableMeshes=[];
+const CLICK_MAP={
+  'projectsRed':'projects','projectsWhite':'projects',
+  'aboutMeBlue':'aboutMe','aboutMeBlack':'aboutMe',
+  'articlesRed':'articles','articlesWhite':'articles',
+  'creditsOrange':'credits','creditsBlack':'credits',
+  'vendingMachineScreen':'projects','bigScreen':'aboutMe',
+  'arcadeScreen':'credits','sideScreen':'articles',
+};
+function onDown(e){pointer._dx=e.touches?e.touches[0].clientX:e.clientX;pointer._dy=e.touches?e.touches[0].clientY:e.clientY;}
+function onUp(e){
+  if(isTransitioning)return;
+  const cx=e.changedTouches?e.changedTouches[0].clientX:e.clientX;
+  const cy=e.changedTouches?e.changedTouches[0].clientY:e.clientY;
+  if(Math.abs(cx-(pointer._dx||0))>8||Math.abs(cy-(pointer._dy||0))>8)return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.x=((cx-rect.left)/rect.width)*2-1;
+  pointer.y=-((cy-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects(clickableMeshes,false);
+  if(hits.length){
+    const name=hits[0].object.userData.clickName||hits[0].object.name;
+    const vk=CLICK_MAP[name];
+    if(vk){
+      playSound('click');   // tap feedback on valid hit
+      log(`👆 ${name} → ${vk}`,'click');
+      flyTo(vk);
+    }
+  }
+}
+renderer.domElement.addEventListener('pointerdown',onDown);
+renderer.domElement.addEventListener('pointerup',onUp);
+renderer.domElement.addEventListener('touchstart',onDown,{passive:true});
+renderer.domElement.addEventListener('touchend',onUp,{passive:true});
+
+// ─────────────────────────────────────────────────────────────
+//  HOLOGRAM SHADER
+//
+//  Reconstructed from the original repo's hologramShaders/ and
+//  the Three.js Journey holographic shader lesson.
+//
+//  VERTEX SHADER — passes world-space position and surface
+//  normal (in view space) to the fragment stage.
+//  The normal is used for the Fresnel rim calculation.
+//
+//  FRAGMENT SHADER — four layered effects:
+//  1. Horizontal scan lines — fract(vPosition.y * lineCount + time)
+//     creates repeating bright bands that scroll upward over time.
+//  2. Fresnel rim glow — dot(vNormal, viewDir) gives 0 at edges,
+//     1 at centre. We invert so edges glow: (1 - dot)^power.
+//     This makes the silhouette rim burn brightest, fading toward
+//     the centre — the classic hologram edge effect.
+//  3. Pulsing opacity — sin(time) drives alpha so the hologram
+//     breathes in and out, never going fully transparent.
+//  4. Glitch flicker — occasional rapid sin(time*50) spike adds
+//     the sci-fi instability feel.
+//
+//  Hologram colour: #00eeff (cyan-teal) matching the original.
+//  Transparency: side=THREE.DoubleSide, depthWrite:false so the
+//  hologram composites over the scene without z-fighting.
+// ─────────────────────────────────────────────────────────────
+
+const holoVertexShader = /* glsl */`
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  void main() {
+    // World-space position — used for scan line Y coordinate
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+    vPosition = modelPosition.xyz;
+
+    // View-space normal — used for Fresnel dot product
+    // normalMatrix transforms normals correctly into view space
+    vNormal = normalize(normalMatrix * normal);
+
+    gl_Position = projectionMatrix * viewMatrix * modelPosition;
+  }
+`;
+
+const holoFragmentShader = /* glsl */`
+  uniform float uTime;
+  uniform vec3  uColor;
+  uniform float uLineCount;   // number of scan lines
+  uniform float uLineSpeed;   // scroll speed
+  uniform float uFresnelPow;  // rim sharpness (higher = thinner rim)
+  uniform float uOpacityMin;  // minimum alpha (never fully invisible)
+  uniform float uOpacityMax;  // maximum alpha peak
+
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  void main() {
+    // ── 1. Scan lines ──────────────────────────────────────
+    // fract creates the repeating 0→1 ramp. Multiplying by a
+    // step makes thin bright lines on a dark field.
+    float scanLine = fract(vPosition.y * uLineCount + uTime * uLineSpeed);
+    // Narrow bright band: values near 0 or 1 → bright
+    float line = step(0.85, scanLine);
+
+    // ── 2. Fresnel rim ─────────────────────────────────────
+    // vNormal is in view space; viewDir for view-space normals
+    // is always (0,0,1) — we don't need the actual camera vec.
+    float fresnel = dot(vNormal, vec3(0.0, 0.0, 1.0));
+    fresnel = clamp(fresnel, 0.0, 1.0);
+    // Invert so rim (low dot) is bright, centre is dark
+    float rim = pow(1.0 - fresnel, uFresnelPow);
+
+    // ── 3. Pulsing opacity ─────────────────────────────────
+    float pulse = sin(uTime * 1.5) * 0.5 + 0.5;   // 0→1
+    float alpha = mix(uOpacityMin, uOpacityMax, pulse);
+
+    // ── 4. Glitch flicker ──────────────────────────────────
+    // Rare fast flicker — abs(sin) creates sharp spikes
+    float glitch = abs(sin(uTime * 40.0));
+    glitch = step(0.98, glitch) * 0.4;   // fires ~2% of time
+
+    // ── Combine ─────────────────────────────────────────────
+    // Base: rim glow + scan lines
+    float intensity = rim * 0.6 + line * 0.4;
+    // Final alpha: base alpha * intensity + glitch spike
+    float finalAlpha = (alpha * intensity) + glitch;
+    finalAlpha = clamp(finalAlpha, 0.0, 1.0);
+
+    // Colour: hologram cyan, brightness driven by rim + lines
+    vec3 color = uColor * (rim + line * 0.5 + 0.1);
+
+    gl_FragColor = vec4(color, finalAlpha);
+  }
+`;
+
+// Create the hologram ShaderMaterial
+const holoUniforms = {
+  uTime:       { value: 0.0 },
+  uColor:      { value: new THREE.Color(0x00eeff) },
+  uLineCount:  { value: 80.0 },    // scan line density
+  uLineSpeed:  { value: 1.2 },     // scroll speed (upward)
+  uFresnelPow: { value: 2.0 },     // rim sharpness
+  uOpacityMin: { value: 0.15 },    // breath minimum
+  uOpacityMax: { value: 0.85 },    // breath maximum
+};
+
+const holoMaterial = new THREE.ShaderMaterial({
+  vertexShader:   holoVertexShader,
+  fragmentShader: holoFragmentShader,
+  uniforms:       holoUniforms,
+  transparent:    true,
+  depthWrite:     false,          // composites correctly over scene
+  side:           THREE.DoubleSide,
+  blending:       THREE.AdditiveBlending,  // glow adds to scene behind it
+});
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOAD — shop first, then hologram
+// ─────────────────────────────────────────────────────────────
+log('Fetching ramenShop.gltf …','pending');
+fetch(GLTF_SHOP)
+  .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.text();})
+  .then(()=>{log('Shop GLTF reachable ✓','ok');setBar(8);loadShop();})
+  .catch(err=>{log('FETCH FAILED: '+err.message,'err');setStatus('Error ❌','#ff5f5f');});
+
+function loadShop(){
+  log('Loading ramenShop.gltf …','pending');
+  gltfLoader.load(GLTF_SHOP, async(gltf)=>{
+    log('Shop GLTF parsed ✓','ok'); setBar(18);
+
+    const model=gltf.scene;
+    model.traverse(o=>{if(o.name)meshMap[o.name]=o;});
+    log(`${Object.keys(meshMap).length} named objects`,'ok');
+
+    // Load sounds in parallel while we process the model
+    loadAllSounds();
+
+    const bbox=new THREE.Box3().setFromObject(model);
+    const center=bbox.getCenter(new THREE.Vector3());
+    const size=bbox.getSize(new THREE.Vector3());
+    model.position.x-=center.x; model.position.z-=center.z; model.position.y-=bbox.min.y;
+    model.traverse(c=>{if(c.isMesh){c.receiveShadow=true;c.castShadow=false;}});
+    scene.add(model);
+
+    const sh=size.y;
+    mshBox.position.set(0,sh+3.5,0);
+    spotLight1.position.set(5,sh+14,8); spotLight2.position.set(0,sh+14,6); spotLight3.position.set(-5,sh+14,8);
+    log(`Shop: ${size.x.toFixed(1)}×${sh.toFixed(1)}×${size.z.toFixed(1)}`,'info');
+    setBar(22);
+
+    Object.keys(CLICK_MAP).forEach(name=>{
+      const obj=meshMap[name];if(!obj)return;
+      obj.traverse(o=>{if(o.isMesh){o.userData.clickName=name;clickableMeshes.push(o);}});
+    });
+
+    // ── Baked ──
+    log('── Baked textures ──','head');
+    for(const[name,ktx2]of BAKED){
+      const tex=await loadKTX2(ktx2);if(!tex)continue;
+      applyMat(meshMap,name,bakedMat(tex));
+    }
+    fillLight.intensity=0.0; setBar(38);
+
+    for(const[name,hex]of COLORS)applyMat(meshMap,name,new THREE.MeshBasicMaterial({color:hex}));
+    setBar(44);
+
+    log('── Matcaps ──','head');
+    for(const[names,ktx2,png]of MATCAPS){
+      const tex=ktx2?await loadKTX2(ktx2):await loadPNG(png);if(!tex)continue;
+      const mat=new THREE.MeshMatcapMaterial({matcap:tex});
+      names.forEach(n=>applyMat(meshMap,n,mat));
+    }
+    setBar(54);
+
+    for(const[name,src]of VIDEO_SCREENS)applyMat(meshMap,name,videoMat(src));
+    const s1=(await Promise.all(SMALL1_PATHS.map(loadBasis))).filter(Boolean);
+    s1.forEach(t=>{t.colorSpace=THREE.SRGBColorSpace;});
+    if(meshMap['smallScreen1']&&s1.length)cycleScreens(meshMap['smallScreen1'],s1,2000);
+    const s2=(await Promise.all(SMALL2_PATHS.map(loadBasis))).filter(Boolean);
+    s2.forEach(t=>{t.colorSpace=THREE.SRGBColorSpace;});
+    if(meshMap['smallScreen2']&&s2.length)cycleScreens(meshMap['smallScreen2'],s2,2000);
+    setBar(62);
+
+    log('── Screen textures ──','head');
+    const sideTex=[];
+    for(const p of SIDE_PATHS){
+      const tex=await loadKTX2(p);
+      if(tex){
+        tex.colorSpace=THREE.SRGBColorSpace;
+        const key=p.split('/').pop().replace('.ktx2','');
+        SCREEN_TEX[key]=tex; sideTex.push(tex);
+      }
+    }
+    if(meshMap['sideScreen']&&sideTex.length)sideInterval=cycleScreens(meshMap['sideScreen'],sideTex,3000);
+
+    let loaded=0;
+    for(const[key,path]of SCREEN_LOAD_LIST){
+      const tex=await loadKTX2(path);
+      if(tex){tex.colorSpace=THREE.SRGBColorSpace;SCREEN_TEX[key]=tex;loaded++;}
+      setBar(62+Math.round((loaded/SCREEN_LOAD_LIST.length)*18));
+    }
+    log(`${loaded}/${SCREEN_LOAD_LIST.length} screen textures ✓`,'ok');
+
+    setScreen('bigScreen','bigScreenDefault');
+    setScreen('vendingMachineScreen','vendingDefault');
+    setScreen('arcadeScreen','arcadeDefault');
+    if(SCREEN_TEX['easelTouch'])applyMat(meshMap,'easelFrontGraphic',screenMat(SCREEN_TEX['easelTouch']));
+    setBar(82);
+
+    // ── Now load hologram ──
+    loadHologram(sh);
+
+  },
+  (xhr)=>{if(xhr.total)setBar(8+Math.round((xhr.loaded/xhr.total)*10));},
+  (err)=>{log('Shop GLTFLoader ERROR: '+(err?.message||err),'err');setStatus('Error ❌','#ff5f5f');}
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HOLOGRAM LOAD
+//  The hologram model is 106.97×78.01×91.56 units — enormous.
+//  The shop is 49.9×10.09×49.9.
+//  We scale it down to fit above the neon sign.
+//
+//  Target: hologram ~2 units wide, ~1.5 units tall
+//  Scale factor ≈ 2 / 106.97 ≈ 0.0187
+//  Position: centred X, Y just above the neon sign (~7.5 units),
+//  Z slightly in front of the shop face (~-1)
+// ─────────────────────────────────────────────────────────────
+function loadHologram(shopHeight){
+  log('── Step 7: ramenHologram.gltf ──','head');
+  log('Fetching ramenHologram.gltf …','pending');
+
+  gltfLoader.load(
+    GLTF_HOLO,
+
+    (gltf)=>{
+      log('Hologram GLTF parsed ✓','ok');
+
+      const holo=gltf.scene;
+
+      // Measure raw size
+      const rawBox=new THREE.Box3().setFromObject(holo);
+      const rawSize=rawBox.getSize(new THREE.Vector3());
+      log(`Hologram raw: ${rawSize.x.toFixed(1)}×${rawSize.y.toFixed(1)}×${rawSize.z.toFixed(1)}`,'info');
+
+      // Scale so the widest dimension becomes ~2.5 units
+      const targetWidth = 2.5;
+      const scaleFactor = targetWidth / rawSize.x;
+      holo.scale.setScalar(scaleFactor);
+      log(`Scale factor: ${scaleFactor.toFixed(4)}`,'info');
+
+      // After scaling, re-centre and position above shop sign
+      // The neon sign is around Y=6.5–7.5 in the centred model
+      const scaledBox=new THREE.Box3().setFromObject(holo);
+      const scaledCenter=scaledBox.getCenter(new THREE.Vector3());
+      const scaledSize=scaledBox.getSize(new THREE.Vector3());
+
+      // Place: centred on X, above neon sign, slightly in front
+      holo.position.x -= scaledCenter.x;
+      holo.position.y  = 7.8 - scaledBox.min.y * scaleFactor;   // sit bottom at Y=7.8
+      holo.position.z  = -1.0;   // slightly in front of building face
+
+      log(`Hologram scaled size: ${scaledSize.x.toFixed(2)}×${scaledSize.y.toFixed(2)}×${scaledSize.z.toFixed(2)}`,'info');
+      log(`Hologram position: ${holo.position.x.toFixed(2)}, ${holo.position.y.toFixed(2)}, ${holo.position.z.toFixed(2)}`,'info');
+
+      // Apply hologram shader to every mesh in the model
+      let meshCount=0;
+      holo.traverse(child=>{
+        if(child.isMesh){
+          child.material  = holoMaterial;
+          child.castShadow    = false;
+          child.receiveShadow = false;
+          meshCount++;
+        }
+      });
+      log(`Hologram shader applied to ${meshCount} mesh(es) ✓`,'ok');
+
+      scene.add(holo);
+
+      // Store reference for animation loop
+      window._holoScene = holo;
+
+      setBar(92);
+      log('▶ STEP 8 COMPLETE — Hologram + Sound live','ok');
+
+      // ── Now load the inductor demo (Step 09) ──
+      loadInductor();
+    },
+
+    (xhr)=>{if(xhr.total)log(`Hologram: ${Math.round((xhr.loaded/xhr.total)*100)}%`,'pending');},
+
+    (err)=>{
+      log('Hologram GLTF ERROR: '+(err?.message||err),'err');
+      log('Continuing without hologram — check ./models/ramenHologram.gltf path','info');
+      setBar(92);
+      setStatus('⚠️ Hologram failed — shop OK','#f0c060');
+      // Still attempt the inductor demo even if hologram failed
+      loadInductor();
+    }
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  STEP 09 — INDUCTOR DEMO (self-inductance / Faraday's Law)
+//
+//  Loads ./models/powersupply.glb as a standalone rig placed
+//  into the shop scene using the calibration below:
+//
+//    SCALE_X=1.0000 SCALE_Y=1.0000 SCALE_Z=1.0000
+//    OFFSET_X=-2.6000 OFFSET_Y=-0.5637 OFFSET_Z=0.8352
+//    ROT_X=0.0° ROT_Y=0.0° ROT_Z=0.0°
+//
+//  Unlike the original standalone inductor page (which scaled
+//  the model ×100 in an empty scene with its own huge coordinate
+//  system), here the powersupply.glb sits inside the ramen shop's
+//  much smaller coordinate space (shop is ~50 units wide, camera
+//  near/far is 0.1–2000). So SCALE stays at 1.0 as calibrated,
+//  and the whole inductor rig (coil, connectors, resistor, bulb)
+//  is built at a matching small scale via INDUCTOR_SCALE below.
+//
+//  This function only does the LOADING + CLIP REGISTRATION +
+//  PROCEDURAL GEOMETRY portions (Step 09). Wiring the two
+//  animation systems together and the flow/acVolt/lowF state
+//  machine is deferred to Step 10, exactly as planned.
+// ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+//  STEP 09/10 — INDUCTOR DEMO (self-inductance / Faraday's Law)
+//  FINAL CONSOLIDATED VERSION
+//
+//  Loads ./models/powersupply.glb as a standalone rig placed
+//  into the shop scene using the calibration below:
+//
+//    SCALE_X=1.0000 SCALE_Y=1.0000 SCALE_Z=1.0000
+//    OFFSET_X=-2.6000 OFFSET_Y=-0.5637 OFFSET_Z=0.8352
+//    ROT_X=0.0° ROT_Y=0.0° ROT_Z=0.0°
+//
+//  Includes fixes applied after initial integration:
+//   - Coil radius (r) and pitch (b) now correctly multiplied by
+//     INDUCTOR_UNIT — previously only `extrude` was scaled, so
+//     the coil was built ~100x too large and disconnected from
+//     the connector wires.
+//   - AC oscilloscope waveform no longer drawn as free-floating
+//     3D lines/points near the coil — it's rendered to a 2D
+//     canvas texture and projected onto the TV 60.001 mesh
+//     (Mesh_59 / Mesh_60) as a live scope screen.
+//   - All text labels (INDUCTOR, RESISTOR, EMF, +/-, current
+//     status) sized down substantially to match shop scale.
+// ─────────────────────────────────────────────────────────────
+
+const GLTF_POWERSUPPLY = './models/powersupply.glb';
+
+// Calibration supplied for this integration
+const IND_OFFSET = new THREE.Vector3(1.0000,1.0000, -1.2352);
+const IND_SCALE   = new THREE.Vector3(1.0000, 1.0000, 1.0000);
+const IND_ROT     = new THREE.Euler(
+  THREE.MathUtils.degToRad(0.0),
+  THREE.MathUtils.degToRad(0.0),
+  THREE.MathUtils.degToRad(0.0)
+);
+
+// Root group everything inductor-related hangs off of, so the
+// whole demo can be positioned/scaled as one unit and toggled
+// visible/invisible without touching the shop model at all.
+const inductorRoot = new THREE.Group();
+inductorRoot.name = 'inductorRoot';
+inductorRoot.position.copy(IND_OFFSET);
+inductorRoot.scale.copy(IND_SCALE);
+inductorRoot.rotation.copy(IND_ROT);
+scene.add(inductorRoot);
+
+// Procedural geometry scale — the original inductor page used
+// coordinates in the hundreds inside a scene with far=50000.
+// The ramen shop's coordinate space is roughly 1/100th that
+// scale, so every procedural dimension is multiplied by
+// INDUCTOR_UNIT to compress the original demo geometry down.
+const INDUCTOR_UNIT = 0.01;
+
+// Label text size multiplier — shop scale needs labels far
+// smaller than the original standalone page's canvas-texture
+// sizes (which were tuned for a scene with far=50000). This
+// gets applied on top of INDUCTOR_UNIT in indMakeText below.
+// Raise this later if labels need to read more clearly.
+const INDUCTOR_LABEL_SCALE = 0.12;
+
+// Mixer + node refs, populated once the GLB resolves.
+let indModel, indMixer;
+let indKnob, indPlus, indMinus;
+let indActions = {};      // {clipName: AnimationAction}
+let indModelReady = false;
+
+// Procedural-geometry containers
+let indSpring        = new THREE.Group();  // the coil
+let indConnectors    = new THREE.Group();  // wire tubes
+let indResistor;
+let indBulbGroup, indBulbLight, indBulbMaterial;
+let indDisplayGroup  = new THREE.Group();  // DC-mode EMF label home (AC mode no longer uses this — see TV scope below)
+
+const indParams = {
+  b: 2.4,
+  p: 500,
+  extrude: 5,
+  r: 40,
+  t: 119.6,
+  points: 200
+};
+
+// Shared resources reused by every text label
+const indLabelGeometry = new THREE.PlaneGeometry(10, 10);
+
+function indMakeLabelCanvas(size, name, backgdCol, color){
+  const borderSize = 2;
+  const ctx = document.createElement('canvas').getContext('2d');
+  const font = `${size}px bold sans-serif`;
+  ctx.font = font;
+  const doubleBorderSize = borderSize * 2;
+  const width = ctx.measureText(name).width + doubleBorderSize;
+  const height = size + doubleBorderSize;
+  ctx.canvas.width = width;
+  ctx.canvas.height = height;
+  ctx.font = font;               // must re-set after canvas resize clears state
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = backgdCol;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = color;
+  ctx.fillText(name, borderSize, borderSize);
+  return ctx.canvas;
+}
+
+function indMakeText(x, y, z, size, material, name, backgdCol, color){
+  const canvas = indMakeLabelCanvas(size, name, backgdCol, color);
+  material.map = new THREE.CanvasTexture(canvas);
+  const root = new THREE.Object3D();
+  root.position.set(x, y, z);
+  const label = new THREE.Mesh(indLabelGeometry, material);
+  root.add(label);
+  // Combines shop-scale compression (INDUCTOR_UNIT) with an
+  // additional label-specific shrink (INDUCTOR_LABEL_SCALE) so
+  // text reads as small signage rather than room-sized banners.
+  const labelBaseScale = 0.1 * INDUCTOR_UNIT * 10 * INDUCTOR_LABEL_SCALE;
+  label.scale.x = canvas.width * labelBaseScale;
+  label.scale.y = canvas.height * labelBaseScale;
+  return root;
+}
+
+// ── Helix coil (procedural) — FIXED: r and b now scaled ─────
+function indHelixPoint(a, b, t){
+  return new THREE.Vector3(a * Math.cos(t), a * Math.sin(t), b * t);
+}
+function indHelixPointsArray(a, b, value){
+  const pts = [];
+  for(let t=0; t<value; t+=0.1) pts.push(indHelixPoint(a, b, t));
+  return pts;
+}
+function indAddSpring(extrude, b, t, radialSegs){
+  const u = INDUCTOR_UNIT;
+  const xDist = b * u;                                      // FIX: pitch now scaled
+  const helixPoints = indHelixPointsArray(indParams.r * u, xDist, t);  // FIX: radius now scaled
+  const curve = new THREE.CatmullRomCurve3(helixPoints);
+  const tubeGeometry = new THREE.TubeGeometry(curve, radialSegs, extrude, 15, false);
+  const mat = new THREE.MeshPhongMaterial({
+    color: 0xff3333, flatShading: false, side: THREE.DoubleSide
+  });
+  mat.color.convertSRGBToLinear();
+  const mesh = new THREE.Mesh(tubeGeometry, mat);
+  indSpring.add(mesh);
+
+  const labelMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+  const iLabel = indMakeText(
+    -250 * INDUCTOR_UNIT, 120 * INDUCTOR_UNIT, 0,
+    30, labelMat, 'INDUCTOR', 'rgba(0,0,0,0)', 'rgba(05,05,05,1)'
+  );
+  iLabel.rotation.y = 1.57;
+  inductorRoot.add(iLabel);
+}
+
+// ── Connector wires (procedural) ────────────────────────────
+const indConnectorMaterial = new THREE.MeshPhongMaterial({
+  color: 0xb87333, side: THREE.DoubleSide
+});
+function indMakeConnector(x1,y1,z1, x2,y2,z2, gap){
+  const u = INDUCTOR_UNIT;
+  const spline = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(x1*u, y1*u, z1*u),
+    new THREE.Vector3((x1-40)*u, (y1+5)*u, z2*u),
+    new THREE.Vector3(x2*u, (y2+1)*u, z2*u),
+    new THREE.Vector3(x2*u, y2*u, gap*u)
+  ]);
+  const tubeGeometry = new THREE.TubeGeometry(spline, 25, 6*u, 4, false);
+  const mesh = new THREE.Mesh(tubeGeometry, indConnectorMaterial);
+  indConnectors.add(mesh);
+}
+
+// ── Resistor (procedural) — labels shrunk ───────────────────
+function indMakeResistor(){
+  const u = INDUCTOR_UNIT;
+  const geo = new THREE.BoxGeometry(120*u, 40*u, 40*u).translate(0, 20*u, 0);
+  const material = new THREE.MeshPhongMaterial({ color: 0x221011 });
+  const rMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+
+  const rLabel1 = indMakeText(0, 20*u, 20.1*u, 20, rMaterial, ' RESISTOR ', 'rgba(0,0,0,0.1)', 'rgba(250,55,05,1)');
+  const rLabel2 = rLabel1.clone();
+  rLabel2.position.set(0, 20*u, -20.1*u);
+  rLabel2.rotation.y = 3.14;
+  const rLabel3 = rLabel1.clone();
+  rLabel3.position.set(0, 40.1*u, 0);
+  rLabel3.rotation.set(-1.57, 0, 0);
+
+  indResistor = new THREE.Mesh(geo, material);
+  indResistor.add(rLabel1, rLabel2, rLabel3);
+  indResistor.position.set(-80*u, 0, 280*u);
+  inductorRoot.add(indResistor);
+}
+
+// ── Bulb (procedural) ────────────────────────────────────────
+function indMakeBulb(){
+  const u = INDUCTOR_UNIT;
+  const group = new THREE.Group();
+
+  const bulbGeometry = new THREE.SphereGeometry(1*u*20, 32, 32);
+  indBulbLight = new THREE.PointLight(0x986b65, 0, 300*u*20, 6);
+  indBulbMaterial = new THREE.MeshStandardMaterial({
+    emissive: 0xffffee, emissiveIntensity: 0, color: 0xeeeeee, roughness: 1
+  });
+  indBulbLight.add(new THREE.Mesh(bulbGeometry, indBulbMaterial));
+  indBulbLight.position.set(0, 1*u*20, 0);
+  indBulbLight.castShadow = true;
+
+  const d = 2000*u;
+  indBulbLight.shadow.camera.left = -d;
+  indBulbLight.shadow.camera.right = d;
+  indBulbLight.shadow.camera.top = d;
+  indBulbLight.shadow.camera.bottom = -d;
+  indBulbLight.shadow.camera.far = 1000*u;
+
+  const bulbStem = new THREE.CylinderGeometry(0.65*u*20, 0.5*u*20, 0.55*u*20, 32);
+  const bStem = new THREE.Mesh(bulbStem, indBulbMaterial);
+  bStem.position.set(0, 1*u*20, 0);
+  bStem.castShadow = true;
+  bStem.receiveShadow = true;
+
+  const bulbPlug = new THREE.CylinderGeometry(0.52*u*20, 0.52*u*20, 1.2*u*20, 32);
+  const plugMat = new THREE.MeshPhongMaterial({ color: 0x837d7a });
+  const plug = new THREE.Mesh(bulbPlug, plugMat);
+  plug.position.set(0, 0.5*u*20, 0);
+  plug.receiveShadow = true;
+  plug.castShadow = true;
+
+  group.add(bStem, indBulbLight, plug);
+  group.position.set(-260*u, 0, -200*u);
+  inductorRoot.add(group);
+  indBulbGroup = group;
+}
+
+// ── Assemble all procedural geometry ────────────────────────
+function buildInductorGeometry(){
+  log('Building procedural inductor geometry…', 'ind');
+
+  indAddSpring(indParams.extrude*INDUCTOR_UNIT, indParams.b, indParams.t, indParams.p);
+  indSpring.position.set(-250*INDUCTOR_UNIT, 52*INDUCTOR_UNIT, -120*INDUCTOR_UNIT);
+  indSpring.rotation.z = -1.7;
+  inductorRoot.add(indSpring);
+
+  indMakeConnector(92, 2, -20, -250, 10, -250, -120);
+  indMakeConnector(92, 2, 20, -250, 10, 250, 163);
+  inductorRoot.add(indConnectors);
+
+  indMakeResistor();
+  indMakeBulb();
+
+  // DC-mode display group (Induced EMF label + polarity text).
+  // AC mode no longer uses this group — see TV scope screen below.
+  indDisplayGroup.visible = false;
+  inductorRoot.add(indDisplayGroup);
+
+  log('Procedural inductor geometry built ✓ (coil, wires, resistor, bulb)', 'ok');
+}
+
+// ── TV 60.001 oscilloscope screen ───────────────────────────
+let indScopeCanvas, indScopeCtx, indScopeTexture, indScopeMesh;
+const INDSCOPE_W = 512, INDSCOPE_H = 384;
+let indScopeISamples = [];  // current trace samples
+let indScopeVSamples = [];  // voltage trace samples
+
+function indSetupScopeScreen(){
+  const tvNode = indModel ? indModel.getObjectByName('TV 60.001') : null;
+  if(!tvNode){
+    log('  ✗ TV 60.001 not found in powersupply.glb — scope screen skipped', 'err');
+    return;
+  }
+
+  indScopeCanvas = document.createElement('canvas');
+  indScopeCanvas.width = INDSCOPE_W;
+  indScopeCanvas.height = INDSCOPE_H;
+  indScopeCtx = indScopeCanvas.getContext('2d');
+
+  indScopeTexture = new THREE.CanvasTexture(indScopeCanvas);
+  indScopeTexture.colorSpace = THREE.SRGBColorSpace;
+  indScopeTexture.flipY = true;
+
+  const scopeMat = new THREE.MeshBasicMaterial({ map: indScopeTexture });
+
+  // Mesh_59 ("Color M08") / Mesh_60 ("Material 10") — both mapped
+  // to the scope texture. If one is actually the bezel/casing
+  // rather than the glass panel, remove it from this condition.
+  tvNode.traverse(o=>{
+    if(o.isMesh && (o.name === 'Mesh_59' || o.name === 'Mesh_60')){
+      o.material = scopeMat;
+    }
+  });
+
+  indScopeMesh = tvNode;
+  indDrawScopeFrame(0, false); // idle "NO SIGNAL" frame on load
+  log('  ✓ oscilloscope screen wired to TV 60.001', 'ok');
+}
+
+function indGenerateScopeSamples(X, F, factor){
+  indScopeISamples = [];
+  indScopeVSamples = [];
+
+  const b = INDSCOPE_H * 0.5;
+  const ampScale = INDSCOPE_H * 0.28;
+  const xScale = (INDSCOPE_W * 0.8) / (indParams.points * 4 * 0.00835 * factor * X * F);
+
+  let i = 0;
+  for(let j=0, l=indParams.points*4; j<l; j++){
+    const t = i;
+    const x = INDSCOPE_W*0.08 + t*X*F*xScale;
+    const y = b + ampScale*Math.sin(t*F);
+    const y1 = b + (ampScale*1.15)*Math.cos(t*F);
+    indScopeISamples.push({x, y});
+    indScopeVSamples.push({x, y: y1});
+    i += 0.00835*factor;
+  }
+}
+
+function indDrawScopeFrame(sweepCount, active){
+  if(!indScopeCtx) return;
+  const ctx = indScopeCtx;
+
+  ctx.fillStyle = '#050a05';
+  ctx.fillRect(0, 0, INDSCOPE_W, INDSCOPE_H);
+
+  ctx.strokeStyle = '#1a3a1a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(INDSCOPE_W*0.06, INDSCOPE_H*0.08, INDSCOPE_W*0.88, INDSCOPE_H*0.84);
+
+  ctx.strokeStyle = '#123312';
+  ctx.beginPath();
+  ctx.moveTo(INDSCOPE_W*0.06, INDSCOPE_H*0.5);
+  ctx.lineTo(INDSCOPE_W*0.94, INDSCOPE_H*0.5);
+  ctx.stroke();
+
+  if(!active || indScopeISamples.length === 0){
+    ctx.fillStyle = '#2a4a2a';
+    ctx.font = '20px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO SIGNAL', INDSCOPE_W/2, INDSCOPE_H/2 - 20);
+    if(indScopeTexture) indScopeTexture.needsUpdate = true;
+    return;
+  }
+
+  // Voltage trace (blue) — persists, extends with sweepCount
+  ctx.strokeStyle = '#4488ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const vEnd = Math.min(sweepCount, indScopeVSamples.length);
+  for(let k=0; k<vEnd; k++){
+    const p = indScopeVSamples[k];
+    if(k===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+
+  // Current trace (red) — sweeps and resets
+  ctx.strokeStyle = '#ff4444';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const iEnd = Math.min(sweepCount, indScopeISamples.length);
+  for(let k=0; k<iEnd; k++){
+    const p = indScopeISamples[k];
+    if(k===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+
+  // Sweep cursor
+  if(iEnd > 0 && iEnd < indScopeISamples.length){
+    const p = indScopeISamples[iEnd-1];
+    ctx.fillStyle = '#ff8888';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#336633';
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('V', INDSCOPE_W*0.06 + 6, INDSCOPE_H*0.08 + 16);
+  ctx.fillStyle = '#663333';
+  ctx.fillText('I', INDSCOPE_W*0.06 + 20, INDSCOPE_H*0.08 + 16);
+
+  indScopeTexture.needsUpdate = true;
+}
+
+// ── Load powersupply.glb, register clips, grab node refs ────
+function loadInductor(){
+  log('── Step 09: powersupply.glb ──','head');
+  log('Fetching powersupply.glb …','pending');
+
+  gltfLoader.load(
+    GLTF_POWERSUPPLY,
+    (gltf)=>{
+      log('powersupply.glb parsed ✓','ok');
+
+      indModel = gltf.scene;
+      indModel.traverse(o=>{
+        if(o.isMesh){ o.castShadow=false; o.receiveShadow=true; }
+      });
+      inductorRoot.add(indModel);
+
+      // ── Named node refs for JS-level control ──
+      indKnob  = indModel.getObjectByName('knob');
+      indPlus  = indModel.getObjectByName('plus');
+      indMinus = indModel.getObjectByName('minus');
+
+      if(indKnob)  { indKnob.rotation.y = 0; log('  ✓ node ref: knob','ok'); }
+      else           log('  ✗ node "knob" not found in GLB','err');
+
+      if(indPlus)  { indPlus.visible = false;  log('  ✓ node ref: plus','ok'); }
+      else           log('  ✗ node "plus" not found in GLB','err');
+
+      if(indMinus) { indMinus.visible = false; log('  ✓ node ref: minus','ok'); }
+      else           log('  ✗ node "minus" not found in GLB','err');
+
+      // Remaining rig nodes (Armature001, switch, Supply,
+      // connector, Voltage_Knob, SwitchFlip) are driven entirely
+      // by their baked animation clips through indMixer below.
+
+      indSetupScopeScreen();
+
+      // ── AnimationMixer + clip registration ──
+      indMixer = new THREE.AnimationMixer(indModel);
+      const fixedStates = ['polarity','Action','Action_knob','AC_connector','DC_connector','knob_reset'];
+
+      if(gltf.animations && gltf.animations.length){
+        for(let i=0;i<gltf.animations.length;i++){
+          const clip = gltf.animations[i];
+          const action = indMixer.clipAction(clip);
+          indActions[clip.name] = action;
+          if(fixedStates.indexOf(clip.name) >= 0){
+            action.clampWhenFinished = true;
+            action.loop = THREE.LoopOnce;
+          }
+          log(`  ✓ clip registered: ${clip.name}`,'ok');
+        }
+        log(`${gltf.animations.length} animation clip(s) registered into actions{}`,'ind');
+      } else {
+        log('No animation clips found on powersupply.glb','info');
+      }
+
+      indModelReady = true;
+
+      buildInductorGeometry();
+      setupInductorPanel();
+
+      setBar(100);
+      summaryEl.textContent='Steps 1–10 complete · Inductor demo fully wired · Scope on TV 60.001';
+      setStatus('✅ Step 10 complete — Inductor demo live','#4eca8b');
+      log('▶ STEP 10 COMPLETE','ok');
+      log('powersupply.glb loaded, clips registered, coil fixed, scope on TV, labels resized','ok');
+
+      setTimeout(()=>{
+        hideAll();
+        document.getElementById('hint').textContent=
+          '🔊 Tap anything to start audio  |  Projects · About Me · Articles · Credits';
+      },3000);
+    },
+    (xhr)=>{ if(xhr.total) log(`powersupply.glb: ${Math.round((xhr.loaded/xhr.total)*100)}%`,'pending'); },
+    (err)=>{
+      log('powersupply.glb ERROR: '+(err?.message||err),'err');
+      log('Continuing without inductor demo — check ./models/powersupply.glb path','info');
+      setBar(100);
+      setStatus('⚠️ Inductor failed — shop OK','#f0c060');
+    }
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DUAL ANIMATION SYSTEMS + STATE TOGGLING
+// ─────────────────────────────────────────────────────────────
+
+let indFlow = false, indAcVolt = false, indLowF = true;
+let indIntensity = 0, indScale = 1;
+let indReqID = null, indReqAC = null;
+let indT = 0;
+let indParamsF = [30, 1, 1];
+
+let indVDisplay, indIDisplay, indIPlus, indIMinus;
+
+const indVoltageMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+const indChargeMaterial  = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+const indPlusMaterial    = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+const indMinusMaterial   = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
+
+const indButtonFlip = document.getElementById('ind-flip');
+const indButtonFlow = document.getElementById('ind-flow');
+const indFreqRow    = document.getElementById('freqRow');
+const indLowFBtn    = document.getElementById('ind-lowF');
+const indHighFBtn   = document.getElementById('ind-highF');
+
+// ── Clear indDisplayGroup children (DC mode only now) ────────
+function indClearDisplay(){
+  while(indDisplayGroup.children.length > 0){
+    indDisplayGroup.remove(indDisplayGroup.children[0]);
+  }
+}
+
+// ── DC mode: "Induced EMF" label + polarity indicators ──────
+function indMakeDisplay(){
+  indClearDisplay();
+  const u = INDUCTOR_UNIT;
+
+  indVDisplay = indMakeText(220*u, 130*u, -180*u, 50, indVoltageMaterial,
+    'Increasing Current', 'rgba(0,0,0,0)', 'rgba(0,05,05,1)');
+  inductorRoot.add(indVDisplay);
+
+  indIDisplay = indMakeText(-200*u, 50*u, 0, 35, indChargeMaterial,
+    'Induced EMF', 'rgba(0,0,0,0.1)', 'rgba(0,05,05,1)');
+  indIDisplay.rotation.y = 1.57;
+  indDisplayGroup.add(indIDisplay);
+
+  indIPlus = indMakeText(-200*u, 50*u, 140*u, 40, indPlusMaterial,
+    '+', 'rgba(0,0,0,0)', 'rgba(0,05,05,1)');
+  indIPlus.rotation.y = 1.57;
+  indIMinus = indMakeText(-200*u, 50*u, -140*u, 50, indMinusMaterial,
+    '-', 'rgba(0,0,0,0)', 'rgba(0,05,05,1)');
+  indIMinus.rotation.y = 1.57;
+  indDisplayGroup.add(indIMinus, indIPlus);
+
+  indDisplayGroup.children.forEach(c => c.visible = false);
+  indDisplayGroup.visible = true;
+}
+
+// ── AC mode: generate scope samples + start idle frame ───────
+function indMakeWaveform(X, F, factor){
+  indGenerateScopeSamples(X, F, factor);
+  indDrawScopeFrame(0, true);
+}
+
+// ── Oscilloscope sweep (hand-rolled rAF → redraws TV canvas) ─
+function indDrawWaveform(){
+  if(!indScopeISamples.length) return;
+  const count = indScopeISamples.length;
+  if(indT < count){
+    indDrawScopeFrame(indT, true);
+    indReqAC = requestAnimationFrame(indDrawWaveform);
+  } else {
+    indDrawScopeFrame(indT, true);
+    indT = 0;
+    indReqAC = requestAnimationFrame(indDrawWaveform);
+  }
+  indT++;
+}
+
+// ── DC "crank the knob" → induced EMF fade-in ────────────────
+function indInducedEmf(){
+  if(!indKnob) { indOnScaleAction(); return; }
+  if(indKnob.rotation.y > -5){
+    indKnob.rotation.y -= 0.01;
+    indReqID = requestAnimationFrame(indInducedEmf);
+  } else {
+    cancelAnimationFrame(indReqID);
+    indOnScaleAction();
+  }
+}
+function indOnScaleAction(){
+  if(indScale >= 0){
+    if(indBulbMaterial){ indBulbMaterial.emissiveIntensity = indIntensity; }
+    if(indBulbLight){ indBulbLight.intensity = indIntensity; }
+    indScale = indScale < 0 ? 0 : indScale;
+    indDisplayGroup.children.forEach(c => c.scale.set(indScale, indScale, indScale));
+    indReqID = requestAnimationFrame(indOnScaleAction);
+  } else {
+    indScale = 0;
+    cancelAnimationFrame(indReqID);
+  }
+  indScale -= 0.003;
+  indIntensity += 0.08;
+}
+
+// ── DC "release the knob" → EMF fade-out ──────────────────────
+function indOffEmf(){
+  if(!indKnob) { indOffScaleAction(); return; }
+  if(indKnob.rotation.y > -5.1 && indKnob.rotation.y < 0){
+    indKnob.rotation.y += 0.005;
+    indReqID = requestAnimationFrame(indOffEmf);
+  } else {
+    cancelAnimationFrame(indReqID);
+    indOffScaleAction();
+  }
+}
+function indOffScaleAction(){
+  if(indScale >= 0){
+    if(indBulbMaterial){ indBulbMaterial.emissiveIntensity = indIntensity; }
+    if(indBulbLight){ indBulbLight.intensity = indIntensity; }
+    indDisplayGroup.children.forEach(c => c.scale.set(indScale, indScale, indScale));
+    indReqID = requestAnimationFrame(indOffScaleAction);
+  } else {
+    indDisplayGroup.children.forEach(c => c.visible = false);
+    indIntensity = 0; indScale = 0;
+    if(indBulbMaterial){ indBulbMaterial.emissiveIntensity = 0; }
+    if(indBulbLight){ indBulbLight.intensity = 0; }
+    cancelAnimationFrame(indReqID);
+  }
+  indScale -= 0.005;
+  indIntensity -= 0.01;
+}
+
+// ── DC flow toggle: setTimeout-choreographed sequence ─────────
+function indFlowAction(){
+  cancelAnimationFrame(indReqID);
+  cancelAnimationFrame(indReqAC);
+
+  if(indFlow){
+    indButtonFlow.disabled = true;
+    indButtonFlow.style.cursor = 'default';
+    if(indActions['Action']) indActions['Action'].play();
+    indButtonFlow.textContent = 'ON';
+    indButtonFlow.className = 'flow-on';
+
+    setTimeout(()=>{
+      if(indIMinus) indIMinus.position.z = 140*INDUCTOR_UNIT;
+      if(indIPlus)  indIPlus.position.z  = -140*INDUCTOR_UNIT;
+      indInducedEmf();
+      indVoltageMaterial.map = new THREE.CanvasTexture(
+        indMakeLabelCanvas(50, 'Increasing Current', 'rgba(0,0,0,0)', 'rgba(05,55,05,1)'));
+    }, 1000);
+
+    setTimeout(()=>{
+      if(indPlus)  indPlus.visible = true;
+      if(indMinus) indMinus.visible = true;
+      indScale = 1;
+      indDisplayGroup.children.forEach(c => { c.visible = true; c.scale.set(1,1,1); });
+    }, 2500);
+
+    setTimeout(()=>{
+      indVoltageMaterial.map = new THREE.CanvasTexture(
+        indMakeLabelCanvas(50, 'Constant Current', 'rgba(0,0,0,0)', 'rgba(05,55,05,1)'));
+      indButtonFlow.disabled = false;
+      indButtonFlow.style.cursor = 'pointer';
+    }, 10000);
+
+  } else {
+    indScale = 1; indIntensity = 20;
+    indButtonFlow.disabled = true;
+    indButtonFlow.style.cursor = 'default';
+    indVoltageMaterial.map = new THREE.CanvasTexture(
+      indMakeLabelCanvas(50, 'Decreasing Current', 'rgba(0,0,0,0)', 'rgba(05,55,05,1)'));
+
+    setTimeout(()=>{
+      if(indIMinus) indIMinus.position.z = -140*INDUCTOR_UNIT;
+      if(indIPlus)  indIPlus.position.z  = 140*INDUCTOR_UNIT;
+      indOffEmf();
+    }, 1000);
+
+    setTimeout(()=>{
+      if(indPlus)  indPlus.visible = true;
+      if(indMinus) indMinus.visible = true;
+      indScale = 1;
+      indDisplayGroup.children.forEach(c => { c.visible = true; c.scale.set(1,1,1); });
+    }, 2500);
+
+    setTimeout(()=>{
+      if(indPlus)  indPlus.visible = false;
+      if(indMinus) indMinus.visible = false;
+    }, 1000);
+
+    setTimeout(()=>{
+      indButtonFlow.disabled = false;
+      indButtonFlow.style.cursor = 'pointer';
+      if(indActions['Action']) indActions['Action'].reset().stop();
+      indButtonFlip.disabled = false;
+      indButtonFlip.style.cursor = 'pointer';
+      indVoltageMaterial.map = new THREE.CanvasTexture(
+        indMakeLabelCanvas(50, 'No Current', 'rgba(0,0,0,0)', 'rgba(05,55,05,1)'));
+    }, 18000);
+
+    indButtonFlow.textContent = 'OFF';
+    indButtonFlow.className = 'flow-off';
+  }
+}
+
+// ── AC flow toggle: oscilloscope sweep on TV + rig clip ───────
+function indPeriodicAction(){
+  cancelAnimationFrame(indReqID);
+  cancelAnimationFrame(indReqAC);
+
+  if(indFlow){
+    if(indActions['Action']) indActions['Action'].play();
+    indButtonFlow.textContent = 'ON';
+    indButtonFlow.className = 'flow-on';
+    if(indKnob) indKnob.rotation.y = -1.4;
+    indIntensity = 20;
+    if(indBulbMaterial) indBulbMaterial.emissiveIntensity = 20;
+    if(indBulbLight)    indBulbLight.intensity = 20;
+    indT = 0;
+    indDrawWaveform();
+  } else {
+    if(indActions['Action']) indActions['Action'].reset().stop();
+    if(indKnob) indKnob.rotation.y = 0;
+    if(indPlus)  indPlus.visible = false;
+    if(indMinus) indMinus.visible = false;
+    indButtonFlow.textContent = 'OFF';
+    indButtonFlow.className = 'flow-off';
+
+    setTimeout(()=>{
+      indDrawScopeFrame(0, false);   // "NO SIGNAL" idle frame
+      indT = 0;
+      indIntensity = 0;
+      if(indBulbMaterial) indBulbMaterial.emissiveIntensity = 0;
+      if(indBulbLight)    indBulbLight.intensity = 0;
+    }, 500);
+
+    indMakeWaveform(indParamsF[0], indParamsF[1], indParamsF[2]);
+  }
+}
+
+// ── Master flow dispatcher (DC vs AC route differently) ───────
+function indChargeAction(){
+  if(indAcVolt){
+    indT = 0;
+    indMakeWaveform(indParamsF[0], indParamsF[1], indParamsF[2]);
+    indPeriodicAction();
+  } else {
+    indMakeDisplay();
+    indFlowAction();
+    indButtonFlip.disabled = true;
+    indButtonFlip.style.cursor = 'default';
+  }
+}
+
+// ── Frequency selection (AC mode only) ────────────────────────
+function indFreqSelect(){
+  if(indLowF){
+    indParamsF = [30, 1, 1];
+    indLowFBtn.style.backgroundColor = 'rgb(26,164,26)';
+    indHighFBtn.style.backgroundColor = 'rgb(164,26,26)';
+  } else {
+    indParamsF = [15, 0.67, 3];
+    indHighFBtn.style.backgroundColor = 'rgb(26,164,26)';
+    indLowFBtn.style.backgroundColor = 'rgb(164,26,26)';
+  }
+  // Regenerate live if AC mode is already active
+  if(indAcVolt) indGenerateScopeSamples(indParamsF[0], indParamsF[1], indParamsF[2]);
+}
+
+// ── Wire up the control panel UI ──────────────────────────────
+function setupInductorPanel(){
+  const panel = document.getElementById('inductor-panel');
+  panel.classList.add('visible');
+
+  indButtonFlow.addEventListener('click', ()=>{
+    indFlow = !indFlow;
+    indChargeAction();
+    log(`⚡ flow → ${indFlow}`, 'ind');
+  });
+
+  indButtonFlip.addEventListener('click', ()=>{
+    indAcVolt = !indAcVolt;
+    indFlow = false;
+    if(indActions['Action']) indActions['Action'].reset().stop();
+    if(indKnob) indKnob.rotation.y = 0;
+    indFreqSelect();
+    indButtonFlow.textContent = 'OFF';
+    indButtonFlow.className = 'flow-off';
+
+    if(indAcVolt){
+      indFreqRow.classList.add('visible');
+      if(indActions['DC_connector']) indActions['DC_connector'].reset().stop();
+      if(indActions['AC_connector']) { indActions['AC_connector'].setDuration(2).play(); }
+      indButtonFlip.textContent = 'AC VOLTAGE';
+      indDrawScopeFrame(0, false); // idle scope frame when entering AC mode
+    } else {
+      indFreqRow.classList.remove('visible');
+      if(indActions['AC_connector']) indActions['AC_connector'].reset().stop();
+      if(indActions['DC_connector']) { indActions['DC_connector'].setDuration(2).play(); }
+      indButtonFlip.textContent = 'DC VOLTAGE';
+    }
+    log(`⚡ acVolt → ${indAcVolt}`, 'ind');
+  });
+
+  indLowFBtn.addEventListener('click', ()=>{ indLowF = true;  indFreqSelect(); });
+  indHighFBtn.addEventListener('click', ()=>{ indLowF = false; indFreqSelect(); });
+
+  indFreqSelect();
+  log('Inductor control panel wired — DC/AC toggle, flow, frequency','ok');
+}
+
+// ── SPOTLIGHT TWEENS ─────────────────────────────────────────
+function tweenSpot(l){
+  new TWEEN.Tween(l).to({angle:(Math.random()*0.7)+0.1,penumbra:Math.random()+1},Math.random()*3000+2000).easing(TWEEN.Easing.Quadratic.Out).start();
+  const bY=l.position.y;
+  new TWEEN.Tween(l.position).to({x:(Math.random()*16)-8,y:bY+(Math.random()*4)-2,z:(Math.random()*16)-8},Math.random()*3000+2000).easing(TWEEN.Easing.Quadratic.Out).start();
+}
+function updateTweens(){tweenSpot(spotLight1);tweenSpot(spotLight2);tweenSpot(spotLight3);setTimeout(updateTweens,5000);}
+
+// ── COORD DEBUG ──────────────────────────────────────────────
+let showCoords=true;
+coordEl.addEventListener('click',()=>{showCoords=!showCoords;coordEl.style.opacity=showCoords?'1':'0.2';});
+
+// ── RENDER LOOP ───────────────────────────────────────────────
+const clock=new THREE.Clock();
+(function tick(){
+  requestAnimationFrame(tick);
+  const delta=clock.getDelta();
+  const elapsed=clock.getElapsedTime();
+
+  holoUniforms.uTime.value = elapsed;
+
+  if(window._holoScene){
+    window._holoScene.rotation.y = elapsed * 0.4;
+    window._holoScene.position.y = 7.8 + Math.sin(elapsed * 1.2) * 0.08;
+  }
+
+  // GLTF AnimationMixer for the inductor rig — advances every
+  // frame in parallel with the hand-rolled rAF loops above
+  if(indModelReady && indMixer) indMixer.update(delta);
+
+  TWEEN.update(); controls.update();
+  lh1.update(); lh2.update(); lh3.update();
+  renderer.render(scene,camera);
+
+  if(showCoords){
+    const p=camera.position,t=controls.target;
+    coordEl.innerHTML=
+      `<span style="color:#adf">cam</span> ${p.x.toFixed(2)} ${p.y.toFixed(2)} ${p.z.toFixed(2)}<br>`+
+      `<span style="color:#fa0">tgt</span> ${t.x.toFixed(2)} ${t.y.toFixed(2)} ${t.z.toFixed(2)}<br>`+
+      `<span style="color:#555">${currentMode}</span>`;
+  }
+})();
+
+updateTweens();
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+
+</html>
+

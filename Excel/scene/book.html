@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scrolls</title>
+
+<!-- Font Awesome (icons) -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+/>
+
+<style>
+  /* ============ base / reset (from index.css) ============ */
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+
+  /* ============ App.css ============ */
+  :root {
+    --page-count: 23;
+    --page-index: 0;
+    --page-scroll: 21.5;
+  }
+
+  #book-animation {
+    height: calc(((var(--page-count) + 2) * var(--page-scroll) * 1vh));
+  }
+
+  .book {
+    position: fixed;
+    height: 85vmin;
+    width: 48vmin;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%);
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
+
+  .book.scroll {
+    right: 50vw;
+    left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+  }
+
+  .book.page {
+    transform-style: preserve-3d;
+    position: absolute;
+    left: 1px;
+    top: 50%;
+    transform: translate(0, -50%);
+    transform-origin: 0% 50%;
+    height: 94%;
+    width: 94%;
+    border-left: 1px solid darkgrey;
+    border-radius: 5%;
+    /* z-index will be set inline per page via data-index, same as React's calc() */
+  }
+
+  .book.cover {
+    border-radius: 5%;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 0;
+  }
+
+  .page.half {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  .page.half.front {
+    border-radius: 5%;
+  }
+
+  .page.half.back {
+    transform: rotateY(180deg) translateZ(1px);
+    border-radius: 5%;
+  }
+
+  .content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5%;
+    padding: 20px;
+  }
+
+  .last-page {
+    height: 100%;
+  }
+
+  .content > ul {
+    text-align: left;
+  }
+
+  .scroll-icon {
+    display: inline;
+    margin-bottom: 20px;
+  }
+
+  .lock-key-icon {
+    display: inline-block;
+    margin-bottom: 15px;
+  }
+
+  .scroll-number {
+    padding: 0px 5px;
+  }
+
+  .link {
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+  }
+
+  .scroll-down {
+    padding-top: 30px;
+  }
+
+  /* NOTE: original project used local images (./images/blue.jpeg, ./images/purple.jpeg).
+     Those files aren't available in this standalone build, so we substitute
+     CSS gradients as stand-ins. Swap the `background` in .bg-blue / .bg-purple
+     for `background-image: url("images/blue.jpeg");` etc. once you have the assets. */
+  .bg-blue {
+    background: linear-gradient(135deg, #3a6ea5, #1b3a5c);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .bg-purple {
+    background: linear-gradient(135deg, #7b4397, #3a1c5c);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  /* text is white-ish so it reads on the gradient placeholders */
+  .content, .content h1, .content h3, .content h6, .content p, .content li {
+    color: #fff;
+  }
+  .content a.link {
+    color: #fff;
+    text-decoration: underline;
+  }
+
+  /* icon color helper (React used color="#00a86b" inline) */
+  .icon-green {
+    color: #00a86b;
+  }
+
+  /* Remove content if screen's height is < 400px */
+  @media only screen and (max-height: 400px) {
+    .content {
+      display: none;
+    }
+  }
+
+  /* Too much info for smaller screens - hide some info */
+  @media only screen and (max-width: 650px) {
+    li.small-screen {
+      display: none;
+    }
+    .content {
+      padding: 1px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<main id="book-animation">
+
+  <div class="scroll book">
+    <div class="content">
+      <h3>Scroll down to read the book</h3>
+    </div>
+  </div>
+
+  <div class="book" id="book">
+
+    <!-- ===================== SET 1 (Set1.jsx) — pages 1-2 ===================== -->
+    <div class="page book cover front book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-3x"></i>
+            <i class="fa-solid fa-scroll fa-3x fa-flip-horizontal"></i>
+          </span>
+          <h1>Scrolls</h1>
+          <h3>A summary of Og Mandino's "The Greatest Salesman in the World"</h3>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <p>
+            This book animation is adapted from
+            <a href="https://delilah-career-storybook.vercel.app/" target="_blank" class="link">Delilah's project</a>
+          </p>
+          <p class="scroll-down">Scroll down to read the book</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 2 (Set2.jsx) — pages 3-4 ===================== -->
+    <div class="page book book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <h3>Unlock the wisdom of 10 ancient scrolls handed down for thousands of years</h3>
+          <span class="lock-key-icon">
+            <i class="fa-solid fa-lock fa-2x" style="margin-right:-6px;"></i>
+            <i class="fa-solid fa-key fa-2x"></i>
+            <i class="fa-solid fa-unlock-alt fa-2x" style="margin-left:-6px;"></i>
+          </span>
+          <i class="fa-solid fa-door-open fa-4x"></i>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">1</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>Today I begin a new life</h3>
+          <i class="fa-solid fa-arrows-rotate fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 3 (Set3.jsx) — pages 5-6 ===================== -->
+    <div class="page book book-page bg-blue">
+      <div class="page half front">
+        <div class="content">
+          <i class="fa-solid fa-arrows-rotate fa-3x icon-green"></i>
+          <ul>
+            <li>The only difference between those who have failed and those who have succeeded lies in the difference of their habits.</li>
+            <li>Good habits are the key to all success.</li>
+            <li class="small-screen">Bad habits are the unlocked door to failure.</li>
+            <li class="small-screen">Thus, I will form good habits and become their slave.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">2</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will greet this day with love in my heart</h3>
+          <i class="fa-solid fa-heart fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 4 (Set4.jsx) — pages 7-8 ===================== -->
+    <div class="page book book-page bg-blue">
+      <div class="page half front">
+        <div class="content">
+          <i class="fa-solid fa-heart fa-3x icon-green"></i>
+          <ul>
+            <li>I will look on all things with love.</li>
+            <li>I will love the ambitious for they can inspire me.</li>
+            <li>I will love the failures for they teach me.</li>
+            <li class="small-screen">Love is my shield to repulse the arrows of hate and the spears of anger.</li>
+            <li class="small-screen">And most of all I will love myself. For when I do I will zealously inspect all things which enter my body, my mind, my soul, and my heart.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-blue">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">3</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will persist until I succeed</h3>
+          <i class="fa-solid fa-hand-fist fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 5 (Set5.jsx) — pages 9-10 ===================== -->
+    <div class="page book book-page bg-blue">
+      <div class="page half front">
+        <div class="content">
+          <i class="fa-solid fa-hand-fist fa-3x icon-green"></i>
+          <ul>
+            <li>Failure I may still encounter at the thousandth step, yet success hides behind the next bend in the road.</li>
+            <li>Always will I take another step.</li>
+            <li class="small-screen">I must fail often to succeed only once.</li>
+            <li class="small-screen">When each day is ended, not regarding whether it has been a success of a failure, I will attempt to achieve one more sale.</li>
+            <li class="small-screen">Never will I allow any day to end in failure.</li>
+            <li class="small-screen">Nor will I allow yesterday's success to lull me into today's complacency.</li>
+            <li class="small-screen">If I persist long enough I will win.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">4</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I am nature's greatest miracle</h3>
+          <i class="fa-solid fa-paw fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 6 (Set6.jsx) — pages 11-12 ===================== -->
+    <div class="page book book-page bg-blue">
+      <div class="page half front">
+        <div class="content">
+          <i class="fa-solid fa-paw fa-3x icon-green"></i>
+          <ul>
+            <li class="small-screen">All men are my brothers yet I am different from each.</li>
+            <li>I am a unique creature.</li>
+            <li>Henceforth, I will capitalize on this difference for it is an asset to be promoted to the fullest.</li>
+            <li class="small-screen">I will place my uniqueness on display in the market place.</li>
+            <li class="small-screen">I will begin now to accent my differences; hide my similarities.</li>
+            <li class="small-screen">I will win for I am unique.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">5</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will live this day as if it is my last</h3>
+          <i class="fa-solid fa-clock fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 7 (Set7.jsx) — pages 13-14 ===================== -->
+    <div class="page book book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <i class="fa-solid fa-clock fa-3x icon-green"></i>
+          <ul>
+            <li>I will avoid with fury the killers of time.</li>
+            <li>Procrastination I will destroy with action.</li>
+            <li>The duties of today I shall fulfill today.</li>
+            <li class="small-screen">This day I will make the best day of my life.</li>
+            <li class="small-screen">I will make every hour count and each minute I will trade only for something of value.</li>
+            <li class="small-screen">Each minute of today will be more fruitful than hours of yesterday.</li>
+            <li class="small-screen">My last must be my best.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">6</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will be the master of my emotions</h3>
+          <i class="fa-solid fa-face-smile fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 8 (Set8.jsx) — pages 15-16 ===================== -->
+    <div class="page book book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <i class="fa-solid fa-face-smile fa-3x icon-green"></i>
+          <ul>
+            <li class="small-screen">Each day I awaken with moods that have changed from yesterday.</li>
+            <li>Trees and plants depend on the weather to flourish but I make my own weather.</li>
+            <li>Weak is he who permits his thoughts to control his actions; strong is he who forces his actions to control his thoughts.</li>
+            <li class="small-screen">I am prepared to control whatever personality awakes in me each day.</li>
+            <li class="small-screen">I will master my moods through positive action and when I master my moods I will control my destiny.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">7</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will laugh at the world</h3>
+          <i class="fa-solid fa-face-grin-tears fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 9 (Set9.jsx) — pages 17-18 ===================== -->
+    <div class="page book book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <i class="fa-solid fa-face-grin-tears fa-3x icon-green"></i>
+          <ul>
+            <li class="small-screen">How can I laugh when confronted with man or deed which offends me?</li>
+            <li>Whenever good humor threatens to depart from me, say 'This too shall pass'.</li>
+            <li>For all worldly things shall indeed pass.</li>
+            <li>And with laughter all things will be reduced to their proper size.</li>
+            <li class="small-screen">Each day will be triumphant only when my smiles bring forth smiles from others.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-blue">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">8</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will multiply my value a hundredfold</h3>
+          <i class="fa-solid fa-chart-line fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 10 (Set10.jsx) — pages 19-20 ===================== -->
+    <div class="page book book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <i class="fa-solid fa-chart-line fa-3x icon-green"></i>
+          <ul>
+            <li class="small-screen">I will not commit not the terrible crime of aiming too low.</li>
+            <li class="small-screen">I will do the work that a failure will not do.</li>
+            <li class="small-screen">I will always let my reach exceed my grasp.</li>
+            <li class="small-screen">I will never be content with my performance in the market.</li>
+            <li>I will always raise my goals as soon as they are attained.</li>
+            <li>I will always strive to make the next hour better than this one.</li>
+            <li>I will always announce my goals to the world.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">9</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will act now</h3>
+          <i class="fa-solid fa-person-running fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SET 11 (Set11.jsx) — pages 21-22 ===================== -->
+    <div class="page book book-page">
+      <div class="page half front bg-blue">
+        <div class="content">
+          <i class="fa-solid fa-person-running fa-3x icon-green"></i>
+          <ul>
+            <li>My dreams are worthless, my plans are dust, my goals are impossible.</li>
+            <li class="small-screen">All are of no value unless they are followed by action.</li>
+            <li class="small-screen">Let me act now even though my actions may not bring happiness or success for it is better to act and fail than not to act and flounder.</li>
+            <li>Only action determines my value in the market place and to multiply my value I will my actions.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page half back bg-purple">
+        <div class="content">
+          <span class="scroll-icon">
+            <i class="fa-solid fa-scroll fa-1x"></i>
+            <span class="scroll-number">10</span>
+            <i class="fa-solid fa-scroll fa-1x fa-flip-horizontal"></i>
+          </span>
+          <h3>I will pray for guidance</h3>
+          <i class="fa-solid fa-brain fa-3x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== Back of book (App.js final cover) — page 23 ===================== -->
+    <div class="page book cover back book-page bg-blue">
+      <div class="content last-page">
+        <i class="fa-solid fa-brain fa-3x"></i>
+        <ul>
+          <li>Ask for guidance above all things.</li>
+          <li>Guide me so that I may acquire ability equal to my opportunities.</li>
+          <li class="small-screen">Teach me how to hunt with words and prosper with love so that I may be a lion among men and an eagle in the market place.</li>
+          <li class="small-screen">Bathe me in good habits that the bad ones may drown.</li>
+          <li>Discipline me in the habit of trying and trying again.</li>
+          <li class="small-screen">Suffer me to know that all things shall pass; yet help me to count my blessings today.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- GSAP + ScrollTrigger via CDN (UMD build, no bundler/npm needed) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script>
+  // Same logic as the React App.js useEffect, translated 1:1
+  gsap.registerPlugin(ScrollTrigger);
+
+  const book = Array.from(document.getElementsByClassName("book-page"));
+
+  book.forEach((page, index) => {
+    gsap.set(page, { z: -index * 1 });
+
+    gsap.to(page, {
+      rotateY: `-=${180 - index / 2}`,
+      scrollTrigger: {
+        scrub: 1,
+        start: () => index * (window.innerHeight * 0.4),
+        end: () => (index + 1) * (window.innerHeight * 0.4),
+      },
+    });
+
+    gsap.to(page, {
+      z: index,
+      scrollTrigger: {
+        scrub: 1,
+        start: () => index * (window.innerHeight * 0.4),
+        end: () => (index + 0.5) * (window.innerHeight * 0.4),
+      },
+    });
+
+    // Preserve the React z-index stacking rule:
+    // z-index: calc(((var(--page-count) + 2) - var(--page-index)) * 2)
+    const pageCount = 23;
+    page.style.zIndex = (pageCount + 2 - index) * 2;
+  });
+</script>
+
+</body>
+</html>
