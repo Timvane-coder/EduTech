@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scrolls</title>
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #0c0c0f;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* ============ scroll-height driver ============
+     Same idea as the CSS version: an invisible tall element whose height
+     determines how much scroll distance the whole book animation gets.
+     PAGE_COUNT / PAGE_SCROLL below in the script must match these numbers. */
+  #book-animation {
+    height: calc((12 + 2) * 21.5 * 1vh);
+    position: relative;
+  }
+
+  /* Canvas is fixed full-viewport; the book is drawn inside it in 3D. */
+  #book-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+
+  /* intro overlay, matches the ".book.scroll" hint text from the CSS version */
+  #scroll-hint {
+    position: fixed;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    text-align: center;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 5;
+    font-size: 1.1rem;
+    transition: opacity 0.4s ease;
+  }
+
+  #loading {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0c0c0f;
+    color: #cfcfcf;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    z-index: 50;
+    transition: opacity 0.5s ease;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="loading">Loading book…</div>
+<div id="scroll-hint">Scroll down to read the book</div>
+
+<main id="book-animation">
+  <canvas id="book-canvas"></canvas>
+</main>
+
+<!-- ============================================================
+     Three.js + KTX2Loader (for the compressed textures) + GSAP
+     via CDN import map — no npm install needed.
+     ============================================================ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script type="module">
+import * as THREE from "three";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* =====================================================================
+   CONFIG — matches the original CSS version's numbers 1:1
+   ===================================================================== */
+const PAGE_COUNT_CSS_VAR = 12;   // number of flip-pages (was 23 in old --page-count,
+                                  // but that constant was a scroll-height multiplier,
+                                  // not a literal page count — 12 real flip-pages here)
+const PAGE_SCROLL = 21.5;        // vh per page, same as --page-scroll
+const SCROLL_SEGMENT = 0.4;      // same 0.4 * innerHeight step used in the old GSAP code
+
+/* =====================================================================
+   KTX2 FILE MAP
+   ---------------------------------------------------------------------
+   You listed these files:
+     frontCover.ktx2  page1.ktx2  page2.ktx2  page3.ktx2  page4.ktx2
+     page5.ktx2       page6.ktx2 page7.ktx2  page8.ktx2  page9.ktx2
+     backCover.ktx2
+
+   That's 11 textures. The book has 12 flip-pages, each with a FRONT and
+   BACK face = 24 faces total. Your file list clearly covers the two
+   outer cover faces (frontCover, backCover) plus 9 inner content faces
+   (page1..page9) — which doesn't yet cover all 22 inner faces.
+
+   Until the full set arrives, each face below has an explicit ktx2 path
+   assigned where a file name was given, and "null" left as a clearly
+   marked placeholder (rendered as a colored fallback plane) everywhere
+   else. Once you upload the rest of the pages (or tell me the correct
+   mapping), update this table — nothing else in the script needs to
+   change.
+   ===================================================================== */
+const KTX2_BASE_PATH = "./textures/"; // put your .ktx2 files in a /textures folder next to this html
+
+const FACES = [
+  // { page: 0, face: "front" | "back", file: "xxx.ktx2" | null, fallback: "#hex" }
+  { page: 0,  face: "front", file: "frontCover.ktx2", fallback: "#1b3a5c" },
+  { page: 0,  face: "back",  file: "page1.ktx2",      fallback: "#3a1c5c" },
+
+  { page: 1,  face: "front", file: "page2.ktx2",      fallback: "#1b3a5c" },
+  { page: 1,  face: "back",  file: "page3.ktx2",      fallback: "#3a1c5c" },
+
+  { page: 2,  face: "front", file: "page4.ktx2",      fallback: "#1b3a5c" },
+  { page: 2,  face: "back",  file: "page5.ktx2",      fallback: "#3a1c5c" },
+
+  { page: 3,  face: "front", file: "page6.ktx2",      fallback: "#1b3a5c" },
+  { page: 3,  face: "back",  file: "page7.ktx2",      fallback: "#1b3a5c" },
+
+  { page: 4,  face: "front", file: "page8.ktx2",      fallback: "#1b3a5c" },
+  { page: 4,  face: "back",  file: "page9.ktx2",      fallback: "#3a1c5c" },
+
+  // Pages 5-10 (6 pages / 12 faces): no filenames given yet -> placeholders
+  { page: 5,  face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 5,  face: "back",  file: null,              fallback: "#3a1c5c" },
+
+  { page: 6,  face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 6,  face: "back",  file: null,              fallback: "#3a1c5c" },
+
+  { page: 7,  face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 7,  face: "back",  file: null,              fallback: "#3a1c5c" },
+
+  { page: 8,  face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 8,  face: "back",  file: null,              fallback: "#1b3a5c" },
+
+  { page: 9,  face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 9,  face: "back",  file: null,              fallback: "#3a1c5c" },
+
+  { page: 10, face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 10, face: "back",  file: null,              fallback: "#3a1c5c" },
+
+  // Page 11 = the back cover of the whole book
+  { page: 11, face: "front", file: null,              fallback: "#1b3a5c" },
+  { page: 11, face: "back",  file: "backCover.ktx2",  fallback: "#1b3a5c" },
+];
+
+const PAGE_COUNT = 12;
+
+/* =====================================================================
+   RENDERER / SCENE / CAMERA
+   ===================================================================== */
+const canvas = document.getElementById("book-canvas");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  35,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+
+// Camera looks straight down -Z at the book, matching the CSS version's
+// book sitting centered at top:50%/left:50% with no rotation.
+const CAMERA_Z = 9;
+camera.position.set(0, 0, CAMERA_Z);
+camera.lookAt(0, 0, 0);
+
+/* =====================================================================
+   SIZE MATCHING — reproduce the original CSS book's size:
+     .book { height: 85vmin; width: 48vmin; top: 50%; left: 50%; }
+   `vmin` = 1% of the smaller viewport dimension. At a fixed camera
+   distance CAMERA_Z with vertical FOV `camera.fov`, the visible height
+   in world units at z=0 is:
+     visibleHeight = 2 * CAMERA_Z * tan(fov/2)
+   1vmin (in world units) is then visibleHeight/100 IF the viewport is
+   taller than wide, otherwise we derive it from the width instead —
+   exactly mirroring how CSS vmin picks the smaller dimension.
+   This keeps the book's on-screen size/position identical to the
+   original across window sizes, and recalculates on resize. ===================================================================== */
+function getVminInWorldUnits() {
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const visibleHeight = 2 * Math.tan(vFOV / 2) * CAMERA_Z;
+  const visibleWidth = visibleHeight * camera.aspect;
+  const vminPx = Math.min(window.innerWidth, window.innerHeight);
+  // world units per 1% of the smaller viewport dimension
+  const smallerVisible = Math.min(visibleHeight, visibleWidth);
+  return smallerVisible / 100;
+}
+
+let vmin = getVminInWorldUnits();
+
+// soft key + fill light so the pages read as 3D rather than flat-lit
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+keyLight.position.set(3, 4, 5);
+scene.add(keyLight);
+
+const fillLight = new THREE.AmbientLight(0xffffff, 0.55);
+scene.add(fillLight);
+
+// ground contact shadow, a simple dark translucent disc under the book.
+// Sized/positioned relative to vmin so it scales with the book on resize.
+const shadowGeo = new THREE.CircleGeometry(1, 48);
+const shadowMat = new THREE.MeshBasicMaterial({
+  color: 0x000000,
+  transparent: true,
+  opacity: 0.35,
+  depthWrite: false,
+});
+const groundShadow = new THREE.Mesh(shadowGeo, shadowMat);
+groundShadow.rotation.x = -Math.PI / 2;
+scene.add(groundShadow);
+
+function updateGroundShadow() {
+  const radius = 30 * vmin;
+  groundShadow.scale.set(radius, radius, 1);
+  groundShadow.position.y = -42.5 * vmin - 5 * vmin; // just below the book's bottom edge (half of 85vmin + margin)
+}
+
+/* =====================================================================
+   KTX2 LOADER
+   ===================================================================== */
+const ktx2Loader = new KTX2Loader()
+  .setTranscoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/basis/")
+  .detectSupport(renderer);
+
+function makeFallbackTexture(hexColor) {
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 724; // roughly matches a book-page aspect ratio (48:85 from the old CSS)
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = hexColor;
+  ctx.fillRect(0, 0, c.width, c.height);
+  // subtle vignette so placeholders don't look completely flat
+  const grad = ctx.createRadialGradient(
+    c.width / 2, c.height / 2, c.height * 0.1,
+    c.width / 2, c.height / 2, c.height * 0.7
+  );
+  grad.addColorStop(0, "rgba(255,255,255,0.06)");
+  grad.addColorStop(1, "rgba(0,0,0,0.25)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "28px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("(ktx2 placeholder)", c.width / 2, c.height - 24);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+/* returns a Promise<THREE.Texture>. Tries in order:
+     1. the .ktx2 file via KTX2Loader
+     2. a same-name .png file (e.g. frontCover.png) via plain TextureLoader
+     3. a generated colored placeholder canvas texture
+   This lets you drop in ordinary PNGs as a stand-in for any page whose
+   .ktx2 isn't ready yet — just name it the same as the ktx2 filename
+   but with a .png extension, in the same /textures folder. */
+const pngLoader = new THREE.TextureLoader();
+
+function loadPngFallback(file, fallback) {
+  return new Promise((resolve) => {
+    if (!file) {
+      resolve(makeFallbackTexture(fallback));
+      return;
+    }
+    const pngName = KTX2_BASE_PATH + file.replace(/\.ktx2$/i, ".png");
+    pngLoader.load(
+      pngName,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        resolve(texture);
+      },
+      undefined,
+      () => {
+        console.warn("PNG fallback also missing for", file, "(looked for", pngName, ") — using color placeholder.");
+        resolve(makeFallbackTexture(fallback));
+      }
+    );
+  });
+}
+
+function loadFaceTexture({ file, fallback }) {
+  return new Promise((resolve) => {
+    if (!file) {
+      resolve(makeFallbackTexture(fallback));
+      return;
+    }
+    ktx2Loader.load(
+      KTX2_BASE_PATH + file,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        resolve(texture);
+      },
+      undefined,
+      (err) => {
+        console.warn("KTX2 missing/failed for", file, "— trying PNG fallback.", err);
+        resolve(loadPngFallback(file, fallback));
+      }
+    );
+  });
+}
+
+/* =====================================================================
+   BUILD THE BOOK
+   Each "page" is a THREE.Group (the hinge) containing a thin box mesh
+   (front material, back material, thin edge material) so it has real
+   thickness instead of a flat double-sided plane.
+
+   Size matches the original CSS book exactly: height 85vmin, width 48vmin.
+   PAGE_THICKNESS is expressed as a fraction of vmin too, so it scales
+   consistently with the rest of the book on resize.
+   ===================================================================== */
+let PAGE_WIDTH = 48 * vmin;
+let PAGE_HEIGHT = 85 * vmin;
+let PAGE_THICKNESS = 0.9 * vmin;
+
+const bookRoot = new THREE.Group();
+scene.add(bookRoot);
+
+// spine sized to exactly span all page thicknesses stacked together,
+// flush against the hinge line (no gap) — see rebuildBookGeometry()
+const spineGeo = new THREE.BoxGeometry(1, 1, 1); // real size set in rebuildBookGeometry()
+const spineMat = new THREE.MeshStandardMaterial({ color: 0x141419, roughness: 0.8 });
+const spine = new THREE.Mesh(spineGeo, spineMat);
+bookRoot.add(spine);
+
+const pageGroups = [];      // THREE.Group per page (hinge pivot)
+const pageMeshes = [];      // Mesh per page, so we can rebuild geometry on resize
+const pageMaterials = [];   // { front, back } materials per page, for texture assignment
+
+const STACK_GAP = 0.02;     // world-unit-independent multiplier (of PAGE_THICKNESS) between stacked pages
+
+function rebuildBookGeometry() {
+  // total depth spanned by all pages stacked back-to-back, flush, no daylight between them
+  const totalDepth = PAGE_COUNT * PAGE_THICKNESS * (1 + STACK_GAP);
+
+  // spine sits exactly behind the hinge line, spanning the full stack depth
+  spine.geometry.dispose();
+  spine.geometry = new THREE.BoxGeometry(PAGE_THICKNESS * 1.4, PAGE_HEIGHT + PAGE_THICKNESS, totalDepth);
+  spine.position.set(0, 0, -totalDepth / 2 + PAGE_THICKNESS / 2);
+
+  pageGroups.forEach((hinge, i) => {
+    const mesh = pageMeshes[i];
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.BoxGeometry(PAGE_WIDTH, PAGE_HEIGHT, PAGE_THICKNESS);
+    // mesh's own left edge sits AT the hinge origin (flush, no offset gap)
+    mesh.position.x = PAGE_WIDTH / 2;
+
+    // hinge pivot sits flush against the spine face, stacked toward -Z with
+    // zero daylight between consecutive pages
+    hinge.position.set(0, 0, -i * (PAGE_THICKNESS * (1 + STACK_GAP)));
+  });
+
+  // whole book centered at world origin (which the camera looks straight at,
+  // matching the CSS book's top:50%/left:50% centered position)
+  bookRoot.position.set(-PAGE_WIDTH / 2 + PAGE_THICKNESS * 0.7, 0, totalDepth / 2 - PAGE_THICKNESS / 2);
+}
+
+async function buildPages() {
+  for (let i = 0; i < PAGE_COUNT; i++) {
+    const facesForPage = FACES.filter((f) => f.page === i);
+    const frontDef = facesForPage.find((f) => f.face === "front");
+    const backDef = facesForPage.find((f) => f.face === "back");
+
+    const [frontTex, backTex] = await Promise.all([
+      loadFaceTexture(frontDef),
+      loadFaceTexture(backDef),
+    ]);
+
+    const frontMat = new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.75 });
+    const backMat = new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.75 });
+    const edgeMat = new THREE.MeshStandardMaterial({ color: 0xcfc7b4, roughness: 0.9 });
+
+    // BoxGeometry face order: +x, -x, +y, -y, +z (front), -z (back)
+    const geo = new THREE.BoxGeometry(PAGE_WIDTH, PAGE_HEIGHT, PAGE_THICKNESS);
+    const materials = [edgeMat, edgeMat, edgeMat, edgeMat, frontMat, backMat];
+    const pageMesh = new THREE.Mesh(geo, materials);
+    pageMesh.position.x = PAGE_WIDTH / 2;
+
+    const hinge = new THREE.Group();
+    hinge.add(pageMesh);
+
+    bookRoot.add(hinge);
+    pageGroups.push(hinge);
+    pageMeshes.push(pageMesh);
+    pageMaterials.push({ front: frontMat, back: backMat });
+  }
+
+  rebuildBookGeometry();
+  updateGroundShadow();
+
+  document.getElementById("loading").style.opacity = "0";
+  setTimeout(() => document.getElementById("loading").remove(), 600);
+
+  setupScrollAnimation();
+  animate();
+}
+
+/* =====================================================================
+   SCROLL-DRIVEN FLIP — same math/timing as the original GSAP code:
+     rotateY: `-=${180 - index / 2}`   over a scroll window of
+     0.4 * innerHeight per page, staggered by index.
+   Here we animate hinge.rotation.y (radians) instead of a CSS rotateY,
+   and drive it with the identical ScrollTrigger start/end windows.
+   ===================================================================== */
+function setupScrollAnimation() {
+  pageGroups.forEach((hinge, index) => {
+    const rotationDeg = -(180 - index / 2); // same formula as before
+    const rotationRad = THREE.MathUtils.degToRad(rotationDeg);
+
+    gsap.to(hinge.rotation, {
+      y: rotationRad,
+      ease: "none",
+      scrollTrigger: {
+        scrub: 1,
+        start: () => index * (window.innerHeight * SCROLL_SEGMENT),
+        end: () => (index + 1) * (window.innerHeight * SCROLL_SEGMENT),
+      },
+    });
+
+    // subtle forward lift as each page turns, echoing the old `z: index` tween
+    const restZ = -index * (PAGE_THICKNESS * (1 + STACK_GAP));
+    gsap.to(hinge.position, {
+      z: restZ + PAGE_THICKNESS * 8,
+      ease: "none",
+      scrollTrigger: {
+        scrub: 1,
+        start: () => index * (window.innerHeight * SCROLL_SEGMENT),
+        end: () => (index + 0.5) * (window.innerHeight * SCROLL_SEGMENT),
+      },
+    });
+  });
+
+  // fade the scroll hint out once the user starts scrolling
+  gsap.to("#scroll-hint", {
+    opacity: 0,
+    scrollTrigger: {
+      trigger: "#book-animation",
+      start: "top top",
+      end: "+=200",
+      scrub: true,
+    },
+  });
+
+  ScrollTrigger.refresh();
+}
+
+/* =====================================================================
+   RENDER LOOP + RESIZE
+   ===================================================================== */
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  vmin = getVminInWorldUnits();
+  PAGE_WIDTH = 48 * vmin;
+  PAGE_HEIGHT = 85 * vmin;
+  PAGE_THICKNESS = 0.9 * vmin;
+  rebuildBookGeometry();
+  updateGroundShadow();
+
+  ScrollTrigger.refresh();
+});
+
+buildPages();
+</script>
+
+</body>
+</html>
