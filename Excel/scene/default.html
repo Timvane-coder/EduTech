@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 01 — GLTF Loader | Ramen Shop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; height: 100vh; width: 100vw; overflow: hidden; }
+    canvas { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 44px;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(8px);
+      border-bottom: 1px solid #2a2a3a;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px; z-index: 200;
+    }
+    #topbar .title { font-size: 11px; letter-spacing: 2px; color: #ff7f00; text-transform: uppercase; }
+    #topbar .status { font-size: 11px; color: #4eca8b; }
+
+    .btn {
+      background: #1a1a2a; border: 1px solid #3a3a5a; color: #ccc;
+      border-radius: 6px; padding: 5px 12px; font-size: 11px;
+      font-family: 'Courier New', monospace; cursor: pointer; transition: background 0.2s;
+    }
+    .btn:hover { background: #2a2a4a; }
+    .btn.active { background: #ff7f0033; border-color: #ff7f00; color: #ff7f00; }
+    .btn:disabled { opacity: 0.35; cursor: default; }
+
+    #btn-row {
+      position: fixed; top: 52px; right: 10px;
+      display: flex; flex-direction: column; gap: 6px; z-index: 200;
+    }
+
+    #log-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 55vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #2a2a3a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #log-panel.hidden { opacity: 0; pointer-events: none; transform: translateY(-8px); }
+
+    .log-entry { font-size: 11px; line-height: 1.85; padding: 1px 0; border-bottom: 1px solid #111; display: flex; gap: 7px; word-break: break-all; }
+    .log-entry.pending { color: #888; }
+    .log-entry.ok      { color: #4eca8b; }
+    .log-entry.err     { color: #ff5f5f; font-weight: bold; }
+    .log-entry.info    { color: #f0c060; }
+
+    #progress-bar-wrap { margin-top: 8px; height: 4px; background: #1a1a2a; border-radius: 3px; overflow: hidden; }
+    #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#ff7f00,#00ff7f); transition: width 0.3s; }
+    #summary { margin-top: 6px; font-size: 10px; color: #666; }
+
+    #mesh-panel {
+      position: fixed; top: 52px; left: 10px; right: 10px;
+      max-height: 75vh; overflow-y: auto;
+      background: rgba(0,0,0,0.93); border: 1px solid #1a2a1a;
+      border-radius: 10px; padding: 12px 14px; z-index: 100; display: none;
+    }
+    #mesh-panel h3 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #4eca8b; margin-bottom: 8px; }
+    #mesh-filter {
+      width: 100%; background: #111; border: 1px solid #333; color: #cfc;
+      padding: 5px 8px; font-size: 11px; border-radius: 5px; margin-bottom: 8px;
+      font-family: 'Courier New', monospace; outline: none;
+    }
+    .mesh-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+    .mesh-tag        { font-size: 10px; padding: 3px 8px; border-radius: 4px; white-space: nowrap; cursor: default; }
+    .mesh-tag.mesh   { background: #0d2a1a; color: #4eca8b; border: 1px solid #1a4a2a; }
+    .mesh-tag.group  { background: #1a1040; color: #9c8fff; border: 1px solid #3a2a7a; }
+    .mesh-tag.screen { background: #2a1a00; color: #f0c060; border: 1px solid #5a3a00; }
+    .mesh-tag.neon   { background: #1a002a; color: #ff88ff; border: 1px solid #4a006a; }
+    .mesh-tag.fan    { background: #1a1800; color: #f4e04d; border: 1px solid #4a4000; }
+
+    /* legend bottom-left */
+    #scene-legend {
+      position: fixed; bottom: 50px; left: 14px;
+      font-size: 10px; color: #666; z-index: 100; line-height: 2.0;
+      pointer-events: none;
+    }
+    #hint {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; color: #333; z-index: 100; text-align: center;
+      background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 20px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<div id="topbar">
+  <span class="title">🍜 Step 01 — GLTF + SpotLights</span>
+  <span class="status" id="top-status">Loading…</span>
+</div>
+
+<div id="btn-row">
+  <button class="btn active" id="btn-log"  onclick="toggle('log')">📋 Log</button>
+  <button class="btn"        id="btn-mesh" onclick="toggle('mesh')" disabled>🗂 Meshes</button>
+</div>
+
+<div id="log-panel">
+  <div id="log-entries"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="summary"></div>
+</div>
+
+<div id="mesh-panel">
+  <h3>All mesh / group names — Step 2 targets</h3>
+  <input id="mesh-filter" type="text" placeholder="filter by name…" oninput="filterMeshes(this.value)"/>
+  <div class="mesh-grid" id="mesh-grid"></div>
+</div>
+
+<div id="scene-legend"></div>
+<div id="hint">Drag · Pinch · Scroll</div>
+
+<script>
+  let logVisible = true, meshVisible = false;
+  let allTags = [];
+
+  function toggle(which) {
+    const lp = document.getElementById('log-panel');
+    const mp = document.getElementById('mesh-panel');
+    const bl = document.getElementById('btn-log');
+    const bm = document.getElementById('btn-mesh');
+    if (which === 'log') {
+      logVisible = !logVisible;
+      lp.classList.toggle('hidden', !logVisible);
+      bl.classList.toggle('active', logVisible);
+      if (logVisible) { meshVisible=false; mp.style.display='none'; bm.classList.remove('active'); }
+    } else {
+      meshVisible = !meshVisible;
+      mp.style.display = meshVisible ? 'block' : 'none';
+      bm.classList.toggle('active', meshVisible);
+      if (meshVisible) { logVisible=false; lp.classList.add('hidden'); bl.classList.remove('active'); }
+    }
+  }
+  function filterMeshes(q) {
+    q = q.toLowerCase();
+    allTags.forEach(({el,name}) => { el.style.display = name.toLowerCase().includes(q) ? '' : 'none'; });
+  }
+  function hideAllPanels() {
+    logVisible=false; meshVisible=false;
+    document.getElementById('log-panel').classList.add('hidden');
+    document.getElementById('mesh-panel').style.display='none';
+    document.getElementById('btn-log').classList.remove('active');
+    document.getElementById('btn-mesh').classList.remove('active');
+  }
+</script>
+
+<script type="module">
+import * as THREE        from 'three';
+import TWEEN             from 'three/addons/libs/tween.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+
+const GLTF_PATH  = './test_node2_clustered.glb';
+const DRACO_PATH = 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
+
+// ── LOG ──────────────────────────────────────────────────────
+const logWrap   = document.getElementById('log-entries');
+const barEl     = document.getElementById('progress-bar');
+const summaryEl = document.getElementById('summary');
+const topStatus = document.getElementById('top-status');
+const icons     = { pending:'⏳', ok:'✅', err:'❌', info:'📌' };
+
+function log(msg, type='info') {
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.innerHTML = `<span>${icons[type]||'·'}</span><span>${msg}</span>`;
+  logWrap.appendChild(div);
+  logWrap.scrollTop = logWrap.scrollHeight;
+  console.log(`[${type}] ${msg}`);
+}
+function setBar(pct) { barEl.style.width = pct + '%'; }
+
+window.addEventListener('unhandledrejection', e =>
+  log('UNHANDLED: ' + (e.reason?.message || e.reason), 'err'));
+
+// ── RENDERER ─────────────────────────────────────────────────
+const canvas = document.createElement('canvas');
+document.body.prepend(canvas);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+
+// ── SCENE ────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+// Grid scaled to match shop (50×50 units)
+scene.add(new THREE.GridHelper(100, 40, 0x111130, 0x0a0a20));
+
+// ── CAMERA ───────────────────────────────────────────────────
+// Start pulled back to see the full 50-unit shop
+const camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 2000);
+camera.position.set(-8, 14, 28);   // ramen-shop default overview
+
+// ── CONTROLS ─────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(2, 0, 0);
+controls.maxPolarAngle = Math.PI / 2;
+controls.minDistance = 1;
+controls.maxDistance = 300;
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.update();
+
+// ── FLOOR (scaled to shop — 50×50 units, matches baked floor) ──
+// We keep MeshPhongMaterial grey for now — Step 2 replaces with baked KTX2
+const mshFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshPhongMaterial({ color: 0x808080 })
+);
+mshFloor.rotation.x = -Math.PI * 0.5;
+mshFloor.receiveShadow = true;
+mshFloor.position.set(0, -0.05, 0);   // just below y=0
+scene.add(mshFloor);
+
+// ── LIGHTS ───────────────────────────────────────────────────
+// Keep original AmbientLight
+scene.add(new THREE.AmbientLight(0x444444));
+
+// Fill light so grey GLTF meshes are visible without baked textures
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
+fillLight.position.set(15, 30, 15);
+fillLight.castShadow = true;
+fillLight.shadow.mapSize.set(2048, 2048);
+fillLight.shadow.camera.near = 0.5;
+fillLight.shadow.camera.far  = 200;
+fillLight.shadow.camera.left = fillLight.shadow.camera.bottom = -60;
+fillLight.shadow.camera.right = fillLight.shadow.camera.top  =  60;
+scene.add(fillLight);
+
+log('Renderer · Scene · Lights ready ✓', 'ok');
+setBar(10);
+
+// ── DRACO ────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(DRACO_PATH);
+dracoLoader.preload();
+log('DRACOLoader → CDN 1.5.6 ✓', 'ok');
+setBar(15);
+
+// ── GLTF ─────────────────────────────────────────────────────
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+
+log(`Fetching: ${GLTF_PATH}`, 'pending');
+
+fetch(GLTF_PATH)
+  .then(r => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    log('File reachable ✓', 'ok');
+    return r.text();
+  })
+  .then(text => {
+    const hasDraco = text.includes('KHR_draco_mesh_compression');
+    log(`Draco compressed: ${hasDraco ? 'YES ✓' : 'NO'}`, 'info');
+    setBar(25);
+    loadGLTF();
+  })
+  .catch(err => {
+    log('FETCH FAILED: ' + err.message, 'err');
+    log('→ Start live-server from the folder containing /models', 'info');
+    topStatus.textContent = 'Error ❌';
+    topStatus.style.color = '#ff5f5f';
+  });
+
+function loadGLTF() {
+  log('GLTFLoader parsing …', 'pending');
+
+  gltfLoader.load(
+    GLTF_PATH,
+
+    (gltf) => {
+      log('GLTF parsed ✓', 'ok');
+      setBar(88);
+
+      const model  = gltf.scene;
+      const meshes = [];
+      const groups = [];
+
+      const screenKw = ['screen','Screen','bigScreen','easel','arcade','Arcade','tv','TV'];
+      const neonKw   = ['neon','Neon','lamp','Lamp','light','Light','LED','globe'];
+      const fanKw    = ['fan','Fan'];
+
+      model.traverse(obj => {
+        if (obj.isMesh) meshes.push(obj);
+        else if (obj.name && (obj.isGroup || obj.type === 'Object3D')) groups.push(obj);
+      });
+
+      // ── Mesh tag cloud ──────────────────────────────────
+      const meshGridEl = document.getElementById('mesh-grid');
+      document.getElementById('btn-mesh').disabled = false;
+
+      groups.forEach(g => {
+        const t = document.createElement('div');
+        t.className = 'mesh-tag group';
+        t.textContent = g.name;
+        meshGridEl.appendChild(t);
+        allTags.push({ el: t, name: g.name });
+      });
+      meshes.forEach(m => {
+        const name = m.name || '[unnamed]';
+        const cls = screenKw.some(k=>name.includes(k)) ? 'screen'
+                  : neonKw.some(k=>name.includes(k))   ? 'neon'
+                  : fanKw.some(k=>name.includes(k))     ? 'fan'
+                  : 'mesh';
+        const t = document.createElement('div');
+        t.className = `mesh-tag ${cls}`;
+        t.textContent = name;
+        meshGridEl.appendChild(t);
+        allTags.push({ el: t, name });
+      });
+
+      log(`Meshes: ${meshes.length}  Groups: ${groups.length}  Anims: ${gltf.animations.length}`, 'ok');
+
+      // ── Place model — floor at y=0, centred on XZ ───────
+      const box    = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size   = box.getSize(new THREE.Vector3());
+
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+      model.position.y -= box.min.y;
+      scene.add(model);
+
+      const shopHeight = size.y;
+      log(`Size: ${size.x.toFixed(1)} × ${shopHeight.toFixed(1)} × ${size.z.toFixed(1)} units`, 'info');
+
+      summaryEl.textContent =
+        `${meshes.length} meshes · ${size.x.toFixed(1)}×${shopHeight.toFixed(1)}×${size.z.toFixed(1)}`;
+      topStatus.textContent = `✅ ${meshes.length} meshes`;
+      topStatus.style.color = '#4eca8b';
+
+      // ── Console Step 2 checklist ─────────────────────────
+      const targets = [
+        'bigScreen','vendingMachineScreen','arcadeScreen',
+        'littleTVScreen','tallScreen','tvScreen',
+        'smallScreen1','smallScreen2','smallScreen3','smallScreen4','smallScreen5',
+        'fan1','fan2','dish','neonBlue','neonGreen',
+        'ramenShop','machines','floor',
+        'projectsRed','aboutMeCyan','articlesPink','creditsOrange','hologramBase'
+      ];
+      console.group('🔍 Step 2 mesh name checklist');
+      targets.forEach(n => {
+        const found = meshes.find(m => m.name === n);
+        console.log(found ? `✅ ${n}` : `❌ ${n}`);
+      });
+      console.groupEnd();
+
+      log('▶ STEP 1 COMPLETE — tap 🗂 Meshes to see all names', 'ok');
+      setBar(100);
+
+      setTimeout(() => {
+        hideAllPanels();
+        document.getElementById('hint').textContent =
+          'Drag · Pinch · Scroll  |  📋 Log   🗂 Meshes →';
+      }, 2500);
+    },
+
+    (xhr) => {
+      if (xhr.total) setBar(25 + Math.round((xhr.loaded/xhr.total)*60));
+    },
+
+    (err) => {
+      const msg = err?.message || err?.type || String(err);
+      log('GLTFLoader ERROR: ' + msg, 'err');
+      topStatus.textContent = 'Error ❌';
+      topStatus.style.color = '#ff5f5f';
+      setBar(0);
+    }
+  );
+}
+
+// ── RENDER LOOP ───────────────────────────────────────────────
+(function tick() {
+  requestAnimationFrame(tick);
+  TWEEN.update();
+  controls.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
