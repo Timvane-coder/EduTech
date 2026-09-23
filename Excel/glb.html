@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>mpfb.glb — Clothing Toggle Viewer</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1a1a1a; overflow: hidden; font-family: -apple-system, sans-serif; }
+  #canvas-wrap { position: absolute; inset: 0; }
+  #panel {
+    position: absolute; top: 12px; left: 12px; z-index: 10;
+    background: rgba(20,20,20,0.85); color: #eee; padding: 14px 16px;
+    border-radius: 8px; font-size: 13px; max-width: 340px; line-height: 1.5;
+    max-height: calc(100vh - 24px); overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: #555 #222;
+  }
+  #panel::-webkit-scrollbar { width: 8px; }
+  #panel::-webkit-scrollbar-track { background: #222; border-radius: 4px; }
+  #panel::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+  #panel::-webkit-scrollbar-thumb:hover { background: #777; }
+  #panel h2 { margin: 0 0 8px; font-size: 14px; color: #7fd3ff; }
+  button {
+    display: block; width: 100%; margin: 6px 0; padding: 8px 10px;
+    background: #2a2a2a; color: #eee; border: 1px solid #444; border-radius: 5px;
+    cursor: pointer; font-size: 13px; text-align: left;
+  }
+  button:hover { background: #3a3a3a; }
+  button.active { background: #2d5a3d; border-color: #4a9; }
+  #status { margin-top: 8px; font-size: 12px; color: #999; white-space: pre-wrap; }
+  #log { margin-top: 8px; font-size: 11px; color: #6a6; max-height: 160px; overflow-y: auto; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div id="canvas-wrap"></div>
+<div id="panel">
+  <h2>mpfb.glb — Node Inspector</h2>
+  <div id="node-list">Loading model…</div>
+  <div id="status"></div>
+  <div id="log"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const wrap = document.getElementById('canvas-wrap');
+const nodeListEl = document.getElementById('node-list');
+const statusEl = document.getElementById('status');
+const logEl = document.getElementById('log');
+
+function log(msg) {
+  logEl.textContent += msg + '\n';
+  console.log(msg);
+}
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1a);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100);
+camera.position.set(0, 1.4, 3);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+wrap.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.2, 0);
+controls.enableDamping = true;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+dir.position.set(2, 4, 3);
+scene.add(dir);
+const dir2 = new THREE.DirectionalLight(0xffffff, 0.5);
+dir2.position.set(-2, 2, -3);
+scene.add(dir2);
+
+const grid = new THREE.GridHelper(4, 20, 0x444444, 0x2a2a2a);
+scene.add(grid);
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const loader = new GLTFLoader();
+statusEl.textContent = 'Fetching mpfb-small.glb …';
+
+loader.load(
+  './futuristic.glb',
+  (gltf) => {
+    statusEl.textContent = 'Loaded. Scanning nodes…';
+    const model = gltf.scene;
+    scene.add(model);
+
+    // Center/scale camera roughly on the model
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const center = box.getCenter(new THREE.Vector3());
+    controls.target.copy(center);
+    camera.position.set(center.x, center.y + size * 0.1, center.z + size * 0.9);
+    camera.near = size / 100;
+    camera.far = size * 100;
+    camera.updateProjectionMatrix();
+
+    // Find all meshes and list them
+    const meshNodes = [];
+    model.traverse((obj) => {
+      if (obj.isMesh) {
+        meshNodes.push(obj);
+        log(`Mesh node: "${obj.name}" material="${obj.material?.name || '(unnamed)'}" visible=${obj.visible}`);
+      }
+    });
+
+    nodeListEl.innerHTML = '';
+    meshNodes.forEach((mesh) => {
+      const btn = document.createElement('button');
+      btn.textContent = `👁 ${mesh.name}`;
+      btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        mesh.visible = !mesh.visible;
+        btn.classList.toggle('active', mesh.visible);
+        btn.textContent = (mesh.visible ? '👁 ' : '🚫 ') + mesh.name;
+      });
+      nodeListEl.appendChild(btn);
+    });
+
+    // Convenience: a one-click "strip clothing" button
+    const stripBtn = document.createElement('button');
+    stripBtn.textContent = '⚡ Hide clothing mesh (female_casualsuit01)';
+    stripBtn.style.marginTop = '10px';
+    stripBtn.style.borderColor = '#f80';
+    stripBtn.addEventListener('click', () => {
+      meshNodes.forEach((mesh) => {
+        if (/casualsuit/i.test(mesh.name)) {
+          mesh.visible = false;
+          const b = [...nodeListEl.querySelectorAll('button')].find(b => b.textContent.includes(mesh.name));
+          if (b) { b.classList.remove('active'); b.textContent = '🚫 ' + mesh.name; }
+        }
+      });
+    });
+    nodeListEl.appendChild(stripBtn);
+
+    statusEl.textContent = `${meshNodes.length} mesh nodes found. Click to toggle visibility.`;
+  },
+  (progress) => {
+    if (progress.total) {
+      statusEl.textContent = `Loading… ${(progress.loaded / progress.total * 100).toFixed(0)}%`;
+    }
+  },
+  (err) => {
+    statusEl.textContent = 'ERROR loading model — see log.';
+    log('Load error: ' + err.message);
+    console.error(err);
+  }
+);
+</script>
+</body>
+</html>

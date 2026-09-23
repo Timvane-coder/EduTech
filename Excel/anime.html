@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLB Animation Inspector</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #a0a0a0;
+            font-family: sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 8px;
+            pointer-events: none;
+            display: none;
+        }
+        .lil-gui {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+
+    <!-- THE IMPORT MAP: Maps bare module names to CDN URLs -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://esm.sh/three@0.160.0",
+          "three/addons/": "https://esm.sh/three@0.160.0/examples/jsm/",
+          "lil-gui": "https://esm.sh/lil-gui@0.19"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <div id="loading">Loading 3D Model...</div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GUI } from 'lil-gui';
+
+        // --- Core Application Variables ---
+        let scene, camera, renderer, controls;
+        let mixer;
+        const clock = new THREE.Clock();
+        const animationsMap = {};
+        let activeAction;
+        const loadingEl = document.getElementById('loading');
+        const morphMeshes = []; // meshes that have morph targets
+
+        init();
+        animate();
+
+        function init() {
+            // 1. Scene Setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xa0a0a0);
+            scene.fog = new THREE.Fog(0xa0a0a0, 10, 50);
+
+            // 2. Camera Setup
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100);
+            camera.position.set(0, 1.6, 1.2); // closer, chest/face height — better for checking facial morphs
+
+            // 3. Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+
+            // 4. Controls Setup
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 1.5, 0); // aim near head height
+
+            // 5. Lighting Setup
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3);
+            hemiLight.position.set(0, 20, 0);
+            scene.add(hemiLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 3);
+            dirLight.position.set(3, 10, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.camera.top = 2;
+            dirLight.shadow.camera.bottom = -2;
+            dirLight.shadow.camera.left = -2;
+            dirLight.shadow.camera.right = 2;
+            dirLight.shadow.camera.near = 0.1;
+            dirLight.shadow.camera.far = 40;
+            scene.add(dirLight);
+
+            // 6. Floor Grid
+            const mesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(100, 100),
+                new THREE.MeshStandardMaterial({ color: 0xcbcbcb, depthWrite: false })
+            );
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            const grid = new THREE.GridHelper(100, 100, 0x000000, 0x000000);
+            grid.material.opacity = 0.2;
+            grid.material.transparent = true;
+            scene.add(grid);
+
+            // 7. Load GLTF/GLB Model
+            loadingEl.style.display = 'block';
+            const loader = new GLTFLoader();
+
+            loader.load('ferrari.glb', (gltf) => {
+                loadingEl.style.display = 'none';
+                const model = gltf.scene;
+
+                model.traverse((object) => {
+                    if (object.isMesh) {
+                        object.castShadow = true;
+                        object.receiveShadow = true;
+
+                        // Collect meshes that have morph targets
+                        if (object.morphTargetInfluences && object.morphTargetInfluences.length > 0) {
+                            morphMeshes.push(object);
+                        }
+                    }
+                });
+
+                scene.add(model);
+                // Handle skeletal Animations if they exist
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(model);
+                    const clipNames = [];
+
+                    gltf.animations.forEach((clip) => {
+                        clipNames.push(clip.name);
+                        animationsMap[clip.name] = mixer.clipAction(clip);
+                    });
+
+                    setupAnimationGUI(clipNames);
+                    fadeToAction(clipNames[0]);
+                }
+
+                // Build the morph target (facial expression) GUI
+                if (morphMeshes.length > 0) {
+                    setupMorphGUI();
+                } else {
+                    console.warn('No meshes with morph targets found.');
+                }
+
+                if ((!gltf.animations || gltf.animations.length === 0) && morphMeshes.length === 0) {
+                    alert("Model loaded, but no animation clips or morph targets were found.");
+                }
+            },
+            undefined,
+            (error) => {
+                loadingEl.style.display = 'none';
+                console.error('An error happened loading the GLB:', error);
+                alert("Failed to load model.glb. Check your console for details.");
+            });
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- Animation GUI Panel ---
+        function setupAnimationGUI(clipNames) {
+            const gui = new GUI({ title: '📦 Animation Inspector' });
+
+            const settings = {
+                currentAnimation: clipNames[0] || 'None',
+                timeScale: 1.0,
+                stopAll: () => { if (activeAction) activeAction.stop(); }
+            };
+
+            gui.add(settings, 'currentAnimation', clipNames)
+               .name('Clip Name')
+               .onChange((selectedClipName) => {
+                   fadeToAction(selectedClipName);
+               });
+
+            gui.add(settings, 'timeScale', 0.0, 2.0, 0.05)
+               .name('Playback Speed')
+               .onChange((speed) => {
+                   if (mixer) mixer.timeScale = speed;
+               });
+
+            gui.add(settings, 'stopAll').name('⏹ Stop Playback');
+
+            gui.open();
+        }
+
+        // --- Morph Target (Facial Expression) GUI Panel ---
+        function setupMorphGUI() {
+            const gui = new GUI({ title: '😀 Morph Target Inspector' });
+            gui.close(); // start collapsed — could be a LOT of sliders across meshes
+
+            const globalSettings = {
+                resetAll: () => {
+                    morphMeshes.forEach(mesh => {
+                        for (let i = 0; i < mesh.morphTargetInfluences.length; i++) {
+                            mesh.morphTargetInfluences[i] = 0;
+                        }
+                    });
+                    gui.controllersRecursive().forEach(c => c.updateDisplay());
+                }
+            };
+            gui.add(globalSettings, 'resetAll').name(' 🔄 Reset All Morphs');
+
+            morphMeshes.forEach((mesh, meshIdx) => {
+                const meshName = mesh.name || `Mesh_${meshIdx}`;
+                const count = mesh.morphTargetInfluences.length;
+                const folder = gui.addFolder(`${meshName} (${count} targets)`);
+                folder.close(); // collapsed by default, expand the ones you want to test
+
+                // Proxy object so lil-gui can bind sliders to array indices
+                const proxy = {};
+                for (let i = 0; i < count; i++) {
+                    proxy[i] = mesh.morphTargetInfluences[i];
+                }
+
+                for (let i = 0; i < count; i++) {
+                    folder.add(proxy, String(i), 0, 1, 0.01)
+                        .name(`#${i}`)
+                        .onChange((value) => {
+                            mesh.morphTargetInfluences[i] = value;
+                        });
+                }
+            });
+        }
+
+        // --- Crossfade Logic ---
+        function fadeToAction(name) {
+            const nextAction = animationsMap[name];
+            if (nextAction === activeAction) return;
+
+            if (activeAction) {
+                activeAction.fadeOut(0.3);
+            }
+
+            nextAction
+                .reset()
+                .setEffectiveTimeScale(1)
+                .setEffectiveWeight(1)
+                .fadeIn(0.3)
+                .play();
+
+            activeAction = nextAction;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- Main Frame Update Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

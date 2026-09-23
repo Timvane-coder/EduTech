@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔍 Mesh Transform Debugger — Exhibit + Hallway</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Courier New', monospace; overflow: hidden; }
+  #canvas-container { position: fixed; inset: 0; }
+
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 10px; padding: 7px 12px;
+    background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #222; z-index: 30; flex-wrap: wrap;
+  }
+  #title { color: #f97316; font-size: 11px; font-weight: bold; flex: 1; }
+  #summary { font-size: 10px; color: #94a3b8; }
+
+  #log-panel {
+    position: fixed; top: 40px; left: 10px; width: 220px;
+    max-height: calc(100vh - 90px);
+    background: rgba(8,8,18,0.95); border: 1px solid #333; border-radius: 8px;
+    display: flex; flex-direction: column; z-index: 24;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #log-panel.hidden { opacity: 0; transform: translateX(-230px); pointer-events: none; }
+  #log-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px 6px; border-bottom: 1px solid #1a1a2e; flex-shrink: 0;
+  }
+  #log-header h3 { color: #f97316; font-size: 11px; }
+  #log-close { background: none; border: none; color: #555; font-size: 13px; cursor: pointer; }
+  #log-close:hover { color: #f87171; }
+  #log-body { overflow-y: auto; padding: 7px 12px 10px; flex: 1; }
+  .ll { padding: 2px 0; border-bottom: 1px solid #0f0f1a; line-height: 1.5; font-size: 9px; }
+  .ok { color: #4ade80; } .err { color: #f87171; }
+  .info { color: #94a3b8; } .warn { color: #fbbf24; }
+
+  #log-reopen {
+    position: fixed; top: 9px; left: 12px;
+    background: rgba(8,8,18,0.9); border: 1px solid #444; border-radius: 5px;
+    color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px;
+    padding: 4px 9px; cursor: pointer; z-index: 25;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  #log-reopen.visible { opacity: 1; pointer-events: auto; }
+  #log-reopen:hover { color: #f97316; border-color: #f97316; }
+
+  /* ── Replacement / Transform panel ── */
+  #replace-panel {
+    position: fixed; top: 46px; right: 10px; width: 300px;
+    background: rgba(8,8,18,0.97); border: 1px solid #333; border-radius: 8px;
+    z-index: 25; max-height: calc(100vh - 58px); overflow-y: auto;
+  }
+  #replace-panel::-webkit-scrollbar { width: 3px; }
+  #replace-panel::-webkit-scrollbar-thumb { background: #333; }
+
+  #rp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px 7px; border-bottom: 1px solid #222;
+    position: sticky; top: 0; background: rgba(8,8,18,0.98); z-index: 1;
+  }
+  #rp-header h3 { font-size: 11px; }
+
+  #rp-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .rp-field label {
+    color: #94a3b8; font-size: 9px; display: block; margin-bottom: 3px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* Mesh dropdown selector — replaces the "Replacement GLB path" field */
+  #mesh-select {
+    width: 100%; padding: 6px 8px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 4px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 10px; outline: none;
+    max-height: 300px;
+  }
+  #mesh-select:focus { border-color: #f97316; }
+  #mesh-select optgroup {
+    color: #f97316; font-style: normal; font-weight: bold;
+    background: #0a0a14;
+  }
+  #mesh-select option {
+    color: #e0e0e0; background: #0f0f1e; padding: 3px;
+  }
+
+  #mesh-search {
+    width: 100%; padding: 5px 8px; margin-top: 5px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 4px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 10px; outline: none;
+  }
+  #mesh-search:focus { border-color: #f97316; }
+  #mesh-search::placeholder { color: #444; }
+
+  .rp-info {
+    background: #060610; border: 1px solid #1a1a2e;
+    border-radius: 4px; padding: 7px 9px; font-size: 9px;
+    color: #94a3b8; line-height: 1.8;
+  }
+  .rp-info span { color: #e0e0e0; }
+  .rp-info .hi { color: #f97316; font-weight: bold; }
+
+  .slider-section {
+    background: #060610; border: 1px solid #1a1a2e; border-radius: 5px; padding: 8px 9px;
+  }
+  .ss-title {
+    font-size: 9px; color: #f97316; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sr { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+  .sr:last-child { margin-bottom: 0; }
+  .saxis { font-size: 9px; color: #555; width: 12px; flex-shrink: 0; font-weight: bold; }
+  .sr input[type=range] { flex: 1; accent-color: #f97316; height: 3px; }
+  .snum {
+    font-size: 9px; color: #f97316; width: 44px;
+    text-align: right; flex-shrink: 0; font-family: 'Courier New', monospace;
+  }
+  .sfine {
+    width: 54px; padding: 2px 4px;
+    background: #0f0f1e; border: 1px solid #333; border-radius: 3px;
+    color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 9px; outline: none;
+  }
+  .sfine:focus { border-color: #f97316; }
+  .reset-btn {
+    background: none; border: 1px solid #333; border-radius: 3px;
+    color: #555; font-size: 8px; padding: 1px 5px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  .reset-btn:hover { border-color: #f97316; color: #f97316; }
+  .divrow { border-top: 1px solid #1a1a2e; padding-top: 5px; margin-top: 4px; }
+
+  .turn-btn {
+    background: #0f0f1e; border: 1px solid #334155; border-radius: 4px;
+    color: #94a3b8; font-size: 10px;
+    width: 24px; height: 24px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s; flex-shrink: 0; user-select: none;
+  }
+  .turn-btn:hover  { border-color: #f97316; color: #f97316; background: #1a0800; }
+  .turn-btn:active { background: #f97316; color: #000; transform: scale(0.9); }
+
+  .step-btn {
+    background: #0f0f1e; border: 1px solid #334155; border-radius: 4px;
+    color: #64748b; font-size: 8px; padding: 3px 6px;
+    cursor: pointer; font-family: 'Courier New', monospace;
+    transition: all 0.1s; user-select: none;
+  }
+  .step-btn:hover  { border-color: #f97316; color: #f97316; }
+  .step-btn.active { border-color: #f97316; color: #f97316; background: rgba(249,115,22,0.12); }
+
+  #rp-copy-box {
+    background: #0a0a18; border: 1px solid #1a1a3a; border-radius: 4px;
+    padding: 7px 9px; font-size: 9px; color: #4ade80; line-height: 1.8;
+    font-family: 'Courier New', monospace; display: none; white-space: pre-wrap;
+  }
+
+  .rp-btn {
+    width: 100%; padding: 6px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    cursor: pointer; border: 1px solid; transition: all 0.15s;
+  }
+  .rp-btn.secondary { background: #0f0f1e; border-color: #333; color: #94a3b8; }
+  .rp-btn.secondary:hover { border-color: #06b6d4; color: #06b6d4; }
+  .rp-btn.green     { background: #0f0f1e; border-color: #4ade80; color: #4ade80; }
+  .rp-btn.green:hover { background: #4ade80; color: #000; }
+  .rp-btn:disabled  { opacity: 0.35; cursor: not-allowed; }
+
+  #rp-status { font-size: 9px; min-height: 14px; text-align: center; color: #94a3b8; }
+  #rp-status.ok  { color: #4ade80; }
+  #rp-status.err { color: #f87171; }
+
+  #tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(0,0,0,0.92); border: 1px solid #444;
+    border-radius: 5px; padding: 4px 9px; font-size: 10px; color: #fff;
+    z-index: 40; display: none;
+  }
+
+  #loading-overlay {
+    position: fixed; inset: 0; background: #0a0a0f;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px; z-index: 60;
+    font-size: 13px; color: #f97316; transition: opacity 0.4s;
+  }
+  #loading-overlay .bar-track {
+    width: 220px; height: 4px; background: #1a1a2e; border-radius: 2px; overflow: hidden;
+  }
+  #loading-overlay .bar-fill {
+    height: 100%; width: 0%; background: #f97316; transition: width 0.2s;
+  }
+  #loading-overlay .sub { font-size: 10px; color: #64748b; }
+</style>
+</head>
+<body>
+<div id="loading-overlay">
+  <div>🔍 LOADING ramenShopExhibtStand_with_hallway.glb</div>
+  <div class="bar-track"><div class="bar-fill" id="load-bar"></div></div>
+  <div class="sub" id="load-sub">connecting…</div>
+</div>
+
+<div id="canvas-container"></div>
+<div id="ui">
+  <span id="title">🔍 MESH TRANSFORM DEBUGGER — EXHIBIT + HALLWAY</span>
+  <span id="summary">Loading…</span>
+</div>
+
+<div id="log-panel">
+  <div id="log-header"><h3>📋 Log</h3><button id="log-close">✕</button></div>
+  <div id="log-body"></div>
+</div>
+<button id="log-reopen">📋 Log</button>
+
+<div id="replace-panel">
+  <div id="rp-header">
+    <h3 id="rp-title" style="color:#f97316">🎯 Select a mesh</h3>
+  </div>
+  <div id="rp-body">
+    <div class="rp-info" id="rp-info">Choose a mesh from the dropdown, or click one directly in the scene.</div>
+
+    <div class="rp-field">
+      <label>Mesh selector</label>
+      <input type="text" id="mesh-search" placeholder="Filter meshes… e.g. Rám3, Kaslíky, hallway" />
+      <select id="mesh-select" size="10">
+        <option value="">— choose a mesh —</option>
+      </select>
+    </div>
+
+    <!-- SCALE -->
+    <div class="slider-section">
+      <div class="ss-title">📐 Scale <button class="reset-btn" id="reset-scale">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="sx" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sx-v">1.000</span><input class="sfine" type="number" id="sx-f" step="0.001" value="1"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="sy" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sy-v">1.000</span><input class="sfine" type="number" id="sy-f" step="0.001" value="1"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="sz" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="sz-v">1.000</span><input class="sfine" type="number" id="sz-f" step="0.001" value="1"></div>
+      <div class="sr divrow"><span class="saxis" style="color:#fbbf24">∀</span><input type="range" id="su" min="0.01" max="8" step="0.01" value="1"><span class="snum" id="su-v">1.000</span><input class="sfine" type="number" id="su-f" step="0.001" value="1"></div>
+    </div>
+
+    <!-- POSITION -->
+    <div class="slider-section">
+      <div class="ss-title">📍 Position <button class="reset-btn" id="reset-pos">reset</button></div>
+      <div class="sr"><span class="saxis" style="color:#f87171">X</span><input type="range" id="px" min="-30" max="30" step="0.05" value="0"><span class="snum" id="px-v">0.000</span><input class="sfine" type="number" id="px-f" step="0.01" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#4ade80">Y</span><input type="range" id="py" min="-30" max="30" step="0.05" value="0"><span class="snum" id="py-v">0.000</span><input class="sfine" type="number" id="py-f" step="0.01" value="0"></div>
+      <div class="sr"><span class="saxis" style="color:#38bdf8">Z</span><input type="range" id="pz" min="-30" max="30" step="0.05" value="0"><span class="snum" id="pz-v">0.000</span><input class="sfine" type="number" id="pz-f" step="0.01" value="0"></div>
+    </div>
+
+    <!-- ROTATION -->
+    <div class="slider-section">
+      <div class="ss-title">🔄 Rotation (deg) <button class="reset-btn" id="reset-rot">reset</button></div>
+
+      <div class="sr">
+        <span class="saxis" style="color:#f87171">X</span>
+        <div style="display:flex;gap:3px;flex-shrink:0;">
+          <button class="turn-btn" data-axis="rx" data-dir="-1">◀</button>
+          <button class="turn-btn" data-axis="rx" data-dir="1">▶</button>
+        </div>
+        <span class="snum" id="rx-v" style="width:42px">0.0°</span>
+        <input class="sfine" type="number" id="rx-f" step="1" value="0">
+      </div>
+
+      <div class="sr">
+        <span class="saxis" style="color:#4ade80">Y</span>
+        <div style="display:flex;gap:3px;flex-shrink:0;">
+          <button class="turn-btn" data-axis="ry" data-dir="-1">◀</button>
+          <button class="turn-btn" data-axis="ry" data-dir="1">▶</button>
+        </div>
+        <span class="snum" id="ry-v" style="width:42px">0.0°</span>
+        <input class="sfine" type="number" id="ry-f" step="1" value="0">
+      </div>
+
+      <div class="sr">
+        <span class="saxis" style="color:#38bdf8">Z</span>
+        <div style="display:flex;gap:3px;flex-shrink:0;">
+          <button class="turn-btn" data-axis="rz" data-dir="-1">◀</button>
+          <button class="turn-btn" data-axis="rz" data-dir="1">▶</button>
+        </div>
+        <span class="snum" id="rz-v" style="width:42px">0.0°</span>
+        <input class="sfine" type="number" id="rz-f" step="1" value="0">
+      </div>
+
+      <div class="sr divrow" style="justify-content:space-between;align-items:center;">
+        <span style="font-size:9px;color:#475569;">Step</span>
+        <div style="display:flex;gap:3px;">
+          <button class="step-btn active" data-step="1">1°</button>
+          <button class="step-btn" data-step="5">5°</button>
+          <button class="step-btn" data-step="15">15°</button>
+          <button class="step-btn" data-step="45">45°</button>
+          <button class="step-btn" data-step="90">90°</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="rp-btn green" id="rp-copy-btn">📋 Copy transform values</button>
+    <div id="rp-copy-box"></div>
+    <button class="rp-btn secondary" id="rp-restore-btn" disabled>↩ Reset this mesh</button>
+    <button class="rp-btn secondary" id="rp-cancel-btn">✕ Deselect</button>
+    <div id="rp-status"></div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'three/addons/loaders/DRACOLoader.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
+const GLB_PATH = './models/ramenShopExhibtStand_with_hallway.glb';
+
+// The single root node name whose ENTIRE subtree is treated as one group
+// transform target, rather than exposing its individual child meshes.
+// Per the diagnostic: SpaceshipHallway_OnKasliky is a sibling of
+// exhibitStand_root (not nested under it), holding 8 "highpolywall11_*"
+// meshes that should move/scale/rotate together as the hallway, not
+// individually — everything else in the file is transformed per-mesh.
+const GROUP_TRANSFORM_ROOTS = ['SpaceshipHallway_OnKasliky'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SCENE SETUP
+// ═══════════════════════════════════════════════════════════════════════════
+const container = document.getElementById('canvas-container');
+const renderer  = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d16);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 500);
+camera.position.set(0, 8, 22);
+const orbitCtrl = new OrbitControls(camera, renderer.domElement);
+orbitCtrl.enableDamping = true; orbitCtrl.dampingFactor = 0.07;
+
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+const dirL = new THREE.DirectionalLight(0xffffff, 0.9);
+dirL.position.set(5, 10, 7); scene.add(dirL);
+scene.add(new THREE.GridHelper(80, 80, 0x1a1a1a, 0x111111));
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════════════════════════════
+const logBody   = document.getElementById('log-body');
+const logPanel  = document.getElementById('log-panel');
+const summaryEl = document.getElementById('summary');
+const loadOverlay = document.getElementById('loading-overlay');
+const loadBar   = document.getElementById('load-bar');
+const loadSub   = document.getElementById('load-sub');
+
+function log(msg, type='info') {
+  const d = document.createElement('div');
+  d.className = `ll ${type}`; d.textContent = msg;
+  logBody.appendChild(d); logBody.scrollTop = logBody.scrollHeight;
+}
+document.getElementById('log-close').addEventListener('click', () => {
+  logPanel.classList.add('hidden');
+  document.getElementById('log-reopen').classList.add('visible');
+});
+document.getElementById('log-reopen').addEventListener('click', () => {
+  logPanel.classList.remove('hidden');
+  document.getElementById('log-reopen').classList.remove('visible');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOADER
+// ═══════════════════════════════════════════════════════════════════════════
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+// TARGETS: one entry per selectable "unit" — either a single mesh, or (for
+// the hallway) one group. Keyed by a stable id used in the dropdown.
+const TARGETS = new Map();
+let selectedId = null;
+let sceneRoot  = null;
+
+const DEG2RAD = Math.PI / 180;
+const T = { sx:1, sy:1, sz:1, px:0, py:0, pz:0, rx:0, ry:0, rz:0 };
+
+// Highlight material — flat, distinct, applied ONLY to the selected mesh's
+// object(s). Everything else keeps its original loaded material.
+const HIGHLIGHT_COLOR = 0xf97316;
+function makeHighlightMat() {
+  return new THREE.MeshStandardMaterial({
+    color: HIGHLIGHT_COLOR, emissive: 0x3a1400, emissiveIntensity: 0.6,
+    roughness: 0.4, metalness: 0.1,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUILD TARGET LIST FROM LOADED SCENE
+// ═══════════════════════════════════════════════════════════════════════════
+// Finds the nearest ancestor group name for a mesh, to label it in the
+// dropdown as e.g. "Mesh_181 (Kaslíky)". If the mesh sits directly under
+// the document root with no meaningful group parent, no suffix is added.
+function findGroupLabel(meshObj, groupBoundaryNames) {
+  let cur = meshObj.parent;
+  while (cur) {
+    const name = cur.name;
+    if (name && groupBoundaryNames.has(name)) return name;
+    cur = cur.parent;
+  }
+  return null;
+}
+
+function isUnderAny(obj, rootNames) {
+  let cur = obj;
+  while (cur) {
+    if (rootNames.includes(cur.name)) return cur.name;
+    cur = cur.parent;
+  }
+  return null;
+}
+
+function buildTargets(root) {
+  // Known group-container node names, per the diagnostic listing — meshes
+  // parented (at any depth) under one of these get a "(GroupName)" suffix
+  // in the dropdown. This list is derived from the node dump you provided;
+  // if the file changes, extend this set.
+  const KNOWN_GROUPS = new Set([
+    'Kaslíky', 'Rám1', 'Rám2', 'Rám3', 'Skla', 'TV 60', 'TV 60.001',
+    'Mesh_216', 'Mesh_219', 'Mesh_222',
+  ]);
+
+  TARGETS.clear();
+
+  // ── 1. Collect the hallway as ONE group target ──
+  for (const groupRootName of GROUP_TRANSFORM_ROOTS) {
+    let groupNode = null;
+    root.traverse(obj => { if (obj.name === groupRootName) groupNode = obj; });
+    if (!groupNode) {
+      log(`⚠️ Group root "${groupRootName}" not found in loaded scene.`, 'warn');
+      continue;
+    }
+    let meshCount = 0;
+    groupNode.traverse(o => { if (o.isMesh) meshCount++; });
+
+    const id = `GROUP::${groupRootName}`;
+    TARGETS.set(id, {
+      id, kind: 'group', label: 'Spaceship Hallway', groupLabel: null,
+      displayName: `⬡ Spaceship Hallway (group, ${meshCount} meshes)`,
+      object3D: groupNode,          // the node we transform
+      meshes: [],                   // filled below, for highlight purposes
+      origMaterials: new Map(),     // meshUUID -> original material
+      basePos: groupNode.position.clone(),
+      baseScale: groupNode.scale.clone(),
+      baseRot: groupNode.rotation.clone(),
+      section: 'Hallway (group)',
+    });
+    groupNode.traverse(o => { if (o.isMesh) TARGETS.get(id).meshes.push(o); });
+  }
+
+  // ── 2. Collect every OTHER mesh individually, skipping anything inside
+  //      a GROUP_TRANSFORM_ROOTS subtree (already handled above). ──
+  root.traverse(obj => {
+    if (!obj.isMesh) return;
+    if (isUnderAny(obj, GROUP_TRANSFORM_ROOTS)) return; // handled as group
+
+    const groupLabel = findGroupLabel(obj, KNOWN_GROUPS);
+    const baseName = obj.name || '(unnamed mesh)';
+    const displayName = groupLabel ? `${baseName} (${groupLabel})` : baseName;
+    const id = `MESH::${obj.uuid}`;
+
+    TARGETS.set(id, {
+      id, kind: 'mesh', label: baseName, groupLabel,
+      displayName,
+      object3D: obj,
+      meshes: [obj],
+      origMaterials: new Map([[obj.uuid, obj.material]]),
+      basePos: obj.position.clone(),
+      baseScale: obj.scale.clone(),
+      baseRot: obj.rotation.clone(),
+      section: groupLabel || 'Ungrouped',
+    });
+  });
+
+  log(`🗂️ Built ${TARGETS.size} selectable targets (${TARGETS.size - GROUP_TRANSFORM_ROOTS.length} meshes + ${GROUP_TRANSFORM_ROOTS.length} group).`, 'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DROPDOWN POPULATION
+// ═══════════════════════════════════════════════════════════════════════════
+const meshSelect = document.getElementById('mesh-select');
+const meshSearch = document.getElementById('mesh-search');
+
+function populateDropdown(filterText = '') {
+  const filter = filterText.trim().toLowerCase();
+  meshSelect.innerHTML = '';
+
+  const blank = document.createElement('option');
+  blank.value = ''; blank.textContent = '— choose a mesh —';
+  meshSelect.appendChild(blank);
+
+  // Group entries by section for optgroup organization. Hallway group and
+  // "Ungrouped" (direct root-level meshes) get their own sections; named
+  // group containers (Kaslíky, Rám1, etc.) get their own too.
+  const bySection = new Map();
+  for (const t of TARGETS.values()) {
+    if (filter && !t.displayName.toLowerCase().includes(filter)) continue;
+    if (!bySection.has(t.section)) bySection.set(t.section, []);
+    bySection.get(t.section).push(t);
+  }
+
+  // Sort sections: Hallway group first, then alphabetically, "Ungrouped" last.
+  const sectionNames = [...bySection.keys()].sort((a, b) => {
+    if (a === 'Hallway (group)') return -1;
+    if (b === 'Hallway (group)') return 1;
+    if (a === 'Ungrouped') return 1;
+    if (b === 'Ungrouped') return -1;
+    return a.localeCompare(b);
+  });
+
+  for (const sectionName of sectionNames) {
+    const items = bySection.get(sectionName).sort((a, b) => a.label.localeCompare(b.label, undefined, {numeric:true}));
+    const og = document.createElement('optgroup');
+    og.label = sectionName;
+    for (const t of items) {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.displayName;
+      og.appendChild(opt);
+    }
+    meshSelect.appendChild(og);
+  }
+}
+
+meshSearch.addEventListener('input', () => populateDropdown(meshSearch.value));
+meshSelect.addEventListener('change', () => {
+  if (meshSelect.value) selectTarget(meshSelect.value);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SELECTION + HIGHLIGHT
+// ═══════════════════════════════════════════════════════════════════════════
+function clearHighlight(id) {
+  const t = TARGETS.get(id);
+  if (!t) return;
+  for (const m of t.meshes) {
+    const orig = t.origMaterials.get(m.uuid);
+    if (orig) m.material = orig;
+  }
+}
+
+function applyHighlight(id) {
+  const t = TARGETS.get(id);
+  if (!t) return;
+  const mat = makeHighlightMat();
+  for (const m of t.meshes) m.material = mat;
+}
+
+function selectTarget(id) {
+  if (selectedId && selectedId !== id) clearHighlight(selectedId);
+  selectedId = id;
+  const t = TARGETS.get(id);
+  if (!t) return;
+
+  applyHighlight(id);
+  meshSelect.value = id;
+
+  const rpTitle = document.getElementById('rp-title');
+  rpTitle.textContent = `🎯 ${t.displayName}`;
+
+  T.sx = t.object3D.scale.x; T.sy = t.object3D.scale.y; T.sz = t.object3D.scale.z;
+  T.px = t.object3D.position.x - t.basePos.x;
+  T.py = t.object3D.position.y - t.basePos.y;
+  T.pz = t.object3D.position.z - t.basePos.z;
+  T.rx = t.object3D.rotation.x / DEG2RAD;
+  T.ry = t.object3D.rotation.y / DEG2RAD;
+  T.rz = t.object3D.rotation.z / DEG2RAD;
+
+  syncSlidersFromT();
+
+  const box = new THREE.Box3().setFromObject(t.object3D);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  document.getElementById('rp-info').innerHTML =
+    `<div>Kind: <span class="${t.kind==='group'?'hi':''}">${t.kind === 'group' ? 'GROUP (hallway)' : 'single mesh'}</span></div>` +
+    `<div>Belongs to: <span>${t.groupLabel || '—'}</span></div>` +
+    `<div>Mesh count: <span>${t.meshes.length}</span></div>` +
+    `<div>Size: <span>${size.x.toFixed(2)}×${size.y.toFixed(2)}×${size.z.toFixed(2)}</span></div>` +
+    `<div>Ctr: <span>${center.x.toFixed(2)}, ${center.y.toFixed(2)}, ${center.z.toFixed(2)}</span></div>`;
+
+  document.getElementById('rp-restore-btn').disabled = false;
+  document.getElementById('rp-status').textContent = '';
+  document.getElementById('rp-copy-box').style.display = 'none';
+  updateCopyBox();
+}
+
+function deselect() {
+  if (selectedId) clearHighlight(selectedId);
+  selectedId = null;
+  meshSelect.value = '';
+  document.getElementById('rp-title').textContent = '🎯 Select a mesh';
+  document.getElementById('rp-info').textContent = 'Choose a mesh from the dropdown, or click one directly in the scene.';
+  document.getElementById('rp-restore-btn').disabled = true;
+  document.getElementById('rp-copy-box').style.display = 'none';
+  resetSliders();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SLIDERS
+// ═══════════════════════════════════════════════════════════════════════════
+function wireSlider(id, key) {
+  const sl = document.getElementById(id);
+  const vl = document.getElementById(id + '-v');
+  const fn = document.getElementById(id + '-f');
+  function apply(v) {
+    v = parseFloat(v); T[key] = v;
+    sl.value = v; fn.value = v.toFixed(3); vl.textContent = v.toFixed(3);
+    applyTransform(); updateCopyBox();
+  }
+  sl.addEventListener('input',  () => apply(sl.value));
+  fn.addEventListener('change', () => apply(fn.value));
+}
+['sx','sy','sz','px','py','pz'].forEach(k => wireSlider(k, k));
+
+const suSl = document.getElementById('su');
+const suVl = document.getElementById('su-v');
+const suFn = document.getElementById('su-f');
+function applyUniform(v) {
+  v = parseFloat(v); T.sx = T.sy = T.sz = v;
+  suSl.value = v; suFn.value = v.toFixed(3); suVl.textContent = v.toFixed(3);
+  ['sx','sy','sz'].forEach(k => {
+    document.getElementById(k).value           = v;
+    document.getElementById(k+'-f').value       = v.toFixed(3);
+    document.getElementById(k+'-v').textContent = v.toFixed(3);
+  });
+  applyTransform(); updateCopyBox();
+}
+suSl.addEventListener('input',  () => applyUniform(suSl.value));
+suFn.addEventListener('change', () => applyUniform(suFn.value));
+document.getElementById('reset-scale').addEventListener('click', () => applyUniform(1));
+
+document.getElementById('reset-pos').addEventListener('click', () => {
+  ['px','py','pz'].forEach(k => {
+    T[k] = 0;
+    document.getElementById(k).value           = 0;
+    document.getElementById(k+'-f').value       = '0.000';
+    document.getElementById(k+'-v').textContent = '0.000';
+  });
+  applyTransform(); updateCopyBox();
+});
+
+let rotStep = 1;
+document.querySelectorAll('.step-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    rotStep = parseInt(btn.dataset.step);
+    document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+function setRotAxis(axis, deg) {
+  deg = ((deg + 180) % 360 + 360) % 360 - 180;
+  T[axis] = deg;
+  document.getElementById(axis + '-v').textContent = deg.toFixed(1) + '°';
+  document.getElementById(axis + '-f').value = deg.toFixed(0);
+  applyTransform(); updateCopyBox();
+}
+
+document.querySelectorAll('.turn-btn').forEach(btn => {
+  const getAxis = () => btn.dataset.axis;
+  const getDir  = () => parseInt(btn.dataset.dir);
+  btn.addEventListener('click', () => setRotAxis(getAxis(), T[getAxis()] + getDir() * rotStep));
+
+  let holdTimer = null, holdInterval = null;
+  const startHold = () => {
+    holdTimer = setTimeout(() => {
+      holdInterval = setInterval(() => setRotAxis(getAxis(), T[getAxis()] + getDir() * rotStep), 80);
+    }, 400);
+  };
+  const stopHold = () => { clearTimeout(holdTimer); clearInterval(holdInterval); };
+  btn.addEventListener('mousedown',  startHold);
+  btn.addEventListener('mouseup',    stopHold);
+  btn.addEventListener('mouseleave', stopHold);
+  btn.addEventListener('touchstart', startHold, { passive: true });
+  btn.addEventListener('touchend',   stopHold);
+});
+
+['rx','ry','rz'].forEach(axis => {
+  document.getElementById(axis + '-f').addEventListener('change', e => {
+    setRotAxis(axis, parseFloat(e.target.value) || 0);
+  });
+});
+
+document.getElementById('reset-rot').addEventListener('click', () => {
+  ['rx','ry','rz'].forEach(axis => setRotAxis(axis, 0));
+});
+
+function syncSlidersFromT() {
+  ['sx','sy','sz','px','py','pz'].forEach(k => {
+    document.getElementById(k).value           = T[k];
+    document.getElementById(k+'-f').value       = T[k].toFixed(3);
+    document.getElementById(k+'-v').textContent = T[k].toFixed(3);
+  });
+  suSl.value = T.sx; suFn.value = T.sx.toFixed(3); suVl.textContent = T.sx.toFixed(3);
+  ['rx','ry','rz'].forEach(axis => {
+    document.getElementById(axis + '-v').textContent = T[axis].toFixed(1) + '°';
+    document.getElementById(axis + '-f').value = T[axis].toFixed(0);
+  });
+}
+
+function resetSliders() {
+  T.sx=T.sy=T.sz=1; T.px=T.py=T.pz=0; T.rx=T.ry=T.rz=0;
+  syncSlidersFromT();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APPLY TRANSFORM
+// ═══════════════════════════════════════════════════════════════════════════
+function applyTransform() {
+  if (!selectedId) return;
+  const t = TARGETS.get(selectedId);
+  if (!t) return;
+  t.object3D.scale.set(T.sx, T.sy, T.sz);
+  t.object3D.position.set(
+    t.basePos.x + T.px,
+    t.basePos.y + T.py,
+    t.basePos.z + T.pz,
+  );
+  t.object3D.rotation.set(T.rx * DEG2RAD, T.ry * DEG2RAD, T.rz * DEG2RAD);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COPY BOX — same format as the original replacement tool, for continuity
+// with your existing transform-recording workflow.
+// ═══════════════════════════════════════════════════════════════════════════
+const copyBox = document.getElementById('rp-copy-box');
+function updateCopyBox() {
+  if (!selectedId) return;
+  const t = TARGETS.get(selectedId);
+  copyBox.style.display = 'block';
+  copyBox.textContent =
+    `// ${t.displayName}\n` +
+    `TARGET_KIND=${t.kind}${t.kind === 'group' ? ` (${t.label})` : ''}\n` +
+    `SCALE_X=${T.sx.toFixed(4)} SCALE_Y=${T.sy.toFixed(4)} SCALE_Z=${T.sz.toFixed(4)}\n` +
+    `OFFSET_X=${T.px.toFixed(4)} OFFSET_Y=${T.py.toFixed(4)} OFFSET_Z=${T.pz.toFixed(4)}\n` +
+    `ROT_X=${T.rx.toFixed(1)}° ROT_Y=${T.ry.toFixed(1)}° ROT_Z=${T.rz.toFixed(1)}°`;
+}
+document.getElementById('rp-copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(copyBox.textContent).then(() => {
+    const btn = document.getElementById('rp-copy-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy transform values'; }, 2000);
+  }).catch(() => alert(copyBox.textContent));
+});
+
+document.getElementById('rp-restore-btn').addEventListener('click', () => {
+  if (!selectedId) return;
+  resetSliders();
+  applyTransform();
+  document.getElementById('rp-status').textContent = '↩ Reset to original transform';
+  document.getElementById('rp-status').className   = 'ok';
+  updateCopyBox();
+  log(`↩ ${TARGETS.get(selectedId).displayName} reset`, 'info');
+});
+
+document.getElementById('rp-cancel-btn').addEventListener('click', deselect);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RAYCASTER — click a mesh directly in the scene to select it
+// ═══════════════════════════════════════════════════════════════════════════
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+const tooltip   = document.getElementById('tooltip');
+
+function findTargetIdForMesh(meshObj) {
+  // Direct mesh target?
+  const directId = `MESH::${meshObj.uuid}`;
+  if (TARGETS.has(directId)) return directId;
+  // Otherwise, is it inside a group target (hallway)?
+  for (const t of TARGETS.values()) {
+    if (t.kind === 'group' && t.meshes.includes(meshObj)) return t.id;
+  }
+  return null;
+}
+
+renderer.domElement.addEventListener('pointermove', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  if (!sceneRoot) return;
+  const meshes = [];
+  sceneRoot.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const id = findTargetIdForMesh(hits[0].object);
+    const t = id ? TARGETS.get(id) : null;
+    tooltip.style.display = 'block';
+    tooltip.style.left    = (ev.clientX + 14) + 'px';
+    tooltip.style.top     = (ev.clientY - 10) + 'px';
+    tooltip.textContent   = t ? t.displayName : (hits[0].object.name || '?');
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+renderer.domElement.addEventListener('click', ev => {
+  mouse.x =  (ev.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  if (!sceneRoot) return;
+  const meshes = [];
+  sceneRoot.traverse(obj => { if (obj.isMesh && obj.visible) meshes.push(obj); });
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) {
+    const id = findTargetIdForMesh(hits[0].object);
+    if (id) selectTarget(id);
+  }
+});
+
+renderer.domElement.addEventListener('pointerleave', () => { tooltip.style.display = 'none'; });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOAD
+// ═══════════════════════════════════════════════════════════════════════════
+log('🚀 Loading ramenShopExhibtStand_with_hallway.glb…', 'info');
+
+loader.load(
+  GLB_PATH,
+  gltf => {
+    sceneRoot = gltf.scene;
+    scene.add(sceneRoot);
+
+    // Preserve original materials as-loaded — nothing is flattened globally.
+    // Only the currently selected target gets a highlight material, applied
+    // in selectTarget()/clearHighlight() above.
+    buildTargets(sceneRoot);
+    populateDropdown();
+
+    let totalMeshes = 0;
+    sceneRoot.traverse(o => { if (o.isMesh) totalMeshes++; });
+    summaryEl.textContent = `✅ Loaded — ${totalMeshes} meshes, ${TARGETS.size} selectable targets`;
+    log(`🎉 Loaded ${totalMeshes} meshes across ${TARGETS.size} selectable targets (originals materials intact)`, 'ok');
+
+    // Frame the whole scene
+    const box = new THREE.Box3().setFromObject(sceneRoot);
+    if (!box.isEmpty()) {
+      const center = box.getCenter(new THREE.Vector3());
+      const size   = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      camera.position.set(center.x, center.y + maxDim * 0.35, center.z + maxDim * 0.9);
+      orbitCtrl.target.copy(center); orbitCtrl.update();
+    }
+
+    loadOverlay.style.opacity = '0';
+    setTimeout(() => { loadOverlay.style.display = 'none'; }, 400);
+
+    setTimeout(() => {
+      logPanel.classList.add('hidden');
+      document.getElementById('log-reopen').classList.add('visible');
+    }, 4000);
+  },
+  xhr => {
+    if (xhr.lengthComputable) {
+      const pct = Math.round((xhr.loaded / xhr.total) * 100);
+      loadBar.style.width = pct + '%';
+      loadSub.textContent = `${pct}% — ${(xhr.loaded/1048576).toFixed(1)}MB / ${(xhr.total/1048576).toFixed(1)}MB`;
+    } else {
+      loadSub.textContent = `${(xhr.loaded/1048576).toFixed(1)}MB loaded…`;
+    }
+  },
+  err => {
+    log(`❌ Failed to load GLB: ${err.message || err}`, 'err');
+    loadSub.textContent = '❌ Load failed — check console & GLB_PATH';
+    loadSub.style.color = '#f87171';
+  }
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+(function animate() {
+  requestAnimationFrame(animate);
+  orbitCtrl.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
